@@ -183,11 +183,16 @@
     if (isProcessing) return;
     isProcessing = true;
 
-    // Trigger haptic feedback (getar di HP)
     if (navigator.vibrate) navigator.vibrate(100);
 
-    // Kirim permintaan Check-in ke Supabase
-    await processCheckIn(decodedText.trim());
+    // Ambil token saja jika yang di-scan berupa URL (misal: https://rayarayu.vercel.app/rudi-irul/f4d30e93)
+    let extractedToken = decodedText.trim();
+    if (extractedToken.includes('/')) {
+      const parts = extractedToken.split('/').filter(Boolean);
+      extractedToken = parts[parts.length - 1]; // Mengambil segmen paling akhir (f4d30e93)
+    }
+
+    await processCheckIn(extractedToken);
   }
 
   async function processCheckIn(ticketToken) {
