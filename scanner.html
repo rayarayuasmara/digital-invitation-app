@@ -302,7 +302,7 @@
     isProcessing = true;
     if (navigator.vibrate) navigator.vibrate(100);
 
-    // Kirim langsung teks hasil scan ke Supabase RPC
+    // Kirim string hasil scan langsung ke Supabase
     await processCheckIn(rawText);
   }
 
