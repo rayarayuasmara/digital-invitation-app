@@ -4,37 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Scanner Check-in - RayaRayu</title>
-  <!-- Tailwind CSS & Google Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Supabase & HTML5 QR Scanner Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     
-    /* Animasi Garis Laser Scan */
     @keyframes scan-laser {
       0% { top: 5%; opacity: 0.3; }
       50% { opacity: 1; }
       100% { top: 90%; opacity: 0.3; }
     }
-    .animate-laser {
-      animation: scan-laser 2s infinite ease-in-out;
-    }
+    .animate-laser { animation: scan-laser 2s infinite ease-in-out; }
 
-    /* Custom Reader Hide Default UI */
     #reader video {
       object-fit: cover !important;
+      width: 100% !important;
+      height: 100% !important;
       border-radius: 1.5rem;
     }
-    #reader__scan_region {
-      background: transparent !important;
-    }
-    #reader__dashboard {
-      display: none !important;
-    }
+    #reader__scan_region { background: transparent !important; }
+    #reader__dashboard { display: none !important; }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 antialiased flex justify-center min-h-screen">
@@ -62,20 +54,18 @@
     <!-- MAIN CAMERA / SCANNER AREA -->
     <main class="flex-1 flex flex-col items-center justify-center p-6 relative">
       
-      <!-- Instructional Tag -->
       <div class="text-center space-y-1 mb-6 z-10">
         <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider">
           Arahkan Kamera ke QR Tiket
         </span>
       </div>
 
-      <!-- CAMERA CONTAINER & SCANNER WINDOW -->
+      <!-- CAMERA CONTAINER -->
       <div class="relative w-72 h-72 rounded-3xl overflow-hidden border-2 border-slate-700 bg-slate-950 shadow-2xl flex items-center justify-center">
         
-        <!-- Video Feed Container -->
         <div id="reader" class="w-full h-full"></div>
 
-        <!-- Corner Viewfinder Corners (iOS Style) -->
+        <!-- Viewfinder Corners -->
         <div class="absolute inset-0 pointer-events-none p-4 flex flex-col justify-between z-10">
           <div class="flex justify-between">
             <div class="w-8 h-8 border-t-4 border-l-4 border-emerald-400 rounded-tl-2xl"></div>
@@ -92,7 +82,6 @@
 
       </div>
 
-      <!-- Quick Manual Input Option -->
       <div class="mt-8 text-center z-10">
         <button onclick="promptManualCode()" class="text-xs font-bold text-slate-400 hover:text-emerald-400 transition underline underline-offset-4">
           Atau masukkan kode tiket manual
@@ -101,20 +90,16 @@
 
     </main>
 
-    <!-- FOOTER STATUS BAR -->
     <footer class="p-5 text-center text-xs text-slate-500 border-t border-slate-800/60 bg-slate-900/50 backdrop-blur-md">
       <p>© 2026 RayaRayu Check-in System</p>
     </footer>
 
     <!-- RESULT MODAL SLIDE-UP -->
     <div id="result-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-4 transition-all duration-300 transform translate-y-full opacity-0">
-      
       <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-2xl relative overflow-hidden">
         
-        <!-- Decorative Glow Top -->
         <div id="modal-glow" class="absolute -top-12 left-1/2 -translate-x-1/2 w-40 h-20 bg-emerald-500/20 blur-2xl rounded-full pointer-events-none"></div>
 
-        <!-- Status Icon Badge -->
         <div class="text-center">
           <div id="modal-icon-bg" class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl mb-3 border">
             <span id="modal-icon">✅</span>
@@ -123,7 +108,6 @@
           <p id="modal-subtitle" class="text-xs text-slate-400 mt-1">Tamu siap dipersilakan masuk</p>
         </div>
 
-        <!-- Detail Card -->
         <div id="modal-details" class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 space-y-2 text-xs">
           <div class="flex justify-between items-center border-b border-slate-800/60 pb-2">
             <span class="text-slate-400">Nama Tamu</span>
@@ -139,7 +123,6 @@
           </div>
         </div>
 
-        <!-- Close / Continue Button -->
         <button onclick="resumeScanner()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs py-3.5 rounded-2xl shadow-lg shadow-emerald-500/20 transition">
           Pindai Tiket Berikutnya ➔
         </button>
@@ -150,7 +133,6 @@
   </div>
 
 <script>
- // CREDENTIALS SUPABASE
   const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
 
@@ -162,12 +144,9 @@
   async function startScanner() {
     html5QrcodeScanner = new Html5Qrcode("reader");
 
-    // Konfigurasi pemindaian full frame tanpa pembatasan qrbox kaku
     const config = { 
-      fps: 20,
-      experimentalFeatures: {
-        useBarCodeDetectorIfSupported: true
-      }
+      fps: 10,
+      qrbox: { width: 200, height: 200 }
     };
 
     try {
@@ -177,11 +156,34 @@
         onScanSuccess
       );
     } catch (err) {
-      console.warn("Kamera tidak dapat diakses otomatis:", err);
+      console.warn("Kamera belakang tidak dapat diakses, mencoba opsi default:", err);
+      try {
+        await html5QrcodeScanner.start({ facingMode: "user" }, config, onScanSuccess);
+      } catch (errUser) {
+        alert("Gagal mengaktifkan kamera. Pastikan izin kamera sudah diberikan di Safari.");
+      }
     }
   }
 
-  onScanSuccess
+  async function onScanSuccess(decodedText) {
+    if (isProcessing) return;
+
+    let rawText = String(decodedText).trim();
+    if (!rawText || rawText === "undefined") return;
+
+    isProcessing = true;
+    if (navigator.vibrate) navigator.vibrate(100);
+
+    let extractedToken = rawText;
+    if (rawText.includes('?token=')) {
+      extractedToken = rawText.split('?token=')[1].split('&')[0];
+    } else if (rawText.includes('/')) {
+      const parts = rawText.split('?')[0].split('/').filter(Boolean);
+      extractedToken = parts[parts.length - 1];
+    }
+
+    await processCheckIn(extractedToken);
+  }
 
   async function processCheckIn(ticketToken) {
     const { data, error } = await supabaseClient.rpc('check_in_guest', { p_ticket_token: ticketToken });
@@ -260,20 +262,6 @@
       alert("Fitur senter tidak aktif.");
     }
   }
-
-  function renderQRCode(ticketToken) {
-  const finalToken = ticketToken || token;
-  if (!finalToken) return;
-
-  document.getElementById('ticket-section').classList.remove('hidden');
-  document.getElementById('qrcode').innerHTML = '';
-
-  new QRCode(document.getElementById("qrcode"), { 
-    text: String(finalToken).trim(), 
-    width: 160, 
-    height: 160 
-  });
-}
 
   window.addEventListener('DOMContentLoaded', startScanner);
 </script>
