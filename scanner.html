@@ -12,7 +12,7 @@
     .btn { background: #2563eb; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 8px; }
     .hidden { display: none; }
     #reader { width: 100%; border-radius: 8px; overflow: hidden; margin-top: 12px; }
-    .result-box { margin-top: 16px; padding: 16px; border-radius: 8px; text-align: center; font-weight: bold; }
+    .result-box { margin-top: 16px; padding: 16px; border-radius: 8px; text-align: center; font-weight: bold; word-break: break-word; }
     .success { background: #166534; color: #bbf7d0; }
     .error { background: #991b1b; color: #fecaca; }
     .warning { background: #854d0e; color: #fef08a; }
@@ -85,14 +85,20 @@
     document.getElementById('scanner-section').classList.remove('hidden');
     document.getElementById('user-email').innerText = email;
 
-    html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } });
-    html5QrcodeScanner.render(onScanSuccess);
+    if (!html5QrcodeScanner) {
+      html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } });
+      html5QrcodeScanner.render(onScanSuccess);
+    }
   }
 
   async function onScanSuccess(decodedText) {
-    html5QrcodeScanner.pause();
+    if (html5QrcodeScanner) {
+      html5QrcodeScanner.pause();
+    }
     await processCheckIn(decodedText);
-    setTimeout(() => { html5QrcodeScanner.resume(); }, 3000);
+    setTimeout(() => { 
+      if (html5QrcodeScanner) html5QrcodeScanner.resume(); 
+    }, 3000);
   }
 
   async function submitManual() {
@@ -109,11 +115,12 @@
 
     const cleanToken = ticketToken.trim();
 
+    // Panggil RPC Supabase
     const { data, error } = await supabaseClient.rpc('process_check_in', { p_ticket_token: cleanToken });
 
     if (error) {
       resultDiv.className = "result-box error";
-      resultDiv.innerText = "Error: " + error.message;
+      resultDiv.innerText = "Error SQL/Auth: " + error.message;
       return;
     }
 
