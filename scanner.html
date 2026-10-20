@@ -193,8 +193,9 @@
   async function processCheckIn(ticketToken) {
     const { data, error } = await supabaseClient.rpc('check_in_guest', { p_ticket_token: ticketToken });
 
-    if (error || !data) {
-      showModal(false, "Kesalahan Sistem", "Gagal menghubungkan ke server.", null);
+    if (error) {
+      console.error("Supabase Error:", error);
+      showModal(false, "Kesalahan Sistem", error.message || "Gagal menghubungkan ke server.", null);
       return;
     }
 
