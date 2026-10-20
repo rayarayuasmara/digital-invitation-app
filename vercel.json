@@ -12,6 +12,10 @@
     {
       "source": "/:slug/:token",
       "destination": "/invitation.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/invitation.html"
     }
   ]
 }
