@@ -1,24 +1,29 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard Klien - RayaRayu</title>
   <!-- Tailwind CSS & Google Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Lucide Icons Library -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0b0f17; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="flex justify-center min-h-screen text-slate-100 antialiased selection:bg-blue-600 selection:text-white">
+<body class="flex justify-center min-h-screen bg-slate-950 dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-600 selection:text-white transition-colors duration-200">
 
-  <div class="w-full max-w-md bg-[#0f172a] min-h-screen shadow-2xl flex flex-col relative pb-32 overflow-x-hidden border-x border-slate-800/80">
+  <div class="w-full max-w-md bg-slate-50 dark:bg-[#0f172a] min-h-screen shadow-2xl flex flex-col relative pb-32 overflow-x-hidden border-x border-slate-200 dark:border-slate-800/80 transition-colors duration-200">
 
     <!-- LOGIN SCREEN -->
     <div id="login-section" class="p-6 my-auto">
@@ -26,18 +31,18 @@
         <div class="w-12 h-12 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center text-white shadow-lg shadow-blue-600/30">
           <i data-lucide="sparkles" class="w-6 h-6"></i>
         </div>
-        <h1 class="text-2xl font-extrabold text-white mt-4 tracking-tight">Masuk Dashboard</h1>
-        <p class="text-xs text-slate-400 mt-1">Kelola data undangan & kehadiran tamu acara Anda</p>
+        <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white mt-4 tracking-tight">Masuk Dashboard</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Kelola data undangan & kehadiran tamu acara Anda</p>
       </div>
 
-      <form id="login-form" onsubmit="login(event)" class="space-y-4 bg-slate-900/80 p-6 rounded-3xl border border-slate-800 backdrop-blur-md shadow-xl">
+      <form id="login-form" onsubmit="login(event)" class="space-y-4 bg-white dark:bg-slate-900/80 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl backdrop-blur-md">
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Email Klien</label>
-          <input type="email" id="email" required placeholder="nama@email.com" class="w-full text-xs p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition" />
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email Klien</label>
+          <input type="email" id="email" required placeholder="nama@email.com" class="w-full text-xs p-3.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Password</label>
-          <input type="password" id="password" required placeholder="••••••••" class="w-full text-xs p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition" />
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
+          <input type="password" id="password" required placeholder="••••••••" class="w-full text-xs p-3.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition" />
         </div>
         <button type="submit" id="btn-login" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3.5 rounded-xl shadow-lg shadow-blue-600/25 transition flex items-center justify-center gap-2">
           <span>Login</span>
@@ -50,15 +55,17 @@
     <div id="dashboard-section" class="hidden">
 
       <!-- HEADER TOP BAR -->
-      <div class="p-4 bg-[#0f172a]/90 flex items-center justify-between sticky top-0 z-30 border-b border-slate-800/80 backdrop-blur-md">
+      <div class="p-4 bg-white/90 dark:bg-[#0f172a]/90 flex items-center justify-between sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800/80 backdrop-blur-md transition-colors duration-200">
         <div class="flex items-center gap-2">
-          <span class="text-[11px] font-semibold px-3 py-1 bg-blue-500/10 text-blue-400 rounded-lg border border-blue-500/20 tracking-wide font-mono" id="header-client-slug">...</span>
+          <span class="text-[11px] font-semibold px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-lg border border-blue-500/20 tracking-wide font-mono" id="header-client-slug">...</span>
         </div>
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-md">
-            <i data-lucide="layers" class="w-4 h-4"></i>
-          </div>
-          <button onclick="logout()" title="Logout" class="text-slate-400 hover:text-rose-400 transition text-xs font-semibold flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
+        <div class="flex items-center gap-2">
+          <!-- Dark/Light Theme Switcher -->
+          <button onclick="toggleTheme()" id="btn-theme" title="Ubah Tema" class="w-8 h-8 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl flex items-center justify-center transition border border-slate-300 dark:border-slate-700">
+            <i data-lucide="sun" id="theme-icon" class="w-4 h-4"></i>
+          </button>
+
+          <button onclick="logout()" title="Logout" class="text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition text-xs font-semibold flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800">
             <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
             <span>Keluar</span>
           </button>
@@ -69,34 +76,34 @@
       <div id="tab-home" class="p-5 space-y-4">
         
         <!-- Welcome Card -->
-        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 relative overflow-hidden">
+        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 relative overflow-hidden transition-colors duration-200">
           <div class="flex justify-between items-start">
             <div>
-              <p class="text-[11px] text-slate-400 font-medium">Pengelola Event</p>
-              <h2 id="home-client-name" class="text-xl font-extrabold text-white tracking-tight leading-tight mt-0.5">...</h2>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Pengelola Event</p>
+              <h2 id="home-client-name" class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mt-0.5">...</h2>
             </div>
-            <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Sistem Aktif
+            <span class="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span> Sistem Aktif
             </span>
           </div>
 
-          <div class="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-slate-800 text-xs">
+          <div class="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs">
             <div class="flex items-center gap-2.5">
-              <div class="p-2 rounded-lg bg-slate-800/80 text-slate-400">
+              <div class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400">
                 <i data-lucide="calendar" class="w-4 h-4"></i>
               </div>
               <div>
-                <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Tanggal</p>
-                <p id="home-event-date" class="font-bold text-slate-200 mt-0.5">...</p>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Tanggal</p>
+                <p id="home-event-date" class="font-bold text-slate-800 dark:text-slate-200 mt-0.5">...</p>
               </div>
             </div>
             <div class="flex items-center gap-2.5">
-              <div class="p-2 rounded-lg bg-slate-800/80 text-slate-400">
+              <div class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400">
                 <i data-lucide="map-pin" class="w-4 h-4"></i>
               </div>
               <div>
-                <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Lokasi</p>
-                <p id="home-event-location" class="font-bold text-slate-200 mt-0.5 line-clamp-1">...</p>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Lokasi</p>
+                <p id="home-event-location" class="font-bold text-slate-800 dark:text-slate-200 mt-0.5 line-clamp-1">...</p>
               </div>
             </div>
           </div>
@@ -105,49 +112,49 @@
         <!-- Metric Grid -->
         <div class="grid grid-cols-2 gap-3">
           <!-- Total Undangan -->
-          <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-col justify-between">
-            <div class="flex justify-between items-center text-slate-400">
+          <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between transition-colors duration-200">
+            <div class="flex justify-between items-center text-slate-500 dark:text-slate-400">
               <span class="text-[11px] font-semibold">Total Undangan</span>
-              <i data-lucide="mail" class="w-4 h-4 text-blue-400"></i>
+              <i data-lucide="mail" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
             </div>
             <div class="mt-3">
-              <h3 id="stat-total-guests" class="text-3xl font-black text-white">0</h3>
-              <p class="text-[10px] text-slate-400 mt-0.5">Target Tamu</p>
+              <h3 id="stat-total-guests" class="text-3xl font-black text-slate-900 dark:text-white">0</h3>
+              <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Target Tamu</p>
             </div>
-            <div class="mt-3 pt-2.5 border-t border-slate-800 flex justify-between text-[11px]">
-              <span class="text-slate-400">Total Kuota</span>
-              <span id="stat-total-pax" class="font-bold text-slate-200">0 Pax</span>
+            <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex justify-between text-[11px]">
+              <span class="text-slate-500 dark:text-slate-400">Total Kuota</span>
+              <span id="stat-total-pax" class="font-bold text-slate-800 dark:text-slate-200">0 Pax</span>
             </div>
           </div>
 
           <!-- Konfirmasi Hadir -->
-          <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-col justify-between">
-            <div class="flex justify-between items-center text-slate-400">
+          <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between transition-colors duration-200">
+            <div class="flex justify-between items-center text-slate-500 dark:text-slate-400">
               <span class="text-[11px] font-semibold">RSVP Hadir</span>
-              <i data-lucide="user-check" class="w-4 h-4 text-emerald-400"></i>
+              <i data-lucide="user-check" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
             </div>
             <div class="mt-2">
               <div class="flex items-baseline gap-2">
-                <h3 id="stat-hadir-pax" class="text-3xl font-black text-emerald-400">0</h3>
-                <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold px-1.5 py-0.5 rounded-md" id="stat-hadir-pct">0%</span>
+                <h3 id="stat-hadir-pax" class="text-3xl font-black text-emerald-600 dark:text-emerald-400">0</h3>
+                <span class="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold px-1.5 py-0.5 rounded-md" id="stat-hadir-pct">0%</span>
               </div>
-              <p class="text-[10px] text-slate-400 mt-0.5">Tamu Terkonfirmasi</p>
+              <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Tamu Terkonfirmasi</p>
             </div>
-            <div class="mt-2.5 pt-2 border-t border-slate-800 space-y-1 text-[11px]">
-              <div class="flex justify-between"><span class="text-slate-400">Absen</span><span id="stat-absen-count" class="font-bold text-slate-200">0</span></div>
-              <div class="flex justify-between"><span class="text-slate-400">Pending</span><span id="stat-pending-count" class="font-bold text-slate-200">0</span></div>
+            <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1 text-[11px]">
+              <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Absen</span><span id="stat-absen-count" class="font-bold text-slate-800 dark:text-slate-200">0</span></div>
+              <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Pending</span><span id="stat-pending-count" class="font-bold text-slate-800 dark:text-slate-200">0</span></div>
             </div>
           </div>
         </div>
 
         <!-- Total Checked-In Card -->
-        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 relative">
+        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 relative transition-colors duration-200">
           <div class="flex justify-between items-center mb-3">
             <div class="flex items-center gap-2">
-              <i data-lucide="qr-code" class="w-4 h-4 text-blue-400"></i>
-              <h3 class="text-xs font-bold text-white tracking-wide">Progres Check-in Pintu</h3>
+              <i data-lucide="qr-code" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+              <h3 class="text-xs font-bold text-slate-900 dark:text-white tracking-wide">Progres Check-in Pintu</h3>
             </div>
-            <button onclick="switchTab('tamu')" class="text-[10px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 transition flex items-center gap-1">
+            <button onclick="switchTab('tamu')" class="text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 transition flex items-center gap-1">
               <span>Detail</span>
               <i data-lucide="chevron-right" class="w-3 h-3"></i>
             </button>
@@ -155,28 +162,28 @@
           <div class="flex items-center gap-4">
             <div class="w-16 h-16 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-center">
               <div>
-                <span id="card-checkedin-count" class="text-xl font-black text-blue-400 block leading-none">0</span>
-                <span class="text-[8px] uppercase font-bold tracking-wider text-slate-400">Masuk</span>
+                <span id="card-checkedin-count" class="text-xl font-black text-blue-600 dark:text-blue-400 block leading-none">0</span>
+                <span class="text-[8px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">Masuk</span>
               </div>
             </div>
             <div class="space-y-1.5 text-xs">
-              <p class="text-slate-400 flex items-center gap-2">
+              <p class="text-slate-500 dark:text-slate-400 flex items-center gap-2">
                 <span>Belum Hadir:</span>
-                <strong id="card-waiting-count" class="text-white font-extrabold">0 Tamu</strong>
+                <strong id="card-waiting-count" class="text-slate-900 dark:text-white font-extrabold">0 Tamu</strong>
               </p>
-              <p class="text-slate-400 flex items-center gap-2">
+              <p class="text-slate-500 dark:text-slate-400 flex items-center gap-2">
                 <span>Total Est. Pax:</span>
-                <strong id="card-est-pax" class="text-white font-extrabold">0 Orang</strong>
+                <strong id="card-est-pax" class="text-slate-900 dark:text-white font-extrabold">0 Orang</strong>
               </p>
             </div>
           </div>
         </div>
 
         <!-- Histori RSVP Terbaru -->
-        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-3">
+        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3 transition-colors duration-200">
           <div class="flex justify-between items-center">
-            <h3 class="text-xs font-bold text-white">Histori Respon Terakhir</h3>
-            <button onclick="switchTab('tamu')" class="text-[11px] font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1">
+            <h3 class="text-xs font-bold text-slate-900 dark:text-white">Histori Respon Terakhir</h3>
+            <button onclick="switchTab('tamu')" class="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 flex items-center gap-1">
               <span>Semua</span>
               <i data-lucide="arrow-right" class="w-3 h-3"></i>
             </button>
@@ -187,10 +194,10 @@
         </div>
 
         <!-- Top Kategori Breakdown -->
-        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-3">
+        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3 transition-colors duration-200">
           <div class="flex justify-between items-center">
-            <h3 class="text-xs font-bold text-white">Kategori Tamu</h3>
-            <i data-lucide="pie-chart" class="w-4 h-4 text-slate-500"></i>
+            <h3 class="text-xs font-bold text-slate-900 dark:text-white">Kategori Tamu</h3>
+            <i data-lucide="pie-chart" class="w-4 h-4 text-slate-400 dark:text-slate-500"></i>
           </div>
           <div id="category-breakdown-list" class="space-y-2.5">
             <!-- Items injected by JS -->
@@ -203,8 +210,8 @@
       <div id="tab-tamu" class="p-5 space-y-4 hidden">
         <div class="flex justify-between items-center">
           <div>
-            <h2 class="text-xl font-extrabold text-white tracking-tight">Daftar Tamu</h2>
-            <p class="text-[10px] text-slate-400">Kelola dan pantau status undangan</p>
+            <h2 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Daftar Tamu</h2>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400">Kelola dan pantau status undangan</p>
           </div>
           <button onclick="openAddGuestModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-lg shadow-blue-600/20 flex items-center gap-1.5 transition">
             <i data-lucide="plus" class="w-4 h-4"></i>
@@ -214,17 +221,17 @@
 
         <!-- Search Bar -->
         <div class="relative">
-          <input type="text" id="search-input" onkeyup="filterGuests()" placeholder="Cari berdasarkan nama tamu..." class="w-full text-xs p-3.5 pl-10 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-600 outline-none transition" />
-          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3.5 text-slate-500"></i>
+          <input type="text" id="search-input" onkeyup="filterGuests()" placeholder="Cari berdasarkan nama tamu..." class="w-full text-xs p-3.5 pl-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-600 outline-none transition" />
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400 dark:text-slate-500"></i>
         </div>
 
         <!-- Status Filter Pills -->
         <div class="flex gap-1.5 overflow-x-auto no-scrollbar text-xs font-semibold pb-1" id="filter-pills">
           <button onclick="setFilter('all', event)" class="pill-btn active px-3.5 py-1.5 rounded-lg bg-blue-600 text-white whitespace-nowrap">Semua</button>
-          <button onclick="setFilter('hadir', event)" class="pill-btn px-3.5 py-1.5 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 whitespace-nowrap">Hadir</button>
-          <button onclick="setFilter('tidak_hadir', event)" class="pill-btn px-3.5 py-1.5 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 whitespace-nowrap">Absen</button>
-          <button onclick="setFilter('pending', event)" class="pill-btn px-3.5 py-1.5 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 whitespace-nowrap">Pending</button>
-          <button onclick="setFilter('checked_in', event)" class="pill-btn px-3.5 py-1.5 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 whitespace-nowrap">Checked</button>
+          <button onclick="setFilter('hadir', event)" class="pill-btn px-3.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap">Hadir</button>
+          <button onclick="setFilter('tidak_hadir', event)" class="pill-btn px-3.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap">Absen</button>
+          <button onclick="setFilter('pending', event)" class="pill-btn px-3.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap">Pending</button>
+          <button onclick="setFilter('checked_in', event)" class="pill-btn px-3.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap">Checked</button>
         </div>
 
         <!-- Guest List Items -->
@@ -233,12 +240,12 @@
         </div>
 
         <!-- Kuota Progress Bar -->
-        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-2">
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2 transition-colors duration-200">
           <div class="flex justify-between text-xs font-semibold">
-            <span class="text-slate-400">Penggunaan Limit Undangan</span>
-            <span class="text-blue-400"><span id="quota-used">0</span>/<span id="quota-max">100</span></span>
+            <span class="text-slate-500 dark:text-slate-400">Penggunaan Limit Undangan</span>
+            <span class="text-blue-600 dark:text-blue-400"><span id="quota-used">0</span>/<span id="quota-max">100</span></span>
           </div>
-          <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+          <div class="w-full bg-slate-100 dark:bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-200 dark:border-slate-800">
             <div id="quota-bar" class="bg-blue-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
           </div>
         </div>
@@ -246,20 +253,20 @@
       </div>
 
       <!-- BOTTOM FLOATING DOCK NAV -->
-      <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-slate-900/90 backdrop-blur-md text-white p-2 rounded-2xl shadow-2xl flex items-center justify-around border border-slate-800 z-40">
+      <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-white/90 dark:bg-slate-900/90 backdrop-blur-md text-slate-900 dark:text-white p-2 rounded-2xl shadow-2xl flex items-center justify-around border border-slate-200 dark:border-slate-800 z-40 transition-colors duration-200">
         <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold bg-blue-600 text-white shadow-md transition">
           <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
           <span>Dashboard</span>
         </button>
-        <button onclick="switchTab('tamu')" id="nav-tamu" class="nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-white transition">
+        <button onclick="switchTab('tamu')" id="nav-tamu" class="nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
           <i data-lucide="users" class="w-4 h-4"></i>
           <span>Tamu</span>
         </button>
-        <button onclick="alert('Fitur Style Segera Hadir!')" class="nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-white transition">
+        <button onclick="alert('Fitur Style Segera Hadir!')" class="nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
           <i data-lucide="palette" class="w-4 h-4"></i>
           <span>Desain</span>
         </button>
-        <button onclick="alert('Fitur Setting Segera Hadir!')" class="nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-white transition">
+        <button onclick="alert('Fitur Setting Segera Hadir!')" class="nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
           <i data-lucide="settings" class="w-4 h-4"></i>
           <span>Pengaturan</span>
         </button>
@@ -269,19 +276,19 @@
 
     <!-- MODAL TAMBAH TAMU -->
     <div id="add-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-      <div class="bg-slate-900 border border-slate-800 w-full max-w-xs rounded-2xl p-6 space-y-4 shadow-2xl">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-          <h3 class="text-sm font-bold text-white">Tambah Tamu Baru</h3>
-          <button onclick="closeAddGuestModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-xs rounded-2xl p-6 space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Tambah Tamu Baru</h3>
+          <button onclick="closeAddGuestModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
         <div class="space-y-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Nama Tamu / Kelompok</label>
-            <input type="text" id="modal-name" placeholder="Budi Santoso & Keluarga" class="w-full text-xs p-3 rounded-xl bg-slate-950 border border-slate-800 text-white outline-none focus:ring-2 focus:ring-blue-600" />
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Nama Tamu / Kelompok</label>
+            <input type="text" id="modal-name" placeholder="Budi Santoso & Keluarga" class="w-full text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Kategori</label>
-            <select id="modal-cat" class="w-full text-xs p-3 rounded-xl bg-slate-950 border border-slate-800 text-white outline-none focus:ring-2 focus:ring-blue-600">
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Kategori</label>
+            <select id="modal-cat" class="w-full text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600">
               <option value="Keluarga">Keluarga</option>
               <option value="Teman">Teman</option>
               <option value="Tetangga">Tetangga</option>
@@ -290,12 +297,12 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Kuota Orang (Pax)</label>
-            <input type="number" id="modal-pax" min="1" value="2" class="w-full text-xs p-3 rounded-xl bg-slate-950 border border-slate-800 text-white outline-none focus:ring-2 focus:ring-blue-600" />
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Kuota Orang (Pax)</label>
+            <input type="number" id="modal-pax" min="1" value="2" class="w-full text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600" />
           </div>
         </div>
         <div class="flex gap-2 pt-2">
-          <button onclick="closeAddGuestModal()" class="flex-1 text-xs font-semibold py-3 text-slate-400 hover:bg-slate-800 rounded-xl">Batal</button>
+          <button onclick="closeAddGuestModal()" class="flex-1 text-xs font-semibold py-3 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">Batal</button>
           <button onclick="submitAddGuest()" id="btn-save-guest" class="flex-1 text-xs font-semibold py-3 bg-blue-600 text-white rounded-xl shadow-md">Simpan</button>
         </div>
       </div>
@@ -303,23 +310,23 @@
 
     <!-- MODAL EDIT / UBAH STATUS TAMU -->
     <div id="edit-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-      <div class="bg-slate-900 border border-slate-800 w-full max-w-xs rounded-2xl p-6 space-y-4 shadow-2xl">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-          <h3 class="text-sm font-bold text-white">Edit Data Tamu</h3>
-          <button onclick="closeEditGuestModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-xs rounded-2xl p-6 space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Edit Data Tamu</h3>
+          <button onclick="closeEditGuestModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
         
         <input type="hidden" id="edit-guest-id" />
 
         <div class="space-y-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Nama Tamu / Kelompok</label>
-            <input type="text" id="edit-name" class="w-full text-xs p-3 rounded-xl bg-slate-950 border border-slate-800 text-white outline-none focus:ring-2 focus:ring-blue-600" />
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Nama Tamu / Kelompok</label>
+            <input type="text" id="edit-name" class="w-full text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600" />
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Kategori</label>
-            <select id="edit-cat" class="w-full text-xs p-3 rounded-xl bg-slate-950 border border-slate-800 text-white outline-none focus:ring-2 focus:ring-blue-600">
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Kategori</label>
+            <select id="edit-cat" class="w-full text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600">
               <option value="Keluarga">Keluarga</option>
               <option value="Teman">Teman</option>
               <option value="Tetangga">Tetangga</option>
@@ -329,30 +336,30 @@
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Kuota Orang (Pax)</label>
-            <input type="number" id="edit-pax" min="1" class="w-full text-xs p-3 rounded-xl bg-slate-950 border border-slate-800 text-white outline-none focus:ring-2 focus:ring-blue-600" />
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Kuota Orang (Pax)</label>
+            <input type="number" id="edit-pax" min="1" class="w-full text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600" />
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Status RSVP</label>
-            <select id="edit-rsvp" class="w-full text-xs p-3 rounded-xl bg-slate-950 border border-slate-800 text-white outline-none focus:ring-2 focus:ring-blue-600">
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Status RSVP</label>
+            <select id="edit-rsvp" class="w-full text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600">
               <option value="pending">Pending</option>
               <option value="hadir">Hadir</option>
               <option value="tidak_hadir">Absen (Tidak Hadir)</option>
             </select>
           </div>
 
-          <div class="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800">
-            <span class="text-xs font-semibold text-slate-300">Status Check-in</span>
+          <div class="flex items-center justify-between p-3 bg-slate-100 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
+            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Status Check-in</span>
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" id="edit-checkedin" class="sr-only peer">
-              <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+              <div class="w-9 h-5 bg-slate-300 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
           </div>
         </div>
 
         <div class="flex gap-2 pt-2">
-          <button onclick="closeEditGuestModal()" class="flex-1 text-xs font-semibold py-3 text-slate-400 hover:bg-slate-800 rounded-xl">Batal</button>
+          <button onclick="closeEditGuestModal()" class="flex-1 text-xs font-semibold py-3 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">Batal</button>
           <button onclick="submitEditGuest()" id="btn-update-guest" class="flex-1 text-xs font-semibold py-3 bg-blue-600 text-white rounded-xl shadow-md">Simpan</button>
         </div>
       </div>
@@ -370,6 +377,32 @@
   let globalData = null;
   let activeFilter = 'all';
 
+  // DARK MODE LOGIC
+  function initTheme() {
+    const savedTheme = localStorage.getItem('rr_theme') || 'dark';
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    updateThemeIcon();
+  }
+
+  function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('rr_theme', isDark ? 'dark' : 'light');
+    updateThemeIcon();
+  }
+
+  function updateThemeIcon() {
+    const isDark = document.documentElement.classList.contains('dark');
+    const iconEl = document.getElementById('theme-icon');
+    if (iconEl) {
+      iconEl.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+      initIcons();
+    }
+  }
+
   function initIcons() {
     if (window.lucide) {
       lucide.createIcons();
@@ -377,6 +410,7 @@
   }
 
   async function checkSession() {
+    initTheme();
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) loadDashboard();
     else initIcons();
@@ -472,18 +506,18 @@
 
     recent.forEach(g => {
       let badge = '<span class="w-2 h-2 rounded-full bg-amber-400"></span>';
-      if (g.rsvp_status === 'hadir') badge = '<span class="w-2 h-2 rounded-full bg-emerald-400"></span>';
+      if (g.rsvp_status === 'hadir') badge = '<span class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>';
       if (g.rsvp_status === 'tidak_hadir') badge = '<span class="w-2 h-2 rounded-full bg-rose-500"></span>';
 
       const div = document.createElement('div');
-      div.className = "flex items-center justify-between text-xs p-2.5 rounded-xl bg-slate-950 border border-slate-800/80";
+      div.className = "flex items-center justify-between text-xs p-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80";
       div.innerHTML = `
         <div class="flex items-center gap-2.5">
-          <div class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 font-bold flex items-center justify-center text-[10px] border border-blue-500/20">
+          <div class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center text-[10px] border border-blue-500/20">
             ${g.group_name.substring(0,2).toUpperCase()}
           </div>
           <div>
-            <p class="font-bold text-slate-200">${g.group_name}</p>
+            <p class="font-bold text-slate-800 dark:text-slate-200">${g.group_name}</p>
             <p class="text-[10px] text-slate-500">${g.category}</p>
           </div>
         </div>
@@ -510,13 +544,13 @@
       div.className = "flex items-center justify-between text-xs";
       div.innerHTML = `
         <div class="flex items-center gap-2.5">
-          <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+          <div class="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-500"></div>
           <div>
-            <p class="font-semibold text-slate-200">${c.category}</p>
+            <p class="font-semibold text-slate-800 dark:text-slate-200">${c.category}</p>
             <p class="text-[10px] text-slate-500">${c.hadir} Hadir • ${c.absen} Absen</p>
           </div>
         </div>
-        <span class="font-bold text-xs text-slate-300 font-mono">${c.total}</span>
+        <span class="font-bold text-xs text-slate-700 dark:text-slate-300 font-mono">${c.total}</span>
       `;
       container.appendChild(div);
     });
@@ -551,21 +585,21 @@
         `Halo *${g.group_name}*,\n\nKami mengundang Anda untuk menghadiri acara *${globalData.event.title}*.\n\nSilakan konfirmasi kehadiran Anda melalui tautan resmi berikut:\n${link}`
       );
 
-      let badgeClass = "bg-amber-500/10 text-amber-400 border border-amber-500/20";
+      let badgeClass = "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20";
       let badgeText = "Pending";
-      if (g.rsvp_status === 'hadir') { badgeClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"; badgeText = "Hadir"; }
-      if (g.rsvp_status === 'tidak_hadir') { badgeClass = "bg-rose-500/10 text-rose-400 border border-rose-500/20"; badgeText = "Absen"; }
-      if (g.is_checked_in) { badgeClass = "bg-blue-500/10 text-blue-400 border border-blue-500/20"; badgeText = "Checked"; }
+      if (g.rsvp_status === 'hadir') { badgeClass = "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"; badgeText = "Hadir"; }
+      if (g.rsvp_status === 'tidak_hadir') { badgeClass = "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"; badgeText = "Absen"; }
+      if (g.is_checked_in) { badgeClass = "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"; badgeText = "Checked"; }
 
       const card = document.createElement('div');
-      card.className = "bg-slate-900 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between";
+      card.className = "bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between transition-colors duration-200";
       card.innerHTML = `
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg bg-slate-800 text-slate-300 font-bold flex items-center justify-center text-xs border border-slate-700">
+          <div class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold flex items-center justify-center text-xs border border-slate-200 dark:border-slate-700">
             ${g.group_name.substring(0,2).toUpperCase()}
           </div>
           <div>
-            <h4 class="font-bold text-xs text-white">${g.group_name}</h4>
+            <h4 class="font-bold text-xs text-slate-900 dark:text-white">${g.group_name}</h4>
             <div class="flex items-center gap-2 mt-0.5">
               <span class="text-[10px] text-slate-500">${g.category} • ${g.max_pax} Pax</span>
               <span class="text-[9px] font-semibold px-2 py-0.5 rounded-md ${badgeClass}">${badgeText}</span>
@@ -573,16 +607,16 @@
           </div>
         </div>
         <div class="flex items-center gap-1">
-          <button onclick="copyLink('${link}', this)" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition" title="Salin Tautan">
+          <button onclick="copyLink('${link}', this)" class="p-1.5 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Salin Tautan">
             <i data-lucide="copy" class="w-3.5 h-3.5"></i>
           </button>
-          <a href="https://wa.me/?text=${waMessage}" target="_blank" class="p-1.5 text-slate-400 hover:text-emerald-400 rounded-lg hover:bg-slate-800 transition" title="Kirim WA">
+          <a href="https://wa.me/?text=${waMessage}" target="_blank" class="p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Kirim WA">
             <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
           </a>
-          <button onclick="openEditGuestModal('${g.id}')" class="p-1.5 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-slate-800 transition" title="Edit Data/Status">
+          <button onclick="openEditGuestModal('${g.id}')" class="p-1.5 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Edit Data/Status">
             <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
           </button>
-          <button onclick="deleteGuest('${g.id}', '${g.group_name}')" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800 transition" title="Hapus Tamu">
+          <button onclick="deleteGuest('${g.id}', '${g.group_name}')" class="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Hapus Tamu">
             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           </button>
         </div>
@@ -598,19 +632,19 @@
       document.getElementById('tab-home').classList.remove('hidden');
       document.getElementById('tab-tamu').classList.add('hidden');
       document.getElementById('nav-home').className = "nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold bg-blue-600 text-white shadow-md transition";
-      document.getElementById('nav-tamu').className = "nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-white transition";
+      document.getElementById('nav-tamu').className = "nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
     } else {
       document.getElementById('tab-home').classList.add('hidden');
       document.getElementById('tab-tamu').classList.remove('hidden');
       document.getElementById('nav-tamu').className = "nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold bg-blue-600 text-white shadow-md transition";
-      document.getElementById('nav-home').className = "nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-white transition";
+      document.getElementById('nav-home').className = "nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
     }
   }
 
   function setFilter(filter, e) {
     activeFilter = filter;
     document.querySelectorAll('#filter-pills button').forEach(btn => {
-      btn.className = "pill-btn px-3.5 py-1.5 rounded-lg bg-slate-900 text-slate-400 border border-slate-800 whitespace-nowrap text-xs font-semibold";
+      btn.className = "pill-btn px-3.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap text-xs font-semibold";
     });
     if (e) e.target.className = "pill-btn active px-3.5 py-1.5 rounded-lg bg-blue-600 text-white whitespace-nowrap text-xs font-semibold";
     renderGuestList();
@@ -622,8 +656,8 @@
 
   function copyLink(url, btn) {
     navigator.clipboard.writeText(url).then(() => {
-      btn.classList.add('text-emerald-400');
-      setTimeout(() => btn.classList.remove('text-emerald-400'), 1500);
+      btn.classList.add('text-emerald-500');
+      setTimeout(() => btn.classList.remove('text-emerald-500'), 1500);
     });
   }
 
