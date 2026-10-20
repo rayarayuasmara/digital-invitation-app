@@ -317,15 +317,32 @@
       p_pax: pax
     });
 
+    btn.disabled = false;
+    btn.innerText = "Kirim RSVP";
+
     if (error || !data || !data.success) {
       alert(data ? data.message : "Gagal menyimpan RSVP.");
-      btn.disabled = false;
-      btn.innerText = "Kirim RSVP";
       return;
     }
 
+    // Tampilkan notifikasi berhasil tanpa reload halaman
     alert("RSVP berhasil disimpan!");
-    location.reload();
+
+    // JIKA STATUS HADIR: LANGSUNG GENERATE QR CODE SECARA DYNAMICAL (TANPA REFRESH)
+    if (status === 'hadir') {
+      let activeToken = cleanTokenString(token);
+      renderQRCode(activeToken);
+      
+      // Scroll perlahan ke area Tiket QR agar tamu langsung melihatnya
+      const ticketSection = document.getElementById('ticket-section');
+      if (ticketSection) {
+        ticketSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Jika memilih tidak hadir, sembunyikan area tiket jika sebelumnya terbuka
+      const ticketSection = document.getElementById('ticket-section');
+      if (ticketSection) ticketSection.classList.add('hidden');
+    }
   });
 
   document.getElementById('wish-form').addEventListener('submit', async (e) => {
