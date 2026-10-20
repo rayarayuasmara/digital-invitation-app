@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scanner Petugas Check-in</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    body { font-family: sans-serif; background: #0f172a; color: #fff; padding: 20px; display: flex; justify-content: center; }
+    .card { background: #1e293b; padding: 20px; border-radius: 12px; max-width: 420px; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .btn { background: #2563eb; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 8px; }
+    .hidden { display: none; }
+    #reader { width: 100%; border-radius: 8px; overflow: hidden; margin-top: 12px; }
+    .result-box { margin-top: 16px; padding: 16px; border-radius: 8px; text-align: center; font-weight: bold; }
+    .success { background: #166534; color: #bbf7d0; }
+    .error { background: #991b1b; color: #fecaca; }
+    .warning { background: #854d0e; color: #fef08a; }
+    input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Check-in Petugas</h2>
+
+  <!-- Form Login -->
+  <div id="login-section">
+    <p style="color: #94a3b8; font-size: 0.9em;">Silakan login dengan akun petugas.</p>
+    <input type="email" id="email" placeholder="Email Petugas" />
+    <input type="password" id="password" placeholder="Password" />
+    <button class="btn" onclick="login()">Login</button>
+  </div>
+
+  <!-- Area Scanner -->
+  <div id="scanner-section" class="hidden">
+    <p>Logged in: <span id="user-email" style="color: #38bdf8;"></span> | <a href="#" onclick="logout()" style="color: #ef4444;">Logout</a></p>
+    
+    <div id="reader"></div>
+
+    <div style="margin-top: 20px; border-top: 1px solid #334155; padding-top: 12px;">
+      <label style="font-size: 0.85em; color: #94a3b8;">Cari Manual / Masukkan Token Tiket:</label>
+      <input type="text" id="manual-token" placeholder="Paste Token Tiket..." />
+      <button class="btn" onclick="submitManual()">Check-in Manual</button>
+    </div>
+
+    <div id="result" class="result-box hidden"></div>
+  </div>
+</div>
+
+<script>
+  // GANTI DENGAN CREDENTIALS SUPABASE KAMU
+  const SUPABASE_URL = "URL_SUPABASE_KAMU";
+  const SUPABASE_ANON_KEY = "ANON_KEY_SUPABASE_KAMU";
+
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  let html5QrcodeScanner = null;
+
+  async function checkSession() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+      showScanner(session.user.email);
+    }
+  }
+
+  async function login() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) {
+      alert("Login gagal: " + error.message);
+      return;
+    }
+    showScanner(data.user.email);
+  }
+
+  async function logout() {
+    await supabaseClient.auth.signOut();
+    location.reload();
+  }
+
+  function showScanner(email) {
+    document.getElementById('login-section').classList.add('hidden');
+    document.getElementById('scanner-section').classList.remove('hidden');
+    document.getElementById('user-email').innerText = email;
+
+    html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } });
+    html5QrcodeScanner.render(onScanSuccess);
+  }
+
+  async function onScanSuccess(decodedText) {
+    html5QrcodeScanner.pause();
+    await processCheckIn(decodedText);
+    setTimeout(() => { html5QrcodeScanner.resume(); }, 3000);
+  }
+
+  async function submitManual() {
+    const token = document.getElementById('manual-token').value.trim();
+    if (!token) return alert("Masukkan token tiket terlebih dahulu.");
+    await processCheckIn(token);
+  }
+
+  async function processCheckIn(ticketToken) {
+    const resultDiv = document.getElementById('result');
+    resultDiv.className = "result-box";
+    resultDiv.innerText = "Memproses Check-in...";
+    resultDiv.classList.remove('hidden');
+
+    const { data, error } = await supabaseClient.rpc('process_check_in', { p_ticket_token: ticketToken });
+
+    if (error) {
+      resultDiv.className = "result-box error";
+      resultDiv.innerText = "Gangguan Jaringan / Server Error";
+      return;
+    }
+
+    if (data.success) {
+      resultDiv.className = "result-box success";
+      resultDiv.innerHTML = `✅ ${data.message}<br/><strong>${data.guest_name}</strong> (${data.pax} Orang)`;
+    } else if (data.already_checked_in) {
+      resultDiv.className = "result-box warning";
+      resultDiv.innerHTML = `⚠️ ${data.message}<br/><strong>${data.guest_name}</strong> (${data.pax} Orang)`;
+    } else {
+      resultDiv.className = "result-box error";
+      resultDiv.innerText = "❌ " + data.message;
+    }
+  }
+
+  checkSession();
+</script>
+
+</body>
+</html>
