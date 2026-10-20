@@ -302,8 +302,23 @@
     isProcessing = true;
     if (navigator.vibrate) navigator.vibrate(100);
 
-    // Kirim string hasil scan langsung ke Supabase
-    await processCheckIn(rawText);
+    // Ambil segmen token dari URL jika yang di-scan berupa link utuh
+    let extractedToken = rawText;
+    if (rawText.includes('?token=')) {
+      extractedToken = rawText.split('?token=')[1].split('&')[0];
+    } else if (rawText.includes('/')) {
+      const parts = rawText.split('?')[0].split('/').filter(Boolean);
+      extractedToken = parts[parts.length - 1];
+    }
+
+    await processCheckIn(extractedToken);
+  }
+
+  async function logout() {
+    if (confirm("Apakah Anda yakin ingin keluar dari mode scanner?")) {
+      await supabaseClient.auth.signOut();
+      window.location.href = "/"; // Diarahkan ke Landing Page Utama (bukan form login dashboard)
+    }
   }
 
   async function processCheckIn(ticketToken) {
@@ -381,12 +396,6 @@
     }
   }
 
-  async function logout() {
-    if (confirm("Apakah Anda yakin ingin keluar dari mode scanner?")) {
-      await supabaseClient.auth.signOut();
-      window.location.href = "/dashboard";
-    }
-  }
 
   window.addEventListener('DOMContentLoaded', startScanner);
 </script>
