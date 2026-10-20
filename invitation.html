@@ -364,22 +364,23 @@
   }
 
   function renderQRCode(ticketToken) {
-  if (!ticketToken) return;
+    if (!ticketToken) return;
 
-  const ticketSection = document.getElementById('ticket-section');
-  const qrContainer = document.getElementById("qrcode");
-  if (!qrContainer || !ticketSection) return;
+    const ticketSection = document.getElementById('ticket-section');
+    const qrContainer = document.getElementById("qrcode");
+    if (!qrContainer || !ticketSection) return;
 
-  ticketSection.classList.remove('hidden');
-  qrContainer.innerHTML = '';
+    ticketSection.classList.remove('hidden');
+    qrContainer.innerHTML = '';
 
-  // Cetak MURNI kode token saja
-  new QRCode(qrContainer, {
-    text: String(ticketToken).trim(),
-    width: 160,
-    height: 160
-  });
-}
+    // Cetak MURNI string tokennya saja (tanpa kombinasi URL)
+    new QRCode(qrContainer, {
+      text: String(ticketToken).trim(),
+      width: 160,
+      height: 160,
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }
 
   function showError(msg) {
     document.getElementById('loading').classList.add('hidden');
