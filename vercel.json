@@ -1,6 +1,9 @@
 {
-  "cleanUrls": true,
   "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index.html"
+    },
     {
       "source": "/dashboard",
       "destination": "/dashboard.html"
@@ -11,10 +14,6 @@
     },
     {
       "source": "/:slug/:token",
-      "destination": "/invitation.html"
-    },
-    {
-      "source": "/(.*)",
       "destination": "/invitation.html"
     }
   ]
