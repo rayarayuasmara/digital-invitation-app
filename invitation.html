@@ -188,17 +188,26 @@
 
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // Ekstraksi Token Pendek dari URL Path Vercel (/rudi-irul/115b0522) atau Parameter (?token=115b0522)
+  // Sanitasi String Token
+  function cleanTokenString(str) {
+    if (!str) return '';
+    return String(str)
+      .trim()
+      .toLowerCase()
+      .replace(/[\u200B-\u200D\uFEFF]/g, '') // Hapus zero-width characters
+      .replace(/[\u2010-\u2015\u2212]/g, '-'); // Normalisasi karakter dash/minus
+  }
+
   function getInvitationToken() {
     const urlParams = new URLSearchParams(window.location.search);
     const queryToken = urlParams.get('token');
-    if (queryToken) return queryToken.trim();
+    if (queryToken) return cleanTokenString(queryToken);
 
     const pathSegments = window.location.pathname.split('/').filter(Boolean);
     if (pathSegments.length >= 2) {
-      return pathSegments[pathSegments.length - 1].trim();
+      return cleanTokenString(pathSegments[pathSegments.length - 1]);
     } else if (pathSegments.length === 1 && pathSegments[0] !== 'invitation' && pathSegments[0] !== 'invitation.html') {
-      return pathSegments[0].trim();
+      return cleanTokenString(pathSegments[0]);
     }
 
     return null;
@@ -250,15 +259,15 @@
       if (guest.rsvp_status === 'hadir') {
         document.getElementById('pax-input').value = guest.pax_confirmed || guest.max_pax;
         
-        // Pastikan mengambil token pendek, abaikan jika bernilai UUID (panjang > 20 karakter)
-let activeToken = guest.invitation_token || guest.ticket_token || token;
+        // PAKSA GUNAKAN TOKEN PENDEK BERSIH
+        let activeToken = cleanTokenString(guest.invitation_token || guest.ticket_token || token);
+        
+        // Proteksi: Jika terlanjur membawa UUID panjang (> 20 karakter), gunakan fallback token dari URL
+        if (activeToken.length > 20 && token) {
+          activeToken = token;
+        }
 
-if (activeToken && activeToken.length > 20) {
-  // Jika activeToken tidak sengaja berisi UUID, paksa ambil token dari URL
-  activeToken = token;
-}
-
-renderQRCode(activeToken);
+        renderQRCode(activeToken);
       }
     }
 
@@ -379,9 +388,9 @@ renderQRCode(activeToken);
     ticketSection.classList.remove('hidden');
     qrContainer.innerHTML = '';
 
-    // Wajib merender token pendek murni (misal: 115b0522)
+    // Cetak murni string token pendek yang bersih
     new QRCode(qrContainer, {
-      text: String(ticketToken).trim(),
+      text: cleanTokenString(ticketToken),
       width: 160,
       height: 160,
       correctLevel: QRCode.CorrectLevel.H
