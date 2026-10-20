@@ -188,7 +188,7 @@
 
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // Fungsi Pembaca Token Fleksibel (Mendukung URL Rewrite /rudi-irul/f4d30e93 dan Query Param ?token=f4d30e93)
+  // Ekstraksi Token Pendek dari URL Path Vercel (/rudi-irul/115b0522) atau Parameter (?token=115b0522)
   function getInvitationToken() {
     const urlParams = new URLSearchParams(window.location.search);
     const queryToken = urlParams.get('token');
@@ -250,8 +250,8 @@
       if (guest.rsvp_status === 'hadir') {
         document.getElementById('pax-input').value = guest.pax_confirmed || guest.max_pax;
         
-        // Render QR Code Tiket menggunakan token aktif
-        const activeToken = guest.ticket_token || guest.invitation_token || token;
+        // PASTI MENGGUNAKAN TOKEN PENDEK MURNI
+        const activeToken = guest.invitation_token || guest.ticket_token || token;
         renderQRCode(activeToken);
       }
     }
@@ -373,7 +373,7 @@
     ticketSection.classList.remove('hidden');
     qrContainer.innerHTML = '';
 
-    // Cetak MURNI string tokennya saja (tanpa kombinasi URL)
+    // Wajib merender token pendek murni (misal: 115b0522)
     new QRCode(qrContainer, {
       text: String(ticketToken).trim(),
       width: 160,
