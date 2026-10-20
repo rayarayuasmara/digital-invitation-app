@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Undangan Digital</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f9; padding: 20px; display: flex; justify-content: center; }
+    .card { background: #fff; padding: 24px; border-radius: 12px; max-width: 420px; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .btn { background: #2563eb; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 12px; font-weight: bold; }
+    .btn:disabled { background: #93c5fd; }
+    .hidden { display: none; }
+    .qr-container { display: flex; justify-content: center; margin-top: 16px; }
+    input, select { width: 100%; padding: 8px; margin-top: 6px; margin-bottom: 12px; box-sizing: border-box; }
+    .status-badge { padding: 6px 12px; border-radius: 20px; display: inline-block; font-size: 0.85em; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div id="loading">Memuat data undangan...</div>
+  
+  <div id="content" class="hidden">
+    <h2 id="event-title"></h2>
+    <p id="event-caption" style="color: #555;"></p>
+    <hr />
+    <p><strong>Kepada Yth:</strong> <span id="guest-name"></span></p>
+    <p><strong>Kuota Tamu:</strong> Maksimal <span id="max-pax"></span> orang</p>
+
+    <form id="rsvp-form">
+      <label>Konfirmasi Kehadiran:</label>
+      <select id="status-select" onchange="togglePaxInput()">
+        <option value="">-- Pilih Status --</option>
+        <option value="hadir">Hadir</option>
+        <option value="tidak_hadir">Tidak Hadir</option>
+      </select>
+
+      <div id="pax-group" class="hidden">
+        <label>Jumlah Orang Hadir:</label>
+        <input type="number" id="pax-input" min="1" />
+      </div>
+
+      <button type="submit" id="btn-submit" class="btn">Kirim RSVP</button>
+    </form>
+
+    <div id="ticket-section" class="hidden" style="margin-top: 24px; text-align: center; border-top: 1px dashed #ccc; padding-top: 16px;">
+      <h3>Tiket Masuk Anda</h3>
+      <p style="font-size: 0.85em; color: #666;">Tunjukkan QR Code ini kepada petugas di lokasi acara.</p>
+      <div class="qr-container" id="qrcode"></div>
+    </div>
+  </div>
+
+  <div id="error-msg" class="hidden" style="color: red; font-weight: bold;"></div>
+</div>
+
+<script>
+  // GANTI DENGAN CREDENTIALS SUPABASE KAMU
+  const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co/rest/v1/";
+  const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
+
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token');
+
+  let maxPaxAllowed = 1;
+
+  async function init() {
+    if (!token) {
+      showError("Tautan undangan tidak valid atau token hilang.");
+      return;
+    }
+
+    const { data, error } = await supabaseClient.rpc('get_invitation_details', { p_token: token });
+
+    if (error || !data || data.length === 0) {
+      showError("Undangan tidak ditemukan.");
+      return;
+    }
+
+    const guest = data[0];
+    maxPaxAllowed = guest.max_pax;
+
+    document.getElementById('event-title').innerText = guest.event_title;
+    document.getElementById('event-caption').innerText = guest.event_caption;
+    document.getElementById('guest-name').innerText = guest.group_name;
+    document.getElementById('max-pax').innerText = guest.max_pax;
+    document.getElementById('pax-input').max = guest.max_pax;
+
+    // Jika sudah pernah RSVP
+    if (guest.rsvp_status) {
+      document.getElementById('status-select').value = guest.rsvp_status;
+      togglePaxInput();
+      if (guest.rsvp_status === 'hadir') {
+        document.getElementById('pax-input').value = guest.pax_confirmed;
+        renderQRCode(guest.ticket_token);
+      }
+    }
+
+    // Jika sudah check-in, kunci form
+    if (guest.is_checked_in) {
+      document.getElementById('status-select').disabled = true;
+      document.getElementById('pax-input').disabled = true;
+      document.getElementById('btn-submit').disabled = true;
+      document.getElementById('btn-submit').innerText = "Sudah Check-in";
+    }
+
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('content').classList.remove('hidden');
+  }
+
+  function togglePaxInput() {
+    const status = document.getElementById('status-select').value;
+    const paxGroup = document.getElementById('pax-group');
+    if (status === 'hadir') {
+      paxGroup.classList.remove('hidden');
+      document.getElementById('pax-input').value = document.getElementById('pax-input').value || 1;
+    } else {
+      paxGroup.classList.add('hidden');
+    }
+  }
+
+  document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const status = document.getElementById('status-select').value;
+    const pax = status === 'hadir' ? parseInt(document.getElementById('pax-input').value) : 0;
+
+    if (!status) {
+      alert("Silakan pilih status kehadiran.");
+      return;
+    }
+
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true;
+    btn.innerText = "Menyimpan...";
+
+    const { data, error } = await supabaseClient.rpc('submit_rsvp', {
+      p_invitation_token: token,
+      p_status: status,
+      p_pax: pax
+    });
+
+    if (error || !data.success) {
+      alert(data ? data.message : "Gagal menyimpan RSVP.");
+      btn.disabled = false;
+      btn.innerText = "Kirim RSVP";
+      return;
+    }
+
+    alert("RSVP berhasil disimpan!");
+    location.reload();
+  });
+
+  function renderQRCode(ticketToken) {
+    const ticketSection = document.getElementById('ticket-section');
+    ticketSection.classList.remove('hidden');
+    document.getElementById('qrcode').innerHTML = '';
+    new QRCode(document.getElementById("qrcode"), {
+      text: ticketToken,
+      width: 160,
+      height: 160
+    });
+  }
+
+  function showError(msg) {
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('error-msg').innerText = msg;
+    document.getElementById('error-msg').classList.remove('hidden');
+  }
+
+  init();
+</script>
+
+</body>
+</html>
