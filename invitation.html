@@ -250,9 +250,15 @@
       if (guest.rsvp_status === 'hadir') {
         document.getElementById('pax-input').value = guest.pax_confirmed || guest.max_pax;
         
-        // PASTI MENGGUNAKAN TOKEN PENDEK MURNI
-        const activeToken = guest.invitation_token || guest.ticket_token || token;
-        renderQRCode(activeToken);
+        // Pastikan mengambil token pendek, abaikan jika bernilai UUID (panjang > 20 karakter)
+let activeToken = guest.invitation_token || guest.ticket_token || token;
+
+if (activeToken && activeToken.length > 20) {
+  // Jika activeToken tidak sengaja berisi UUID, paksa ambil token dari URL
+  activeToken = token;
+}
+
+renderQRCode(activeToken);
       }
     }
 
