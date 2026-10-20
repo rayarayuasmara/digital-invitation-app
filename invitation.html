@@ -351,11 +351,25 @@ const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token'
     }, 1000);
   }
 
-  function renderQRCode(ticketToken) {
-    document.getElementById('ticket-section').classList.remove('hidden');
-    document.getElementById('qrcode').innerHTML = '';
-    new QRCode(document.getElementById("qrcode"), { text: ticketToken, width: 150, height: 150 });
-  }
+  // Saat data tamu didapat dari Supabase
+const activeToken = guest.ticket_token || guest.invitation_token || token;
+renderQRCode(activeToken);
+
+function renderQRCode(ticketToken) {
+  if (!ticketToken) return;
+  
+  const qrContainer = document.getElementById("qrcode");
+  if (!qrContainer) return;
+
+  qrContainer.innerHTML = '';
+  
+  // Cetak MURNI string tokennya saja
+  new QRCode(qrContainer, { 
+    text: String(ticketToken).trim(), 
+    width: 160, 
+    height: 160 
+  });
+}
 
   function showError(msg) {
     document.getElementById('loading').classList.add('hidden');
