@@ -364,22 +364,22 @@
   }
 
   function renderQRCode(ticketToken) {
-    if (!ticketToken) return;
-    
-    const ticketSection = document.getElementById('ticket-section');
-    const qrContainer = document.getElementById("qrcode");
-    if (!qrContainer || !ticketSection) return;
+  if (!ticketToken) return;
 
-    ticketSection.classList.remove('hidden');
-    qrContainer.innerHTML = '';
-    
-    // Render MURNI string token
-    new QRCode(qrContainer, { 
-      text: String(ticketToken).trim(), 
-      width: 160, 
-      height: 160 
-    });
-  }
+  const ticketSection = document.getElementById('ticket-section');
+  const qrContainer = document.getElementById("qrcode");
+  if (!qrContainer || !ticketSection) return;
+
+  ticketSection.classList.remove('hidden');
+  qrContainer.innerHTML = '';
+
+  // Cetak MURNI kode token saja
+  new QRCode(qrContainer, {
+    text: String(ticketToken).trim(),
+    width: 160,
+    height: 160
+  });
+}
 
   function showError(msg) {
     document.getElementById('loading').classList.add('hidden');
