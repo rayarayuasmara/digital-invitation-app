@@ -181,23 +181,7 @@
     }
   }
 
-  async function onScanSuccess(decodedText) {
-    if (isProcessing) return;
-
-    let extractedToken = String(decodedText).trim();
-    if (!extractedToken || extractedToken === "undefined") return;
-
-    isProcessing = true;
-    if (navigator.vibrate) navigator.vibrate(100);
-
-    // Ambil token jika QR berupa URL penuh (misal: rayarayu.vercel.app/rudi-irul/f4d30e93)
-    if (extractedToken.includes('/')) {
-      const parts = extractedToken.split('/').filter(Boolean);
-      extractedToken = parts[parts.length - 1];
-    }
-
-    await processCheckIn(extractedToken);
-  }
+  onScanSuccess
 
   async function processCheckIn(ticketToken) {
     const { data, error } = await supabaseClient.rpc('check_in_guest', { p_ticket_token: ticketToken });
