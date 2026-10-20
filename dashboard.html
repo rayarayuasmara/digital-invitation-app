@@ -11,7 +11,7 @@
       darkMode: 'class',
     }
   </script>
-  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Lucide Icons Library -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -20,22 +20,20 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .apple-glass { background: rgba(20, 20, 22, 0.75); backdrop-blur: blur(20px); -webkit-backdrop-filter: blur(20px); }
-    .apple-glass-light { background: rgba(255, 255, 255, 0.85); backdrop-blur: blur(20px); -webkit-backdrop-filter: blur(20px); }
-  </style>
-  <style>
-  /* Mencegah auto-zoom pada perangkat mobile saat input diketik */
-  @media screen and (max-width: 768px) {
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    input[type="number"],
-    input[type="datetime-local"],
-    select,
-    textarea {
-      font-size: 16px !important;
+    
+    /* Mencegah auto-zoom pada perangkat mobile saat input diketik */
+    @media screen and (max-width: 768px) {
+      input[type="text"],
+      input[type="email"],
+      input[type="password"],
+      input[type="number"],
+      input[type="datetime-local"],
+      select,
+      textarea {
+        font-size: 16px !important;
+      }
     }
-  }
-</style>
+  </style>
 </head>
 <body class="flex justify-center min-h-screen bg-[#000000] text-white antialiased selection:bg-white selection:text-black transition-colors duration-300">
 
@@ -70,7 +68,7 @@
     <!-- MAIN DASHBOARD CONTENT -->
     <div id="dashboard-section" class="hidden flex-1 flex flex-col justify-between">
 
-      <!-- HEADER TOP BAR (Apple Style Header) -->
+      <!-- HEADER TOP BAR -->
       <div class="p-5 flex items-center justify-between sticky top-0 z-30 apple-glass border-b border-[#1c1c1e]">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-full bg-[#1c1c1e] flex items-center justify-center text-white font-bold border border-[#3a3a3c]">
@@ -88,10 +86,10 @@
         </div>
       </div>
 
-      <!-- TAB 1: HOME (Apple Fitness Bento Style) -->
+      <!-- TAB 1: HOME -->
       <div id="tab-home" class="p-5 space-y-4">
         
-        <!-- HERO CARD (Apple Fitness Plus Banner Style) -->
+        <!-- HERO CARD -->
         <div class="relative bg-gradient-to-br from-[#1c1c1e] to-[#2c2c2e] p-6 rounded-3xl border border-[#3a3a3c] overflow-hidden shadow-2xl">
           <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
           <div class="flex justify-between items-start relative z-10">
@@ -100,7 +98,6 @@
               <h2 class="text-2xl font-bold tracking-tight text-white mt-1" id="hero-hadir-text">0 / 0 Pax</h2>
               <p class="text-[11px] text-[#86868b] mt-0.5">Terkonfirmasi hadir dari kapasitas total</p>
             </div>
-            <!-- Ring Progress Badge -->
             <div class="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center text-center">
               <span class="text-sm font-bold text-white" id="hero-pct-text">0%</span>
             </div>
@@ -118,17 +115,33 @@
           </div>
         </div>
 
-        <!-- CATEGORY ANALYTICS (Apple Activity Rings Style Bars) -->
+        <!-- CATEGORY DONUT CHART ANALYTICS -->
         <div class="bg-[#1c1c1e]/60 p-5 rounded-3xl border border-[#2c2c2e] space-y-4 backdrop-blur-xl">
           <div class="flex justify-between items-center">
             <div>
               <h3 class="text-xs font-bold text-white">Analitik Kategori Tamu</h3>
-              <p class="text-[10px] text-[#86868b]">Sebaran kelompok undangan</p>
+              <p class="text-[10px] text-[#86868b]">Distribusi proporsi kelompok undangan</p>
             </div>
-            <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#86868b]"></i>
+            <i data-lucide="pie-chart" class="w-4 h-4 text-[#86868b]"></i>
           </div>
-          <div id="category-chart-container" class="space-y-3 pt-1">
-            <!-- Diisi lewat JS -->
+          
+          <!-- Wrapper Donut Chart & Legend -->
+          <div class="flex flex-col sm:flex-row items-center gap-6 py-2">
+            <!-- Donut Chart SVG Container -->
+            <div class="relative w-36 h-36 flex-shrink-0 flex items-center justify-center">
+              <svg id="donut-chart-svg" class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                <!-- Diisi secara dinamis melalui JavaScript -->
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+                <span class="text-[10px] text-[#86868b] uppercase font-bold">Total</span>
+                <span id="donut-total-val" class="text-base font-extrabold text-white leading-none mt-0.5">0</span>
+              </div>
+            </div>
+
+            <!-- Legend Container -->
+            <div id="donut-legend" class="w-full space-y-2 text-xs">
+              <!-- Diisi secara dinamis melalui JavaScript -->
+            </div>
           </div>
         </div>
 
@@ -145,7 +158,7 @@
 
       </div>
 
-      <!-- TAB 2: TAMU (GUEST LIST MANAGEMENT) -->
+      <!-- TAB 2: TAMU -->
       <div id="tab-tamu" class="p-5 space-y-4 hidden">
         <div class="flex justify-between items-center">
           <div>
@@ -158,13 +171,11 @@
           </button>
         </div>
 
-        <!-- Search Bar -->
         <div class="relative">
           <input type="text" id="search-input" onkeyup="filterGuests()" placeholder="Cari nama tamu..." class="w-full text-xs p-3.5 pl-10 rounded-2xl bg-[#1c1c1e] border border-[#3a3a3c] text-white placeholder-[#545456] outline-none focus:ring-2 focus:ring-white transition" />
           <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3.5 text-[#86868b]"></i>
         </div>
 
-        <!-- Status Filter Pills (Apple Segmented Control Style) -->
         <div class="flex gap-1.5 overflow-x-auto no-scrollbar text-xs font-semibold pb-1" id="filter-pills">
           <button onclick="setFilter('all', event)" class="pill-btn active px-4 py-2 rounded-full bg-white text-black shadow-sm whitespace-nowrap">Semua</button>
           <button onclick="setFilter('hadir', event)" class="pill-btn px-4 py-2 rounded-full bg-[#1c1c1e] text-[#86868b] border border-[#3a3a3c] whitespace-nowrap">Hadir</button>
@@ -173,12 +184,8 @@
           <button onclick="setFilter('checked_in', event)" class="pill-btn px-4 py-2 rounded-full bg-[#1c1c1e] text-[#86868b] border border-[#3a3a3c] whitespace-nowrap">Checked</button>
         </div>
 
-        <!-- Guest List Items -->
-        <div id="guest-list-container" class="space-y-2.5">
-          <!-- Diisi lewat JS -->
-        </div>
+        <div id="guest-list-container" class="space-y-2.5"></div>
 
-        <!-- Quota Progress Bar -->
         <div class="bg-[#1c1c1e]/60 p-4 rounded-3xl border border-[#2c2c2e] space-y-2 backdrop-blur-xl">
           <div class="flex justify-between text-xs font-semibold">
             <span class="text-[#86868b]">Kapasitas Database Tamu</span>
@@ -190,7 +197,7 @@
         </div>
       </div>
 
-      <!-- TAB 3: ACARA (EVENT SETTINGS) -->
+      <!-- TAB 3: ACARA -->
       <div id="tab-acara" class="p-5 space-y-4 hidden">
         <div>
           <h2 class="text-xl font-bold text-white tracking-tight">Pengaturan Acara</h2>
@@ -202,22 +209,18 @@
             <label class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Judul Acara</label>
             <input type="text" id="ev-title" required class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e]/50 border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white" />
           </div>
-
           <div>
             <label class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Tanggal & Waktu</label>
             <input type="datetime-local" id="ev-date" required class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e]/50 border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white" />
           </div>
-
           <div>
             <label class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Lokasi Gedung</label>
             <textarea id="ev-location" rows="2" required class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e]/50 border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white"></textarea>
           </div>
-
           <div>
             <label class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Pesan Pembuka / Caption</label>
             <textarea id="ev-caption" rows="3" required class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e]/50 border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white"></textarea>
           </div>
-
           <button type="submit" id="btn-save-event" class="w-full bg-white hover:bg-[#e0e0e0] text-black font-bold text-xs py-4 rounded-2xl shadow-md transition flex items-center justify-center gap-2 mt-2">
             <i data-lucide="save" class="w-4 h-4"></i>
             <span>Simpan Perubahan</span>
@@ -225,7 +228,7 @@
         </form>
       </div>
 
-      <!-- TAB 4: AKUN (LOGOUT) -->
+      <!-- TAB 4: AKUN -->
       <div id="tab-akun" class="p-5 space-y-4 hidden">
         <div>
           <h2 class="text-xl font-bold text-white tracking-tight">Akun Klien</h2>
@@ -242,7 +245,6 @@
               <p id="account-slug" class="text-xs text-[#86868b] font-mono">...</p>
             </div>
           </div>
-
           <div class="pt-3 border-t border-[#3a3a3c] space-y-2">
             <button onclick="logout()" class="w-full bg-[#ff453a]/10 hover:bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/30 font-bold text-xs py-3.5 rounded-2xl transition flex items-center justify-center gap-2">
               <i data-lucide="log-out" class="w-4 h-4"></i>
@@ -252,7 +254,7 @@
         </div>
       </div>
 
-      <!-- BOTTOM FLOATING DOCK NAV (Apple Fitness+ Style Bottom Bar) -->
+      <!-- BOTTOM FLOATING DOCK NAV -->
       <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-sm apple-glass text-white p-2 rounded-full shadow-2xl flex items-center justify-around border border-[#3a3a3c] z-40">
         <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex-1 py-2.5 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold bg-white text-black shadow-md transition">
           <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
@@ -323,7 +325,6 @@
             <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Nama Tamu</label>
             <input type="text" id="edit-name" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white" />
           </div>
-
           <div>
             <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Kategori</label>
             <select id="edit-cat" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white">
@@ -334,12 +335,10 @@
               <option value="Umum">Umum</option>
             </select>
           </div>
-
           <div>
             <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Kuota Pax</label>
             <input type="number" id="edit-pax" min="1" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white" />
           </div>
-
           <div>
             <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Status RSVP</label>
             <select id="edit-rsvp" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white">
@@ -348,7 +347,6 @@
               <option value="tidak_hadir">Absen</option>
             </select>
           </div>
-
           <div class="flex items-center justify-between p-3.5 bg-[#2c2c2e] rounded-2xl border border-[#3a3a3c]">
             <span class="text-xs font-semibold text-white">Status Check-in</span>
             <label class="relative inline-flex items-center cursor-pointer">
@@ -480,7 +478,7 @@
     document.getElementById('stat-hadir-groups').innerText = `${stats.count_hadir_groups} Grup`;
     document.getElementById('stat-checkedin-count').innerText = `${stats.total_checked_in} Orang`;
 
-    renderCategoryChart(categories);
+    renderDonutChart(categories);
     renderRecentRSVP(guests);
     renderGuestList();
 
@@ -492,31 +490,61 @@
     initIcons();
   }
 
-  function renderCategoryChart(categories) {
-    const container = document.getElementById('category-chart-container');
-    container.innerHTML = '';
+  // FUNGSI RENDER DONUT CHART & LEGEND
+  function renderDonutChart(categories) {
+    const svg = document.getElementById('donut-chart-svg');
+    const legendContainer = document.getElementById('donut-legend');
+    const totalValEl = document.getElementById('donut-total-val');
+    
+    svg.innerHTML = '';
+    legendContainer.innerHTML = '';
 
     if (!categories || categories.length === 0) {
-      container.innerHTML = '<p class="text-xs text-[#86868b]">Belum ada data kategori.</p>';
+      legendContainer.innerHTML = '<p class="text-xs text-[#86868b]">Belum ada data kategori.</p>';
+      totalValEl.innerText = "0";
       return;
     }
 
-    const maxTotal = Math.max(...categories.map(c => c.total), 1);
+    const totalSum = categories.reduce((sum, c) => sum + c.total, 0);
+    totalValEl.innerText = totalSum;
 
-    categories.forEach(c => {
-      const pct = Math.round((c.total / maxTotal) * 100);
-      const div = document.createElement('div');
-      div.className = "space-y-1.5";
-      div.innerHTML = `
-        <div class="flex justify-between text-xs font-semibold">
-          <span class="text-white">${c.category}</span>
-          <span class="text-[#86868b] font-mono text-[11px]">${c.hadir} Hadir / ${c.total} Total</span>
+    // Palet warna elegan ala Apple Design System
+    const colors = ['#0a84ff', '#30d158', '#ff9f0a', '#bf5af2', '#ff375f', '#64d2ff', '#ffd60a'];
+    
+    let cumulativePercent = 0;
+
+    categories.forEach((c, index) => {
+      const color = colors[index % colors.length];
+      const percent = totalSum > 0 ? (c.total / totalSum) * 100 : 0;
+      
+      // Render potongan SVG Donut
+      const strokeDasharray = `${percent} ${100 - percent}`;
+      const strokeDashoffset = -cumulativePercent;
+
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', '18');
+      circle.setAttribute('cy', '18');
+      circle.setAttribute('r', '15.91549430918954');
+      circle.setAttribute('fill', 'transparent');
+      circle.setAttribute('stroke', color);
+      circle.setAttribute('stroke-width', '4');
+      circle.setAttribute('stroke-dasharray', strokeDasharray);
+      circle.setAttribute('stroke-dashoffset', strokeDashoffset);
+      svg.appendChild(circle);
+
+      cumulativePercent += percent;
+
+      // Render Legenda Kategori
+      const legendItem = document.createElement('div');
+      legendItem.className = "flex items-center justify-between";
+      legendItem.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${color};"></span>
+          <span class="text-white font-medium truncate max-w-[120px]">${c.category}</span>
         </div>
-        <div class="w-full bg-[#2c2c2e] rounded-full h-2.5 overflow-hidden p-0.5 border border-[#3a3a3c]">
-          <div class="bg-white h-full rounded-full transition-all duration-500" style="width: ${pct}%"></div>
-        </div>
+        <span class="text-[#86868b] font-mono text-[11px]">${c.hadir} Hadir / ${c.total} Total</span>
       `;
-      container.appendChild(div);
+      legendContainer.appendChild(legendItem);
     });
   }
 
