@@ -20,6 +20,7 @@
     .badge-success { background: #dcfce7; color: #15803d; }
     .badge-danger { background: #fee2e2; color: #b91c1c; }
     .badge-warning { background: #fef3c7; color: #b45309; }
+    .wish-item { background: #f1f5f9; padding: 12px; rounded: 6px; margin-bottom: 8px; border-radius: 6px; font-size: 0.85em; }
   </style>
 </head>
 <body>
@@ -77,15 +78,24 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Daftar Ucapan & Doa -->
+    <div class="card">
+      <h3>Ucapan & Doa Masuk</h3>
+      <div id="wishes-list" style="max-height: 250px; overflow-y: auto;">
+        <p style="color: #64748b; font-size: 0.85em;">Belum ada ucapan.</p>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
-  // GANTI DENGAN CREDENTIALS SUPABASE KAMU
+  // CREDENTIALS SUPABASE
   const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
 
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  let currentClientData = null;
   let currentEventData = null;
 
   async function checkSession() {
@@ -117,13 +127,16 @@
       return;
     }
 
+    currentClientData = data.client;
+    currentEventData = data.event;
+
     document.getElementById('client-name').innerText = "Dashboard: " + data.client.name;
     document.getElementById('event-title').innerText = data.event.title;
     document.getElementById('event-date').innerText = new Date(data.event.event_date).toLocaleString('id-ID');
     document.getElementById('event-location').innerText = data.event.location;
-    currentEventData = data.event;
 
     renderGuestTable(data.guests);
+    renderWishes(data.wishes);
   }
 
   function renderGuestTable(guests) {
@@ -138,7 +151,8 @@
     const domainBase = window.location.origin;
 
     guests.forEach(g => {
-      const link = `${domainBase}/?token=${g.invitation_token}`;
+      // MENGGUNAKAN FORMAT URL BARU: /slug/token
+      const link = `${domainBase}/${currentClientData.slug}/${g.invitation_token}`;
       const waMessage = encodeURIComponent(
         `Halo *${g.group_name}*,\n\nKami mengundang Anda untuk menghadiri acara *${currentEventData.title}*.\n\nSilakan konfirmasi kehadiran Anda melalui tautan resmi berikut:\n${link}`
       );
@@ -163,6 +177,23 @@
         </td>
       `;
       tbody.appendChild(tr);
+    });
+  }
+
+  function renderWishes(wishes) {
+    const list = document.getElementById('wishes-list');
+    list.innerHTML = '';
+
+    if (!wishes || wishes.length === 0) {
+      list.innerHTML = '<p style="color: #64748b; font-size: 0.85em;">Belum ada ucapan.</p>';
+      return;
+    }
+
+    wishes.forEach(w => {
+      const item = document.createElement('div');
+      item.className = 'wish-item';
+      item.innerHTML = `<strong>${w.guest_name}</strong><p style="margin: 4px 0 0 0; color: #334155;">${w.message}</p>`;
+      list.appendChild(item);
     });
   }
 
