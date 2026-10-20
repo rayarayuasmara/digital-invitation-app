@@ -19,24 +19,11 @@
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    :root { color-scheme: light; }
-    body { background: #f7f8fc !important; color: #182230 !important; }
-    .dashboard-shell { max-width: 1100px !important; background: #f7f8fc !important; border-color: #e8ebf2 !important; box-shadow: 0 24px 80px rgba(40, 48, 72, .08) !important; }
-    .dashboard-surface { background: rgba(255,255,255,.92) !important; border-color: #e8ebf2 !important; }
-    .card-clean { box-shadow: 0 8px 24px rgba(40, 48, 72, .045) !important; border-color: #e8ebf2 !important; }
-    @media (min-width: 768px) {
-      #dashboard-section { padding-bottom: 7rem; }
-      #tab-home, #tab-tamu, #tab-acara, #tab-akun { padding: 2rem 3rem; }
-      #tab-home { display: grid; grid-template-columns: 1.15fr .85fr; align-items: start; gap: 1rem; }
-      #tab-home > * { margin: 0 !important; }
-      #tab-home > :first-child { grid-column: 1 / -1; }
-      #tab-home > :nth-child(4), #tab-home > :nth-child(5) { grid-column: 1 / -1; }
-    }
   </style>
 </head>
-<body class="flex justify-center min-h-screen bg-[#f7f8fc] text-slate-900 antialiased selection:bg-indigo-100 selection:text-indigo-950 transition-colors duration-300">
+<body class="flex justify-center min-h-screen bg-slate-950 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 antialiased selection:bg-lime-400 selection:text-slate-950 transition-colors duration-300">
 
-  <div class="dashboard-shell w-full max-w-md bg-[#f7f8fc] min-h-screen shadow-2xl flex flex-col relative pb-32 overflow-x-hidden border-x border-slate-200 transition-colors duration-300">
+  <div class="w-full max-w-md bg-slate-50 dark:bg-[#0b101d] min-h-screen shadow-2xl flex flex-col relative pb-32 overflow-x-hidden border-x border-slate-200 dark:border-slate-800/80 transition-colors duration-300">
 
     <!-- LOGIN SCREEN -->
     <div id="login-section" class="p-6 my-auto">
@@ -68,25 +55,25 @@
     <div id="dashboard-section" class="hidden flex-1 flex flex-col justify-between">
 
       <!-- HEADER TOP BAR -->
-      <div class="dashboard-surface p-4 md:px-12 bg-white/80 flex items-center justify-between sticky top-0 z-30 border-b border-slate-200 backdrop-blur-md transition-colors">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-2xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 font-bold text-xs overflow-hidden border border-slate-300 dark:border-slate-700">
-            <i data-lucide="user" class="w-4 h-4"></i>
+      <div class="p-4 bg-white/80 dark:bg-[#0b101d]/80 flex items-center justify-between sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800/80 backdrop-blur-md transition-colors">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 font-bold overflow-hidden border border-slate-300 dark:border-slate-700 shadow-sm">
+            <i data-lucide="user" class="w-5 h-5"></i>
           </div>
           <div>
-            <h4 id="home-client-name" class="font-extrabold text-xs text-slate-900 dark:text-white leading-tight">Memuat...</h4>
-            <span class="text-[10px] text-slate-500 font-mono" id="header-client-slug">...</span>
+            <h4 id="home-client-name" class="font-black text-xs text-slate-900 dark:text-white leading-tight">Memuat...</h4>
+            <span class="text-[10px] text-slate-500 font-mono font-bold" id="header-client-slug">...</span>
           </div>
         </div>
         <div class="flex items-center gap-2">
           <!-- Theme Switcher -->
-          <button onclick="toggleTheme()" id="btn-theme" title="Ubah Tema" class="w-9 h-9 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:text-lime-500 rounded-2xl flex items-center justify-center transition border border-slate-200 dark:border-slate-800">
+          <button onclick="toggleTheme()" id="btn-theme" title="Ubah Tema" class="w-10 h-10 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:text-lime-500 rounded-2xl flex items-center justify-center transition border border-slate-200 dark:border-slate-800 shadow-sm">
             <i data-lucide="sun" id="theme-icon" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
 
-      <!-- TAB 1: HOME (BENTO GRID STYLE) -->
+      <!-- TAB 1: HOME (BENTO GRID RESTRUCTURING) -->
       <div id="tab-home" class="p-4 space-y-3.5">
         
         <!-- HERO PROGRESS CARD (Mirip Daily Intake Referensi) -->
@@ -106,7 +93,7 @@
           </div>
         </div>
 
-        <!-- BENTO ROW 2: MINI CARDS (Step & Water ala referensi) -->
+        <!-- BENTO ROW 2: MINI CARDS (Statistik Kunci) -->
         <div class="grid grid-cols-2 gap-3">
           <!-- Card Hadir -->
           <div class="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
@@ -137,7 +124,7 @@
           </div>
         </div>
 
-        <!-- BENTO ROW 3: VISUAL CATEGORY PROGRESS (Mirip Grafik Batang Statistic Referensi) -->
+        <!-- BENTO ROW 3: VISUAL CATEGORY PROGRESS (Grafik Batang Statistik) -->
         <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
           <div class="flex justify-between items-center">
             <div>
