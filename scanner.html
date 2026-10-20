@@ -4,8 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Scanner Check-in - RayaRayu</title>
+  <!-- Tailwind CSS & Google Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Supabase & HTML5 QR Scanner Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
@@ -18,6 +20,9 @@
       100% { top: 90%; opacity: 0.3; }
     }
     .animate-laser { animation: scan-laser 2s infinite ease-in-out; }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
     #reader video {
       object-fit: cover !important;
@@ -34,7 +39,7 @@
   <div class="w-full max-w-md bg-slate-900 min-h-screen flex flex-col justify-between relative overflow-hidden shadow-2xl border-x border-slate-800">
 
     <!-- TOP HEADER BAR -->
-    <header class="p-5 flex items-center justify-between z-20 backdrop-blur-md bg-slate-900/80 sticky top-0 border-b border-slate-800/60">
+    <header class="p-4 flex items-center justify-between z-20 backdrop-blur-md bg-slate-900/80 sticky top-0 border-b border-slate-800/60">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-center text-emerald-400 font-extrabold text-sm shadow-inner">
           ❖
@@ -46,14 +51,22 @@
           </p>
         </div>
       </div>
-      <button onclick="toggleTorch()" id="btn-torch" class="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl flex items-center justify-center text-sm border border-slate-700 transition">
-        🔦
-      </button>
+      
+      <!-- Action Buttons Header -->
+      <div class="flex items-center gap-2">
+        <button onclick="toggleTorch()" id="btn-torch" class="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl flex items-center justify-center text-sm border border-slate-700 transition" title="Lampu Senter">
+          🔦
+        </button>
+        <button onclick="logout()" class="w-9 h-9 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center text-sm border border-rose-500/30 transition font-bold" title="Logout">
+          🚪
+        </button>
+      </div>
     </header>
 
     <!-- MAIN CAMERA / SCANNER AREA -->
     <main class="flex-1 flex flex-col items-center justify-center p-6 relative">
       
+      <!-- Instructional Tag -->
       <div class="text-center space-y-1 mb-6 z-10">
         <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider">
           Arahkan Kamera ke QR Tiket
@@ -63,6 +76,7 @@
       <!-- CAMERA CONTAINER -->
       <div class="relative w-72 h-72 rounded-3xl overflow-hidden border-2 border-slate-700 bg-slate-950 shadow-2xl flex items-center justify-center">
         
+        <!-- Video Stream Container -->
         <div id="reader" class="w-full h-full"></div>
 
         <!-- Viewfinder Corners -->
@@ -82,20 +96,56 @@
 
       </div>
 
+      <!-- Quick Manual Input Option -->
       <div class="mt-8 text-center z-10">
-        <button onclick="promptManualCode()" class="text-xs font-bold text-slate-400 hover:text-emerald-400 transition underline underline-offset-4">
-          Atau masukkan kode tiket manual
+        <button onclick="openManualModal()" class="text-xs font-bold text-slate-400 hover:text-emerald-400 transition underline underline-offset-4 flex items-center gap-1.5 mx-auto">
+          <span>🔍</span> Cari & Masukkan Tamu Manual
         </button>
       </div>
 
     </main>
 
-    <footer class="p-5 text-center text-xs text-slate-500 border-t border-slate-800/60 bg-slate-900/50 backdrop-blur-md">
+    <!-- FOOTER STATUS BAR -->
+    <footer class="p-4 text-center text-xs text-slate-500 border-t border-slate-800/60 bg-slate-900/50 backdrop-blur-md">
       <p>© 2026 RayaRayu Check-in System</p>
     </footer>
 
+    <!-- MODAL MANUAL CHECK-IN & DAFTAR NAMA TAMU -->
+    <div id="manual-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-end justify-center p-4 transition-all duration-300 transform translate-y-full opacity-0">
+      <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-2xl relative">
+        
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+          <h3 class="text-sm font-extrabold text-white">Check-in Manual Tamu</h3>
+          <button onclick="closeManualModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 text-xs font-bold flex items-center justify-center">✕</button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative">
+          <input type="text" id="manual-search-input" onkeyup="filterManualGuests()" placeholder="Ketik nama tamu..." class="w-full text-xs p-3 pl-9 rounded-2xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
+          <span class="absolute left-3 top-3 text-slate-500 text-xs">🔍</span>
+        </div>
+
+        <!-- Daftar Tamu Dropdown List -->
+        <div id="manual-guest-list" class="max-h-56 overflow-y-auto no-scrollbar space-y-2 pr-1">
+          <p class="text-xs text-slate-500 text-center py-4">Memuat daftar tamu...</p>
+        </div>
+
+        <!-- Manual Token Input Direct -->
+        <div class="pt-2 border-t border-slate-800/80">
+          <p class="text-[10px] text-slate-500 mb-1.5 font-semibold uppercase tracking-wider">Atau Masukkan Kode Token Tiket:</p>
+          <div class="flex gap-2">
+            <input type="text" id="manual-token-input" placeholder="Contoh: f4d30e93" class="flex-1 text-xs p-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 outline-none uppercase font-mono" />
+            <button onclick="submitManualTokenInput()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold px-4 rounded-xl shadow-md transition">
+              Proses
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <!-- RESULT MODAL SLIDE-UP -->
-    <div id="result-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-4 transition-all duration-300 transform translate-y-full opacity-0">
+    <div id="result-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-end justify-center p-4 transition-all duration-300 transform translate-y-full opacity-0">
       <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-2xl relative overflow-hidden">
         
         <div id="modal-glow" class="absolute -top-12 left-1/2 -translate-x-1/2 w-40 h-20 bg-emerald-500/20 blur-2xl rounded-full pointer-events-none"></div>
@@ -133,6 +183,7 @@
   </div>
 
 <script>
+  // CREDENTIALS SUPABASE
   const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
 
@@ -140,6 +191,7 @@
 
   let html5QrcodeScanner = null;
   let isProcessing = false;
+  let allRegisteredGuests = [];
 
   async function startScanner() {
     html5QrcodeScanner = new Html5Qrcode("reader");
@@ -156,13 +208,89 @@
         onScanSuccess
       );
     } catch (err) {
-      console.warn("Kamera belakang tidak dapat diakses, mencoba opsi default:", err);
+      console.warn("Mencoba kamera depan...", err);
       try {
         await html5QrcodeScanner.start({ facingMode: "user" }, config, onScanSuccess);
       } catch (errUser) {
-        alert("Gagal mengaktifkan kamera. Pastikan izin kamera sudah diberikan di Safari.");
+        alert("Gagal mengaktifkan kamera. Pastikan izin kamera sudah diberikan.");
       }
     }
+
+    // Muat daftar tamu untuk pilihan manual
+    fetchRegisteredGuests();
+  }
+
+  async function fetchRegisteredGuests() {
+    const { data, error } = await supabaseClient
+      .from('guests')
+      .select('id, group_name, category, invitation_token, ticket_token, is_checked_in')
+      .order('group_name', { ascending: true });
+
+    if (!error && data) {
+      allRegisteredGuests = data;
+      renderManualGuestList(allRegisteredGuests);
+    }
+  }
+
+  function renderManualGuestList(guests) {
+    const container = document.getElementById('manual-guest-list');
+    container.innerHTML = '';
+
+    if (!guests || guests.length === 0) {
+      container.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">Tamu tidak ditemukan.</p>';
+      return;
+    }
+
+    guests.forEach(g => {
+      const activeToken = g.ticket_token || g.invitation_token;
+      const statusBadge = g.is_checked_in 
+        ? '<span class="text-[9px] bg-blue-500/20 text-blue-400 font-bold px-2 py-0.5 rounded-full border border-blue-500/30">Checked</span>'
+        : '<span class="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">Ready</span>';
+
+      const div = document.createElement('div');
+      div.className = "bg-slate-950 p-3 rounded-xl border border-slate-800/80 flex items-center justify-between hover:border-emerald-500/50 transition cursor-pointer";
+      div.onclick = () => selectManualGuest(activeToken);
+      div.innerHTML = `
+        <div>
+          <p class="text-xs font-bold text-white">${g.group_name}</p>
+          <p class="text-[10px] text-slate-400 mt-0.5">${g.category || 'Umum'} • Code: <span class="font-mono text-slate-300">${activeToken}</span></p>
+        </div>
+        <div>${statusBadge}</div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function filterManualGuests() {
+    const search = document.getElementById('manual-search-input').value.toLowerCase();
+    const filtered = allRegisteredGuests.filter(g => g.group_name.toLowerCase().includes(search));
+    renderManualGuestList(filtered);
+  }
+
+  function openManualModal() {
+    closeResultModal();
+    fetchRegisteredGuests();
+    const modal = document.getElementById('manual-modal');
+    modal.classList.remove('translate-y-full', 'opacity-0');
+  }
+
+  function closeManualModal() {
+    const modal = document.getElementById('manual-modal');
+    modal.classList.add('translate-y-full', 'opacity-0');
+  }
+
+  function selectManualGuest(token) {
+    closeManualModal();
+    if (token) {
+      processCheckIn(token);
+    }
+  }
+
+  function submitManualTokenInput() {
+    const token = document.getElementById('manual-token-input').value.trim();
+    if (!token) return alert("Masukkan kode token terlebih dahulu.");
+    closeManualModal();
+    processCheckIn(token);
   }
 
   async function onScanSuccess(decodedText) {
@@ -174,7 +302,6 @@
     isProcessing = true;
     if (navigator.vibrate) navigator.vibrate(100);
 
-    // Ambil token jika yang di-scan bernilai URL lengkap
     let extractedToken = rawText;
     if (rawText.includes('?token=')) {
       extractedToken = rawText.split('?token=')[1].split('&')[0];
@@ -233,19 +360,16 @@
     modal.classList.remove('translate-y-full', 'opacity-0');
   }
 
-  function resumeScanner() {
+  function closeResultModal() {
     const modal = document.getElementById('result-modal');
     modal.classList.add('translate-y-full', 'opacity-0');
+  }
+
+  function resumeScanner() {
+    closeResultModal();
     setTimeout(() => {
       isProcessing = false;
     }, 500);
-  }
-
-  function promptManualCode() {
-    const code = prompt("Masukkan Token Tiket Tamu:");
-    if (code) {
-      processCheckIn(code.trim());
-    }
   }
 
   async function toggleTorch() {
@@ -261,6 +385,13 @@
       }
     } catch (e) {
       alert("Fitur senter tidak aktif.");
+    }
+  }
+
+  async function logout() {
+    if (confirm("Apakah Anda yakin ingin keluar dari mode scanner?")) {
+      await supabaseClient.auth.signOut();
+      window.location.href = "/dashboard";
     }
   }
 
