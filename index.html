@@ -62,8 +62,11 @@
 
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get('token');
+  // Membaca token dari path (/rudi-irul/f4d30e93) atau dari query parameter (?token=f4d30e93)
+const pathSegments = window.location.pathname.split('/').filter(Boolean);
+const urlParams = new URLSearchParams(window.location.search);
+
+const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token');
 
   let maxPaxAllowed = 1;
 
