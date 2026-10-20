@@ -277,6 +277,20 @@
     }
   }
 
+  function renderQRCode(ticketToken) {
+  const finalToken = ticketToken || token;
+  if (!finalToken) return;
+
+  document.getElementById('ticket-section').classList.remove('hidden');
+  document.getElementById('qrcode').innerHTML = '';
+
+  new QRCode(document.getElementById("qrcode"), { 
+    text: String(finalToken).trim(), 
+    width: 160, 
+    height: 160 
+  });
+}
+
   window.addEventListener('DOMContentLoaded', startScanner);
 </script>
 
