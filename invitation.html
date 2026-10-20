@@ -188,10 +188,12 @@
 
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // Parse token dari URL path (/rudi-irul/f4d30e93) atau query parameter (?token=f4d30e93)
-  const pathSegments = window.location.pathname.split('/').filter(Boolean);
-  const urlParams = new URLSearchParams(window.location.search);
-  const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token');
+ // Membaca path URL (misal: /rudi-irul/f4d30e93)
+const pathSegments = window.location.pathname.split('/').filter(Boolean);
+const urlParams = new URLSearchParams(window.location.search);
+
+// pathSegments[0] = 'rudi-irul', pathSegments[1] = 'f4d30e93'
+const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token');
 
   let eventDateObj = null;
 
