@@ -107,11 +107,13 @@
     resultDiv.innerText = "Memproses Check-in...";
     resultDiv.classList.remove('hidden');
 
-    const { data, error } = await supabaseClient.rpc('process_check_in', { p_ticket_token: ticketToken });
+    const cleanToken = ticketToken.trim();
+
+    const { data, error } = await supabaseClient.rpc('process_check_in', { p_ticket_token: cleanToken });
 
     if (error) {
       resultDiv.className = "result-box error";
-      resultDiv.innerText = "Gangguan Jaringan / Server Error";
+      resultDiv.innerText = "Error: " + error.message;
       return;
     }
 
