@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,41 +11,43 @@
       darkMode: 'class',
     }
   </script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Lucide Icons Library -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .apple-glass { background: rgba(20, 20, 22, 0.75); backdrop-blur: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    .apple-glass-light { background: rgba(255, 255, 255, 0.85); backdrop-blur: blur(20px); -webkit-backdrop-filter: blur(20px); }
   </style>
 </head>
-<body class="flex justify-center min-h-screen bg-slate-950 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 antialiased selection:bg-lime-400 selection:text-slate-950 transition-colors duration-300">
+<body class="flex justify-center min-h-screen bg-[#000000] text-white antialiased selection:bg-white selection:text-black transition-colors duration-300">
 
-  <div class="w-full max-w-md bg-slate-50 dark:bg-[#0b101d] min-h-screen shadow-2xl flex flex-col relative pb-32 overflow-x-hidden border-x border-slate-200 dark:border-slate-800/80 transition-colors duration-300">
+  <div class="w-full max-w-md bg-[#000000] min-h-screen shadow-2xl flex flex-col relative pb-32 overflow-x-hidden border-x border-[#1c1c1e]">
 
     <!-- LOGIN SCREEN -->
     <div id="login-section" class="p-6 my-auto">
       <div class="text-center mb-8">
-        <div class="w-14 h-14 bg-lime-400 text-slate-950 rounded-3xl mx-auto flex items-center justify-center font-black text-xl shadow-xl shadow-lime-400/20">
-          <i data-lucide="sparkles" class="w-7 h-7"></i>
+        <div class="w-16 h-16 bg-[#1c1c1e] text-white rounded-3xl mx-auto flex items-center justify-center font-bold text-2xl shadow-2xl border border-[#3a3a3c]">
+          <i data-lucide="apple" class="w-8 h-8"></i>
         </div>
-        <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white mt-5 tracking-tight">Portal Klien</h1>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Masuk untuk melihat analitik kehadiran tamu secara real-time</p>
+        <h1 class="text-3xl font-bold tracking-tight mt-6">RayaRayu+</h1>
+        <p class="text-xs text-[#86868b] mt-1">Masuk untuk mengelola analitik dan data undangan eksklusif Anda.</p>
       </div>
 
-      <form id="login-form" onsubmit="login(event)" class="space-y-4 bg-white dark:bg-slate-900/80 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl backdrop-blur-md">
+      <form id="login-form" onsubmit="login(event)" class="space-y-3.5 bg-[#1c1c1e]/60 p-6 rounded-3xl border border-[#2c2c2e] backdrop-blur-xl">
         <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Email Klien</label>
-          <input type="email" id="email" required placeholder="nama@email.com" class="w-full text-xs p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-lime-400 outline-none transition" />
+          <label class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1.5">Email Klien</label>
+          <input type="email" id="email" required placeholder="nama@email.com" class="w-full text-xs p-4 rounded-2xl bg-[#2c2c2e]/50 border border-[#3a3a3c] text-white placeholder-[#545456] focus:ring-2 focus:ring-white outline-none transition" />
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
-          <input type="password" id="password" required placeholder="••••••••" class="w-full text-xs p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-lime-400 outline-none transition" />
+          <label class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1.5">Password</label>
+          <input type="password" id="password" required placeholder="••••••••" class="w-full text-xs p-4 rounded-2xl bg-[#2c2c2e]/50 border border-[#3a3a3c] text-white placeholder-[#545456] focus:ring-2 focus:ring-white outline-none transition" />
         </div>
-        <button type="submit" id="btn-login" class="w-full bg-lime-400 hover:bg-lime-300 text-slate-950 font-extrabold text-xs py-4 rounded-2xl shadow-lg shadow-lime-400/20 transition flex items-center justify-center gap-2">
-          <span>Masuk Dashboard</span>
+        <button type="submit" id="btn-login" class="w-full bg-white hover:bg-[#e0e0e0] text-black font-semibold text-xs py-4 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 mt-2">
+          <span>Masuk Portal</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
       </form>
@@ -54,96 +56,73 @@
     <!-- MAIN DASHBOARD CONTENT -->
     <div id="dashboard-section" class="hidden flex-1 flex flex-col justify-between">
 
-      <!-- HEADER TOP BAR -->
-      <div class="p-4 bg-white/80 dark:bg-[#0b101d]/80 flex items-center justify-between sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800/80 backdrop-blur-md transition-colors">
+      <!-- HEADER TOP BAR (Apple Style Header) -->
+      <div class="p-5 flex items-center justify-between sticky top-0 z-30 apple-glass border-b border-[#1c1c1e]">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 font-bold overflow-hidden border border-slate-300 dark:border-slate-700 shadow-sm">
-            <i data-lucide="user" class="w-5 h-5"></i>
+          <div class="w-10 h-10 rounded-full bg-[#1c1c1e] flex items-center justify-center text-white font-bold border border-[#3a3a3c]">
+            <i data-lucide="user" class="w-4 h-4"></i>
           </div>
           <div>
-            <h4 id="home-client-name" class="font-black text-xs text-slate-900 dark:text-white leading-tight">Memuat...</h4>
-            <span class="text-[10px] text-slate-500 font-mono font-bold" id="header-client-slug">...</span>
+            <h4 id="home-client-name" class="font-bold text-xs text-white leading-tight">Memuat...</h4>
+            <span class="text-[10px] text-[#86868b] font-mono" id="header-client-slug">...</span>
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <!-- Theme Switcher -->
-          <button onclick="toggleTheme()" id="btn-theme" title="Ubah Tema" class="w-10 h-10 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:text-lime-500 rounded-2xl flex items-center justify-center transition border border-slate-200 dark:border-slate-800 shadow-sm">
+          <button onclick="toggleTheme()" id="btn-theme" title="Ubah Tema" class="w-9 h-9 bg-[#1c1c1e] text-[#86868b] hover:text-white rounded-full flex items-center justify-center transition border border-[#3a3a3c]">
             <i data-lucide="sun" id="theme-icon" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
 
-      <!-- TAB 1: HOME (BENTO GRID RESTRUCTURING) -->
-      <div id="tab-home" class="p-4 space-y-3.5">
+      <!-- TAB 1: HOME (Apple Fitness Bento Style) -->
+      <div id="tab-home" class="p-5 space-y-4">
         
-        <!-- HERO PROGRESS CARD (Mirip Daily Intake Referensi) -->
-        <div class="bg-gradient-to-br from-lime-300 to-emerald-400 text-slate-950 p-5 rounded-3xl shadow-xl shadow-lime-400/10 relative overflow-hidden flex justify-between items-center">
-          <div class="space-y-1 relative z-10">
-            <div class="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-800">
-              <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
-              <span>Progres Kehadiran</span>
+        <!-- HERO CARD (Apple Fitness Plus Banner Style) -->
+        <div class="relative bg-gradient-to-br from-[#1c1c1e] to-[#2c2c2e] p-6 rounded-3xl border border-[#3a3a3c] overflow-hidden shadow-2xl">
+          <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="flex justify-between items-start relative z-10">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-[#86868b]">Ringkasan Live</span>
+              <h2 class="text-2xl font-bold tracking-tight text-white mt-1" id="hero-hadir-text">0 / 0 Pax</h2>
+              <p class="text-[11px] text-[#86868b] mt-0.5">Terkonfirmasi hadir dari kapasitas total</p>
             </div>
-            <h2 class="text-2xl font-black tracking-tight" id="hero-hadir-text">0 / 0 Pax</h2>
-            <p class="text-[11px] text-slate-800 font-medium">Terkonfirmasi hadir dari kuota total</p>
-          </div>
-          <!-- Circular / Badge Progress -->
-          <div class="w-20 h-20 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 flex flex-col items-center justify-center text-center shadow-inner relative z-10">
-            <span class="text-xl font-black text-slate-950" id="hero-pct-text">0%</span>
-            <span class="text-[9px] uppercase font-bold text-slate-800">Rate</span>
-          </div>
-        </div>
-
-        <!-- BENTO ROW 2: MINI CARDS (Statistik Kunci) -->
-        <div class="grid grid-cols-2 gap-3">
-          <!-- Card Hadir -->
-          <div class="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
-            <div class="flex justify-between items-center text-slate-400">
-              <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400">Tamu Hadir</span>
-              <div class="w-7 h-7 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-              </div>
-            </div>
-            <div class="mt-4">
-              <h3 class="text-2xl font-black text-slate-900 dark:text-white" id="stat-hadir-groups">0</h3>
-              <p class="text-[10px] text-slate-500 mt-0.5">Kelompok / Undangan</p>
+            <!-- Ring Progress Badge -->
+            <div class="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center text-center">
+              <span class="text-sm font-bold text-white" id="hero-pct-text">0%</span>
             </div>
           </div>
 
-          <!-- Card Checked-in Pintu -->
-          <div class="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
-            <div class="flex justify-between items-center text-slate-400">
-              <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400">Sudah Check-In</span>
-              <div class="w-7 h-7 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                <i data-lucide="qr-code" class="w-4 h-4"></i>
-              </div>
+          <div class="grid grid-cols-2 gap-3 mt-6 pt-4 border-t border-[#3a3a3c] text-xs relative z-10">
+            <div>
+              <p class="text-[9px] text-[#86868b] uppercase font-semibold">Tamu Hadir</p>
+              <p class="font-bold text-white text-sm mt-0.5" id="stat-hadir-groups">0 Grup</p>
             </div>
-            <div class="mt-4">
-              <h3 class="text-2xl font-black text-slate-900 dark:text-white" id="stat-checkedin-count">0</h3>
-              <p class="text-[10px] text-slate-500 mt-0.5">Tamu di Venue</p>
+            <div>
+              <p class="text-[9px] text-[#86868b] uppercase font-semibold">Check-In Venue</p>
+              <p class="font-bold text-white text-sm mt-0.5" id="stat-checkedin-count">0 Orang</p>
             </div>
           </div>
         </div>
 
-        <!-- BENTO ROW 3: VISUAL CATEGORY PROGRESS (Grafik Batang Statistik) -->
-        <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+        <!-- CATEGORY ANALYTICS (Apple Activity Rings Style Bars) -->
+        <div class="bg-[#1c1c1e]/60 p-5 rounded-3xl border border-[#2c2c2e] space-y-4 backdrop-blur-xl">
           <div class="flex justify-between items-center">
             <div>
-              <h3 class="text-xs font-extrabold text-slate-900 dark:text-white">Analitik Kategori Tamu</h3>
-              <p class="text-[10px] text-slate-500">Sebaran kelompok undangan terbanyak</p>
+              <h3 class="text-xs font-bold text-white">Analitik Kategori Tamu</h3>
+              <p class="text-[10px] text-[#86868b]">Sebaran kelompok undangan</p>
             </div>
-            <i data-lucide="bar-chart-3" class="w-4 h-4 text-slate-400"></i>
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#86868b]"></i>
           </div>
-          <!-- Container Grafik Kategori -->
           <div id="category-chart-container" class="space-y-3 pt-1">
             <!-- Diisi lewat JS -->
           </div>
         </div>
 
-        <!-- BENTO ROW 4: HISTORI RSVP TERBARU -->
-        <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+        <!-- RECENT RSVP ACTIVITY -->
+        <div class="bg-[#1c1c1e]/60 p-5 rounded-3xl border border-[#2c2c2e] space-y-3 backdrop-blur-xl">
           <div class="flex justify-between items-center">
-            <h3 class="text-xs font-extrabold text-slate-900 dark:text-white">Aktivitas RSVP Masuk</h3>
-            <button onclick="switchTab('tamu')" class="text-[11px] font-bold text-lime-600 dark:text-lime-400 hover:underline">Lihat Semua →</button>
+            <h3 class="text-xs font-bold text-white">Aktivitas RSVP Terbaru</h3>
+            <button onclick="switchTab('tamu')" class="text-[11px] font-semibold text-[#0a84ff] hover:underline">Semua →</button>
           </div>
           <div id="recent-rsvp-list" class="space-y-2.5">
             <!-- Diisi lewat JS -->
@@ -153,13 +132,13 @@
       </div>
 
       <!-- TAB 2: TAMU (GUEST LIST MANAGEMENT) -->
-      <div id="tab-tamu" class="p-4 space-y-4 hidden">
+      <div id="tab-tamu" class="p-5 space-y-4 hidden">
         <div class="flex justify-between items-center">
           <div>
-            <h2 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">Daftar Tamu</h2>
-            <p class="text-[10px] text-slate-500">Cari, edit status, atau buat undangan baru</p>
+            <h2 class="text-xl font-bold text-white tracking-tight">Daftar Tamu</h2>
+            <p class="text-[10px] text-[#86868b]">Kelola status kehadiran dan buat undangan</p>
           </div>
-          <button onclick="openAddGuestModal()" class="bg-lime-400 hover:bg-lime-300 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-2xl shadow-md transition flex items-center gap-1.5">
+          <button onclick="openAddGuestModal()" class="bg-white hover:bg-[#e0e0e0] text-black font-bold text-xs px-4 py-2.5 rounded-full shadow-md transition flex items-center gap-1.5">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>Tambah</span>
           </button>
@@ -167,17 +146,17 @@
 
         <!-- Search Bar -->
         <div class="relative">
-          <input type="text" id="search-input" onkeyup="filterGuests()" placeholder="Cari nama tamu..." class="w-full text-xs p-3.5 pl-10 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:ring-2 focus:ring-lime-400 shadow-sm" />
-          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400"></i>
+          <input type="text" id="search-input" onkeyup="filterGuests()" placeholder="Cari nama tamu..." class="w-full text-xs p-3.5 pl-10 rounded-2xl bg-[#1c1c1e] border border-[#3a3a3c] text-white placeholder-[#545456] outline-none focus:ring-2 focus:ring-white transition" />
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3.5 text-[#86868b]"></i>
         </div>
 
-        <!-- Status Filter Pills -->
-        <div class="flex gap-1.5 overflow-x-auto no-scrollbar text-xs font-bold pb-1" id="filter-pills">
-          <button onclick="setFilter('all', event)" class="pill-btn active px-4 py-2 rounded-xl bg-lime-400 text-slate-950 shadow-sm whitespace-nowrap">Semua</button>
-          <button onclick="setFilter('hadir', event)" class="pill-btn px-4 py-2 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap">Hadir</button>
-          <button onclick="setFilter('tidak_hadir', event)" class="pill-btn px-4 py-2 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap">Absen</button>
-          <button onclick="setFilter('pending', event)" class="pill-btn px-4 py-2 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap">Pending</button>
-          <button onclick="setFilter('checked_in', event)" class="pill-btn px-4 py-2 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap">Checked</button>
+        <!-- Status Filter Pills (Apple Segmented Control Style) -->
+        <div class="flex gap-1.5 overflow-x-auto no-scrollbar text-xs font-semibold pb-1" id="filter-pills">
+          <button onclick="setFilter('all', event)" class="pill-btn active px-4 py-2 rounded-full bg-white text-black shadow-sm whitespace-nowrap">Semua</button>
+          <button onclick="setFilter('hadir', event)" class="pill-btn px-4 py-2 rounded-full bg-[#1c1c1e] text-[#86868b] border border-[#3a3a3c] whitespace-nowrap">Hadir</button>
+          <button onclick="setFilter('tidak_hadir', event)" class="pill-btn px-4 py-2 rounded-full bg-[#1c1c1e] text-[#86868b] border border-[#3a3a3c] whitespace-nowrap">Absen</button>
+          <button onclick="setFilter('pending', event)" class="pill-btn px-4 py-2 rounded-full bg-[#1c1c1e] text-[#86868b] border border-[#3a3a3c] whitespace-nowrap">Pending</button>
+          <button onclick="setFilter('checked_in', event)" class="pill-btn px-4 py-2 rounded-full bg-[#1c1c1e] text-[#86868b] border border-[#3a3a3c] whitespace-nowrap">Checked</button>
         </div>
 
         <!-- Guest List Items -->
@@ -186,72 +165,72 @@
         </div>
 
         <!-- Quota Progress Bar -->
-        <div class="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-          <div class="flex justify-between text-xs font-bold">
-            <span class="text-slate-600 dark:text-slate-400">Kapasitas Database Tamu</span>
-            <span class="text-lime-600 dark:text-lime-400"><span id="quota-used">0</span> / <span id="quota-max">100</span></span>
+        <div class="bg-[#1c1c1e]/60 p-4 rounded-3xl border border-[#2c2c2e] space-y-2 backdrop-blur-xl">
+          <div class="flex justify-between text-xs font-semibold">
+            <span class="text-[#86868b]">Kapasitas Database Tamu</span>
+            <span class="text-white"><span id="quota-used">0</span> / <span id="quota-max">100</span></span>
           </div>
-          <div class="w-full bg-slate-100 dark:bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-200 dark:border-slate-800">
-            <div id="quota-bar" class="bg-lime-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+          <div class="w-full bg-[#2c2c2e] rounded-full h-2 overflow-hidden border border-[#3a3a3c]">
+            <div id="quota-bar" class="bg-white h-full rounded-full transition-all duration-500" style="width: 0%"></div>
           </div>
         </div>
       </div>
 
       <!-- TAB 3: ACARA (EVENT SETTINGS) -->
-      <div id="tab-acara" class="p-4 space-y-4 hidden">
+      <div id="tab-acara" class="p-5 space-y-4 hidden">
         <div>
-          <h2 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">Pengaturan Acara</h2>
-          <p class="text-[10px] text-slate-500">Ubah detail waktu dan lokasi resepsi</p>
+          <h2 class="text-xl font-bold text-white tracking-tight">Pengaturan Acara</h2>
+          <p class="text-[10px] text-[#86868b]">Ubah detail waktu dan lokasi resepsi</p>
         </div>
 
-        <form id="event-form" onsubmit="submitEditEvent(event)" class="space-y-3.5 bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <form id="event-form" onsubmit="submitEditEvent(event)" class="space-y-3.5 bg-[#1c1c1e]/60 p-5 rounded-3xl border border-[#2c2c2e] backdrop-blur-xl">
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Judul Acara / Header</label>
-            <input type="text" id="ev-title" required class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400" />
+            <label class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Judul Acara</label>
+            <input type="text" id="ev-title" required class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e]/50 border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white" />
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Tanggal & Waktu</label>
-            <input type="datetime-local" id="ev-date" required class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400" />
+            <label class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Tanggal & Waktu</label>
+            <input type="datetime-local" id="ev-date" required class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e]/50 border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white" />
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Lokasi Gedung / Tempat</label>
-            <textarea id="ev-location" rows="2" required class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400"></textarea>
+            <label class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Lokasi Gedung</label>
+            <textarea id="ev-location" rows="2" required class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e]/50 border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white"></textarea>
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Pesan Pembuka / Caption</label>
-            <textarea id="ev-caption" rows="3" required class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400"></textarea>
+            <label class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Pesan Pembuka / Caption</label>
+            <textarea id="ev-caption" rows="3" required class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e]/50 border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white"></textarea>
           </div>
 
-          <button type="submit" id="btn-save-event" class="w-full bg-lime-400 hover:bg-lime-300 text-slate-950 font-extrabold text-xs py-4 rounded-2xl shadow-md transition flex items-center justify-center gap-2 mt-2">
+          <button type="submit" id="btn-save-event" class="w-full bg-white hover:bg-[#e0e0e0] text-black font-bold text-xs py-4 rounded-2xl shadow-md transition flex items-center justify-center gap-2 mt-2">
             <i data-lucide="save" class="w-4 h-4"></i>
-            <span>Simpan Perubahan Acara</span>
+            <span>Simpan Perubahan</span>
           </button>
         </form>
       </div>
 
       <!-- TAB 4: AKUN (LOGOUT) -->
-      <div id="tab-akun" class="p-4 space-y-4 hidden">
+      <div id="tab-akun" class="p-5 space-y-4 hidden">
         <div>
-          <h2 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">Akun Klien</h2>
-          <p class="text-[10px] text-slate-500">Informasi sesi login saat ini</p>
+          <h2 class="text-xl font-bold text-white tracking-tight">Akun Klien</h2>
+          <p class="text-[10px] text-[#86868b]">Informasi sesi login saat ini</p>
         </div>
 
-        <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+        <div class="bg-[#1c1c1e]/60 p-5 rounded-3xl border border-[#2c2c2e] space-y-4 backdrop-blur-xl">
           <div class="flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-2xl bg-lime-400 text-slate-950 flex items-center justify-center font-black text-lg">
+            <div class="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center font-bold text-lg">
               <i data-lucide="user-check" class="w-6 h-6"></i>
             </div>
             <div>
-              <h4 id="account-name" class="font-black text-sm text-slate-900 dark:text-white">...</h4>
-              <p id="account-slug" class="text-xs text-lime-600 dark:text-lime-400 font-mono">...</p>
+              <h4 id="account-name" class="font-bold text-sm text-white">...</h4>
+              <p id="account-slug" class="text-xs text-[#86868b] font-mono">...</p>
             </div>
           </div>
 
-          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
-            <button onclick="logout()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 font-bold text-xs py-3.5 rounded-2xl transition flex items-center justify-center gap-2">
+          <div class="pt-3 border-t border-[#3a3a3c] space-y-2">
+            <button onclick="logout()" class="w-full bg-[#ff453a]/10 hover:bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/30 font-bold text-xs py-3.5 rounded-2xl transition flex items-center justify-center gap-2">
               <i data-lucide="log-out" class="w-4 h-4"></i>
               <span>Keluar dari Sesi</span>
             </button>
@@ -259,21 +238,21 @@
         </div>
       </div>
 
-      <!-- BOTTOM FLOATING DOCK NAV (Gaya iOS Modern Dock) -->
-      <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-sm bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl text-slate-900 dark:text-white p-2 rounded-3xl shadow-2xl flex items-center justify-around border border-slate-200/80 dark:border-slate-800 z-40 transition-colors">
-        <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex-1 py-2.5 rounded-2xl flex flex-col items-center gap-0.5 text-[10px] font-extrabold bg-lime-400 text-slate-950 shadow-md transition">
+      <!-- BOTTOM FLOATING DOCK NAV (Apple Fitness+ Style Bottom Bar) -->
+      <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-sm apple-glass text-white p-2 rounded-full shadow-2xl flex items-center justify-around border border-[#3a3a3c] z-40">
+        <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex-1 py-2.5 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold bg-white text-black shadow-md transition">
           <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
           <span>Home</span>
         </button>
-        <button onclick="switchTab('tamu')" id="nav-tamu" class="nav-btn flex-1 py-2.5 rounded-2xl flex flex-col items-center gap-0.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+        <button onclick="switchTab('tamu')" id="nav-tamu" class="nav-btn flex-1 py-2.5 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold text-[#86868b] hover:text-white transition">
           <i data-lucide="users" class="w-4 h-4"></i>
           <span>Tamu</span>
         </button>
-        <button onclick="switchTab('acara')" id="nav-acara" class="nav-btn flex-1 py-2.5 rounded-2xl flex flex-col items-center gap-0.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+        <button onclick="switchTab('acara')" id="nav-acara" class="nav-btn flex-1 py-2.5 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold text-[#86868b] hover:text-white transition">
           <i data-lucide="calendar-cog" class="w-4 h-4"></i>
           <span>Acara</span>
         </button>
-        <button onclick="switchTab('akun')" id="nav-akun" class="nav-btn flex-1 py-2.5 rounded-2xl flex flex-col items-center gap-0.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+        <button onclick="switchTab('akun')" id="nav-akun" class="nav-btn flex-1 py-2.5 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold text-[#86868b] hover:text-white transition">
           <i data-lucide="user-cog" class="w-4 h-4"></i>
           <span>Akun</span>
         </button>
@@ -282,20 +261,20 @@
     </div>
 
     <!-- MODAL TAMBAH TAMU -->
-    <div id="add-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-xs rounded-3xl p-6 space-y-4 shadow-2xl">
-        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Tambah Tamu Baru</h3>
-          <button onclick="closeAddGuestModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+    <div id="add-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-[#1c1c1e] border border-[#3a3a3c] w-full max-w-xs rounded-3xl p-6 space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center border-b border-[#2c2c2e] pb-3">
+          <h3 class="text-sm font-bold text-white">Tambah Tamu Baru</h3>
+          <button onclick="closeAddGuestModal()" class="text-[#86868b] hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
         <div class="space-y-3">
           <div>
-            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Nama Tamu / Kelompok</label>
-            <input type="text" id="modal-name" placeholder="Budi Santoso & Keluarga" class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400" />
+            <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Nama Tamu / Kelompok</label>
+            <input type="text" id="modal-name" placeholder="Budi Santoso & Keluarga" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white" />
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Kategori</label>
-            <select id="modal-cat" class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400">
+            <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Kategori</label>
+            <select id="modal-cat" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white">
               <option value="Keluarga">Keluarga</option>
               <option value="Teman">Teman</option>
               <option value="Tetangga">Tetangga</option>
@@ -304,36 +283,36 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Kuota Orang (Pax)</label>
-            <input type="number" id="modal-pax" min="1" value="2" class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400" />
+            <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Kuota Orang (Pax)</label>
+            <input type="number" id="modal-pax" min="1" value="2" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white" />
           </div>
         </div>
         <div class="flex gap-2 pt-2">
-          <button onclick="closeAddGuestModal()" class="flex-1 text-xs font-bold py-3.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl">Batal</button>
-          <button onclick="submitAddGuest()" id="btn-save-guest" class="flex-1 text-xs font-extrabold py-3.5 bg-lime-400 text-slate-950 rounded-2xl shadow-md">Simpan</button>
+          <button onclick="closeAddGuestModal()" class="flex-1 text-xs font-semibold py-3.5 text-[#86868b] hover:bg-[#2c2c2e] rounded-2xl">Batal</button>
+          <button onclick="submitAddGuest()" id="btn-save-guest" class="flex-1 text-xs font-bold py-3.5 bg-white text-black rounded-2xl shadow-md">Simpan</button>
         </div>
       </div>
     </div>
 
-    <!-- MODAL EDIT / UBAH STATUS TAMU -->
-    <div id="edit-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-xs rounded-3xl p-6 space-y-4 shadow-2xl">
-        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Edit Data Tamu</h3>
-          <button onclick="closeEditGuestModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+    <!-- MODAL EDIT TAMU -->
+    <div id="edit-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-[#1c1c1e] border border-[#3a3a3c] w-full max-w-xs rounded-3xl p-6 space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center border-b border-[#2c2c2e] pb-3">
+          <h3 class="text-sm font-bold text-white">Edit Data Tamu</h3>
+          <button onclick="closeEditGuestModal()" class="text-[#86868b] hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
         
         <input type="hidden" id="edit-guest-id" />
 
         <div class="space-y-3">
           <div>
-            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Nama Tamu / Kelompok</label>
-            <input type="text" id="edit-name" class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400" />
+            <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Nama Tamu</label>
+            <input type="text" id="edit-name" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white" />
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Kategori</label>
-            <select id="edit-cat" class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400">
+            <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Kategori</label>
+            <select id="edit-cat" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white">
               <option value="Keluarga">Keluarga</option>
               <option value="Teman">Teman</option>
               <option value="Tetangga">Tetangga</option>
@@ -343,31 +322,31 @@
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Kuota Orang (Pax)</label>
-            <input type="number" id="edit-pax" min="1" class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400" />
+            <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Kuota Pax</label>
+            <input type="number" id="edit-pax" min="1" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white" />
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Status RSVP</label>
-            <select id="edit-rsvp" class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400">
+            <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Status RSVP</label>
+            <select id="edit-rsvp" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white">
               <option value="pending">Pending</option>
               <option value="hadir">Hadir</option>
-              <option value="tidak_hadir">Absen (Tidak Hadir)</option>
+              <option value="tidak_hadir">Absen</option>
             </select>
           </div>
 
-          <div class="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800">
-            <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Status Check-in</span>
+          <div class="flex items-center justify-between p-3.5 bg-[#2c2c2e] rounded-2xl border border-[#3a3a3c]">
+            <span class="text-xs font-semibold text-white">Status Check-in</span>
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" id="edit-checkedin" class="sr-only peer">
-              <div class="w-9 h-5 bg-slate-300 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-lime-400"></div>
+              <div class="w-9 h-5 bg-[#3a3a3c] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-white"></div>
             </label>
           </div>
         </div>
 
         <div class="flex gap-2 pt-2">
-          <button onclick="closeEditGuestModal()" class="flex-1 text-xs font-bold py-3.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl">Batal</button>
-          <button onclick="submitEditGuest()" id="btn-update-guest" class="flex-1 text-xs font-extrabold py-3.5 bg-lime-400 text-slate-950 rounded-2xl shadow-md">Simpan</button>
+          <button onclick="closeEditGuestModal()" class="flex-1 text-xs font-semibold py-3.5 text-[#86868b] hover:bg-[#2c2c2e] rounded-2xl">Batal</button>
+          <button onclick="submitEditGuest()" id="btn-update-guest" class="flex-1 text-xs font-bold py-3.5 bg-white text-black rounded-2xl shadow-md">Simpan</button>
         </div>
       </div>
     </div>
@@ -375,7 +354,6 @@
   </div>
 
 <script>
-  // CREDENTIALS SUPABASE
   const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
 
@@ -384,13 +362,14 @@
   let globalData = null;
   let activeFilter = 'all';
 
-  // DARK MODE LOGIC
   function initTheme() {
     const savedTheme = localStorage.getItem('rr_theme') || 'dark';
     if (savedTheme === 'dark') {
       document.documentElement.classList.add('dark');
+      document.body.style.backgroundColor = "#000000";
     } else {
       document.documentElement.classList.remove('dark');
+      document.body.style.backgroundColor = "#f5f5f7";
     }
     updateThemeIcon();
   }
@@ -398,6 +377,7 @@
   function toggleTheme() {
     const isDark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('rr_theme', isDark ? 'dark' : 'light');
+    document.body.style.backgroundColor = isDark ? "#000000" : "#f5f5f7";
     updateThemeIcon();
   }
 
@@ -436,7 +416,7 @@
     if (error) {
       alert("Login gagal: " + error.message);
       btn.disabled = false;
-      btn.innerHTML = '<span>Masuk Dashboard</span><i data-lucide="arrow-right" class="w-4 h-4"></i>';
+      btn.innerHTML = '<span>Masuk Portal</span><i data-lucide="arrow-right" class="w-4 h-4"></i>';
       initIcons();
       return;
     }
@@ -465,7 +445,6 @@
   function renderUI() {
     const { client, event, stats, categories, guests } = globalData;
 
-    // Header & Welcome
     document.getElementById('header-client-slug').innerText = `@${client.slug}`;
     document.getElementById('home-client-name').innerText = client.name;
     document.getElementById('account-name').innerText = client.name;
@@ -473,7 +452,6 @@
 
     const eventDateFormatted = new Date(event.event_date);
 
-    // Isi Form Edit Acara
     document.getElementById('ev-title').value = event.title || '';
     const tzOffset = eventDateFormatted.getTimezoneOffset() * 60000;
     const localISOTime = (new Date(eventDateFormatted - tzOffset)).toISOString().slice(0, 16);
@@ -481,23 +459,17 @@
     document.getElementById('ev-location').value = event.location || '';
     document.getElementById('ev-caption').value = event.caption || '';
 
-    // Hero Progress (Mirip Daily Intake)
     document.getElementById('hero-hadir-text').innerText = `${stats.total_hadir} / ${stats.total_max_pax} Pax`;
     const hadirPct = stats.total_max_pax > 0 ? Math.round((stats.total_hadir / stats.total_max_pax) * 100) : 0;
     document.getElementById('hero-pct-text').innerText = `${hadirPct}%`;
 
-    // Stats Cards
-    document.getElementById('stat-hadir-groups').innerText = stats.count_hadir_groups;
-    document.getElementById('stat-checkedin-count').innerText = stats.total_checked_in;
+    document.getElementById('stat-hadir-groups').innerText = `${stats.count_hadir_groups} Grup`;
+    document.getElementById('stat-checkedin-count').innerText = `${stats.total_checked_in} Orang`;
 
-    // Render Grafik Batang Kategori (Statistic Style)
     renderCategoryChart(categories);
-
-    // Histori RSVP
     renderRecentRSVP(guests);
-
-    // Daftar Tamu & Progress Kuota
     renderGuestList();
+
     document.getElementById('quota-used').innerText = stats.total_guests;
     document.getElementById('quota-max').innerText = 100;
     const quotaPct = Math.min(100, Math.round((stats.total_guests / 100) * 100));
@@ -511,24 +483,23 @@
     container.innerHTML = '';
 
     if (!categories || categories.length === 0) {
-      container.innerHTML = '<p class="text-xs text-slate-500">Belum ada data kategori.</p>';
+      container.innerHTML = '<p class="text-xs text-[#86868b]">Belum ada data kategori.</p>';
       return;
     }
 
-    // Cari max total untuk persentase tinggi bar grafik
     const maxTotal = Math.max(...categories.map(c => c.total), 1);
 
     categories.forEach(c => {
       const pct = Math.round((c.total / maxTotal) * 100);
       const div = document.createElement('div');
-      div.className = "space-y-1";
+      div.className = "space-y-1.5";
       div.innerHTML = `
-        <div class="flex justify-between text-xs font-bold">
-          <span class="text-slate-700 dark:text-slate-300">${c.category}</span>
-          <span class="text-slate-500 font-mono">${c.hadir} Hadir / ${c.total} Total</span>
+        <div class="flex justify-between text-xs font-semibold">
+          <span class="text-white">${c.category}</span>
+          <span class="text-[#86868b] font-mono text-[11px]">${c.hadir} Hadir / ${c.total} Total</span>
         </div>
-        <div class="w-full bg-slate-100 dark:bg-slate-950 rounded-xl h-3 overflow-hidden p-0.5 border border-slate-200 dark:border-slate-800">
-          <div class="bg-lime-400 h-full rounded-lg transition-all duration-500" style="width: ${pct}%"></div>
+        <div class="w-full bg-[#2c2c2e] rounded-full h-2.5 overflow-hidden p-0.5 border border-[#3a3a3c]">
+          <div class="bg-white h-full rounded-full transition-all duration-500" style="width: ${pct}%"></div>
         </div>
       `;
       container.appendChild(div);
@@ -541,30 +512,30 @@
 
     const recent = guests.slice(0, 4);
     if (recent.length === 0) {
-      container.innerHTML = '<p class="text-xs text-slate-500">Belum ada data respon.</p>';
+      container.innerHTML = '<p class="text-xs text-[#86868b]">Belum ada data respon.</p>';
       return;
     }
 
     recent.forEach(g => {
-      let badge = '<span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>';
-      if (g.rsvp_status === 'hadir') badge = '<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>';
-      if (g.rsvp_status === 'tidak_hadir') badge = '<span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>';
+      let badge = '<span class="w-2 h-2 rounded-full bg-[#ff9f0a]"></span>';
+      if (g.rsvp_status === 'hadir') badge = '<span class="w-2 h-2 rounded-full bg-[#30d158]"></span>';
+      if (g.rsvp_status === 'tidak_hadir') badge = '<span class="w-2 h-2 rounded-full bg-[#ff453a]"></span>';
 
       const div = document.createElement('div');
-      div.className = "flex items-center justify-between text-xs p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80";
+      div.className = "flex items-center justify-between text-xs p-3 rounded-2xl bg-[#2c2c2e]/40 border border-[#3a3a3c]/60";
       div.innerHTML = `
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-xl bg-lime-400/10 text-lime-600 dark:text-lime-400 font-extrabold flex items-center justify-center text-xs border border-lime-400/20">
+          <div class="w-8 h-8 rounded-xl bg-[#2c2c2e] text-white font-bold flex items-center justify-center text-xs border border-[#3a3a3c]">
             ${g.group_name.substring(0,2).toUpperCase()}
           </div>
           <div>
-            <p class="font-bold text-slate-800 dark:text-slate-200">${g.group_name}</p>
-            <p class="text-[10px] text-slate-500">${g.category}</p>
+            <p class="font-bold text-white">${g.group_name}</p>
+            <p class="text-[10px] text-[#86868b]">${g.category}</p>
           </div>
         </div>
         <div class="flex items-center gap-2">
           ${badge}
-          <span class="text-[10px] text-slate-500 font-bold">Terbaru</span>
+          <span class="text-[10px] text-[#86868b]">Terbaru</span>
         </div>
       `;
       container.appendChild(div);
@@ -588,7 +559,7 @@
     if (activeFilter === 'checked_in') list = list.filter(g => g.is_checked_in);
 
     if (list.length === 0) {
-      container.innerHTML = '<p class="text-xs text-slate-500 text-center py-6">Tidak ada tamu yang sesuai.</p>';
+      container.innerHTML = '<p class="text-xs text-[#86868b] text-center py-6">Tidak ada tamu yang sesuai.</p>';
       return;
     }
 
@@ -600,39 +571,39 @@
         `Halo *${g.group_name}*,\n\nKami mengundang Anda untuk menghadiri acara *${globalData.event.title}*.\n\nSilakan konfirmasi kehadiran Anda melalui tautan resmi berikut:\n${link}`
       );
 
-      let badgeClass = "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20";
+      let badgeClass = "bg-[#ff9f0a]/10 text-[#ff9f0a] border border-[#ff9f0a]/20";
       let badgeText = "Pending";
-      if (g.rsvp_status === 'hadir') { badgeClass = "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"; badgeText = "Hadir"; }
-      if (g.rsvp_status === 'tidak_hadir') { badgeClass = "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"; badgeText = "Absen"; }
-      if (g.is_checked_in) { badgeClass = "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"; badgeText = "Checked"; }
+      if (g.rsvp_status === 'hadir') { badgeClass = "bg-[#30d158]/10 text-[#30d158] border border-[#30d158]/20"; badgeText = "Hadir"; }
+      if (g.rsvp_status === 'tidak_hadir') { badgeClass = "bg-[#ff453a]/10 text-[#ff453a] border border-[#ff453a]/20"; badgeText = "Absen"; }
+      if (g.is_checked_in) { badgeClass = "bg-[#0a84ff]/10 text-[#0a84ff] border border-[#0a84ff]/20"; badgeText = "Checked"; }
 
       const card = document.createElement('div');
-      card.className = "bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between shadow-sm transition-colors";
+      card.className = "bg-[#1c1c1e]/60 p-3.5 rounded-2xl border border-[#2c2c2e] flex items-center justify-between backdrop-blur-xl";
       card.innerHTML = `
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-extrabold flex items-center justify-center text-xs border border-slate-200 dark:border-slate-700">
+          <div class="w-9 h-9 rounded-xl bg-[#2c2c2e] text-white font-bold flex items-center justify-center text-xs border border-[#3a3a3c]">
             ${g.group_name.substring(0,2).toUpperCase()}
           </div>
           <div>
-            <h4 class="font-extrabold text-xs text-slate-900 dark:text-white">${g.group_name}</h4>
+            <h4 class="font-bold text-xs text-white">${g.group_name}</h4>
             <div class="flex items-center gap-2 mt-0.5">
-              <span class="text-[10px] text-slate-500">${g.category} • ${g.max_pax} Pax</span>
-              <span class="text-[9px] font-bold px-2 py-0.5 rounded-lg ${badgeClass}">${badgeText}</span>
+              <span class="text-[10px] text-[#86868b]">${g.category} • ${g.max_pax} Pax</span>
+              <span class="text-[9px] font-semibold px-2 py-0.5 rounded-md ${badgeClass}">${badgeText}</span>
             </div>
           </div>
         </div>
         <div class="flex items-center gap-1">
-          <button onclick="copyLink('${link}', this)" class="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Salin Tautan">
-            <i data-lucide="copy" class="w-4 h-4"></i>
+          <button onclick="copyLink('${link}', this)" class="p-2 text-[#86868b] hover:text-white rounded-xl hover:bg-[#2c2c2e] transition" title="Salin Tautan">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
           </button>
-          <a href="https://wa.me/?text=${waMessage}" target="_blank" class="p-2 text-slate-400 hover:text-emerald-500 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Kirim WA">
-            <i data-lucide="message-square" class="w-4 h-4"></i>
+          <a href="https://wa.me/?text=${waMessage}" target="_blank" class="p-2 text-[#86868b] hover:text-[#30d158] rounded-xl hover:bg-[#2c2c2e] transition" title="Kirim WA">
+            <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
           </a>
-          <button onclick="openEditGuestModal('${g.id}')" class="p-2 text-slate-400 hover:text-amber-500 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Edit Data/Status">
-            <i data-lucide="edit-3" class="w-4 h-4"></i>
+          <button onclick="openEditGuestModal('${g.id}')" class="p-2 text-[#86868b] hover:text-[#ff9f0a] rounded-xl hover:bg-[#2c2c2e] transition" title="Edit Data/Status">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
           </button>
-          <button onclick="deleteGuest('${g.id}', '${g.group_name}')" class="p-2 text-slate-400 hover:text-rose-500 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Hapus Tamu">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          <button onclick="deleteGuest('${g.id}', '${g.group_name}')" class="p-2 text-[#86868b] hover:text-[#ff453a] rounded-xl hover:bg-[#2c2c2e] transition" title="Hapus Tamu">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           </button>
         </div>
       `;
@@ -649,10 +620,10 @@
       const btn = document.getElementById(`nav-${t}`);
       if (t === tab) {
         el.classList.remove('hidden');
-        btn.className = "nav-btn flex-1 py-2.5 rounded-2xl flex flex-col items-center gap-0.5 text-[10px] font-extrabold bg-lime-400 text-slate-950 shadow-md transition";
+        btn.className = "nav-btn flex-1 py-2.5 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold bg-white text-black shadow-md transition";
       } else {
         el.classList.add('hidden');
-        btn.className = "nav-btn flex-1 py-2.5 rounded-2xl flex flex-col items-center gap-0.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
+        btn.className = "nav-btn flex-1 py-2.5 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold text-[#86868b] hover:text-white transition";
       }
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -661,9 +632,9 @@
   function setFilter(filter, e) {
     activeFilter = filter;
     document.querySelectorAll('#filter-pills button').forEach(btn => {
-      btn.className = "pill-btn px-4 py-2 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap text-xs font-bold";
+      btn.className = "pill-btn px-4 py-2 rounded-full bg-[#1c1c1e] text-[#86868b] border border-[#3a3a3c] whitespace-nowrap text-xs font-semibold";
     });
-    if (e) e.target.className = "pill-btn active px-4 py-2 rounded-xl bg-lime-400 text-slate-950 shadow-sm whitespace-nowrap text-xs font-bold";
+    if (e) e.target.className = "pill-btn active px-4 py-2 rounded-full bg-white text-black whitespace-nowrap text-xs font-semibold";
     renderGuestList();
   }
 
@@ -673,8 +644,8 @@
 
   function copyLink(url, btn) {
     navigator.clipboard.writeText(url).then(() => {
-      btn.classList.add('text-emerald-500');
-      setTimeout(() => btn.classList.remove('text-emerald-500'), 1500);
+      btn.classList.add('text-[#30d158]');
+      setTimeout(() => btn.classList.remove('text-[#30d158]'), 1500);
     });
   }
 
@@ -697,7 +668,7 @@
     });
 
     btn.disabled = false;
-    btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i><span>Simpan Perubahan Acara</span>';
+    btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i><span>Simpan Perubahan</span>';
     initIcons();
 
     if (error || !data || !data.success) {
