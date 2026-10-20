@@ -150,7 +150,7 @@
   </div>
 
 <script>
-  // CREDENTIALS SUPABASE
+ // CREDENTIALS SUPABASE
   const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
 
@@ -162,10 +162,12 @@
   async function startScanner() {
     html5QrcodeScanner = new Html5Qrcode("reader");
 
+    // Konfigurasi pemindaian full frame tanpa pembatasan qrbox kaku
     const config = { 
-      fps: 15, 
-      qrbox: { width: 220, height: 220 },
-      aspectRatio: 1.0 
+      fps: 20,
+      experimentalFeatures: {
+        useBarCodeDetectorIfSupported: true
+      }
     };
 
     try {
@@ -175,21 +177,23 @@
         onScanSuccess
       );
     } catch (err) {
-      console.warn("Gagal membuka kamera otomatis, mengalihkan ke opsi kamera:", err);
+      console.warn("Kamera tidak dapat diakses otomatis:", err);
     }
   }
 
   async function onScanSuccess(decodedText) {
     if (isProcessing) return;
-    isProcessing = true;
 
+    let extractedToken = String(decodedText).trim();
+    if (!extractedToken || extractedToken === "undefined") return;
+
+    isProcessing = true;
     if (navigator.vibrate) navigator.vibrate(100);
 
-    // Ambil token saja jika yang di-scan berupa URL (misal: https://rayarayu.vercel.app/rudi-irul/f4d30e93)
-    let extractedToken = decodedText.trim();
+    // Ambil token jika QR berupa URL penuh (misal: rayarayu.vercel.app/rudi-irul/f4d30e93)
     if (extractedToken.includes('/')) {
       const parts = extractedToken.split('/').filter(Boolean);
-      extractedToken = parts[parts.length - 1]; // Mengambil segmen paling akhir (f4d30e93)
+      extractedToken = parts[parts.length - 1];
     }
 
     await processCheckIn(extractedToken);
@@ -205,10 +209,8 @@
     }
 
     if (!data.success) {
-      // Tiket Sudah Digunakan / Tidak Valid
       showModal(false, "Peringatan Tiket", data.message, data.guest || null);
     } else {
-      // Check-in Berhasil
       showModal(true, "Berhasil Check-in!", "Tamu terverifikasi resmi.", data.guest);
     }
   }
@@ -241,7 +243,6 @@
       document.getElementById('modal-details').classList.add('hidden');
     }
 
-    // Slide up modal
     modal.classList.remove('translate-y-full', 'opacity-0');
   }
 
@@ -269,7 +270,7 @@
           advanced: [{ torch: !torchState }]
         });
       } else {
-        alert("Lampu kilat/torch tidak didukung pada perangkat ini.");
+        alert("Senter tidak didukung pada perangkat ini.");
       }
     } catch (e) {
       alert("Fitur senter tidak aktif.");
