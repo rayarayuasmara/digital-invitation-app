@@ -302,7 +302,7 @@
     isProcessing = true;
     if (navigator.vibrate) navigator.vibrate(100);
 
-    // Ambil segmen token dari URL jika yang di-scan berupa link utuh
+    // Ambil token secara bersih jika yang di-scan berupa URL
     let extractedToken = rawText;
     if (rawText.includes('?token=')) {
       extractedToken = rawText.split('?token=')[1].split('&')[0];
@@ -312,13 +312,6 @@
     }
 
     await processCheckIn(extractedToken);
-  }
-
-  async function logout() {
-    if (confirm("Apakah Anda yakin ingin keluar dari mode scanner?")) {
-      await supabaseClient.auth.signOut();
-      window.location.href = "/"; // Diarahkan ke Landing Page Utama (bukan form login dashboard)
-    }
   }
 
   async function processCheckIn(ticketToken) {
@@ -396,6 +389,12 @@
     }
   }
 
+  async function logout() {
+    if (confirm("Apakah Anda yakin ingin keluar dari mode scanner?")) {
+      await supabaseClient.auth.signOut();
+      window.location.href = "/";
+    }
+  }
 
   window.addEventListener('DOMContentLoaded', startScanner);
 </script>
