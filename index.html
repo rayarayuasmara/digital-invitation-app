@@ -3,72 +3,197 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Undangan Digital</title>
+  <title>Undangan Pernikahan</title>
+  <!-- Tailwind CSS & Font -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- Supabase & QRCode Lib -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
   <style>
-    body { font-family: sans-serif; background: #f4f4f9; padding: 20px; display: flex; justify-content: center; }
-    .card { background: #fff; padding: 24px; border-radius: 12px; max-width: 420px; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .btn { background: #2563eb; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 12px; font-weight: bold; }
-    .btn:disabled { background: #93c5fd; }
-    .hidden { display: none; }
-    .qr-container { display: flex; justify-content: center; margin-top: 16px; }
-    input, select { width: 100%; padding: 8px; margin-top: 6px; margin-bottom: 12px; box-sizing: border-box; }
-    .status-badge { padding: 6px 12px; border-radius: 20px; display: inline-block; font-size: 0.85em; font-weight: bold; }
+    body { font-family: 'Poppins', sans-serif; }
+    .font-serif-custom { font-family: 'Playfair Display', serif; }
   </style>
 </head>
-<body>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex justify-center">
 
-<div class="card">
-  <div id="loading">Memuat data undangan...</div>
-  
-  <div id="content" class="hidden">
-    <h2 id="event-title"></h2>
-    <p id="event-caption" style="color: #555;"></p>
-    <hr />
-    <p><strong>Kepada Yth:</strong> <span id="guest-name"></span></p>
-    <p><strong>Kuota Tamu:</strong> Maksimal <span id="max-pax"></span> orang</p>
+  <div class="w-full max-w-md bg-white min-h-screen shadow-xl flex flex-col relative overflow-x-hidden">
 
-    <form id="rsvp-form">
-      <label>Konfirmasi Kehadiran:</label>
-      <select id="status-select" onchange="togglePaxInput()">
-        <option value="">-- Pilih Status --</option>
-        <option value="hadir">Hadir</option>
-        <option value="tidak_hadir">Tidak Hadir</option>
-      </select>
+    <!-- Loading Screen -->
+    <div id="loading" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
+      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-600"></div>
+      <p class="mt-3 text-slate-500 text-sm">Memuat Undangan...</p>
+    </div>
 
-      <div id="pax-group" class="hidden">
-        <label>Jumlah Orang Hadir:</label>
-        <input type="number" id="pax-input" min="1" />
-      </div>
+    <!-- Error Screen -->
+    <div id="error-msg" class="hidden p-6 text-center text-red-600 font-bold my-auto"></div>
 
-      <button type="submit" id="btn-submit" class="btn">Kirim RSVP</button>
-    </form>
+    <!-- Content Undangan -->
+    <div id="main-content" class="hidden">
 
-    <div id="ticket-section" class="hidden" style="margin-top: 24px; text-align: center; border-top: 1px dashed #ccc; padding-top: 16px;">
-      <h3>Tiket Masuk Anda</h3>
-      <p style="font-size: 0.85em; color: #666;">Tunjukkan QR Code ini kepada petugas di lokasi acara.</p>
-      <div class="qr-container" id="qrcode"></div>
+      <!-- 1. SAMPUL DEPAN (COVER) -->
+      <section id="cover" class="fixed inset-0 z-40 bg-slate-900 text-white flex flex-col justify-between p-8 text-center bg-cover bg-center transition-transform duration-700 max-w-md mx-auto" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80');">
+        <div class="mt-8">
+          <p class="text-xs uppercase tracking-widest text-amber-300 font-medium">The Wedding Of</p>
+          <h1 id="cover-title" class="font-serif-custom text-3xl font-bold mt-2 text-amber-100"></h1>
+        </div>
+
+        <div class="my-auto bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20">
+          <p class="text-xs text-slate-200">Kepada Yth. Bapak/Ibu/Saudara/i:</p>
+          <h2 id="cover-guest-name" class="text-lg font-semibold text-amber-300 mt-1"></h2>
+          <p class="text-xs text-slate-300 mt-1">Kuota: <span id="cover-max-pax"></span> Orang</p>
+          
+          <button onclick="openInvitation()" class="mt-5 w-full bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold py-3 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+            ✉️ Buka Undangan
+          </button>
+        </div>
+
+        <p class="text-[10px] text-slate-400 mb-4">Mohon maaf apabila ada kesalahan penulisan nama/gelar</p>
+      </section>
+
+      <!-- ISI UNDANGAN -->
+      <main class="pb-12">
+
+        <!-- Header Photo Banner -->
+        <div class="h-64 bg-cover bg-center relative flex items-end p-6 text-white" style="background-image: linear-gradient(to top, rgba(15,23,42,0.9), transparent), url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80');">
+          <div>
+            <span class="text-xs uppercase tracking-widest text-amber-400 font-semibold">Walimatul 'Ursy</span>
+            <h1 id="header-title" class="font-serif-custom text-2xl font-bold mt-1 text-amber-100"></h1>
+          </div>
+        </div>
+
+        <!-- 2. SALAM PEMBUKA -->
+        <section class="p-6 text-center border-b border-slate-100">
+          <p class="font-serif-custom text-amber-700 text-lg italic">Bismillahirrahmanirrahim</p>
+          <p class="text-xs text-slate-600 leading-relaxed mt-3" id="event-caption"></p>
+        </section>
+
+        <!-- 3. INFORMASI MEMPELAI / PENYELENGGARA -->
+        <section class="p-6 text-center bg-amber-50/50">
+          <h2 class="font-serif-custom text-xl font-bold text-slate-800">Mempelai</h2>
+          <div class="mt-4 space-y-4 text-sm">
+            <div>
+              <h3 id="bride-groom-names" class="font-serif-custom text-2xl font-bold text-amber-700"></h3>
+              <p class="text-xs text-slate-500 mt-1">Putra & Putri Tercinta dari Keluarga Besar Kami</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. DETAIL ACARA & MAPS -->
+        <section class="p-6 text-center border-b border-slate-100">
+          <h2 class="font-serif-custom text-xl font-bold text-slate-800 mb-4">Waktu & Lokasi</h2>
+          
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+            <p id="event-date" class="font-semibold text-slate-800 text-sm"></p>
+            <p id="event-location" class="text-xs text-slate-600 mt-2 leading-relaxed"></p>
+
+            <!-- Google Maps Button -->
+            <a id="maps-btn" href="#" target="_blank" class="mt-4 inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold py-2.5 px-4 rounded-lg transition">
+              📍 Buka di Google Maps
+            </a>
+          </div>
+
+          <!-- Countdown Timer -->
+          <div class="mt-6">
+            <p class="text-xs text-slate-500 mb-2">Hitung Mundur Acara:</p>
+            <div id="countdown" class="flex justify-center gap-2 text-center text-xs font-bold">
+              <div class="bg-amber-100 text-amber-800 p-2.5 rounded-lg w-16"><span id="cd-days" class="text-base block">0</span>Hari</div>
+              <div class="bg-amber-100 text-amber-800 p-2.5 rounded-lg w-16"><span id="cd-hours" class="text-base block">0</span>Jam</div>
+              <div class="bg-amber-100 text-amber-800 p-2.5 rounded-lg w-16"><span id="cd-mins" class="text-base block">0</span>Menit</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. FITUR INTERAKTIF: RSVP & TIKET QR -->
+        <section class="p-6 bg-slate-50">
+          <h2 class="font-serif-custom text-xl font-bold text-center text-slate-800 mb-4">Konfirmasi Kehadiran</h2>
+
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+            <p class="text-xs text-slate-600">Tamu: <strong id="rsvp-guest-name" class="text-slate-800"></strong></p>
+            <p class="text-xs text-slate-500 mb-4">Maksimal kuota: <span id="rsvp-max-pax"></span> Orang</p>
+
+            <form id="rsvp-form" class="space-y-3">
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">Status Kehadiran</label>
+                <select id="status-select" onchange="togglePaxInput()" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-amber-500 outline-none">
+                  <option value="">-- Pilih Status --</option>
+                  <option value="hadir">Hadir</option>
+                  <option value="tidak_hadir">Tidak Hadir</option>
+                </select>
+              </div>
+
+              <div id="pax-group" class="hidden">
+                <label class="block text-xs font-medium text-slate-700 mb-1">Jumlah Orang Hadir</label>
+                <input type="number" id="pax-input" min="1" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-amber-500 outline-none" />
+              </div>
+
+              <button type="submit" id="btn-submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-3 rounded-lg shadow transition">
+                Kirim RSVP
+              </button>
+            </form>
+
+            <!-- TIKET QR -->
+            <div id="ticket-section" class="hidden mt-6 pt-6 border-t border-dashed border-slate-300 text-center">
+              <h3 class="font-bold text-sm text-slate-800">Tiket Masuk Anda</h3>
+              <p class="text-[11px] text-slate-500 mt-1">Tunjukkan QR Code ini kepada petugas check-in di lokasi acara.</p>
+              <div class="flex justify-center my-4" id="qrcode"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. DIGITAL GIFT / AMPLOP DIGITAL -->
+        <section class="p-6 text-center border-t border-slate-100">
+          <h2 class="font-serif-custom text-xl font-bold text-slate-800 mb-2">Amplop Digital</h2>
+          <p class="text-xs text-slate-500 mb-4">Doa restu Anda adalah karunia terindah, namun jika ingin memberikan tanda kasih:</p>
+
+          <div class="bg-amber-50 p-4 rounded-xl border border-amber-200/60 text-left text-xs space-y-2">
+            <p class="font-bold text-slate-700">BCA: <span class="font-normal text-slate-900 select-all">1234567890</span></p>
+            <p class="text-slate-500">a.n. Rudi & Irul</p>
+          </div>
+        </section>
+
+        <!-- 7. BUKU TAMU & UCAPAN DOA -->
+        <section class="p-6 bg-slate-50 border-t border-slate-100">
+          <h2 class="font-serif-custom text-xl font-bold text-center text-slate-800 mb-4">Ucapan & Doa</h2>
+
+          <form id="wish-form" class="space-y-3 mb-6">
+            <textarea id="wish-message" rows="3" placeholder="Tuliskan ucapan & doa restu Anda..." class="w-full text-xs p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-amber-500 outline-none" required></textarea>
+            <button type="submit" id="btn-wish" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2.5 rounded-lg shadow transition">
+              Kirim Ucapan
+            </button>
+          </form>
+
+          <!-- Daftar Ucapan -->
+          <div id="wishes-container" class="space-y-3 max-h-60 overflow-y-auto">
+            <!-- Items injected by JS -->
+          </div>
+        </section>
+
+        <!-- 8. PENUTUP -->
+        <section class="p-8 text-center bg-slate-900 text-white">
+          <p class="text-xs text-slate-400">Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir.</p>
+          <p class="font-serif-custom text-base text-amber-300 mt-4">Terima Kasih</p>
+          <p class="text-xs text-slate-400 mt-1" id="footer-client-name"></p>
+        </section>
+
+      </main>
     </div>
   </div>
 
-  <div id="error-msg" class="hidden" style="color: red; font-weight: bold;"></div>
-</div>
-
 <script>
-  // GANTI DENGAN CREDENTIALS SUPABASE KAMU
+  // CREDENTIALS SUPABASE
   const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
 
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // Membaca token dari path (/rudi-irul/f4d30e93) atau dari query parameter (?token=f4d30e93)
-const pathSegments = window.location.pathname.split('/').filter(Boolean);
-const urlParams = new URLSearchParams(window.location.search);
+  // Parse token dari URL path atau query parameter
+  const pathSegments = window.location.pathname.split('/').filter(Boolean);
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token');
 
-const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token');
-
-  let maxPaxAllowed = 1;
+  let eventDateObj = null;
 
   async function init() {
     if (!token) {
@@ -84,15 +209,29 @@ const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token'
     }
 
     const guest = data[0];
-    maxPaxAllowed = guest.max_pax;
+    eventDateObj = new Date(guest.event_date);
 
-    document.getElementById('event-title').innerText = guest.event_title;
+    // Cover
+    document.getElementById('cover-title').innerText = guest.event_title;
+    document.getElementById('cover-guest-name').innerText = guest.group_name;
+    document.getElementById('cover-max-pax').innerText = guest.max_pax;
+
+    // Header & Content
+    document.getElementById('header-title').innerText = guest.event_title;
+    document.getElementById('bride-groom-names').innerText = guest.client_name;
     document.getElementById('event-caption').innerText = guest.event_caption;
-    document.getElementById('guest-name').innerText = guest.group_name;
-    document.getElementById('max-pax').innerText = guest.max_pax;
+    document.getElementById('event-date').innerText = eventDateObj.toLocaleString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    document.getElementById('event-location').innerText = guest.event_location;
+    document.getElementById('footer-client-name').innerText = guest.client_name;
+
+    // Maps
+    document.getElementById('maps-btn').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(guest.event_location)}`;
+
+    // RSVP Form Details
+    document.getElementById('rsvp-guest-name').innerText = guest.group_name;
+    document.getElementById('rsvp-max-pax').innerText = guest.max_pax;
     document.getElementById('pax-input').max = guest.max_pax;
 
-    // Jika sudah pernah RSVP
     if (guest.rsvp_status) {
       document.getElementById('status-select').value = guest.rsvp_status;
       togglePaxInput();
@@ -102,7 +241,6 @@ const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token'
       }
     }
 
-    // Jika sudah check-in, kunci form
     if (guest.is_checked_in) {
       document.getElementById('status-select').disabled = true;
       document.getElementById('pax-input').disabled = true;
@@ -110,8 +248,15 @@ const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token'
       document.getElementById('btn-submit').innerText = "Sudah Check-in";
     }
 
+    startCountdown();
+    loadWishes();
+
     document.getElementById('loading').classList.add('hidden');
-    document.getElementById('content').classList.remove('hidden');
+    document.getElementById('main-content').classList.remove('hidden');
+  }
+
+  function openInvitation() {
+    document.getElementById('cover').classList.add('-translate-y-full');
   }
 
   function togglePaxInput() {
@@ -130,10 +275,7 @@ const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token'
     const status = document.getElementById('status-select').value;
     const pax = status === 'hadir' ? parseInt(document.getElementById('pax-input').value) : 0;
 
-    if (!status) {
-      alert("Silakan pilih status kehadiran.");
-      return;
-    }
+    if (!status) return alert("Pilih status kehadiran.");
 
     const btn = document.getElementById('btn-submit');
     btn.disabled = true;
@@ -156,15 +298,60 @@ const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token'
     location.reload();
   });
 
-  function renderQRCode(ticketToken) {
-    const ticketSection = document.getElementById('ticket-section');
-    ticketSection.classList.remove('hidden');
-    document.getElementById('qrcode').innerHTML = '';
-    new QRCode(document.getElementById("qrcode"), {
-      text: ticketToken,
-      width: 160,
-      height: 160
+  document.getElementById('wish-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('wish-message').value.trim();
+    if (!msg) return;
+
+    const btn = document.getElementById('btn-wish');
+    btn.disabled = true;
+
+    const { data, error } = await supabaseClient.rpc('send_wish', { p_token: token, p_message: msg });
+    if (!error && data.success) {
+      document.getElementById('wish-message').value = '';
+      loadWishes();
+    } else {
+      alert("Gagal mengirim ucapan.");
+    }
+    btn.disabled = false;
+  });
+
+  async function loadWishes() {
+    const { data } = await supabaseClient.rpc('get_event_wishes', { p_token: token });
+    const container = document.getElementById('wishes-container');
+    container.innerHTML = '';
+
+    if (!data || data.length === 0) {
+      container.innerHTML = '<p class="text-xs text-slate-400 text-center">Belum ada ucapan.</p>';
+      return;
+    }
+
+    data.forEach(w => {
+      const card = document.createElement('div');
+      card.className = "bg-white p-3 rounded-lg border border-slate-200 text-xs";
+      card.innerHTML = `<p class="font-bold text-slate-800">${w.guest_name}</p><p class="text-slate-600 mt-1">${w.message}</p>`;
+      container.appendChild(card);
     });
+  }
+
+  function startCountdown() {
+    setInterval(() => {
+      if (!eventDateObj) return;
+      const now = new Date().getTime();
+      const distance = eventDateObj.getTime() - now;
+
+      if (distance < 0) return;
+
+      document.getElementById('cd-days').innerText = Math.floor(distance / (1000 * 60 * 60 * 24));
+      document.getElementById('cd-hours').innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      document.getElementById('cd-mins').innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    }, 1000);
+  }
+
+  function renderQRCode(ticketToken) {
+    document.getElementById('ticket-section').classList.remove('hidden');
+    document.getElementById('qrcode').innerHTML = '';
+    new QRCode(document.getElementById("qrcode"), { text: ticketToken, width: 150, height: 150 });
   }
 
   function showError(msg) {
