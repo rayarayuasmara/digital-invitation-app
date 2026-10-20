@@ -2,141 +2,275 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Scanner Petugas Check-in</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Scanner Check-in - RayaRayu</title>
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Supabase & HTML5 QR Scanner Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
   <style>
-    body { font-family: sans-serif; background: #0f172a; color: #fff; padding: 20px; display: flex; justify-content: center; }
-    .card { background: #1e293b; padding: 20px; border-radius: 12px; max-width: 420px; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-    .btn { background: #2563eb; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 8px; }
-    .hidden { display: none; }
-    #reader { width: 100%; border-radius: 8px; overflow: hidden; margin-top: 12px; }
-    .result-box { margin-top: 16px; padding: 16px; border-radius: 8px; text-align: center; font-weight: bold; word-break: break-word; }
-    .success { background: #166534; color: #bbf7d0; }
-    .error { background: #991b1b; color: #fecaca; }
-    .warning { background: #854d0e; color: #fef08a; }
-    input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; margin-top: 8px; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    
+    /* Animasi Garis Laser Scan */
+    @keyframes scan-laser {
+      0% { top: 5%; opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { top: 90%; opacity: 0.3; }
+    }
+    .animate-laser {
+      animation: scan-laser 2s infinite ease-in-out;
+    }
+
+    /* Custom Reader Hide Default UI */
+    #reader video {
+      object-fit: cover !important;
+      border-radius: 1.5rem;
+    }
+    #reader__scan_region {
+      background: transparent !important;
+    }
+    #reader__dashboard {
+      display: none !important;
+    }
   </style>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 antialiased flex justify-center min-h-screen">
 
-<div class="card">
-  <h2>Check-in Petugas</h2>
+  <div class="w-full max-w-md bg-slate-900 min-h-screen flex flex-col justify-between relative overflow-hidden shadow-2xl border-x border-slate-800">
 
-  <!-- Form Login -->
-  <div id="login-section">
-    <p style="color: #94a3b8; font-size: 0.9em;">Silakan login dengan akun petugas.</p>
-    <input type="email" id="email" placeholder="Email Petugas" />
-    <input type="password" id="password" placeholder="Password" />
-    <button class="btn" onclick="login()">Login</button>
-  </div>
+    <!-- TOP HEADER BAR -->
+    <header class="p-5 flex items-center justify-between z-20 backdrop-blur-md bg-slate-900/80 sticky top-0 border-b border-slate-800/60">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-center text-emerald-400 font-extrabold text-sm shadow-inner">
+          ❖
+        </div>
+        <div>
+          <h1 class="text-sm font-extrabold text-white tracking-tight">RayaRayu Scanner</h1>
+          <p class="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Mode Operator Door
+          </p>
+        </div>
+      </div>
+      <button onclick="toggleTorch()" id="btn-torch" class="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl flex items-center justify-center text-sm border border-slate-700 transition">
+        🔦
+      </button>
+    </header>
 
-  <!-- Area Scanner -->
-  <div id="scanner-section" class="hidden">
-    <p>Logged in: <span id="user-email" style="color: #38bdf8;"></span> | <a href="#" onclick="logout()" style="color: #ef4444;">Logout</a></p>
-    
-    <div id="reader"></div>
+    <!-- MAIN CAMERA / SCANNER AREA -->
+    <main class="flex-1 flex flex-col items-center justify-center p-6 relative">
+      
+      <!-- Instructional Tag -->
+      <div class="text-center space-y-1 mb-6 z-10">
+        <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider">
+          Arahkan Kamera ke QR Tiket
+        </span>
+      </div>
 
-    <div style="margin-top: 20px; border-top: 1px solid #334155; padding-top: 12px;">
-      <label style="font-size: 0.85em; color: #94a3b8;">Cari Manual / Masukkan Token Tiket:</label>
-      <input type="text" id="manual-token" placeholder="Paste Token Tiket..." />
-      <button class="btn" onclick="submitManual()">Check-in Manual</button>
+      <!-- CAMERA CONTAINER & SCANNER WINDOW -->
+      <div class="relative w-72 h-72 rounded-3xl overflow-hidden border-2 border-slate-700 bg-slate-950 shadow-2xl flex items-center justify-center">
+        
+        <!-- Video Feed Container -->
+        <div id="reader" class="w-full h-full"></div>
+
+        <!-- Corner Viewfinder Corners (iOS Style) -->
+        <div class="absolute inset-0 pointer-events-none p-4 flex flex-col justify-between z-10">
+          <div class="flex justify-between">
+            <div class="w-8 h-8 border-t-4 border-l-4 border-emerald-400 rounded-tl-2xl"></div>
+            <div class="w-8 h-8 border-t-4 border-r-4 border-emerald-400 rounded-tr-2xl"></div>
+          </div>
+          <div class="flex justify-between">
+            <div class="w-8 h-8 border-b-4 border-l-4 border-emerald-400 rounded-bl-2xl"></div>
+            <div class="w-8 h-8 border-b-4 border-r-4 border-emerald-400 rounded-br-2xl"></div>
+          </div>
+        </div>
+
+        <!-- Laser Line Animation -->
+        <div id="laser-line" class="absolute left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_15px_#34d399] z-10 animate-laser"></div>
+
+      </div>
+
+      <!-- Quick Manual Input Option -->
+      <div class="mt-8 text-center z-10">
+        <button onclick="promptManualCode()" class="text-xs font-bold text-slate-400 hover:text-emerald-400 transition underline underline-offset-4">
+          Atau masukkan kode tiket manual
+        </button>
+      </div>
+
+    </main>
+
+    <!-- FOOTER STATUS BAR -->
+    <footer class="p-5 text-center text-xs text-slate-500 border-t border-slate-800/60 bg-slate-900/50 backdrop-blur-md">
+      <p>© 2026 RayaRayu Check-in System</p>
+    </footer>
+
+    <!-- RESULT MODAL SLIDE-UP -->
+    <div id="result-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-4 transition-all duration-300 transform translate-y-full opacity-0">
+      
+      <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-2xl relative overflow-hidden">
+        
+        <!-- Decorative Glow Top -->
+        <div id="modal-glow" class="absolute -top-12 left-1/2 -translate-x-1/2 w-40 h-20 bg-emerald-500/20 blur-2xl rounded-full pointer-events-none"></div>
+
+        <!-- Status Icon Badge -->
+        <div class="text-center">
+          <div id="modal-icon-bg" class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl mb-3 border">
+            <span id="modal-icon">✅</span>
+          </div>
+          <h3 id="modal-title" class="text-lg font-extrabold text-white tracking-tight">Berhasil Check-in</h3>
+          <p id="modal-subtitle" class="text-xs text-slate-400 mt-1">Tamu siap dipersilakan masuk</p>
+        </div>
+
+        <!-- Detail Card -->
+        <div id="modal-details" class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 space-y-2 text-xs">
+          <div class="flex justify-between items-center border-b border-slate-800/60 pb-2">
+            <span class="text-slate-400">Nama Tamu</span>
+            <strong id="res-guest-name" class="text-white text-sm font-bold">Budi Santoso</strong>
+          </div>
+          <div class="flex justify-between items-center border-b border-slate-800/60 pb-2">
+            <span class="text-slate-400">Kategori</span>
+            <span id="res-category" class="bg-slate-800 text-slate-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold">Keluarga</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400">Jumlah Pax</span>
+            <span id="res-pax" class="text-emerald-400 font-extrabold text-sm">2 Orang</span>
+          </div>
+        </div>
+
+        <!-- Close / Continue Button -->
+        <button onclick="resumeScanner()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs py-3.5 rounded-2xl shadow-lg shadow-emerald-500/20 transition">
+          Pindai Tiket Berikutnya ➔
+        </button>
+
+      </div>
     </div>
 
-    <div id="result" class="result-box hidden"></div>
   </div>
-</div>
 
 <script>
-  // GANTI DENGAN CREDENTIALS SUPABASE KAMU
+  // CREDENTIALS SUPABASE
   const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
 
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
   let html5QrcodeScanner = null;
+  let isProcessing = false;
 
-  async function checkSession() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) {
-      showScanner(session.user.email);
-    }
-  }
+  async function startScanner() {
+    html5QrcodeScanner = new Html5Qrcode("reader");
 
-  async function login() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    const config = { 
+      fps: 15, 
+      qrbox: { width: 220, height: 220 },
+      aspectRatio: 1.0 
+    };
 
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error) {
-      alert("Login gagal: " + error.message);
-      return;
-    }
-    showScanner(data.user.email);
-  }
-
-  async function logout() {
-    await supabaseClient.auth.signOut();
-    location.reload();
-  }
-
-  function showScanner(email) {
-    document.getElementById('login-section').classList.add('hidden');
-    document.getElementById('scanner-section').classList.remove('hidden');
-    document.getElementById('user-email').innerText = email;
-
-    if (!html5QrcodeScanner) {
-      html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } });
-      html5QrcodeScanner.render(onScanSuccess);
+    try {
+      await html5QrcodeScanner.start(
+        { facingMode: "environment" }, 
+        config, 
+        onScanSuccess
+      );
+    } catch (err) {
+      console.warn("Gagal membuka kamera otomatis, mengalihkan ke opsi kamera:", err);
     }
   }
 
   async function onScanSuccess(decodedText) {
-    if (html5QrcodeScanner) {
-      html5QrcodeScanner.pause();
-    }
-    await processCheckIn(decodedText);
-    setTimeout(() => { 
-      if (html5QrcodeScanner) html5QrcodeScanner.resume(); 
-    }, 3000);
-  }
+    if (isProcessing) return;
+    isProcessing = true;
 
-  async function submitManual() {
-    const token = document.getElementById('manual-token').value.trim();
-    if (!token) return alert("Masukkan token tiket terlebih dahulu.");
-    await processCheckIn(token);
+    // Trigger haptic feedback (getar di HP)
+    if (navigator.vibrate) navigator.vibrate(100);
+
+    // Kirim permintaan Check-in ke Supabase
+    await processCheckIn(decodedText.trim());
   }
 
   async function processCheckIn(ticketToken) {
-    const resultDiv = document.getElementById('result');
-    resultDiv.className = "result-box";
-    resultDiv.innerText = "Memproses Check-in...";
-    resultDiv.classList.remove('hidden');
+    const { data, error } = await supabaseClient.rpc('check_in_guest', { p_ticket_token: ticketToken });
 
-    const cleanToken = ticketToken.trim();
-
-    // Panggil RPC Supabase
-    const { data, error } = await supabaseClient.rpc('process_check_in', { p_ticket_token: cleanToken });
-
-    if (error) {
-      resultDiv.className = "result-box error";
-      resultDiv.innerText = "Error SQL/Auth: " + error.message;
+    if (error || !data) {
+      showModal(false, "Kesalahan Sistem", "Gagal menghubungkan ke server.", null);
       return;
     }
 
-    if (data.success) {
-      resultDiv.className = "result-box success";
-      resultDiv.innerHTML = `✅ ${data.message}<br/><strong>${data.guest_name}</strong> (${data.pax} Orang)`;
-    } else if (data.already_checked_in) {
-      resultDiv.className = "result-box warning";
-      resultDiv.innerHTML = `⚠️ ${data.message}<br/><strong>${data.guest_name}</strong> (${data.pax} Orang)`;
+    if (!data.success) {
+      // Tiket Sudah Digunakan / Tidak Valid
+      showModal(false, "Peringatan Tiket", data.message, data.guest || null);
     } else {
-      resultDiv.className = "result-box error";
-      resultDiv.innerText = "❌ " + data.message;
+      // Check-in Berhasil
+      showModal(true, "Berhasil Check-in!", "Tamu terverifikasi resmi.", data.guest);
     }
   }
 
-  checkSession();
+  function showModal(isSuccess, title, subtitle, guest) {
+    const modal = document.getElementById('result-modal');
+    const glow = document.getElementById('modal-glow');
+    const iconBg = document.getElementById('modal-icon-bg');
+    const icon = document.getElementById('modal-icon');
+
+    document.getElementById('modal-title').innerText = title;
+    document.getElementById('modal-subtitle').innerText = subtitle;
+
+    if (isSuccess) {
+      glow.className = "absolute -top-12 left-1/2 -translate-x-1/2 w-40 h-20 bg-emerald-500/30 blur-2xl rounded-full pointer-events-none";
+      iconBg.className = "w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl mb-3 border bg-emerald-500/10 border-emerald-500/30 text-emerald-400";
+      icon.innerText = "✅";
+    } else {
+      glow.className = "absolute -top-12 left-1/2 -translate-x-1/2 w-40 h-20 bg-rose-500/30 blur-2xl rounded-full pointer-events-none";
+      iconBg.className = "w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl mb-3 border bg-rose-500/10 border-rose-500/30 text-rose-400";
+      icon.innerText = "⚠️";
+    }
+
+    if (guest) {
+      document.getElementById('modal-details').classList.remove('hidden');
+      document.getElementById('res-guest-name').innerText = guest.group_name || "-";
+      document.getElementById('res-category').innerText = guest.category || "Umum";
+      document.getElementById('res-pax').innerText = `${guest.pax_confirmed || guest.max_pax} Orang`;
+    } else {
+      document.getElementById('modal-details').classList.add('hidden');
+    }
+
+    // Slide up modal
+    modal.classList.remove('translate-y-full', 'opacity-0');
+  }
+
+  function resumeScanner() {
+    const modal = document.getElementById('result-modal');
+    modal.classList.add('translate-y-full', 'opacity-0');
+    setTimeout(() => {
+      isProcessing = false;
+    }, 500);
+  }
+
+  function promptManualCode() {
+    const code = prompt("Masukkan Token Tiket Tamu:");
+    if (code) {
+      processCheckIn(code.trim());
+    }
+  }
+
+  async function toggleTorch() {
+    try {
+      const track = html5QrcodeScanner.getRunningTrack();
+      if (track && track.getCapabilities().torch) {
+        const torchState = track.getSettings().torch;
+        await track.applyConstraints({
+          advanced: [{ torch: !torchState }]
+        });
+      } else {
+        alert("Lampu kilat/torch tidak didukung pada perangkat ini.");
+      }
+    } catch (e) {
+      alert("Fitur senter tidak aktif.");
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', startScanner);
 </script>
 
 </body>
