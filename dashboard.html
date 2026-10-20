@@ -3,107 +3,293 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Klien - Digital Invitation</title>
+  <title>Dashboard Klien</title>
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: sans-serif; background: #f8fafc; color: #1e293b; padding: 20px; }
-    .container { max-width: 900px; margin: 0 auto; }
-    .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .btn { background: #2563eb; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-    .btn-wa { background: #16a34a; }
-    .hidden { display: none; }
-    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-    th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; font-size: 0.9em; }
-    th { background: #f1f5f9; }
-    input, select { padding: 8px; margin: 4px 0; border: 1px solid #cbd5e1; border-radius: 4px; }
-    .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75em; font-weight: bold; }
-    .badge-success { background: #dcfce7; color: #15803d; }
-    .badge-danger { background: #fee2e2; color: #b91c1c; }
-    .badge-warning { background: #fef3c7; color: #b45309; }
-    .wish-item { background: #f1f5f9; padding: 12px; rounded: 6px; margin-bottom: 8px; border-radius: 6px; font-size: 0.85em; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body>
+<body class="flex justify-center min-h-screen text-slate-800 antialiased">
 
-<div class="container">
-  <!-- Section Login -->
-  <div id="login-section" class="card">
-    <h2>Login Dashboard Klien</h2>
-    <input type="email" id="email" placeholder="Email Klien" style="width: 100%; box-sizing: border-box;" /><br/>
-    <input type="password" id="password" placeholder="Password" style="width: 100%; box-sizing: border-box;" /><br/><br/>
-    <button class="btn" onclick="login()">Login</button>
-  </div>
+  <div class="w-full max-w-md bg-slate-50 min-h-screen shadow-2xl flex flex-col relative pb-28 overflow-x-hidden">
 
-  <!-- Section Content Dashboard -->
-  <div id="dashboard-section" class="hidden">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <h2 id="client-name">Dashboard Klien</h2>
-      <button class="btn" onclick="logout()" style="background: #dc2626;">Logout</button>
+    <!-- LOGIN SCREEN -->
+    <div id="login-section" class="p-6 my-auto">
+      <div class="text-center mb-8">
+        <div class="w-12 h-12 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-500/30">
+          ❖
+        </div>
+        <h1 class="text-2xl font-extrabold text-slate-900 mt-4">Masuk Dashboard</h1>
+        <p class="text-xs text-slate-500 mt-1">Kelola data undangan & kehadiran tamu acara Anda</p>
+      </div>
+
+      <form id="login-form" onsubmit="login(event)" class="space-y-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Email Klien</label>
+          <input type="email" id="email" required placeholder="nama@email.com" class="w-full text-xs p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-600 outline-none transition" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
+          <input type="password" id="password" required placeholder="••••••••" class="w-full text-xs p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-600 outline-none transition" />
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3.5 rounded-xl shadow-lg shadow-blue-500/20 transition">
+          Login
+        </button>
+      </form>
     </div>
 
-    <!-- Info Acara -->
-    <div class="card">
-      <h3 id="event-title">...</h3>
-      <p><strong>Tanggal:</strong> <span id="event-date"></span></p>
-      <p><strong>Lokasi:</strong> <span id="event-location"></span></p>
+    <!-- MAIN DASHBOARD CONTENT -->
+    <div id="dashboard-section" class="hidden">
+
+      <!-- HEADER TOP BAR -->
+      <div class="p-5 bg-slate-50 flex items-center justify-between sticky top-0 z-30 border-b border-slate-200/50 backdrop-blur-md bg-slate-50/90">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold px-3 py-1 bg-blue-50 text-blue-600 rounded-full border border-blue-100" id="header-client-slug">...</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xs">❖</div>
+          <button onclick="logout()" title="Logout" class="text-slate-400 hover:text-red-500 transition text-xs font-bold">Logout</button>
+        </div>
+      </div>
+
+      <!-- TAB 1: HOME -->
+      <div id="tab-home" class="p-5 space-y-5">
+        
+        <!-- Welcome Card -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs text-slate-400 font-medium">Halo</p>
+              <h2 id="home-client-name" class="text-2xl font-black text-blue-600 tracking-tight leading-tight mt-0.5">...</h2>
+            </div>
+            <span class="bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1">
+              <span>⏱</span> Trial
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-slate-100 text-xs">
+            <div>
+              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Tanggal</p>
+              <p id="home-event-date" class="font-bold text-slate-700 mt-1">...</p>
+            </div>
+            <div>
+              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Lokasi</p>
+              <p id="home-event-location" class="font-bold text-slate-700 mt-1 line-clamp-1">...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric Grid -->
+        <div class="grid grid-cols-2 gap-3">
+          <!-- Total Undangan -->
+          <div class="bg-white p-4 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <div class="flex justify-between items-center text-slate-400">
+              <span class="text-[11px] font-bold">Total</span>
+              <span>✉️</span>
+            </div>
+            <div class="mt-3">
+              <h3 id="stat-total-guests" class="text-3xl font-black text-blue-600">0</h3>
+              <p class="text-[10px] text-slate-400 mt-0.5">Undangan Ditargetkan</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between text-[11px]">
+              <span class="text-slate-400">Digital</span>
+              <span id="stat-total-pax" class="font-bold text-slate-700">0</span>
+            </div>
+          </div>
+
+          <!-- Hadir -->
+          <div class="bg-white p-4 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <div class="flex justify-between items-center text-slate-400">
+              <span class="text-[11px] font-bold">Hadir</span>
+              <span>📝</span>
+            </div>
+            <div class="mt-2">
+              <div class="flex items-baseline gap-2">
+                <h3 id="stat-hadir-pax" class="text-3xl font-black text-blue-600">0</h3>
+                <span class="text-[10px] bg-slate-100 font-bold px-1.5 py-0.5 rounded text-slate-500" id="stat-hadir-pct">0%</span>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-0.5">Tamu Terkonfirmasi</p>
+            </div>
+            <div class="mt-3 pt-2 border-t border-slate-100 space-y-1 text-[11px]">
+              <div class="flex justify-between"><span class="text-slate-400">Absen</span><span id="stat-absen-count" class="font-bold text-slate-700">0</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Pending</span><span id="stat-pending-count" class="font-bold text-slate-700">0</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Histori RSVP Terbaru -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xs font-bold text-slate-800">Histori RSVP</h3>
+            <button onclick="switchTab('tamu')" class="text-[11px] font-bold text-slate-400 hover:text-blue-600 flex items-center gap-1">Lihat semua →</button>
+          </div>
+          <div id="recent-rsvp-list" class="space-y-3 pt-1">
+            <!-- Items injected by JS -->
+          </div>
+        </div>
+
+        <!-- Total Checked-In Card -->
+        <div class="bg-blue-600 text-white p-5 rounded-3xl shadow-xl shadow-blue-500/20 relative overflow-hidden">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-xs font-bold tracking-wide text-blue-100">Total Checked-In</h3>
+            <button onclick="switchTab('tamu')" class="text-[10px] font-bold bg-blue-500/40 text-blue-100 px-2.5 py-1 rounded-full">Lihat semua →</button>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="w-20 h-20 rounded-full border-4 border-blue-400/40 flex items-center justify-center text-center">
+              <div>
+                <span id="card-checkedin-count" class="text-xl font-black block">0</span>
+                <span class="text-[8px] uppercase tracking-wider text-blue-200">Checked</span>
+              </div>
+            </div>
+            <div class="space-y-1 text-xs">
+              <p class="text-blue-200">Menunggu: <strong id="card-waiting-count" class="text-white">0</strong></p>
+              <p class="text-blue-200">Est. Tamu: <strong id="card-est-pax" class="text-white">0</strong></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Kategori Breakdown -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xs font-bold text-slate-800">Top Kategori</h3>
+            <span class="text-xs">👥</span>
+          </div>
+          <div id="category-breakdown-list" class="space-y-3">
+            <!-- Items injected by JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TAB 2: TAMU -->
+      <div id="tab-tamu" class="p-5 space-y-4 hidden">
+        <h2 class="text-2xl font-black text-blue-600 tracking-tight">Daftar Tamu</h2>
+
+        <!-- Search Bar -->
+        <div class="relative">
+          <input type="text" id="search-input" onkeyup="filterGuests()" placeholder="Cari nama tamu..." class="w-full text-xs p-3.5 pl-10 rounded-2xl border border-slate-200/80 bg-white focus:ring-2 focus:ring-blue-600 outline-none shadow-sm" />
+          <span class="absolute left-3.5 top-3.5 text-slate-400 text-xs">🔍</span>
+        </div>
+
+        <!-- Status Filter Pills -->
+        <div class="flex gap-2 overflow-x-auto no-scrollbar text-xs font-bold pb-1" id="filter-pills">
+          <button onclick="setFilter('all')" class="pill-btn active px-4 py-2 rounded-full bg-blue-600 text-white shadow-sm whitespace-nowrap">Semua</button>
+          <button onclick="setFilter('hadir')" class="pill-btn px-4 py-2 rounded-full bg-white text-slate-500 border border-slate-200 whitespace-nowrap">Hadir</button>
+          <button onclick="setFilter('tidak_hadir')" class="pill-btn px-4 py-2 rounded-full bg-white text-slate-500 border border-slate-200 whitespace-nowrap">Absen</button>
+          <button onclick="setFilter('pending')" class="pill-btn px-4 py-2 rounded-full bg-white text-slate-500 border border-slate-200 whitespace-nowrap">Pending</button>
+          <button onclick="setFilter('checked_in')" class="pill-btn px-4 py-2 rounded-full bg-white text-slate-500 border border-slate-200 whitespace-nowrap">Checked</button>
+        </div>
+
+        <!-- Guest List Items -->
+        <div id="guest-list-container" class="space-y-2.5">
+          <!-- Injected by JS -->
+        </div>
+
+        <!-- Floating Quick Action Buttons -->
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <button onclick="openAddGuestModal()" class="bg-white hover:bg-slate-50 text-blue-600 font-bold text-xs p-4 rounded-3xl border border-slate-200/80 shadow-sm flex items-center justify-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">+</span>
+            <span>Tambah Tamu</span>
+          </button>
+          <button onclick="shareGeneralInvitation()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs p-4 rounded-3xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+            <span class="text-base">💬</span>
+            <span>Kirim Undangan</span>
+          </button>
+        </div>
+
+        <!-- Kuota Progress Bar -->
+        <div class="bg-white p-4 rounded-3xl border border-slate-200/80 shadow-sm space-y-2">
+          <div class="flex justify-between text-xs font-bold">
+            <span class="text-slate-700">Kuota Tamu</span>
+            <span class="text-blue-600"><span id="quota-used">0</span>/<span id="quota-max">100</span> ✉️</span>
+          </div>
+          <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+            <div id="quota-bar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BOTTOM NAVIGATION BAR -->
+      <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-blue-600/90 backdrop-blur-lg text-white p-2 rounded-full shadow-2xl flex items-center justify-around border border-blue-400/30 z-40">
+        <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex-1 py-2 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold bg-white text-blue-600 shadow-md">
+          <span class="text-sm">🏠</span>
+          <span>Home</span>
+        </button>
+        <button onclick="switchTab('tamu')" id="nav-tamu" class="nav-btn flex-1 py-2 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold text-blue-100 hover:text-white">
+          <span class="text-sm">👥</span>
+          <span>Tamu</span>
+        </button>
+        <button onclick="alert('Fitur Style Segera Hadir!')" class="nav-btn flex-1 py-2 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold text-blue-100 hover:text-white">
+          <span class="text-sm">🪄</span>
+          <span>Style</span>
+        </button>
+        <button onclick="alert('Fitur Setting Segera Hadir!')" class="nav-btn flex-1 py-2 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold text-blue-100 hover:text-white">
+          <span class="text-sm">⚙️</span>
+          <span>Setting</span>
+        </button>
+        <div class="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-xs font-bold border border-blue-300/40">
+          ❖
+        </div>
+      </div>
+
     </div>
 
-    <!-- Tambah Tamu -->
-    <div class="card">
-      <h3>Tambah Undangan Baru</h3>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <input type="text" id="new-name" placeholder="Nama Tamu/Kelompok" style="flex: 2;" />
-        <input type="text" id="new-cat" placeholder="Kategori (VIP/Reguler)" style="flex: 1;" />
-        <input type="number" id="new-pax" placeholder="Kuota (Orang)" min="1" value="2" style="width: 100px;" />
-        <button class="btn" onclick="addGuest()">+ Tambah</button>
+    <!-- MODAL TAMBAH TAMU -->
+    <div id="add-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-white w-full max-w-xs rounded-3xl p-6 space-y-4 shadow-2xl">
+        <h3 class="text-base font-bold text-slate-800">Tambah Tamu Baru</h3>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Nama Tamu / Kelompok</label>
+            <input type="text" id="modal-name" placeholder="Budi Santoso & Keluarga" class="w-full text-xs p-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-600" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Kategori</label>
+            <select id="modal-cat" class="w-full text-xs p-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-600">
+              <option value="Keluarga">Keluarga</option>
+              <option value="Teman">Teman</option>
+              <option value="Tetangga">Tetangga</option>
+              <option value="Kolega">Kolega</option>
+              <option value="Umum" selected>Umum</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Kuota Orang (Pax)</label>
+            <input type="number" id="modal-pax" min="1" value="2" class="w-full text-xs p-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-600" />
+          </div>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button onclick="closeAddGuestModal()" class="flex-1 text-xs font-bold py-3 text-slate-500 hover:bg-slate-100 rounded-xl">Batal</button>
+          <button onclick="submitAddGuest()" class="flex-1 text-xs font-bold py-3 bg-blue-600 text-white rounded-xl shadow-md">Simpan</button>
+        </div>
       </div>
     </div>
 
-    <!-- Daftar Tamu -->
-    <div class="card">
-      <h3>Daftar Undangan & Status</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Nama Tamu</th>
-            <th>Kategori</th>
-            <th>Kuota</th>
-            <th>RSVP</th>
-            <th>Check-in</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="guest-table-body">
-          <tr><td colspan="6">Memuat data...</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Daftar Ucapan & Doa -->
-    <div class="card">
-      <h3>Ucapan & Doa Masuk</h3>
-      <div id="wishes-list" style="max-height: 250px; overflow-y: auto;">
-        <p style="color: #64748b; font-size: 0.85em;">Belum ada ucapan.</p>
-      </div>
-    </div>
   </div>
-</div>
 
 <script>
-  // CREDENTIALS SUPABASE
+  // CREDENTIALS SUPABASE (Sesuaikan jika diperlukan)
   const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
+  const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
 
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  let currentClientData = null;
-  let currentEventData = null;
+  
+  let globalData = null;
+  let activeFilter = 'all';
 
   async function checkSession() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) loadDashboard();
   }
 
-  async function login() {
+  async function login(e) {
+    e.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
@@ -127,100 +313,223 @@ const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
       return;
     }
 
-    currentClientData = data.client;
-    currentEventData = data.event;
-
-    document.getElementById('client-name').innerText = "Dashboard: " + data.client.name;
-    document.getElementById('event-title').innerText = data.event.title;
-    document.getElementById('event-date').innerText = new Date(data.event.event_date).toLocaleString('id-ID');
-    document.getElementById('event-location').innerText = data.event.location;
-
-    renderGuestTable(data.guests);
-    renderWishes(data.wishes);
+    globalData = data;
+    renderUI();
   }
 
-  function renderGuestTable(guests) {
-    const tbody = document.getElementById('guest-table-body');
-    tbody.innerHTML = '';
+  function renderUI() {
+    const { client, event, stats, categories, guests } = globalData;
 
-    if (!guests || guests.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6">Belum ada data tamu.</td></tr>';
+    // Header & Welcome
+    document.getElementById('header-client-slug').innerText = client.slug;
+    document.getElementById('home-client-name').innerText = client.name;
+    document.getElementById('home-event-date').innerText = new Date(event.event_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+    document.getElementById('home-event-location').innerText = event.location;
+
+    // Stats Grid
+    document.getElementById('stat-total-guests').innerText = stats.total_guests;
+    document.getElementById('stat-total-pax').innerText = stats.total_max_pax;
+    document.getElementById('stat-hadir-pax').innerText = stats.total_hadir;
+    
+    const hadirPct = stats.total_max_pax > 0 ? Math.round((stats.total_hadir / stats.total_max_pax) * 100) : 0;
+    document.getElementById('stat-hadir-pct').innerText = `${hadirPct}%`;
+    document.getElementById('stat-absen-count').innerText = stats.count_absen_groups;
+    document.getElementById('stat-pending-count').innerText = stats.count_pending_groups;
+
+    // Card Checked-in
+    document.getElementById('card-checkedin-count').innerText = String(stats.total_checked_in).padStart(3, '0');
+    document.getElementById('card-waiting-count').innerText = stats.count_hadir_groups - stats.total_checked_in;
+    document.getElementById('card-est-pax').innerText = stats.total_hadir;
+
+    // Histori RSVP
+    renderRecentRSVP(guests);
+
+    // Top Kategori
+    renderCategories(categories);
+
+    // Daftar Tamu & Progress Kuota
+    renderGuestList();
+    document.getElementById('quota-used').innerText = stats.total_guests;
+    document.getElementById('quota-max').innerText = 100;
+    const quotaPct = Math.min(100, Math.round((stats.total_guests / 100) * 100));
+    document.getElementById('quota-bar').style.width = `${quotaPct}%`;
+  }
+
+  function renderRecentRSVP(guests) {
+    const container = document.getElementById('recent-rsvp-list');
+    container.innerHTML = '';
+
+    const recent = guests.slice(0, 5);
+    if (recent.length === 0) {
+      container.innerHTML = '<p class="text-xs text-slate-400">Belum ada tamu.</p>';
+      return;
+    }
+
+    recent.forEach(g => {
+      let badge = '<span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>';
+      if (g.rsvp_status === 'hadir') badge = '<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>';
+      if (g.rsvp_status === 'tidak_hadir') badge = '<span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>';
+
+      const div = document.createElement('div');
+      div.className = "flex items-center justify-between text-xs p-2.5 rounded-2xl bg-slate-50 border border-slate-100";
+      div.innerHTML = `
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center text-[10px]">
+            ${g.group_name.substring(0,2).toUpperCase()}
+          </div>
+          <div>
+            <p class="font-bold text-slate-800">${g.group_name}</p>
+            <p class="text-[10px] text-slate-400">${g.category}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          ${badge}
+          <span class="text-[10px] text-slate-400">Terbaru</span>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function renderCategories(categories) {
+    const container = document.getElementById('category-breakdown-list');
+    container.innerHTML = '';
+
+    if (!categories || categories.length === 0) {
+      container.innerHTML = '<p class="text-xs text-slate-400">Belum ada data kategori.</p>';
+      return;
+    }
+
+    const icons = { 'Keluarga': '🏠', 'Teman': '🩵', 'Tetangga': '👥', 'Kolega': '💼', 'Umum': '🌐' };
+
+    categories.forEach(c => {
+      const div = document.createElement('div');
+      div.className = "flex items-center justify-between text-xs";
+      div.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-base">
+            ${icons[c.category] || '📌'}
+          </div>
+          <div>
+            <p class="font-bold text-slate-800">${c.category}</p>
+            <p class="text-[10px] text-slate-400">${c.hadir} Hadir • ${c.absen} Absen</p>
+          </div>
+        </div>
+        <span class="font-extrabold text-sm text-slate-700">${c.total}</span>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function renderGuestList() {
+    const container = document.getElementById('guest-list-container');
+    container.innerHTML = '';
+
+    let list = globalData.guests;
+    const search = document.getElementById('search-input').value.toLowerCase();
+
+    if (search) {
+      list = list.filter(g => g.group_name.toLowerCase().includes(search));
+    }
+
+    if (activeFilter === 'hadir') list = list.filter(g => g.rsvp_status === 'hadir');
+    if (activeFilter === 'tidak_hadir') list = list.filter(g => g.rsvp_status === 'tidak_hadir');
+    if (activeFilter === 'pending') list = list.filter(g => g.rsvp_status === 'pending');
+    if (activeFilter === 'checked_in') list = list.filter(g => g.is_checked_in);
+
+    if (list.length === 0) {
+      container.innerHTML = '<p class="text-xs text-slate-400 text-center py-6">Tidak ada tamu yang sesuai.</p>';
       return;
     }
 
     const domainBase = window.location.origin;
 
-    guests.forEach(g => {
-      // FORMAT URL BARU: /slug/token
-      const link = `${domainBase}/${currentClientData.slug}/${g.invitation_token}`;
+    list.forEach(g => {
+      const link = `${domainBase}/${globalData.client.slug}/${g.invitation_token}`;
       const waMessage = encodeURIComponent(
-        `Halo *${g.group_name}*,\n\nKami mengundang Anda untuk menghadiri acara *${currentEventData.title}*.\n\nSilakan konfirmasi kehadiran Anda melalui tautan resmi berikut:\n${link}`
+        `Halo *${g.group_name}*,\n\nKami mengundang Anda untuk menghadiri acara *${globalData.event.title}*.\n\nSilakan konfirmasi kehadiran Anda melalui tautan resmi berikut:\n${link}`
       );
 
-      let rsvpBadge = '<span class="badge badge-warning">Belum Konfirmasi</span>';
-      if (g.rsvp_status === 'hadir') rsvpBadge = `<span class="badge badge-success">Hadir (${g.pax_confirmed} Org)</span>`;
-      if (g.rsvp_status === 'tidak_hadir') rsvpBadge = '<span class="badge badge-danger">Tidak Hadir</span>';
+      let badgeClass = "bg-amber-100 text-amber-700";
+      let badgeText = "Pending";
+      if (g.rsvp_status === 'hadir') { badgeClass = "bg-emerald-100 text-emerald-700"; badgeText = "Hadir"; }
+      if (g.rsvp_status === 'tidak_hadir') { badgeClass = "bg-rose-100 text-rose-700"; badgeText = "Absen"; }
+      if (g.is_checked_in) { badgeClass = "bg-blue-100 text-blue-700"; badgeText = "Checked"; }
 
-      let checkinBadge = g.is_checked_in 
-        ? '<span class="badge badge-success">Sudah Masuk</span>' 
-        : '<span class="badge badge-warning">Belum Check-in</span>';
-
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><strong>${g.group_name}</strong></td>
-        <td>${g.category}</td>
-        <td>Maks ${g.max_pax}</td>
-        <td>${rsvpBadge}</td>
-        <td>${checkinBadge}</td>
-        <td>
-          <div style="display: flex; gap: 4px;">
-            <button class="btn" onclick="copyLink('${link}', this)" style="background: #475569; font-size: 0.8em; padding: 6px 10px;">📋 Copy</button>
-            <a class="btn btn-wa" href="https://wa.me/?text=${waMessage}" target="_blank" style="text-decoration: none; font-size: 0.8em; padding: 6px 10px;">Kirim WA</a>
+      const card = document.createElement('div');
+      card.className = "bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between";
+      card.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 font-bold flex items-center justify-center text-xs">
+            ${g.group_name.substring(0,2).toUpperCase()}
           </div>
-        </td>
+          <div>
+            <h4 class="font-bold text-xs text-slate-800">${g.group_name}</h4>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span class="text-[10px] text-slate-400">${g.category}</span>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${badgeClass}">${badgeText}</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="copyLink('${link}', this)" class="p-2 text-slate-400 hover:text-blue-600 rounded-xl hover:bg-slate-50 transition text-xs" title="Copy Link">📋</button>
+          <a href="https://wa.me/?text=${waMessage}" target="_blank" class="p-2 text-slate-400 hover:text-emerald-600 rounded-xl hover:bg-slate-50 transition text-xs" title="Kirim WA">💬</a>
+        </div>
       `;
-      tbody.appendChild(tr);
+      container.appendChild(card);
     });
   }
 
-  // FUNGSI UNTUK SALIN TAUTAN KE CLIPBOARD
-  function copyLink(url, btnElement) {
-    navigator.clipboard.writeText(url).then(() => {
-      const originalText = btnElement.innerText;
-      btnElement.innerText = "✅ Tersalin!";
-      btnElement.style.background = "#16a34a";
-      setTimeout(() => {
-        btnElement.innerText = originalText;
-        btnElement.style.background = "#475569";
-      }, 2000);
-    }).catch(() => {
-      alert("Gagal menyalin tautan.");
-    });
-  }
-
-  function renderWishes(wishes) {
-    const list = document.getElementById('wishes-list');
-    list.innerHTML = '';
-
-    if (!wishes || wishes.length === 0) {
-      list.innerHTML = '<p style="color: #64748b; font-size: 0.85em;">Belum ada ucapan.</p>';
-      return;
+  function switchTab(tab) {
+    if (tab === 'home') {
+      document.getElementById('tab-home').classList.remove('hidden');
+      document.getElementById('tab-tamu').classList.add('hidden');
+      document.getElementById('nav-home').className = "nav-btn flex-1 py-2 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold bg-white text-blue-600 shadow-md";
+      document.getElementById('nav-tamu').className = "nav-btn flex-1 py-2 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold text-blue-100 hover:text-white";
+    } else {
+      document.getElementById('tab-home').classList.add('hidden');
+      document.getElementById('tab-tamu').classList.remove('hidden');
+      document.getElementById('nav-tamu').className = "nav-btn flex-1 py-2 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold bg-white text-blue-600 shadow-md";
+      document.getElementById('nav-home').className = "nav-btn flex-1 py-2 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold text-blue-100 hover:text-white";
     }
+  }
 
-    wishes.forEach(w => {
-      const item = document.createElement('div');
-      item.className = 'wish-item';
-      item.innerHTML = `<strong>${w.guest_name}</strong><p style="margin: 4px 0 0 0; color: #334155;">${w.message}</p>`;
-      list.appendChild(item);
+  function setFilter(filter) {
+    activeFilter = filter;
+    document.querySelectorAll('#filter-pills button').forEach(btn => {
+      btn.className = "pill-btn px-4 py-2 rounded-full bg-white text-slate-500 border border-slate-200 whitespace-nowrap text-xs font-bold";
+    });
+    event.target.className = "pill-btn active px-4 py-2 rounded-full bg-blue-600 text-white shadow-sm whitespace-nowrap text-xs font-bold";
+    renderGuestList();
+  }
+
+  function filterGuests() {
+    renderGuestList();
+  }
+
+  function copyLink(url, btn) {
+    navigator.clipboard.writeText(url).then(() => {
+      const orig = btn.innerText;
+      btn.innerText = "✅";
+      setTimeout(() => btn.innerText = orig, 1500);
     });
   }
 
-  async function addGuest() {
-    const name = document.getElementById('new-name').value.trim();
-    const cat = document.getElementById('new-cat').value.trim();
-    const pax = parseInt(document.getElementById('new-pax').value);
+  function shareGeneralInvitation() {
+    const link = `${window.location.origin}/${globalData.client.slug}`;
+    const wa = encodeURIComponent(`Halo, kami mengundang Anda untuk menghadiri acara kami. Silakan cek detailnya di: ${link}`);
+    window.open(`https://wa.me/?text=${wa}`, '_blank');
+  }
 
-    if (!name || isNaN(pax)) return alert("Isi nama tamu dan kuota dengan benar.");
+  function openAddGuestModal() { document.getElementById('add-modal').classList.remove('hidden'); }
+  function closeAddGuestModal() { document.getElementById('add-modal').classList.add('hidden'); }
+
+  async function submitAddGuest() {
+    const name = document.getElementById('modal-name').value.trim();
+    const cat = document.getElementById('modal-cat').value;
+    const pax = parseInt(document.getElementById('modal-pax').value);
+
+    if (!name || isNaN(pax)) return alert("Isi data dengan benar.");
 
     const { data, error } = await supabaseClient.rpc('add_guest_by_client', {
       p_group_name: name,
@@ -230,8 +539,8 @@ const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
 
     if (error || !data.success) return alert("Gagal menambah tamu.");
 
-    alert("Tamu berhasil ditambahkan!");
-    document.getElementById('new-name').value = '';
+    closeAddGuestModal();
+    document.getElementById('modal-name').value = '';
     loadDashboard();
   }
 
