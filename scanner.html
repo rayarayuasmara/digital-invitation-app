@@ -302,15 +302,8 @@
     isProcessing = true;
     if (navigator.vibrate) navigator.vibrate(100);
 
-    let extractedToken = rawText;
-    if (rawText.includes('?token=')) {
-      extractedToken = rawText.split('?token=')[1].split('&')[0];
-    } else if (rawText.includes('/')) {
-      const parts = rawText.split('?')[0].split('/').filter(Boolean);
-      extractedToken = parts[parts.length - 1];
-    }
-
-    await processCheckIn(extractedToken);
+    // Kirim langsung teks hasil scan ke Supabase RPC
+    await processCheckIn(rawText);
   }
 
   async function processCheckIn(ticketToken) {
