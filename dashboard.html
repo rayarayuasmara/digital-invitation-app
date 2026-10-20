@@ -92,7 +92,7 @@
 <script>
   // CREDENTIALS SUPABASE
   const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
+const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
 
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   let currentClientData = null;
@@ -151,7 +151,7 @@
     const domainBase = window.location.origin;
 
     guests.forEach(g => {
-      // MENGGUNAKAN FORMAT URL BARU: /slug/token
+      // FORMAT URL BARU: /slug/token
       const link = `${domainBase}/${currentClientData.slug}/${g.invitation_token}`;
       const waMessage = encodeURIComponent(
         `Halo *${g.group_name}*,\n\nKami mengundang Anda untuk menghadiri acara *${currentEventData.title}*.\n\nSilakan konfirmasi kehadiran Anda melalui tautan resmi berikut:\n${link}`
@@ -173,10 +173,28 @@
         <td>${rsvpBadge}</td>
         <td>${checkinBadge}</td>
         <td>
-          <a class="btn btn-wa" href="https://wa.me/?text=${waMessage}" target="_blank" style="text-decoration: none; font-size: 0.8em;">Kirim WA</a>
+          <div style="display: flex; gap: 4px;">
+            <button class="btn" onclick="copyLink('${link}', this)" style="background: #475569; font-size: 0.8em; padding: 6px 10px;">📋 Copy</button>
+            <a class="btn btn-wa" href="https://wa.me/?text=${waMessage}" target="_blank" style="text-decoration: none; font-size: 0.8em; padding: 6px 10px;">Kirim WA</a>
+          </div>
         </td>
       `;
       tbody.appendChild(tr);
+    });
+  }
+
+  // FUNGSI UNTUK SALIN TAUTAN KE CLIPBOARD
+  function copyLink(url, btnElement) {
+    navigator.clipboard.writeText(url).then(() => {
+      const originalText = btnElement.innerText;
+      btnElement.innerText = "✅ Tersalin!";
+      btnElement.style.background = "#16a34a";
+      setTimeout(() => {
+        btnElement.innerText = originalText;
+        btnElement.style.background = "#475569";
+      }, 2000);
+    }).catch(() => {
+      alert("Gagal menyalin tautan.");
     });
   }
 
