@@ -1,824 +1,545 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Klien - RayaRayu</title>
-  <!-- Tailwind CSS & Google Fonts -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-    }
-  </script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Lucide Icons Library -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .apple-glass { background: rgba(20, 20, 22, 0.75); backdrop-blur: blur(20px); -webkit-backdrop-filter: blur(20px); }
-    
-    /* Mencegah auto-zoom pada perangkat mobile saat input diketik */
-    @media screen and (max-width: 768px) {
-      input[type="text"],
-      input[type="email"],
-      input[type="password"],
-      input[type="number"],
-      input[type="datetime-local"],
-      select,
-      textarea {
-        font-size: 16px !important;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#000000" id="meta-theme" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>Dashboard Klien - RayaRayu</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<style>
+:root{
+  --bg:#f2f2f7; --card:#fff; --text:#000; --sub:#8e8e93; --sep:rgba(60,60,67,.16);
+  --fill:rgba(118,118,128,.12); --blue:#007aff; --green:#34c759; --orange:#ff9500; --red:#ff3b30; --purple:#af52de; --pink:#ff2d55; --teal:#32ade6;
+  --bar:rgba(249,249,249,.82); --shadow:0 1px 2px rgba(0,0,0,.04);
+}
+:root[data-dark="1"]{
+  --bg:#000; --card:#1c1c1e; --text:#fff; --sub:#8e8e93; --sep:rgba(84,84,88,.55);
+  --fill:rgba(118,118,128,.24); --blue:#0a84ff; --green:#30d158; --orange:#ff9f0a; --red:#ff453a; --purple:#bf5af2; --pink:#ff375f; --teal:#64d2ff;
+  --bar:rgba(22,22,24,.78); --shadow:none;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Plus Jakarta Sans",system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;display:flex;justify-content:center}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:none;border:0;padding:0;cursor:pointer}
+.hidden{display:none!important}
+#app{width:100%;max-width:480px;min-height:100vh;position:relative}
+svg.lucide{width:1.2em;height:1.2em;stroke-width:2}
+
+/* Navigation bar + large title */
+.nav{position:sticky;top:0;z-index:20;height:calc(48px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 16px 0;display:flex;align-items:center;justify-content:space-between;background:transparent;transition:background .2s}
+.nav::after{content:"";position:absolute;inset:auto 0 0;height:.5px;background:var(--sep);opacity:0;transition:opacity .2s}
+.scrolled .nav{background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px)}
+.scrolled .nav::after{opacity:1}
+.nav-title{position:absolute;left:0;right:0;text-align:center;font-weight:600;font-size:17px;opacity:0;transition:opacity .2s;pointer-events:none}
+.scrolled .nav-title{opacity:1}
+.nav-btn{color:var(--blue);font-size:17px;display:flex;align-items:center;gap:4px;position:relative;z-index:1;min-width:44px;min-height:44px;justify-content:flex-end}
+.large{padding:0 20px 8px;margin-top:-4px}
+.large h1{margin:0;font-size:34px;line-height:1.1;font-weight:800;letter-spacing:-.02em}
+.large p{margin:4px 0 0;color:var(--sub);font-size:15px}
+.page{padding:0 16px calc(110px + env(safe-area-inset-bottom))}
+.page>*+*{margin-top:22px}
+
+/* Grouped lists */
+.group-title{font-size:13px;color:var(--sub);text-transform:uppercase;letter-spacing:.02em;padding:0 16px 6px}
+.group{background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+.row{display:flex;align-items:center;gap:12px;padding:11px 16px;min-height:52px;position:relative;width:100%;text-align:left}
+.row+.row::before{content:"";position:absolute;top:0;left:60px;right:0;height:.5px;background:var(--sep)}
+.row.plain+.row.plain::before{left:16px}
+button.row:active{background:var(--fill)}
+.row .grow{flex:1;min-width:0}
+.row .t{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .s{font-size:13px;color:var(--sub);margin-top:1px}
+.row .v{color:var(--sub);font-size:15px;white-space:nowrap}
+.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0}
+.pill{font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.p-hadir{background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green)}
+.p-absen{background:color-mix(in srgb,var(--red) 16%,transparent);color:var(--red)}
+.p-pending{background:color-mix(in srgb,var(--orange) 16%,transparent);color:var(--orange)}
+.p-checked{background:color-mix(in srgb,var(--blue) 16%,transparent);color:var(--blue)}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.empty{padding:32px 16px;text-align:center;color:var(--sub);font-size:15px}
+
+/* Hero */
+.hero{background:var(--card);border-radius:22px;padding:20px;display:flex;align-items:center;gap:20px;box-shadow:var(--shadow)}
+.ring{position:relative;width:112px;height:112px;flex-shrink:0}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:11;stroke-linecap:round}
+.ring .bg{stroke:var(--fill)}
+.ring .fg{stroke:var(--green);transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:24px;font-weight:800;letter-spacing:-.02em}
+.hero h2{margin:0;font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.05}
+.hero p{margin:4px 0 0;color:var(--sub);font-size:14px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{background:var(--card);border-radius:18px;padding:14px 16px;box-shadow:var(--shadow)}
+.tile .ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:15px}
+.tile b{display:block;font-size:28px;font-weight:800;letter-spacing:-.02em;margin-top:10px;line-height:1}
+.tile span{font-size:13px;color:var(--sub)}
+.stack{display:flex;height:12px;border-radius:99px;overflow:hidden;gap:2px;margin:16px}
+.stack i{display:block;height:100%;min-width:4px}
+
+/* Search + segmented */
+.search{position:relative}
+.search input{width:100%;height:38px;border:0;border-radius:10px;background:var(--fill);padding:0 12px 0 34px;font-size:17px;outline:none}
+.search input::placeholder{color:var(--sub)}
+.search svg{position:absolute;left:10px;top:9px;color:var(--sub);width:20px;height:20px}
+.seg{display:flex;gap:2px;background:var(--fill);border-radius:9px;padding:2px;overflow-x:auto;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button{flex:1;padding:6px 10px;border-radius:7px;font-size:13px;font-weight:600;white-space:nowrap;transition:background .2s}
+.seg button.on{background:var(--card);box-shadow:0 2px 6px rgba(0,0,0,.14)}
+:root[data-dark="1"] .seg button.on{background:#636366}
+
+/* Forms */
+.field{display:flex;align-items:center;gap:12px;padding:0 16px;min-height:48px;position:relative}
+.field+.field::before{content:"";position:absolute;top:0;left:16px;right:0;height:.5px;background:var(--sep)}
+.field label{width:96px;flex-shrink:0;font-size:16px}
+.field input,.field select,.field textarea{flex:1;min-width:0;border:0;background:transparent;outline:none;font-size:16px;padding:12px 0;text-align:right;color:var(--text)}
+.field textarea{resize:none;text-align:left}
+.field.col{flex-direction:column;align-items:stretch;gap:0;padding-bottom:6px}
+.field.col label{padding-top:12px;color:var(--sub);font-size:13px}
+.field.col textarea{text-align:left;padding-top:6px}
+.switch{position:relative;width:51px;height:31px;flex-shrink:0}
+.switch input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;z-index:2;cursor:pointer}
+.switch span{position:absolute;inset:0;border-radius:99px;background:var(--fill);transition:background .2s}
+.switch span::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.25);transition:transform .2s}
+.switch input:checked+span{background:var(--green)}
+.switch input:checked+span::after{transform:translateX(20px)}
+.btn{width:100%;height:50px;border-radius:14px;background:var(--blue);color:#fff;font-weight:600;font-size:17px;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{opacity:.7}
+.btn:disabled{opacity:.5}
+.btn.red{background:var(--card);color:var(--red);box-shadow:var(--shadow)}
+.btn.gray{background:var(--fill);color:var(--blue)}
+
+/* Tab bar */
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;z-index:30;display:flex;padding:6px 8px calc(6px + env(safe-area-inset-bottom));background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px);border-top:.5px solid var(--sep)}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;font-size:10px;font-weight:600;color:var(--sub);transition:color .15s}
+.tabbar button svg{width:26px;height:26px;stroke-width:1.8}
+.tabbar button.on{color:var(--blue)}
+
+/* Sheet */
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;opacity:0;pointer-events:none;transition:opacity .25s}
+.backdrop.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:480px;z-index:51;background:var(--bg);border-radius:14px 14px 0 0;padding:8px 16px calc(16px + env(safe-area-inset-bottom));max-height:92vh;overflow-y:auto;transform:translate(-50%,105%);transition:transform .35s cubic-bezier(.32,.72,0,1)}
+.sheet.open{transform:translate(-50%,0)}
+.grab{width:36px;height:5px;border-radius:99px;background:var(--sep);margin:0 auto 10px}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;margin:0 -4px 14px}
+.sheet-head h3{margin:0;font-size:17px;font-weight:600}
+.sheet-head button{color:var(--blue);font-size:17px;min-width:60px}
+.sheet-head button:last-child{text-align:right;font-weight:600}
+.sheet .group+.group,.sheet .group+.btn,.sheet .btn+.btn{margin-top:16px}
+.act{justify-content:center;font-size:19px;color:var(--blue);gap:10px}
+.act.danger{color:var(--red)}
+.act-title{text-align:center;padding:12px;font-size:13px;color:var(--sub)}
+
+/* Toast */
+.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translate(-50%,-140%);z-index:80;background:var(--card);color:var(--text);padding:12px 18px;border-radius:99px;font-size:14px;font-weight:600;box-shadow:0 8px 28px rgba(0,0,0,.28);display:flex;gap:8px;align-items:center;transition:transform .35s cubic-bezier(.32,.72,0,1);max-width:92%}
+.toast.show{transform:translate(-50%,0)}
+
+/* Login */
+#login{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:24px 16px}
+.app-icon{width:84px;height:84px;border-radius:20px;margin:0 auto 18px;background:linear-gradient(145deg,#ff6b81,#ff375f 55%,#bf2a4c);display:grid;place-items:center;color:#fff;font-weight:800;font-size:36px;letter-spacing:-.04em;box-shadow:0 12px 30px rgba(255,55,95,.35)}
+#login h1{text-align:center;margin:0;font-size:28px;font-weight:800;letter-spacing:-.02em}
+#login p{text-align:center;color:var(--sub);font-size:15px;margin:6px 24px 28px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
 </head>
-<body class="flex justify-center min-h-screen bg-[#000000] text-white antialiased selection:bg-white selection:text-black transition-colors duration-300">
+<body>
+<div id="app">
 
-  <div class="w-full max-w-md bg-[#000000] min-h-screen shadow-2xl flex flex-col relative pb-32 overflow-x-hidden border-x border-[#1c1c1e]">
-
-    <!-- LOGIN SCREEN -->
-    <div id="login-section" class="p-6 my-auto">
-      <div class="text-center mb-8">
-        <div class="w-16 h-16 bg-[#1c1c1e] text-white rounded-3xl mx-auto flex items-center justify-center font-bold text-2xl shadow-2xl border border-[#3a3a3c]">
-          <i data-lucide="apple" class="w-8 h-8"></i>
-        </div>
-        <h1 class="text-3xl font-bold tracking-tight mt-6">RayaRayu+</h1>
-        <p class="text-xs text-[#86868b] mt-1">Masuk untuk mengelola analitik dan data undangan eksklusif Anda.</p>
+  <!-- LOGIN -->
+  <section id="login">
+    <div class="app-icon">R+</div>
+    <h1>RayaRayu</h1>
+    <p>Masuk untuk mengelola tamu dan detail acara Anda.</p>
+    <form id="login-form" onsubmit="login(event)">
+      <div class="group">
+        <div class="field"><label for="email">Email</label><input type="email" id="email" required placeholder="nama@email.com" autocomplete="username" /></div>
+        <div class="field"><label for="password">Password</label><input type="password" id="password" required placeholder="Wajib diisi" autocomplete="current-password" /></div>
       </div>
+      <button type="submit" id="btn-login" class="btn" style="margin-top:20px">Masuk</button>
+    </form>
+  </section>
 
-      <form id="login-form" onsubmit="login(event)" class="space-y-3.5 bg-[#1c1c1e]/60 p-6 rounded-3xl border border-[#2c2c2e] backdrop-blur-xl">
-        <div>
-          <label class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1.5">Email Klien</label>
-          <input type="email" id="email" required placeholder="nama@email.com" class="w-full text-xs p-4 rounded-2xl bg-[#2c2c2e]/50 border border-[#3a3a3c] text-white placeholder-[#545456] focus:ring-2 focus:ring-white outline-none transition" />
+  <!-- DASHBOARD -->
+  <section id="dash" class="hidden">
+
+    <!-- HOME -->
+    <div id="tab-home">
+      <div class="nav"><span class="nav-title">Ringkasan</span><span></span></div>
+      <div class="large"><h1>Ringkasan</h1><p id="home-client-name">Memuat…</p></div>
+      <div class="page">
+        <div class="hero">
+          <div class="ring">
+            <svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="ring-fg" cx="50" cy="50" r="44" stroke-dasharray="276.46" stroke-dashoffset="276.46"/></svg>
+            <b id="hero-pct-text">0%</b>
+          </div>
+          <div>
+            <h2 id="hero-hadir-text">0 / 0</h2>
+            <p>tamu terkonfirmasi hadir dari total kuota</p>
+          </div>
         </div>
-        <div>
-          <label class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1.5">Password</label>
-          <input type="password" id="password" required placeholder="••••••••" class="w-full text-xs p-4 rounded-2xl bg-[#2c2c2e]/50 border border-[#3a3a3c] text-white placeholder-[#545456] focus:ring-2 focus:ring-white outline-none transition" />
+
+        <div class="tiles">
+          <div class="tile"><div class="ic" style="background:var(--green)"><i data-lucide="check"></i></div><b id="stat-hadir-groups">0</b><span>Grup hadir</span></div>
+          <div class="tile"><div class="ic" style="background:var(--blue)"><i data-lucide="door-open"></i></div><b id="stat-checkedin-count">0</b><span>Sudah check-in</span></div>
+          <div class="tile"><div class="ic" style="background:var(--orange)"><i data-lucide="clock"></i></div><b id="stat-pending">0</b><span>Belum menjawab</span></div>
+          <div class="tile"><div class="ic" style="background:var(--red)"><i data-lucide="x"></i></div><b id="stat-absen">0</b><span>Tidak hadir</span></div>
         </div>
-        <button type="submit" id="btn-login" class="w-full bg-white hover:bg-[#e0e0e0] text-black font-semibold text-xs py-4 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 mt-2">
-          <span>Masuk Portal</span>
-          <i data-lucide="arrow-right" class="w-4 h-4"></i>
-        </button>
+
+        <div>
+          <div class="group-title">Kategori tamu</div>
+          <div class="group" id="cat-group"></div>
+        </div>
+
+        <div>
+          <div class="group-title" style="display:flex;justify-content:space-between"><span>RSVP terbaru</span><button onclick="switchTab('tamu')" style="color:var(--blue);text-transform:none;font-size:15px">Lihat semua</button></div>
+          <div class="group" id="recent-rsvp-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAMU -->
+    <div id="tab-tamu" class="hidden">
+      <div class="nav"><span class="nav-title">Tamu</span><span></span><button class="nav-btn" onclick="openGuestSheet()" aria-label="Tambah tamu"><i data-lucide="plus-circle" style="width:28px;height:28px"></i></button></div>
+      <div class="large"><h1>Tamu</h1><p id="guest-count">0 undangan</p></div>
+      <div class="page">
+        <div class="search"><i data-lucide="search"></i><input type="search" id="search-input" placeholder="Cari nama tamu" oninput="renderGuestList()" /></div>
+        <div class="seg" id="filter-pills">
+          <button class="on" data-f="all">Semua</button>
+          <button data-f="hadir">Hadir</button>
+          <button data-f="tidak_hadir">Absen</button>
+          <button data-f="pending">Pending</button>
+          <button data-f="checked_in">Check-in</button>
+        </div>
+        <div class="group" id="guest-list-container"></div>
+        <div>
+          <div class="group">
+            <div class="row plain"><span class="grow t" style="font-weight:500">Kapasitas database tamu</span><span class="v"><span id="quota-used">0</span> / <span id="quota-max">100</span></span></div>
+            <div style="padding:0 16px 16px"><div style="height:8px;background:var(--fill);border-radius:99px;overflow:hidden"><div id="quota-bar" style="height:100%;width:0;background:var(--blue);border-radius:99px;transition:width .6s"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACARA -->
+    <div id="tab-acara" class="hidden">
+      <div class="nav"><span class="nav-title">Acara</span></div>
+      <div class="large"><h1>Acara</h1><p>Waktu, lokasi, dan pesan pembuka</p></div>
+      <form class="page" id="event-form" onsubmit="submitEditEvent(event)">
+        <div class="group">
+          <div class="field"><label for="ev-title">Judul</label><input type="text" id="ev-title" required /></div>
+          <div class="field"><label for="ev-date">Waktu</label><input type="datetime-local" id="ev-date" required /></div>
+        </div>
+        <div class="group">
+          <div class="field col"><label for="ev-location">Lokasi</label><textarea id="ev-location" rows="2" required></textarea></div>
+        </div>
+        <div class="group">
+          <div class="field col"><label for="ev-caption">Pesan pembuka</label><textarea id="ev-caption" rows="4" required></textarea></div>
+        </div>
+        <button type="submit" id="btn-save-event" class="btn">Simpan perubahan</button>
       </form>
     </div>
 
-    <!-- MAIN DASHBOARD CONTENT -->
-    <div id="dashboard-section" class="hidden flex-1 flex flex-col justify-between">
-
-      <!-- HEADER TOP BAR -->
-      <div class="p-5 flex items-center justify-between sticky top-0 z-30 apple-glass border-b border-[#1c1c1e]">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-[#1c1c1e] flex items-center justify-center text-white font-bold border border-[#3a3a3c]">
-            <i data-lucide="user" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h4 id="home-client-name" class="font-bold text-xs text-white leading-tight">Memuat...</h4>
-            <span class="text-[10px] text-[#86868b] font-mono" id="header-client-slug">...</span>
+    <!-- AKUN -->
+    <div id="tab-akun" class="hidden">
+      <div class="nav"><span class="nav-title">Akun</span></div>
+      <div class="large"><h1>Akun</h1></div>
+      <div class="page">
+        <div class="group">
+          <div class="row plain" style="padding:16px">
+            <div class="avatar" style="width:56px;height:56px;font-size:20px;background:linear-gradient(145deg,#ff6b81,#ff375f)" id="account-avatar">R</div>
+            <div class="grow"><div class="t" id="account-name" style="font-size:18px">…</div><div class="s" id="account-slug">…</div></div>
           </div>
         </div>
-        <div class="flex items-center gap-2">
-          <button onclick="toggleTheme()" id="btn-theme" title="Ubah Tema" class="w-9 h-9 bg-[#1c1c1e] text-[#86868b] hover:text-white rounded-full flex items-center justify-center transition border border-[#3a3a3c]">
-            <i data-lucide="sun" id="theme-icon" class="w-4 h-4"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- TAB 1: HOME -->
-      <div id="tab-home" class="p-5 space-y-4">
-        
-        <!-- HERO CARD -->
-        <div class="relative bg-gradient-to-br from-[#1c1c1e] to-[#2c2c2e] p-6 rounded-3xl border border-[#3a3a3c] overflow-hidden shadow-2xl">
-          <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
-          <div class="flex justify-between items-start relative z-10">
-            <div>
-              <span class="text-[10px] font-bold uppercase tracking-widest text-[#86868b]">Ringkasan Live</span>
-              <h2 class="text-2xl font-bold tracking-tight text-white mt-1" id="hero-hadir-text">0 / 0 Pax</h2>
-              <p class="text-[11px] text-[#86868b] mt-0.5">Terkonfirmasi hadir dari kapasitas total</p>
-            </div>
-            <div class="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center text-center">
-              <span class="text-sm font-bold text-white" id="hero-pct-text">0%</span>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3 mt-6 pt-4 border-t border-[#3a3a3c] text-xs relative z-10">
-            <div>
-              <p class="text-[9px] text-[#86868b] uppercase font-semibold">Tamu Hadir</p>
-              <p class="font-bold text-white text-sm mt-0.5" id="stat-hadir-groups">0 Grup</p>
-            </div>
-            <div>
-              <p class="text-[9px] text-[#86868b] uppercase font-semibold">Check-In Venue</p>
-              <p class="font-bold text-white text-sm mt-0.5" id="stat-checkedin-count">0 Orang</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- CATEGORY DONUT CHART ANALYTICS -->
-        <div class="bg-[#1c1c1e]/60 p-5 rounded-3xl border border-[#2c2c2e] space-y-4 backdrop-blur-xl">
-          <div class="flex justify-between items-center">
-            <div>
-              <h3 class="text-xs font-bold text-white">Analitik Kategori Tamu</h3>
-              <p class="text-[10px] text-[#86868b]">Distribusi proporsi kelompok undangan</p>
-            </div>
-            <i data-lucide="pie-chart" class="w-4 h-4 text-[#86868b]"></i>
-          </div>
-          
-          <!-- Wrapper Donut Chart & Legend -->
-          <div class="flex flex-col sm:flex-row items-center gap-6 py-2">
-            <!-- Donut Chart SVG Container -->
-            <div class="relative w-36 h-36 flex-shrink-0 flex items-center justify-center">
-              <svg id="donut-chart-svg" class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                <!-- Diisi secara dinamis melalui JavaScript -->
-              </svg>
-              <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-                <span class="text-[10px] text-[#86868b] uppercase font-bold">Total</span>
-                <span id="donut-total-val" class="text-base font-extrabold text-white leading-none mt-0.5">0</span>
-              </div>
-            </div>
-
-            <!-- Legend Container -->
-            <div id="donut-legend" class="w-full space-y-2 text-xs">
-              <!-- Diisi secara dinamis melalui JavaScript -->
-            </div>
-          </div>
-        </div>
-
-        <!-- RECENT RSVP ACTIVITY -->
-        <div class="bg-[#1c1c1e]/60 p-5 rounded-3xl border border-[#2c2c2e] space-y-3 backdrop-blur-xl">
-          <div class="flex justify-between items-center">
-            <h3 class="text-xs font-bold text-white">Aktivitas RSVP Terbaru</h3>
-            <button onclick="switchTab('tamu')" class="text-[11px] font-semibold text-[#0a84ff] hover:underline">Semua →</button>
-          </div>
-          <div id="recent-rsvp-list" class="space-y-2.5">
-            <!-- Diisi lewat JS -->
-          </div>
-        </div>
-
-      </div>
-
-      <!-- TAB 2: TAMU -->
-      <div id="tab-tamu" class="p-5 space-y-4 hidden">
-        <div class="flex justify-between items-center">
-          <div>
-            <h2 class="text-xl font-bold text-white tracking-tight">Daftar Tamu</h2>
-            <p class="text-[10px] text-[#86868b]">Kelola status kehadiran dan buat undangan</p>
-          </div>
-          <button onclick="openAddGuestModal()" class="bg-white hover:bg-[#e0e0e0] text-black font-bold text-xs px-4 py-2.5 rounded-full shadow-md transition flex items-center gap-1.5">
-            <i data-lucide="plus" class="w-4 h-4"></i>
-            <span>Tambah</span>
-          </button>
-        </div>
-
-        <div class="relative">
-          <input type="text" id="search-input" onkeyup="filterGuests()" placeholder="Cari nama tamu..." class="w-full text-xs p-3.5 pl-10 rounded-2xl bg-[#1c1c1e] border border-[#3a3a3c] text-white placeholder-[#545456] outline-none focus:ring-2 focus:ring-white transition" />
-          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3.5 text-[#86868b]"></i>
-        </div>
-
-        <div class="flex gap-1.5 overflow-x-auto no-scrollbar text-xs font-semibold pb-1" id="filter-pills">
-          <button onclick="setFilter('all', event)" class="pill-btn active px-4 py-2 rounded-full bg-white text-black shadow-sm whitespace-nowrap">Semua</button>
-          <button onclick="setFilter('hadir', event)" class="pill-btn px-4 py-2 rounded-full bg-[#1c1c1e] text-[#86868b] border border-[#3a3a3c] whitespace-nowrap">Hadir</button>
-          <button onclick="setFilter('tidak_hadir', event)" class="pill-btn px-4 py-2 rounded-full bg-[#1c1c1e] text-[#86868b] border border-[#3a3a3c] whitespace-nowrap">Absen</button>
-          <button onclick="setFilter('pending', event)" class="pill-btn px-4 py-2 rounded-full bg-[#1c1c1e] text-[#86868b] border border-[#3a3a3c] whitespace-nowrap">Pending</button>
-          <button onclick="setFilter('checked_in', event)" class="pill-btn px-4 py-2 rounded-full bg-[#1c1c1e] text-[#86868b] border border-[#3a3a3c] whitespace-nowrap">Checked</button>
-        </div>
-
-        <div id="guest-list-container" class="space-y-2.5"></div>
-
-        <div class="bg-[#1c1c1e]/60 p-4 rounded-3xl border border-[#2c2c2e] space-y-2 backdrop-blur-xl">
-          <div class="flex justify-between text-xs font-semibold">
-            <span class="text-[#86868b]">Kapasitas Database Tamu</span>
-            <span class="text-white"><span id="quota-used">0</span> / <span id="quota-max">100</span></span>
-          </div>
-          <div class="w-full bg-[#2c2c2e] rounded-full h-2 overflow-hidden border border-[#3a3a3c]">
-            <div id="quota-bar" class="bg-white h-full rounded-full transition-all duration-500" style="width: 0%"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 3: ACARA -->
-      <div id="tab-acara" class="p-5 space-y-4 hidden">
         <div>
-          <h2 class="text-xl font-bold text-white tracking-tight">Pengaturan Acara</h2>
-          <p class="text-[10px] text-[#86868b]">Ubah detail waktu dan lokasi resepsi</p>
-        </div>
-
-        <form id="event-form" onsubmit="submitEditEvent(event)" class="space-y-3.5 bg-[#1c1c1e]/60 p-5 rounded-3xl border border-[#2c2c2e] backdrop-blur-xl">
-          <div>
-            <label class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Judul Acara</label>
-            <input type="text" id="ev-title" required class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e]/50 border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white" />
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Tanggal & Waktu</label>
-            <input type="datetime-local" id="ev-date" required class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e]/50 border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white" />
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Lokasi Gedung</label>
-            <textarea id="ev-location" rows="2" required class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e]/50 border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white"></textarea>
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Pesan Pembuka / Caption</label>
-            <textarea id="ev-caption" rows="3" required class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e]/50 border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white"></textarea>
-          </div>
-          <button type="submit" id="btn-save-event" class="w-full bg-white hover:bg-[#e0e0e0] text-black font-bold text-xs py-4 rounded-2xl shadow-md transition flex items-center justify-center gap-2 mt-2">
-            <i data-lucide="save" class="w-4 h-4"></i>
-            <span>Simpan Perubahan</span>
-          </button>
-        </form>
-      </div>
-
-      <!-- TAB 4: AKUN -->
-      <div id="tab-akun" class="p-5 space-y-4 hidden">
-        <div>
-          <h2 class="text-xl font-bold text-white tracking-tight">Akun Klien</h2>
-          <p class="text-[10px] text-[#86868b]">Informasi sesi login saat ini</p>
-        </div>
-
-        <div class="bg-[#1c1c1e]/60 p-5 rounded-3xl border border-[#2c2c2e] space-y-4 backdrop-blur-xl">
-          <div class="flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center font-bold text-lg">
-              <i data-lucide="user-check" class="w-6 h-6"></i>
-            </div>
-            <div>
-              <h4 id="account-name" class="font-bold text-sm text-white">...</h4>
-              <p id="account-slug" class="text-xs text-[#86868b] font-mono">...</p>
-            </div>
-          </div>
-          <div class="pt-3 border-t border-[#3a3a3c] space-y-2">
-            <button onclick="logout()" class="w-full bg-[#ff453a]/10 hover:bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/30 font-bold text-xs py-3.5 rounded-2xl transition flex items-center justify-center gap-2">
-              <i data-lucide="log-out" class="w-4 h-4"></i>
-              <span>Keluar dari Sesi</span>
-            </button>
+          <div class="group-title">Tampilan</div>
+          <div class="seg" id="theme-seg">
+            <button data-t="auto">Otomatis</button><button data-t="light">Terang</button><button data-t="dark">Gelap</button>
           </div>
         </div>
-      </div>
-
-      <!-- BOTTOM FLOATING DOCK NAV -->
-      <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-sm apple-glass text-white p-2 rounded-full shadow-2xl flex items-center justify-around border border-[#3a3a3c] z-40">
-        <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex-1 py-2.5 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold bg-white text-black shadow-md transition">
-          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-          <span>Home</span>
-        </button>
-        <button onclick="switchTab('tamu')" id="nav-tamu" class="nav-btn flex-1 py-2.5 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold text-[#86868b] hover:text-white transition">
-          <i data-lucide="users" class="w-4 h-4"></i>
-          <span>Tamu</span>
-        </button>
-        <button onclick="switchTab('acara')" id="nav-acara" class="nav-btn flex-1 py-2.5 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold text-[#86868b] hover:text-white transition">
-          <i data-lucide="calendar-cog" class="w-4 h-4"></i>
-          <span>Acara</span>
-        </button>
-        <button onclick="switchTab('akun')" id="nav-akun" class="nav-btn flex-1 py-2.5 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold text-[#86868b] hover:text-white transition">
-          <i data-lucide="user-cog" class="w-4 h-4"></i>
-          <span>Akun</span>
-        </button>
-      </div>
-
-    </div>
-
-    <!-- MODAL TAMBAH TAMU -->
-    <div id="add-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-      <div class="bg-[#1c1c1e] border border-[#3a3a3c] w-full max-w-xs rounded-3xl p-6 space-y-4 shadow-2xl">
-        <div class="flex justify-between items-center border-b border-[#2c2c2e] pb-3">
-          <h3 class="text-sm font-bold text-white">Tambah Tamu Baru</h3>
-          <button onclick="closeAddGuestModal()" class="text-[#86868b] hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
-        </div>
-        <div class="space-y-3">
-          <div>
-            <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Nama Tamu / Kelompok</label>
-            <input type="text" id="modal-name" placeholder="Budi Santoso & Keluarga" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white" />
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Kategori</label>
-            <select id="modal-cat" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white">
-              <option value="Keluarga">Keluarga</option>
-              <option value="Teman">Teman</option>
-              <option value="Tetangga">Tetangga</option>
-              <option value="Kolega">Kolega</option>
-              <option value="Umum" selected>Umum</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Kuota Orang (Pax)</label>
-            <input type="number" id="modal-pax" min="1" value="2" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white" />
-          </div>
-        </div>
-        <div class="flex gap-2 pt-2">
-          <button onclick="closeAddGuestModal()" class="flex-1 text-xs font-semibold py-3.5 text-[#86868b] hover:bg-[#2c2c2e] rounded-2xl">Batal</button>
-          <button onclick="submitAddGuest()" id="btn-save-guest" class="flex-1 text-xs font-bold py-3.5 bg-white text-black rounded-2xl shadow-md">Simpan</button>
-        </div>
+        <button class="btn red" onclick="logout()">Keluar</button>
       </div>
     </div>
 
-    <!-- MODAL EDIT TAMU -->
-    <div id="edit-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-      <div class="bg-[#1c1c1e] border border-[#3a3a3c] w-full max-w-xs rounded-3xl p-6 space-y-4 shadow-2xl">
-        <div class="flex justify-between items-center border-b border-[#2c2c2e] pb-3">
-          <h3 class="text-sm font-bold text-white">Edit Data Tamu</h3>
-          <button onclick="closeEditGuestModal()" class="text-[#86868b] hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
-        </div>
-        
-        <input type="hidden" id="edit-guest-id" />
+    <!-- TAB BAR -->
+    <nav class="tabbar">
+      <button id="nav-home" class="on" onclick="switchTab('home')"><i data-lucide="layout-grid"></i><span>Ringkasan</span></button>
+      <button id="nav-tamu" onclick="switchTab('tamu')"><i data-lucide="users"></i><span>Tamu</span></button>
+      <button id="nav-acara" onclick="switchTab('acara')"><i data-lucide="calendar-days"></i><span>Acara</span></button>
+      <button id="nav-akun" onclick="switchTab('akun')"><i data-lucide="user-round"></i><span>Akun</span></button>
+    </nav>
+  </section>
+</div>
 
-        <div class="space-y-3">
-          <div>
-            <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Nama Tamu</label>
-            <input type="text" id="edit-name" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white" />
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Kategori</label>
-            <select id="edit-cat" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white">
-              <option value="Keluarga">Keluarga</option>
-              <option value="Teman">Teman</option>
-              <option value="Tetangga">Tetangga</option>
-              <option value="Kolega">Kolega</option>
-              <option value="Umum">Umum</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Kuota Pax</label>
-            <input type="number" id="edit-pax" min="1" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white" />
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-[#86868b] uppercase mb-1">Status RSVP</label>
-            <select id="edit-rsvp" class="w-full text-xs p-3.5 rounded-2xl bg-[#2c2c2e] border border-[#3a3a3c] text-white outline-none focus:ring-2 focus:ring-white">
-              <option value="pending">Pending</option>
-              <option value="hadir">Hadir</option>
-              <option value="tidak_hadir">Absen</option>
-            </select>
-          </div>
-          <div class="flex items-center justify-between p-3.5 bg-[#2c2c2e] rounded-2xl border border-[#3a3a3c]">
-            <span class="text-xs font-semibold text-white">Status Check-in</span>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="edit-checkedin" class="sr-only peer">
-              <div class="w-9 h-5 bg-[#3a3a3c] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-white"></div>
-            </label>
-          </div>
-        </div>
-
-        <div class="flex gap-2 pt-2">
-          <button onclick="closeEditGuestModal()" class="flex-1 text-xs font-semibold py-3.5 text-[#86868b] hover:bg-[#2c2c2e] rounded-2xl">Batal</button>
-          <button onclick="submitEditGuest()" id="btn-update-guest" class="flex-1 text-xs font-bold py-3.5 bg-white text-black rounded-2xl shadow-md">Simpan</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
+<div class="backdrop" id="backdrop" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+<div class="toast" id="toast"></div>
 
 <script>
-  const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
-
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  
-  let globalData = null;
-  let activeFilter = 'all';
-
-  function initTheme() {
-    const savedTheme = localStorage.getItem('rr_theme') || 'dark';
-    if (savedTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.body.style.backgroundColor = "#000000";
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.body.style.backgroundColor = "#f5f5f7";
-    }
-    updateThemeIcon();
-  }
-
-  function toggleTheme() {
-    const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('rr_theme', isDark ? 'dark' : 'light');
-    document.body.style.backgroundColor = isDark ? "#000000" : "#f5f5f7";
-    updateThemeIcon();
-  }
-
-  function updateThemeIcon() {
-    const isDark = document.documentElement.classList.contains('dark');
-    const iconEl = document.getElementById('theme-icon');
-    if (iconEl) {
-      iconEl.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-      initIcons();
-    }
-  }
-
-  function initIcons() {
-    if (window.lucide) {
-      lucide.createIcons();
-    }
-  }
-
-  async function checkSession() {
-    initTheme();
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) loadDashboard();
-    else initIcons();
-  }
-
-  async function login(e) {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    const btn = document.getElementById('btn-login');
-    btn.disabled = true;
-    btn.innerText = "Memproses...";
-
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error) {
-      alert("Login gagal: " + error.message);
-      btn.disabled = false;
-      btn.innerHTML = '<span>Masuk Portal</span><i data-lucide="arrow-right" class="w-4 h-4"></i>';
-      initIcons();
-      return;
-    }
-    loadDashboard();
-  }
-
-  async function logout() {
-    await supabaseClient.auth.signOut();
-    location.reload();
-  }
-
-  async function loadDashboard() {
-    document.getElementById('login-section').classList.add('hidden');
-    document.getElementById('dashboard-section').classList.remove('hidden');
-
-    const { data, error } = await supabaseClient.rpc('get_client_dashboard_data');
-    if (error || !data || !data.success) {
-      alert("Gagal memuat data dashboard. Sesi Anda mungkin berakhir.");
-      return;
-    }
-
-    globalData = data;
-    renderUI();
-  }
-
-  function renderUI() {
-    const { client, event, stats, categories, guests } = globalData;
-
-    document.getElementById('header-client-slug').innerText = `@${client.slug}`;
-    document.getElementById('home-client-name').innerText = client.name;
-    document.getElementById('account-name').innerText = client.name;
-    document.getElementById('account-slug').innerText = `@${client.slug}`;
-
-    const eventDateFormatted = new Date(event.event_date);
-
-    document.getElementById('ev-title').value = event.title || '';
-    const tzOffset = eventDateFormatted.getTimezoneOffset() * 60000;
-    const localISOTime = (new Date(eventDateFormatted - tzOffset)).toISOString().slice(0, 16);
-    document.getElementById('ev-date').value = localISOTime;
-    document.getElementById('ev-location').value = event.location || '';
-    document.getElementById('ev-caption').value = event.caption || '';
-
-    document.getElementById('hero-hadir-text').innerText = `${stats.total_hadir} / ${stats.total_max_pax} Pax`;
-    const hadirPct = stats.total_max_pax > 0 ? Math.round((stats.total_hadir / stats.total_max_pax) * 100) : 0;
-    document.getElementById('hero-pct-text').innerText = `${hadirPct}%`;
-
-    document.getElementById('stat-hadir-groups').innerText = `${stats.count_hadir_groups} Grup`;
-    document.getElementById('stat-checkedin-count').innerText = `${stats.total_checked_in} Orang`;
-
-    renderDonutChart(categories);
-    renderRecentRSVP(guests);
-    renderGuestList();
-
-    document.getElementById('quota-used').innerText = stats.total_guests;
-    document.getElementById('quota-max').innerText = 100;
-    const quotaPct = Math.min(100, Math.round((stats.total_guests / 100) * 100));
-    document.getElementById('quota-bar').style.width = `${quotaPct}%`;
-
-    initIcons();
-  }
-
-  // FUNGSI RENDER DONUT CHART & LEGEND
-  function renderDonutChart(categories) {
-    const svg = document.getElementById('donut-chart-svg');
-    const legendContainer = document.getElementById('donut-legend');
-    const totalValEl = document.getElementById('donut-total-val');
-    
-    svg.innerHTML = '';
-    legendContainer.innerHTML = '';
-
-    if (!categories || categories.length === 0) {
-      legendContainer.innerHTML = '<p class="text-xs text-[#86868b]">Belum ada data kategori.</p>';
-      totalValEl.innerText = "0";
-      return;
-    }
-
-    const totalSum = categories.reduce((sum, c) => sum + c.total, 0);
-    totalValEl.innerText = totalSum;
-
-    // Palet warna elegan ala Apple Design System
-    const colors = ['#0a84ff', '#30d158', '#ff9f0a', '#bf5af2', '#ff375f', '#64d2ff', '#ffd60a'];
-    
-    let cumulativePercent = 0;
-
-    categories.forEach((c, index) => {
-      const color = colors[index % colors.length];
-      const percent = totalSum > 0 ? (c.total / totalSum) * 100 : 0;
-      
-      // Render potongan SVG Donut
-      const strokeDasharray = `${percent} ${100 - percent}`;
-      const strokeDashoffset = -cumulativePercent;
-
-      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      circle.setAttribute('cx', '18');
-      circle.setAttribute('cy', '18');
-      circle.setAttribute('r', '15.91549430918954');
-      circle.setAttribute('fill', 'transparent');
-      circle.setAttribute('stroke', color);
-      circle.setAttribute('stroke-width', '4');
-      circle.setAttribute('stroke-dasharray', strokeDasharray);
-      circle.setAttribute('stroke-dashoffset', strokeDashoffset);
-      svg.appendChild(circle);
-
-      cumulativePercent += percent;
-
-      // Render Legenda Kategori
-      const legendItem = document.createElement('div');
-      legendItem.className = "flex items-center justify-between";
-      legendItem.innerHTML = `
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${color};"></span>
-          <span class="text-white font-medium truncate max-w-[120px]">${c.category}</span>
-        </div>
-        <span class="text-[#86868b] font-mono text-[11px]">${c.hadir} Hadir / ${c.total} Total</span>
-      `;
-      legendContainer.appendChild(legendItem);
-    });
-  }
-
-  function renderRecentRSVP(guests) {
-    const container = document.getElementById('recent-rsvp-list');
-    container.innerHTML = '';
-
-    const recent = guests.slice(0, 4);
-    if (recent.length === 0) {
-      container.innerHTML = '<p class="text-xs text-[#86868b]">Belum ada data respon.</p>';
-      return;
-    }
-
-    recent.forEach(g => {
-      let badge = '<span class="w-2 h-2 rounded-full bg-[#ff9f0a]"></span>';
-      if (g.rsvp_status === 'hadir') badge = '<span class="w-2 h-2 rounded-full bg-[#30d158]"></span>';
-      if (g.rsvp_status === 'tidak_hadir') badge = '<span class="w-2 h-2 rounded-full bg-[#ff453a]"></span>';
-
-      const div = document.createElement('div');
-      div.className = "flex items-center justify-between text-xs p-3 rounded-2xl bg-[#2c2c2e]/40 border border-[#3a3a3c]/60";
-      div.innerHTML = `
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-xl bg-[#2c2c2e] text-white font-bold flex items-center justify-center text-xs border border-[#3a3a3c]">
-            ${g.group_name.substring(0,2).toUpperCase()}
-          </div>
-          <div>
-            <p class="font-bold text-white">${g.group_name}</p>
-            <p class="text-[10px] text-[#86868b]">${g.category}</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          ${badge}
-          <span class="text-[10px] text-[#86868b]">Terbaru</span>
-        </div>
-      `;
-      container.appendChild(div);
-    });
-  }
-
-  function renderGuestList() {
-    const container = document.getElementById('guest-list-container');
-    container.innerHTML = '';
-
-    let list = globalData.guests;
-    const search = document.getElementById('search-input').value.toLowerCase();
-
-    if (search) {
-      list = list.filter(g => g.group_name.toLowerCase().includes(search));
-    }
-
-    if (activeFilter === 'hadir') list = list.filter(g => g.rsvp_status === 'hadir');
-    if (activeFilter === 'tidak_hadir') list = list.filter(g => g.rsvp_status === 'tidak_hadir');
-    if (activeFilter === 'pending') list = list.filter(g => g.rsvp_status === 'pending');
-    if (activeFilter === 'checked_in') list = list.filter(g => g.is_checked_in);
-
-    if (list.length === 0) {
-      container.innerHTML = '<p class="text-xs text-[#86868b] text-center py-6">Tidak ada tamu yang sesuai.</p>';
-      return;
-    }
-
-    const domainBase = window.location.origin;
-
-    list.forEach(g => {
-      const link = `${domainBase}/${globalData.client.slug}/${g.invitation_token}`;
-      const waMessage = encodeURIComponent(
-        `Halo *${g.group_name}*,\n\nKami mengundang Anda untuk menghadiri acara *${globalData.event.title}*.\n\nSilakan konfirmasi kehadiran Anda melalui tautan resmi berikut:\n${link}`
-      );
-
-      let badgeClass = "bg-[#ff9f0a]/10 text-[#ff9f0a] border border-[#ff9f0a]/20";
-      let badgeText = "Pending";
-      if (g.rsvp_status === 'hadir') { badgeClass = "bg-[#30d158]/10 text-[#30d158] border border-[#30d158]/20"; badgeText = "Hadir"; }
-      if (g.rsvp_status === 'tidak_hadir') { badgeClass = "bg-[#ff453a]/10 text-[#ff453a] border border-[#ff453a]/20"; badgeText = "Absen"; }
-      if (g.is_checked_in) { badgeClass = "bg-[#0a84ff]/10 text-[#0a84ff] border border-[#0a84ff]/20"; badgeText = "Checked"; }
-
-      const card = document.createElement('div');
-      card.className = "bg-[#1c1c1e]/60 p-3.5 rounded-2xl border border-[#2c2c2e] flex items-center justify-between backdrop-blur-xl";
-      card.innerHTML = `
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-[#2c2c2e] text-white font-bold flex items-center justify-center text-xs border border-[#3a3a3c]">
-            ${g.group_name.substring(0,2).toUpperCase()}
-          </div>
-          <div>
-            <h4 class="font-bold text-xs text-white">${g.group_name}</h4>
-            <div class="flex items-center gap-2 mt-0.5">
-              <span class="text-[10px] text-[#86868b]">${g.category} • ${g.max_pax} Pax</span>
-              <span class="text-[9px] font-semibold px-2 py-0.5 rounded-md ${badgeClass}">${badgeText}</span>
-            </div>
-          </div>
-        </div>
-        <div class="flex items-center gap-1">
-          <button onclick="copyLink('${link}', this)" class="p-2 text-[#86868b] hover:text-white rounded-xl hover:bg-[#2c2c2e] transition" title="Salin Tautan">
-            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-          </button>
-          <a href="https://wa.me/?text=${waMessage}" target="_blank" class="p-2 text-[#86868b] hover:text-[#30d158] rounded-xl hover:bg-[#2c2c2e] transition" title="Kirim WA">
-            <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
-          </a>
-          <button onclick="openEditGuestModal('${g.id}')" class="p-2 text-[#86868b] hover:text-[#ff9f0a] rounded-xl hover:bg-[#2c2c2e] transition" title="Edit Data/Status">
-            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-          </button>
-          <button onclick="deleteGuest('${g.id}', '${g.group_name}')" class="p-2 text-[#86868b] hover:text-[#ff453a] rounded-xl hover:bg-[#2c2c2e] transition" title="Hapus Tamu">
-            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-          </button>
-        </div>
-      `;
-      container.appendChild(card);
-    });
-
-    initIcons();
-  }
-
-  function switchTab(tab) {
-    const tabs = ['home', 'tamu', 'acara', 'akun'];
-    tabs.forEach(t => {
-      const el = document.getElementById(`tab-${t}`);
-      const btn = document.getElementById(`nav-${t}`);
-      if (t === tab) {
-        el.classList.remove('hidden');
-        btn.className = "nav-btn flex-1 py-2.5 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold bg-white text-black shadow-md transition";
-      } else {
-        el.classList.add('hidden');
-        btn.className = "nav-btn flex-1 py-2.5 rounded-full flex flex-col items-center gap-0.5 text-[10px] font-bold text-[#86868b] hover:text-white transition";
-      }
-    });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  function setFilter(filter, e) {
-    activeFilter = filter;
-    document.querySelectorAll('#filter-pills button').forEach(btn => {
-      btn.className = "pill-btn px-4 py-2 rounded-full bg-[#1c1c1e] text-[#86868b] border border-[#3a3a3c] whitespace-nowrap text-xs font-semibold";
-    });
-    if (e) e.target.className = "pill-btn active px-4 py-2 rounded-full bg-white text-black whitespace-nowrap text-xs font-semibold";
-    renderGuestList();
-  }
-
-  function filterGuests() {
-    renderGuestList();
-  }
-
-  function copyLink(url, btn) {
-    navigator.clipboard.writeText(url).then(() => {
-      btn.classList.add('text-[#30d158]');
-      setTimeout(() => btn.classList.remove('text-[#30d158]'), 1500);
-    });
-  }
-
-  async function submitEditEvent(e) {
-    e.preventDefault();
-    const title = document.getElementById('ev-title').value.trim();
-    const date = document.getElementById('ev-date').value;
-    const location = document.getElementById('ev-location').value.trim();
-    const caption = document.getElementById('ev-caption').value.trim();
-
-    const btn = document.getElementById('btn-save-event');
-    btn.disabled = true;
-    btn.innerText = "Menyimpan...";
-
-    const { data, error } = await supabaseClient.rpc('update_event_by_client', {
-      p_title: title,
-      p_caption: caption,
-      p_event_date: new Date(date).toISOString(),
-      p_location: location
-    });
-
-    btn.disabled = false;
-    btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i><span>Simpan Perubahan</span>';
-    initIcons();
-
-    if (error || !data || !data.success) {
-      return alert(data ? data.message : "Gagal memperbarui acara.");
-    }
-
-    alert("Detail acara berhasil diperbarui!");
-    loadDashboard();
-  }
-
-  function openAddGuestModal() { document.getElementById('add-modal').classList.remove('hidden'); }
-  function closeAddGuestModal() { document.getElementById('add-modal').classList.add('hidden'); }
-
-  async function submitAddGuest() {
-    const name = document.getElementById('modal-name').value.trim();
-    const cat = document.getElementById('modal-cat').value;
-    const pax = parseInt(document.getElementById('modal-pax').value);
-
-    if (!name || isNaN(pax)) return alert("Isi data dengan benar.");
-
-    const btn = document.getElementById('btn-save-guest');
-    btn.disabled = true;
-    btn.innerText = "Menyimpan...";
-
-    const { data, error } = await supabaseClient.rpc('add_guest_by_client', {
-      p_group_name: name,
-      p_category: cat,
-      p_max_pax: pax
-    });
-
-    btn.disabled = false;
-    btn.innerText = "Simpan";
-
-    if (error || !data || !data.success) {
-      return alert(data ? data.message : "Gagal menambah tamu.");
-    }
-
-    closeAddGuestModal();
-    document.getElementById('modal-name').value = '';
-    loadDashboard();
-  }
-
-  function openEditGuestModal(guestId) {
-    const guest = globalData.guests.find(g => g.id === guestId);
-    if (!guest) return;
-
-    document.getElementById('edit-guest-id').value = guest.id;
-    document.getElementById('edit-name').value = guest.group_name;
-    document.getElementById('edit-cat').value = guest.category || 'Umum';
-    document.getElementById('edit-pax').value = guest.max_pax || 2;
-    document.getElementById('edit-rsvp').value = guest.rsvp_status || 'pending';
-    document.getElementById('edit-checkedin').checked = guest.is_checked_in || false;
-
-    document.getElementById('edit-modal').classList.remove('hidden');
-  }
-
-  function closeEditGuestModal() {
-    document.getElementById('edit-modal').classList.add('hidden');
-  }
-
-  async function submitEditGuest() {
-    const guestId = document.getElementById('edit-guest-id').value;
-    const name = document.getElementById('edit-name').value.trim();
-    const cat = document.getElementById('edit-cat').value;
-    const pax = parseInt(document.getElementById('edit-pax').value);
-    const rsvp = document.getElementById('edit-rsvp').value;
-    const checkedIn = document.getElementById('edit-checkedin').checked;
-
-    if (!name || isNaN(pax)) return alert("Isi data dengan benar.");
-
-    const btn = document.getElementById('btn-update-guest');
-    btn.disabled = true;
-    btn.innerText = "Menyimpan...";
-
-    const { data, error } = await supabaseClient.rpc('update_guest_by_client', {
-      p_guest_id: guestId,
-      p_group_name: name,
-      p_category: cat,
-      p_max_pax: pax,
-      p_rsvp_status: rsvp,
-      p_is_checked_in: checkedIn
-    });
-
-    btn.disabled = false;
-    btn.innerText = "Simpan";
-
-    if (error || !data || !data.success) {
-      return alert(data ? data.message : "Gagal memperbarui data tamu.");
-    }
-
-    closeEditGuestModal();
-    loadDashboard();
-  }
-
-  async function deleteGuest(guestId, guestName) {
-    if (!confirm(`Apakah Anda yakin ingin menghapus tamu "${guestName}"?`)) return;
-
-    const { data, error } = await supabaseClient.rpc('delete_guest_by_client', { p_guest_id: guestId });
-
-    if (error || !data || !data.success) {
-      return alert(data ? data.message : "Gagal menghapus tamu.");
-    }
-
-    loadDashboard();
-  }
-
-  checkSession();
+const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let globalData = null;
+let activeFilter = 'all';
+let activeTab = 'home';
+const COLORS = ['#0a84ff','#30d158','#ff9f0a','#bf5af2','#ff375f','#64d2ff','#ffd60a'];
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const icons = () => window.lucide && lucide.createIcons();
+
+/* ---------- Theme ---------- */
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+function applyTheme() {
+  const pref = localStorage.getItem('rr_theme') || 'auto';
+  const dark = pref === 'dark' || (pref === 'auto' && mq.matches);
+  document.documentElement.dataset.dark = dark ? '1' : '0';
+  $('meta-theme').content = dark ? '#000000' : '#f2f2f7';
+  document.querySelectorAll('#theme-seg button').forEach(b => b.classList.toggle('on', b.dataset.t === pref));
+}
+mq.addEventListener('change', applyTheme);
+$('theme-seg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  localStorage.setItem('rr_theme', b.dataset.t); applyTheme();
+});
+
+/* ---------- Toast & sheet ---------- */
+let toastTimer;
+function toast(msg, ok = true) {
+  const t = $('toast');
+  t.innerHTML = `<i data-lucide="${ok ? 'check-circle-2' : 'alert-circle'}" style="color:var(${ok ? '--green' : '--red'})"></i><span>${esc(msg)}</span>`;
+  icons(); t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+function openSheet(html) {
+  $('sheet').innerHTML = '<div class="grab"></div>' + html;
+  icons();
+  $('backdrop').classList.add('open'); $('sheet').classList.add('open');
+}
+function closeSheet() { $('backdrop').classList.remove('open'); $('sheet').classList.remove('open'); }
+
+/* ---------- Auth ---------- */
+async function checkSession() {
+  applyTheme();
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) loadDashboard(); else icons();
+}
+async function login(e) {
+  e.preventDefault();
+  const btn = $('btn-login');
+  btn.disabled = true; btn.textContent = 'Memproses…';
+  const { error } = await supabaseClient.auth.signInWithPassword({ email: $('email').value, password: $('password').value });
+  btn.disabled = false; btn.textContent = 'Masuk';
+  if (error) return toast('Login gagal: ' + error.message, false);
+  loadDashboard();
+}
+async function logout() { await supabaseClient.auth.signOut(); location.reload(); }
+
+async function loadDashboard() {
+  $('login').classList.add('hidden'); $('dash').classList.remove('hidden');
+  const { data, error } = await supabaseClient.rpc('get_client_dashboard_data');
+  if (error || !data || !data.success) return toast('Gagal memuat data. Silakan masuk lagi.', false);
+  globalData = data; renderUI();
+}
+
+/* ---------- Render ---------- */
+function renderUI() {
+  const { client, event, stats, categories, guests } = globalData;
+  $('home-client-name').textContent = client.name;
+  $('account-name').textContent = client.name;
+  $('account-slug').textContent = '@' + client.slug;
+  $('account-avatar').textContent = (client.name || 'R').trim().charAt(0).toUpperCase();
+
+  const d = new Date(event.event_date);
+  $('ev-title').value = event.title || '';
+  $('ev-date').value = new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  $('ev-location').value = event.location || '';
+  $('ev-caption').value = event.caption || '';
+
+  const pct = stats.total_max_pax > 0 ? Math.round(stats.total_hadir / stats.total_max_pax * 100) : 0;
+  $('hero-hadir-text').textContent = `${stats.total_hadir} / ${stats.total_max_pax}`;
+  $('hero-pct-text').textContent = pct + '%';
+  $('ring-fg').style.strokeDashoffset = 276.46 * (1 - Math.min(pct, 100) / 100);
+  $('stat-hadir-groups').textContent = stats.count_hadir_groups;
+  $('stat-checkedin-count').textContent = stats.total_checked_in;
+  $('stat-pending').textContent = guests.filter(g => g.rsvp_status === 'pending').length;
+  $('stat-absen').textContent = guests.filter(g => g.rsvp_status === 'tidak_hadir').length;
+
+  renderCategories(categories);
+  renderRecent(guests);
+  renderGuestList();
+
+  $('guest-count').textContent = `${stats.total_guests} undangan`;
+  $('quota-used').textContent = stats.total_guests;
+  $('quota-max').textContent = 100;
+  $('quota-bar').style.width = Math.min(100, stats.total_guests) + '%';
+  icons();
+}
+
+function renderCategories(cats) {
+  const box = $('cat-group');
+  if (!cats || !cats.length) { box.innerHTML = '<div class="empty">Belum ada data kategori.</div>'; return; }
+  const sum = cats.reduce((s, c) => s + c.total, 0);
+  const bar = cats.map((c, i) => `<i style="width:${sum ? c.total / sum * 100 : 0}%;background:${COLORS[i % COLORS.length]}"></i>`).join('');
+  const rows = cats.map((c, i) => `
+    <div class="row plain"><span class="dot" style="background:${COLORS[i % COLORS.length]}"></span>
+      <span class="grow t" style="font-weight:500">${esc(c.category)}</span>
+      <span class="v">${c.hadir} hadir · ${c.total}</span></div>`).join('');
+  box.innerHTML = `<div class="stack">${bar}</div>${rows}`;
+}
+
+function guestBadge(g) {
+  if (g.is_checked_in) return ['p-checked', 'Check-in'];
+  if (g.rsvp_status === 'hadir') return ['p-hadir', 'Hadir'];
+  if (g.rsvp_status === 'tidak_hadir') return ['p-absen', 'Absen'];
+  return ['p-pending', 'Pending'];
+}
+const avatar = (g, i) => `<div class="avatar" style="background:${COLORS[i % COLORS.length]}">${esc(g.group_name.substring(0, 2).toUpperCase())}</div>`;
+
+function renderRecent(guests) {
+  const box = $('recent-rsvp-list');
+  const recent = guests.slice(0, 4);
+  if (!recent.length) { box.innerHTML = '<div class="empty">Belum ada tamu. Tambahkan dari tab Tamu.</div>'; return; }
+  box.innerHTML = recent.map((g, i) => {
+    const [cls, txt] = guestBadge(g);
+    return `<div class="row">${avatar(g, i)}<div class="grow"><div class="t">${esc(g.group_name)}</div><div class="s">${esc(g.category)}</div></div><span class="pill ${cls}">${txt}</span></div>`;
+  }).join('');
+}
+
+function renderGuestList() {
+  const box = $('guest-list-container');
+  let list = globalData.guests;
+  const q = $('search-input').value.toLowerCase().trim();
+  if (q) list = list.filter(g => g.group_name.toLowerCase().includes(q));
+  if (activeFilter === 'checked_in') list = list.filter(g => g.is_checked_in);
+  else if (activeFilter !== 'all') list = list.filter(g => g.rsvp_status === activeFilter);
+
+  if (!list.length) { box.innerHTML = '<div class="empty">Tidak ada tamu yang sesuai.</div>'; return; }
+  box.innerHTML = list.map((g, i) => {
+    const [cls, txt] = guestBadge(g);
+    return `<button class="row" data-id="${esc(g.id)}">${avatar(g, i)}
+      <div class="grow"><div class="t">${esc(g.group_name)}</div><div class="s">${esc(g.category)} · ${g.max_pax} pax</div></div>
+      <span class="pill ${cls}">${txt}</span><i data-lucide="chevron-right" style="color:var(--sub);width:16px"></i></button>`;
+  }).join('');
+  icons();
+}
+$('guest-list-container').addEventListener('click', e => {
+  const r = e.target.closest('.row[data-id]'); if (r) openGuestActions(r.dataset.id);
+});
+$('filter-pills').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  activeFilter = b.dataset.f;
+  document.querySelectorAll('#filter-pills button').forEach(x => x.classList.toggle('on', x === b));
+  renderGuestList();
+});
+
+/* ---------- Navigation ---------- */
+function switchTab(tab) {
+  activeTab = tab;
+  ['home', 'tamu', 'acara', 'akun'].forEach(t => {
+    $('tab-' + t).classList.toggle('hidden', t !== tab);
+    $('nav-' + t).classList.toggle('on', t === tab);
+  });
+  window.scrollTo(0, 0);
+  document.body.classList.remove('scrolled');
+}
+window.addEventListener('scroll', () => document.body.classList.toggle('scrolled', window.scrollY > 40), { passive: true });
+
+/* ---------- Guest actions ---------- */
+const findGuest = id => globalData.guests.find(g => g.id === id);
+const guestLink = g => `${window.location.origin}/${globalData.client.slug}/${g.invitation_token}`;
+
+function openGuestActions(id) {
+  const g = findGuest(id); if (!g) return;
+  openSheet(`
+    <div class="group">
+      <div class="act-title">${esc(g.group_name)}</div>
+      <button class="row act" data-a="copy"><i data-lucide="copy"></i>Salin tautan undangan</button>
+      <button class="row act" data-a="wa"><i data-lucide="send"></i>Kirim lewat WhatsApp</button>
+      <button class="row act" data-a="edit"><i data-lucide="pencil"></i>Edit tamu</button>
+      <button class="row act danger" data-a="del"><i data-lucide="trash-2"></i>Hapus tamu</button>
+    </div>
+    <button class="btn gray" onclick="closeSheet()" style="margin-top:12px">Batal</button>`);
+  $('sheet').querySelectorAll('[data-a]').forEach(b => b.onclick = () => guestAction(b.dataset.a, g));
+}
+function guestAction(a, g) {
+  if (a === 'copy') {
+    navigator.clipboard.writeText(guestLink(g)).then(() => toast('Tautan disalin'), () => toast('Gagal menyalin tautan', false));
+    closeSheet();
+  } else if (a === 'wa') {
+    const msg = encodeURIComponent(`Halo *${g.group_name}*,\n\nKami mengundang Anda untuk menghadiri acara *${globalData.event.title}*.\n\nSilakan konfirmasi kehadiran Anda melalui tautan resmi berikut:\n${guestLink(g)}`);
+    window.open(`https://wa.me/?text=${msg}`, '_blank'); closeSheet();
+  } else if (a === 'edit') openGuestSheet(g.id);
+  else if (a === 'del') confirmDelete(g);
+}
+function confirmDelete(g) {
+  openSheet(`
+    <div class="group"><div class="act-title" style="padding:16px">Hapus “${esc(g.group_name)}”? Tautan undangannya tidak akan bisa dipakai lagi.</div>
+      <button class="row act danger" id="do-del"><i data-lucide="trash-2"></i>Hapus</button></div>
+    <button class="btn gray" onclick="closeSheet()" style="margin-top:12px">Batal</button>`);
+  $('do-del').onclick = async () => {
+    const { data, error } = await supabaseClient.rpc('delete_guest_by_client', { p_guest_id: g.id });
+    if (error || !data || !data.success) return toast(data?.message || 'Gagal menghapus tamu.', false);
+    closeSheet(); toast('Tamu dihapus'); loadDashboard();
+  };
+}
+
+/* Add / edit sheet (satu form untuk keduanya) */
+function openGuestSheet(id) {
+  const g = id ? findGuest(id) : null;
+  const cats = ['Keluarga', 'Teman', 'Tetangga', 'Kolega', 'Umum'];
+  const cur = g ? (g.category || 'Umum') : 'Umum';
+  openSheet(`
+    <div class="sheet-head"><button onclick="closeSheet()">Batal</button><h3>${g ? 'Edit tamu' : 'Tamu baru'}</h3><button id="gs-save">${g ? 'Simpan' : 'Tambah'}</button></div>
+    <div class="group">
+      <div class="field"><label>Nama</label><input type="text" id="gs-name" placeholder="Budi Santoso & Keluarga" value="${esc(g?.group_name || '')}" /></div>
+      <div class="field"><label>Kategori</label><select id="gs-cat">${cats.map(c => `<option ${c === cur ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+      <div class="field"><label>Kuota (pax)</label><input type="number" id="gs-pax" min="1" inputmode="numeric" value="${g ? g.max_pax || 2 : 2}" /></div>
+    </div>
+    ${g ? `<div class="group">
+      <div class="field"><label>RSVP</label><select id="gs-rsvp">
+        <option value="pending" ${g.rsvp_status === 'pending' ? 'selected' : ''}>Pending</option>
+        <option value="hadir" ${g.rsvp_status === 'hadir' ? 'selected' : ''}>Hadir</option>
+        <option value="tidak_hadir" ${g.rsvp_status === 'tidak_hadir' ? 'selected' : ''}>Absen</option></select></div>
+      <div class="field"><label style="flex:1">Sudah check-in</label><span class="switch"><input type="checkbox" id="gs-checked" ${g.is_checked_in ? 'checked' : ''}><span></span></span></div>
+    </div>` : ''}`);
+  $('gs-save').onclick = () => saveGuest(g);
+  if (!g) setTimeout(() => $('gs-name').focus(), 350);
+}
+async function saveGuest(g) {
+  const name = $('gs-name').value.trim(), cat = $('gs-cat').value, pax = parseInt($('gs-pax').value);
+  if (!name || isNaN(pax) || pax < 1) return toast('Isi nama dan kuota dengan benar.', false);
+  const btn = $('gs-save'); btn.disabled = true;
+  const call = g
+    ? supabaseClient.rpc('update_guest_by_client', { p_guest_id: g.id, p_group_name: name, p_category: cat, p_max_pax: pax, p_rsvp_status: $('gs-rsvp').value, p_is_checked_in: $('gs-checked').checked })
+    : supabaseClient.rpc('add_guest_by_client', { p_group_name: name, p_category: cat, p_max_pax: pax });
+  const { data, error } = await call;
+  btn.disabled = false;
+  if (error || !data || !data.success) return toast(data?.message || 'Gagal menyimpan tamu.', false);
+  closeSheet(); toast(g ? 'Tamu diperbarui' : 'Tamu ditambahkan'); loadDashboard();
+}
+
+/* ---------- Event ---------- */
+async function submitEditEvent(e) {
+  e.preventDefault();
+  const btn = $('btn-save-event');
+  btn.disabled = true; btn.textContent = 'Menyimpan…';
+  const { data, error } = await supabaseClient.rpc('update_event_by_client', {
+    p_title: $('ev-title').value.trim(),
+    p_caption: $('ev-caption').value.trim(),
+    p_event_date: new Date($('ev-date').value).toISOString(),
+    p_location: $('ev-location').value.trim()
+  });
+  btn.disabled = false; btn.textContent = 'Simpan perubahan';
+  if (error || !data || !data.success) return toast(data?.message || 'Gagal memperbarui acara.', false);
+  toast('Detail acara disimpan'); loadDashboard();
+}
+
+checkSession();
 </script>
-
 </body>
 </html>
