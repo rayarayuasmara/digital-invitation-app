@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Undangan Pernikahan</title>
+  <title>Undangan Pernikahan - RayaRayu</title>
   <!-- Tailwind CSS & Font -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -188,17 +188,26 @@
 
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
- // Membaca path URL (misal: /rudi-irul/f4d30e93)
-const pathSegments = window.location.pathname.split('/').filter(Boolean);
-const urlParams = new URLSearchParams(window.location.search);
+  // Fungsi Pembaca Token Fleksibel (Mendukung URL Rewrite /rudi-irul/f4d30e93 dan Query Param ?token=f4d30e93)
+  function getInvitationToken() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryToken = urlParams.get('token');
+    if (queryToken) return queryToken.trim();
 
-// pathSegments[0] = 'rudi-irul', pathSegments[1] = 'f4d30e93'
-const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token');
+    const pathSegments = window.location.pathname.split('/').filter(Boolean);
+    if (pathSegments.length >= 2) {
+      return pathSegments[pathSegments.length - 1].trim();
+    } else if (pathSegments.length === 1 && pathSegments[0] !== 'invitation' && pathSegments[0] !== 'invitation.html') {
+      return pathSegments[0].trim();
+    }
 
+    return null;
+  }
+
+  const token = getInvitationToken();
   let eventDateObj = null;
 
   async function init() {
-    // Wajib ada token tamu personal
     if (!token) {
       showError("Tautan undangan tidak valid atau token tidak ditemukan.");
       return;
@@ -239,8 +248,11 @@ const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token'
       document.getElementById('status-select').value = guest.rsvp_status;
       togglePaxInput();
       if (guest.rsvp_status === 'hadir') {
-        document.getElementById('pax-input').value = guest.pax_confirmed;
-        renderQRCode(guest.ticket_token);
+        document.getElementById('pax-input').value = guest.pax_confirmed || guest.max_pax;
+        
+        // Render QR Code Tiket menggunakan token aktif
+        const activeToken = guest.ticket_token || guest.invitation_token || token;
+        renderQRCode(activeToken);
       }
     }
 
@@ -290,7 +302,7 @@ const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token'
       p_pax: pax
     });
 
-    if (error || !data.success) {
+    if (error || !data || !data.success) {
       alert(data ? data.message : "Gagal menyimpan RSVP.");
       btn.disabled = false;
       btn.innerText = "Kirim RSVP";
@@ -310,7 +322,7 @@ const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token'
     btn.disabled = true;
 
     const { data, error } = await supabaseClient.rpc('send_wish', { p_token: token, p_message: msg });
-    if (!error && data.success) {
+    if (!error && data && data.success) {
       document.getElementById('wish-message').value = '';
       loadWishes();
     } else {
@@ -351,25 +363,23 @@ const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token'
     }, 1000);
   }
 
-  // Saat data tamu didapat dari Supabase
-const activeToken = guest.ticket_token || guest.invitation_token || token;
-renderQRCode(activeToken);
+  function renderQRCode(ticketToken) {
+    if (!ticketToken) return;
+    
+    const ticketSection = document.getElementById('ticket-section');
+    const qrContainer = document.getElementById("qrcode");
+    if (!qrContainer || !ticketSection) return;
 
-function renderQRCode(ticketToken) {
-  if (!ticketToken) return;
-  
-  const qrContainer = document.getElementById("qrcode");
-  if (!qrContainer) return;
-
-  qrContainer.innerHTML = '';
-  
-  // Cetak MURNI string tokennya saja
-  new QRCode(qrContainer, { 
-    text: String(ticketToken).trim(), 
-    width: 160, 
-    height: 160 
-  });
-}
+    ticketSection.classList.remove('hidden');
+    qrContainer.innerHTML = '';
+    
+    // Render MURNI string token
+    new QRCode(qrContainer, { 
+      text: String(ticketToken).trim(), 
+      width: 160, 
+      height: 160 
+    });
+  }
 
   function showError(msg) {
     document.getElementById('loading').classList.add('hidden');
@@ -377,7 +387,7 @@ function renderQRCode(ticketToken) {
     document.getElementById('error-msg').classList.remove('hidden');
   }
 
-  init();
+  window.addEventListener('DOMContentLoaded', init);
 </script>
 
 </body>
