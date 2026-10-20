@@ -188,7 +188,7 @@
 
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // Parse token dari URL path atau query parameter
+  // Parse token dari URL path (/rudi-irul/f4d30e93) atau query parameter (?token=f4d30e93)
   const pathSegments = window.location.pathname.split('/').filter(Boolean);
   const urlParams = new URLSearchParams(window.location.search);
   const token = pathSegments.length >= 2 ? pathSegments[1] : urlParams.get('token');
@@ -196,172 +196,13 @@
   let eventDateObj = null;
 
   async function init() {
+    // Wajib ada token tamu personal
     if (!token) {
-      showError("Tautan undangan tidak valid atau token hilang.");
+      showError("Tautan undangan tidak valid atau token tidak ditemukan.");
       return;
     }
 
     const { data, error } = await supabaseClient.rpc('get_invitation_details', { p_token: token });
 
     if (error || !data || data.length === 0) {
-      showError("Undangan tidak ditemukan.");
-      return;
-    }
-
-    const guest = data[0];
-    eventDateObj = new Date(guest.event_date);
-
-    // Cover
-    document.getElementById('cover-title').innerText = guest.event_title;
-    document.getElementById('cover-guest-name').innerText = guest.group_name;
-    document.getElementById('cover-max-pax').innerText = guest.max_pax;
-
-    // Header & Content
-    document.getElementById('header-title').innerText = guest.event_title;
-    document.getElementById('bride-groom-names').innerText = guest.client_name;
-    document.getElementById('event-caption').innerText = guest.event_caption;
-    document.getElementById('event-date').innerText = eventDateObj.toLocaleString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-    document.getElementById('event-location').innerText = guest.event_location;
-    document.getElementById('footer-client-name').innerText = guest.client_name;
-
-    // Maps
-    document.getElementById('maps-btn').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(guest.event_location)}`;
-
-    // RSVP Form Details
-    document.getElementById('rsvp-guest-name').innerText = guest.group_name;
-    document.getElementById('rsvp-max-pax').innerText = guest.max_pax;
-    document.getElementById('pax-input').max = guest.max_pax;
-
-    if (guest.rsvp_status) {
-      document.getElementById('status-select').value = guest.rsvp_status;
-      togglePaxInput();
-      if (guest.rsvp_status === 'hadir') {
-        document.getElementById('pax-input').value = guest.pax_confirmed;
-        renderQRCode(guest.ticket_token);
-      }
-    }
-
-    if (guest.is_checked_in) {
-      document.getElementById('status-select').disabled = true;
-      document.getElementById('pax-input').disabled = true;
-      document.getElementById('btn-submit').disabled = true;
-      document.getElementById('btn-submit').innerText = "Sudah Check-in";
-    }
-
-    startCountdown();
-    loadWishes();
-
-    document.getElementById('loading').classList.add('hidden');
-    document.getElementById('main-content').classList.remove('hidden');
-  }
-
-  function openInvitation() {
-    document.getElementById('cover').classList.add('-translate-y-full');
-  }
-
-  function togglePaxInput() {
-    const status = document.getElementById('status-select').value;
-    const paxGroup = document.getElementById('pax-group');
-    if (status === 'hadir') {
-      paxGroup.classList.remove('hidden');
-      document.getElementById('pax-input').value = document.getElementById('pax-input').value || 1;
-    } else {
-      paxGroup.classList.add('hidden');
-    }
-  }
-
-  document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const status = document.getElementById('status-select').value;
-    const pax = status === 'hadir' ? parseInt(document.getElementById('pax-input').value) : 0;
-
-    if (!status) return alert("Pilih status kehadiran.");
-
-    const btn = document.getElementById('btn-submit');
-    btn.disabled = true;
-    btn.innerText = "Menyimpan...";
-
-    const { data, error } = await supabaseClient.rpc('submit_rsvp', {
-      p_invitation_token: token,
-      p_status: status,
-      p_pax: pax
-    });
-
-    if (error || !data.success) {
-      alert(data ? data.message : "Gagal menyimpan RSVP.");
-      btn.disabled = false;
-      btn.innerText = "Kirim RSVP";
-      return;
-    }
-
-    alert("RSVP berhasil disimpan!");
-    location.reload();
-  });
-
-  document.getElementById('wish-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const msg = document.getElementById('wish-message').value.trim();
-    if (!msg) return;
-
-    const btn = document.getElementById('btn-wish');
-    btn.disabled = true;
-
-    const { data, error } = await supabaseClient.rpc('send_wish', { p_token: token, p_message: msg });
-    if (!error && data.success) {
-      document.getElementById('wish-message').value = '';
-      loadWishes();
-    } else {
-      alert("Gagal mengirim ucapan.");
-    }
-    btn.disabled = false;
-  });
-
-  async function loadWishes() {
-    const { data } = await supabaseClient.rpc('get_event_wishes', { p_token: token });
-    const container = document.getElementById('wishes-container');
-    container.innerHTML = '';
-
-    if (!data || data.length === 0) {
-      container.innerHTML = '<p class="text-xs text-slate-400 text-center">Belum ada ucapan.</p>';
-      return;
-    }
-
-    data.forEach(w => {
-      const card = document.createElement('div');
-      card.className = "bg-white p-3 rounded-lg border border-slate-200 text-xs";
-      card.innerHTML = `<p class="font-bold text-slate-800">${w.guest_name}</p><p class="text-slate-600 mt-1">${w.message}</p>`;
-      container.appendChild(card);
-    });
-  }
-
-  function startCountdown() {
-    setInterval(() => {
-      if (!eventDateObj) return;
-      const now = new Date().getTime();
-      const distance = eventDateObj.getTime() - now;
-
-      if (distance < 0) return;
-
-      document.getElementById('cd-days').innerText = Math.floor(distance / (1000 * 60 * 60 * 24));
-      document.getElementById('cd-hours').innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      document.getElementById('cd-mins').innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    }, 1000);
-  }
-
-  function renderQRCode(ticketToken) {
-    document.getElementById('ticket-section').classList.remove('hidden');
-    document.getElementById('qrcode').innerHTML = '';
-    new QRCode(document.getElementById("qrcode"), { text: ticketToken, width: 150, height: 150 });
-  }
-
-  function showError(msg) {
-    document.getElementById('loading').classList.add('hidden');
-    document.getElementById('error-msg').innerText = msg;
-    document.getElementById('error-msg').classList.remove('hidden');
-  }
-
-  init();
-</script>
-
-</body>
-</html>
+      show
