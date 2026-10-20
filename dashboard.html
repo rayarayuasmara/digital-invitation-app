@@ -21,30 +21,30 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="flex justify-center min-h-screen bg-slate-950 dark:bg-[#07090e] text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-600 selection:text-white transition-colors duration-300">
+<body class="flex justify-center min-h-screen bg-slate-950 dark:bg-[#090d16] text-slate-900 dark:text-slate-100 antialiased selection:bg-lime-500 selection:text-slate-950 transition-colors duration-300">
 
-  <div class="w-full max-w-md bg-white dark:bg-[#0b101d] min-h-screen shadow-2xl flex flex-col relative pb-32 overflow-x-hidden border-x border-slate-200 dark:border-slate-800/60 transition-colors duration-300">
+  <div class="w-full max-w-md bg-slate-50 dark:bg-[#0e1422] min-h-screen shadow-2xl flex flex-col relative pb-32 overflow-x-hidden border-x border-slate-200 dark:border-slate-800/80 transition-colors duration-300">
 
     <!-- LOGIN SCREEN -->
     <div id="login-section" class="p-6 my-auto">
       <div class="text-center mb-8">
-        <div class="w-14 h-14 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-2xl mx-auto flex items-center justify-center text-white shadow-xl shadow-blue-600/20">
+        <div class="w-14 h-14 bg-lime-400 text-slate-950 rounded-3xl mx-auto flex items-center justify-center font-black text-xl shadow-xl shadow-lime-400/20">
           <i data-lucide="sparkles" class="w-7 h-7"></i>
         </div>
         <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white mt-5 tracking-tight">Portal Klien</h1>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Masuk untuk mengelola undangan & analitik tamu</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Masuk untuk melihat analitik kehadiran tamu secara real-time</p>
       </div>
 
-      <form id="login-form" onsubmit="login(event)" class="space-y-4 bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-800/80 shadow-sm backdrop-blur-md">
+      <form id="login-form" onsubmit="login(event)" class="space-y-4 bg-white dark:bg-slate-900/80 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl backdrop-blur-md">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email Akses</label>
-          <input type="email" id="email" required placeholder="nama@email.com" class="w-full text-xs p-3.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:ring-2 focus:ring-blue-600 outline-none transition" />
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Email Klien</label>
+          <input type="email" id="email" required placeholder="nama@email.com" class="w-full text-xs p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-lime-400 outline-none transition" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
-          <input type="password" id="password" required placeholder="••••••••" class="w-full text-xs p-3.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:ring-2 focus:ring-blue-600 outline-none transition" />
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
+          <input type="password" id="password" required placeholder="••••••••" class="w-full text-xs p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-lime-400 outline-none transition" />
         </div>
-        <button type="submit" id="btn-login" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3.5 rounded-xl shadow-lg shadow-blue-600/20 transition flex items-center justify-center gap-2">
+        <button type="submit" id="btn-login" class="w-full bg-lime-400 hover:bg-lime-300 text-slate-950 font-extrabold text-xs py-4 rounded-2xl shadow-lg shadow-lime-400/20 transition flex items-center justify-center gap-2">
           <span>Masuk Dashboard</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
@@ -55,153 +55,111 @@
     <div id="dashboard-section" class="hidden flex-1 flex flex-col justify-between">
 
       <!-- HEADER TOP BAR -->
-      <div class="p-4 bg-white/80 dark:bg-[#0b101d]/80 flex items-center justify-between sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800/60 backdrop-blur-md transition-colors duration-300">
-        <div class="flex items-center gap-2">
-          <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-sm">
-            <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+      <div class="p-4 bg-white/80 dark:bg-[#0e1422]/80 flex items-center justify-between sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800/80 backdrop-blur-md transition-colors">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-2xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 font-bold text-xs overflow-hidden border border-slate-300 dark:border-slate-700">
+            <i data-lucide="user" class="w-4 h-4"></i>
           </div>
-          <span class="text-xs font-bold px-2.5 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-md tracking-wide font-mono" id="header-client-slug">...</span>
+          <div>
+            <h4 id="home-client-name" class="font-extrabold text-xs text-slate-900 dark:text-white leading-tight">Memuat...</h4>
+            <span class="text-[10px] text-slate-500 font-mono" id="header-client-slug">...</span>
+          </div>
         </div>
         <div class="flex items-center gap-2">
-          <!-- Dark/Light Theme Switcher -->
-          <button onclick="toggleTheme()" id="btn-theme" title="Ubah Tema" class="w-8 h-8 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl flex items-center justify-center transition border border-slate-200 dark:border-slate-800">
+          <!-- Theme Switcher -->
+          <button onclick="toggleTheme()" id="btn-theme" title="Ubah Tema" class="w-9 h-9 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:text-lime-500 rounded-2xl flex items-center justify-center transition border border-slate-200 dark:border-slate-800">
             <i data-lucide="sun" id="theme-icon" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
 
-      <!-- TAB 1: HOME (OVERVIEW) -->
-      <div id="tab-home" class="p-5 space-y-4">
+      <!-- TAB 1: HOME (BENTO GRID STYLE) -->
+      <div id="tab-home" class="p-4 space-y-3.5">
         
-        <!-- Welcome Card -->
-        <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-5 rounded-3xl shadow-xl shadow-blue-600/10 relative overflow-hidden">
-          <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
-          <div class="flex justify-between items-start relative z-10">
-            <div>
-              <p class="text-[11px] text-blue-100 font-medium">Selamat Datang,</p>
-              <h2 id="home-client-name" class="text-xl font-extrabold tracking-tight leading-tight mt-0.5">...</h2>
+        <!-- HERO PROGRESS CARD (Mirip Daily Intake Referensi) -->
+        <div class="bg-gradient-to-br from-lime-300 to-emerald-400 text-slate-950 p-5 rounded-3xl shadow-xl shadow-lime-400/10 relative overflow-hidden flex justify-between items-center">
+          <div class="space-y-1 relative z-10">
+            <div class="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-800">
+              <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+              <span>Progres Kehadiran</span>
             </div>
-            <span class="bg-white/20 text-white text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 backdrop-blur-sm">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Live
-            </span>
+            <h2 class="text-2xl font-black tracking-tight" id="hero-hadir-text">0 / 0 Pax</h2>
+            <p class="text-[11px] text-slate-800 font-medium">Terkonfirmasi hadir dari kuota total</p>
           </div>
-
-          <div class="grid grid-cols-2 gap-3 mt-5 pt-4 border-t border-white/20 text-xs relative z-10">
-            <div class="flex items-center gap-2">
-              <div class="p-1.5 rounded-lg bg-white/10 text-blue-100">
-                <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
-              </div>
-              <div>
-                <p class="text-[9px] text-blue-200 uppercase font-semibold">Tanggal</p>
-                <p id="home-event-date" class="font-bold text-white text-[11px] mt-0.5">...</p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="p-1.5 rounded-lg bg-white/10 text-blue-100">
-                <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
-              </div>
-              <div>
-                <p class="text-[9px] text-blue-200 uppercase font-semibold">Lokasi</p>
-                <p id="home-event-location" class="font-bold text-white text-[11px] mt-0.5 truncate">...</p>
-              </div>
-            </div>
+          <!-- Circular / Badge Progress -->
+          <div class="w-20 h-20 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 flex flex-col items-center justify-center text-center shadow-inner relative z-10">
+            <span class="text-xl font-black text-slate-950" id="hero-pct-text">0%</span>
+            <span class="text-[9px] uppercase font-bold text-slate-800">Rate</span>
           </div>
         </div>
 
-        <!-- Metric Grid -->
+        <!-- BENTO ROW 2: MINI CARDS (Step & Water ala referensi) -->
         <div class="grid grid-cols-2 gap-3">
-          <!-- Total Undangan -->
-          <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between transition-colors">
-            <div class="flex justify-between items-center text-slate-500 dark:text-slate-400">
-              <span class="text-[11px] font-semibold">Total Target</span>
-              <i data-lucide="mail" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+          <!-- Card Hadir -->
+          <div class="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
+            <div class="flex justify-between items-center text-slate-400">
+              <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400">Tamu Hadir</span>
+              <div class="w-7 h-7 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              </div>
             </div>
-            <div class="mt-3">
-              <h3 id="stat-total-guests" class="text-3xl font-black text-slate-900 dark:text-white">0</h3>
-              <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Undangan Terdaftar</p>
-            </div>
-            <div class="mt-3 pt-2.5 border-t border-slate-200 dark:border-slate-800 flex justify-between text-[11px]">
-              <span class="text-slate-500 dark:text-slate-400">Total Pax</span>
-              <span id="stat-total-pax" class="font-bold text-slate-800 dark:text-slate-200">0</span>
+            <div class="mt-4">
+              <h3 class="text-2xl font-black text-slate-900 dark:text-white" id="stat-hadir-groups">0</h3>
+              <p class="text-[10px] text-slate-500 mt-0.5">Kelompok / Undangan</p>
             </div>
           </div>
 
-          <!-- Konfirmasi Hadir -->
-          <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between transition-colors">
-            <div class="flex justify-between items-center text-slate-500 dark:text-slate-400">
-              <span class="text-[11px] font-semibold">RSVP Hadir</span>
-              <i data-lucide="user-check" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
-            </div>
-            <div class="mt-2">
-              <div class="flex items-baseline gap-2">
-                <h3 id="stat-hadir-pax" class="text-3xl font-black text-emerald-600 dark:text-emerald-400">0</h3>
-                <span class="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold px-1.5 py-0.5 rounded-md" id="stat-hadir-pct">0%</span>
+          <!-- Card Checked-in Pintu -->
+          <div class="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm">
+            <div class="flex justify-between items-center text-slate-400">
+              <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400">Sudah Check-In</span>
+              <div class="w-7 h-7 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                <i data-lucide="qr-code" class="w-4 h-4"></i>
               </div>
-              <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Konfirmasi Masuk</p>
             </div>
-            <div class="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1 text-[11px]">
-              <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Absen</span><span id="stat-absen-count" class="font-bold text-slate-800 dark:text-slate-200">0</span></div>
-              <div class="flex justify-between"><span class="text-slate-500 dark:text-slate-400">Pending</span><span id="stat-pending-count" class="font-bold text-slate-800 dark:text-slate-200">0</span></div>
+            <div class="mt-4">
+              <h3 class="text-2xl font-black text-slate-900 dark:text-white" id="stat-checkedin-count">0</h3>
+              <p class="text-[10px] text-slate-500 mt-0.5">Tamu di Venue</p>
             </div>
           </div>
         </div>
 
-        <!-- Total Checked-In Card -->
-        <div class="bg-slate-50 dark:bg-slate-900/60 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 relative transition-colors">
-          <div class="flex justify-between items-center mb-3">
-            <div class="flex items-center gap-2">
-              <i data-lucide="qr-code" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
-              <h3 class="text-xs font-bold text-slate-900 dark:text-white tracking-wide">Check-in Pintu Masuk</h3>
-            </div>
-            <button onclick="switchTab('tamu')" class="text-[10px] font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
-              <span>Kelola</span>
-              <i data-lucide="chevron-right" class="w-3 h-3"></i>
-            </button>
-          </div>
-          <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-center">
-              <div>
-                <span id="card-checkedin-count" class="text-xl font-black text-blue-600 dark:text-blue-400 block leading-none">0</span>
-                <span class="text-[8px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">Hadir</span>
-              </div>
-            </div>
-            <div class="space-y-1.5 text-xs">
-              <p class="text-slate-500 dark:text-slate-400 flex items-center gap-2">
-                <span>Belum Masuk:</span>
-                <strong id="card-waiting-count" class="text-slate-900 dark:text-white font-extrabold">0 Tamu</strong>
-              </p>
-              <p class="text-slate-500 dark:text-slate-400 flex items-center gap-2">
-                <span>Total Est. Pax:</span>
-                <strong id="card-est-pax" class="text-slate-900 dark:text-white font-extrabold">0 Orang</strong>
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Histori RSVP Terbaru -->
-        <div class="bg-slate-50 dark:bg-slate-900/60 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3 transition-colors">
+        <!-- BENTO ROW 3: VISUAL CATEGORY PROGRESS (Mirip Grafik Batang Statistic Referensi) -->
+        <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
           <div class="flex justify-between items-center">
-            <h3 class="text-xs font-bold text-slate-900 dark:text-white">Respon Terbaru</h3>
-            <button onclick="switchTab('tamu')" class="text-[11px] font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
-              <span>Semua</span>
-              <i data-lucide="arrow-right" class="w-3 h-3"></i>
-            </button>
+            <div>
+              <h3 class="text-xs font-extrabold text-slate-900 dark:text-white">Analitik Kategori Tamu</h3>
+              <p class="text-[10px] text-slate-500">Sebaran kelompok undangan terbanyak</p>
+            </div>
+            <i data-lucide="bar-chart-3" class="w-4 h-4 text-slate-400"></i>
           </div>
-          <div id="recent-rsvp-list" class="space-y-2 pt-1">
-            <!-- Items injected by JS -->
+          <!-- Container Grafik Kategori -->
+          <div id="category-chart-container" class="space-y-3 pt-1">
+            <!-- Diisi lewat JS -->
+          </div>
+        </div>
+
+        <!-- BENTO ROW 4: HISTORI RSVP TERBARU -->
+        <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xs font-extrabold text-slate-900 dark:text-white">Aktivitas RSVP Masuk</h3>
+            <button onclick="switchTab('tamu')" class="text-[11px] font-bold text-lime-600 dark:text-lime-400 hover:underline">Lihat Semua →</button>
+          </div>
+          <div id="recent-rsvp-list" class="space-y-2.5">
+            <!-- Diisi lewat JS -->
           </div>
         </div>
 
       </div>
 
-      <!-- TAB 2: TAMU (GUEST MANAGEMENT) -->
-      <div id="tab-tamu" class="p-5 space-y-4 hidden">
+      <!-- TAB 2: TAMU (GUEST LIST MANAGEMENT) -->
+      <div id="tab-tamu" class="p-4 space-y-4 hidden">
         <div class="flex justify-between items-center">
           <div>
-            <h2 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Daftar Tamu</h2>
-            <p class="text-[10px] text-slate-500 dark:text-slate-400">Kelola kuota, kirim link, & ubah status</p>
+            <h2 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">Daftar Tamu</h2>
+            <p class="text-[10px] text-slate-500">Cari, edit status, atau buat undangan baru</p>
           </div>
-          <button onclick="openAddGuestModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-lg shadow-blue-600/20 flex items-center gap-1.5 transition">
+          <button onclick="openAddGuestModal()" class="bg-lime-400 hover:bg-lime-300 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-2xl shadow-md transition flex items-center gap-1.5">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>Tambah</span>
           </button>
@@ -209,113 +167,113 @@
 
         <!-- Search Bar -->
         <div class="relative">
-          <input type="text" id="search-input" onkeyup="filterGuests()" placeholder="Cari nama tamu..." class="w-full text-xs p-3.5 pl-10 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:ring-2 focus:ring-blue-600 transition" />
+          <input type="text" id="search-input" onkeyup="filterGuests()" placeholder="Cari nama tamu..." class="w-full text-xs p-3.5 pl-10 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:ring-2 focus:ring-lime-400 shadow-sm" />
           <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400"></i>
         </div>
 
         <!-- Status Filter Pills -->
-        <div class="flex gap-1.5 overflow-x-auto no-scrollbar text-xs font-semibold pb-1" id="filter-pills">
-          <button onclick="setFilter('all', event)" class="pill-btn active px-3.5 py-1.5 rounded-lg bg-blue-600 text-white whitespace-nowrap">Semua</button>
-          <button onclick="setFilter('hadir', event)" class="pill-btn px-3.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap">Hadir</button>
-          <button onclick="setFilter('tidak_hadir', event)" class="pill-btn px-3.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap">Absen</button>
-          <button onclick="setFilter('pending', event)" class="pill-btn px-3.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap">Pending</button>
-          <button onclick="setFilter('checked_in', event)" class="pill-btn px-3.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap">Checked</button>
+        <div class="flex gap-1.5 overflow-x-auto no-scrollbar text-xs font-bold pb-1" id="filter-pills">
+          <button onclick="setFilter('all', event)" class="pill-btn active px-4 py-2 rounded-xl bg-lime-400 text-slate-950 shadow-sm whitespace-nowrap">Semua</button>
+          <button onclick="setFilter('hadir', event)" class="pill-btn px-4 py-2 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap">Hadir</button>
+          <button onclick="setFilter('tidak_hadir', event)" class="pill-btn px-4 py-2 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap">Absen</button>
+          <button onclick="setFilter('pending', event)" class="pill-btn px-4 py-2 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap">Pending</button>
+          <button onclick="setFilter('checked_in', event)" class="pill-btn px-4 py-2 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap">Checked</button>
         </div>
 
         <!-- Guest List Items -->
-        <div id="guest-list-container" class="space-y-2">
-          <!-- Injected by JS -->
+        <div id="guest-list-container" class="space-y-2.5">
+          <!-- Diisi lewat JS -->
         </div>
 
-        <!-- Kuota Progress Bar -->
-        <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2 transition-colors">
-          <div class="flex justify-between text-xs font-semibold">
-            <span class="text-slate-500 dark:text-slate-400">Kapasitas Tamu</span>
-            <span class="text-blue-600 dark:text-blue-400"><span id="quota-used">0</span> / <span id="quota-max">100</span></span>
+        <!-- Quota Progress Bar -->
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+          <div class="flex justify-between text-xs font-bold">
+            <span class="text-slate-600 dark:text-slate-400">Kapasitas Database Tamu</span>
+            <span class="text-lime-600 dark:text-lime-400"><span id="quota-used">0</span> / <span id="quota-max">100</span></span>
           </div>
-          <div class="w-full bg-slate-200 dark:bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-200 dark:border-slate-800">
-            <div id="quota-bar" class="bg-blue-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+          <div class="w-full bg-slate-100 dark:bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-200 dark:border-slate-800">
+            <div id="quota-bar" class="bg-lime-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
           </div>
         </div>
       </div>
 
-      <!-- TAB 3: ACARA (EVENT SETTINGS / EDIT ACARA) -->
-      <div id="tab-acara" class="p-5 space-y-4 hidden">
+      <!-- TAB 3: ACARA (EVENT SETTINGS) -->
+      <div id="tab-acara" class="p-4 space-y-4 hidden">
         <div>
-          <h2 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Pengaturan Acara</h2>
-          <p class="text-[10px] text-slate-500 dark:text-slate-400">Ubah informasi detail resepsi atau akad pernikahan</p>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">Pengaturan Acara</h2>
+          <p class="text-[10px] text-slate-500">Ubah detail waktu dan lokasi resepsi</p>
         </div>
 
-        <form id="event-form" onsubmit="submitEditEvent(event)" class="space-y-3.5 bg-slate-50 dark:bg-slate-900/60 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors">
+        <form id="event-form" onsubmit="submitEditEvent(event)" class="space-y-3.5 bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Judul Acara / Header</label>
-            <input type="text" id="ev-title" required class="w-full text-xs p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600" />
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Judul Acara / Header</label>
+            <input type="text" id="ev-title" required class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400" />
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal & Waktu</label>
-            <input type="datetime-local" id="ev-date" required class="w-full text-xs p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600" />
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Tanggal & Waktu</label>
+            <input type="datetime-local" id="ev-date" required class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400" />
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Lokasi Gedung / Tempat</label>
-            <textarea id="ev-location" rows="2" required class="w-full text-xs p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600"></textarea>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Lokasi Gedung / Tempat</label>
+            <textarea id="ev-location" rows="2" required class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400"></textarea>
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pesan Pembuka / Caption</label>
-            <textarea id="ev-caption" rows="3" required class="w-full text-xs p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600"></textarea>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Pesan Pembuka / Caption</label>
+            <textarea id="ev-caption" rows="3" required class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400"></textarea>
           </div>
 
-          <button type="submit" id="btn-save-event" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3.5 rounded-xl shadow-md transition flex items-center justify-center gap-2 mt-2">
+          <button type="submit" id="btn-save-event" class="w-full bg-lime-400 hover:bg-lime-300 text-slate-950 font-extrabold text-xs py-4 rounded-2xl shadow-md transition flex items-center justify-center gap-2 mt-2">
             <i data-lucide="save" class="w-4 h-4"></i>
             <span>Simpan Perubahan Acara</span>
           </button>
         </form>
       </div>
 
-      <!-- TAB 4: AKUN (SETTINGS / LOGOUT) -->
-      <div id="tab-akun" class="p-5 space-y-4 hidden">
+      <!-- TAB 4: AKUN (LOGOUT) -->
+      <div id="tab-akun" class="p-4 space-y-4 hidden">
         <div>
-          <h2 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Akun & Sesi</h2>
-          <p class="text-[10px] text-slate-500 dark:text-slate-400">Informasi autentikasi klien</p>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">Akun Klien</h2>
+          <p class="text-[10px] text-slate-500">Informasi sesi login saat ini</p>
         </div>
 
-        <div class="bg-slate-50 dark:bg-slate-900/60 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4 transition-colors">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg">
-              <i data-lucide="user" class="w-6 h-6"></i>
+        <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-lime-400 text-slate-950 flex items-center justify-center font-black text-lg">
+              <i data-lucide="user-check" class="w-6 h-6"></i>
             </div>
             <div>
-              <h4 id="account-name" class="font-bold text-sm text-slate-900 dark:text-white">...</h4>
-              <p id="account-slug" class="text-xs text-blue-600 dark:text-blue-400 font-mono">...</p>
+              <h4 id="account-name" class="font-black text-sm text-slate-900 dark:text-white">...</h4>
+              <p id="account-slug" class="text-xs text-lime-600 dark:text-lime-400 font-mono">...</p>
             </div>
           </div>
 
-          <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
-            <button onclick="logout()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 font-bold text-xs py-3 rounded-xl transition flex items-center justify-center gap-2">
+          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+            <button onclick="logout()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 font-bold text-xs py-3.5 rounded-2xl transition flex items-center justify-center gap-2">
               <i data-lucide="log-out" class="w-4 h-4"></i>
-              <span>Keluar dari Akun</span>
+              <span>Keluar dari Sesi</span>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- BOTTOM FLOATING DOCK NAV -->
-      <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-sm bg-white/90 dark:bg-[#0b101d]/90 backdrop-blur-md text-slate-900 dark:text-white p-2 rounded-2xl shadow-2xl flex items-center justify-around border border-slate-200 dark:border-slate-800 z-40 transition-colors">
-        <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-0.5 text-[10px] font-bold bg-blue-600 text-white shadow-md transition">
+      <!-- BOTTOM FLOATING DOCK NAV (Gaya iOS Modern Dock) -->
+      <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-sm bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl text-slate-900 dark:text-white p-2 rounded-3xl shadow-2xl flex items-center justify-around border border-slate-200/80 dark:border-slate-800 z-40 transition-colors">
+        <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex-1 py-2.5 rounded-2xl flex flex-col items-center gap-0.5 text-[10px] font-extrabold bg-lime-400 text-slate-950 shadow-md transition">
           <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
           <span>Home</span>
         </button>
-        <button onclick="switchTab('tamu')" id="nav-tamu" class="nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-0.5 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+        <button onclick="switchTab('tamu')" id="nav-tamu" class="nav-btn flex-1 py-2.5 rounded-2xl flex flex-col items-center gap-0.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
           <i data-lucide="users" class="w-4 h-4"></i>
           <span>Tamu</span>
         </button>
-        <button onclick="switchTab('acara')" id="nav-acara" class="nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-0.5 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+        <button onclick="switchTab('acara')" id="nav-acara" class="nav-btn flex-1 py-2.5 rounded-2xl flex flex-col items-center gap-0.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
           <i data-lucide="calendar-cog" class="w-4 h-4"></i>
           <span>Acara</span>
         </button>
-        <button onclick="switchTab('akun')" id="nav-akun" class="nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-0.5 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+        <button onclick="switchTab('akun')" id="nav-akun" class="nav-btn flex-1 py-2.5 rounded-2xl flex flex-col items-center gap-0.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
           <i data-lucide="user-cog" class="w-4 h-4"></i>
           <span>Akun</span>
         </button>
@@ -324,20 +282,20 @@
     </div>
 
     <!-- MODAL TAMBAH TAMU -->
-    <div id="add-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-xs rounded-2xl p-6 space-y-4 shadow-2xl">
+    <div id="add-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-xs rounded-3xl p-6 space-y-4 shadow-2xl">
         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
           <h3 class="text-sm font-bold text-slate-900 dark:text-white">Tambah Tamu Baru</h3>
-          <button onclick="closeAddGuestModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+          <button onclick="closeAddGuestModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
         <div class="space-y-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Nama Tamu / Kelompok</label>
-            <input type="text" id="modal-name" placeholder="Budi Santoso & Keluarga" class="w-full text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600" />
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Nama Tamu / Kelompok</label>
+            <input type="text" id="modal-name" placeholder="Budi Santoso & Keluarga" class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Kategori</label>
-            <select id="modal-cat" class="w-full text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600">
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Kategori</label>
+            <select id="modal-cat" class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400">
               <option value="Keluarga">Keluarga</option>
               <option value="Teman">Teman</option>
               <option value="Tetangga">Tetangga</option>
@@ -346,36 +304,36 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Kuota Orang (Pax)</label>
-            <input type="number" id="modal-pax" min="1" value="2" class="w-full text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600" />
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Kuota Orang (Pax)</label>
+            <input type="number" id="modal-pax" min="1" value="2" class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400" />
           </div>
         </div>
         <div class="flex gap-2 pt-2">
-          <button onclick="closeAddGuestModal()" class="flex-1 text-xs font-semibold py-3 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">Batal</button>
-          <button onclick="submitAddGuest()" id="btn-save-guest" class="flex-1 text-xs font-semibold py-3 bg-blue-600 text-white rounded-xl shadow-md">Simpan</button>
+          <button onclick="closeAddGuestModal()" class="flex-1 text-xs font-bold py-3.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl">Batal</button>
+          <button onclick="submitAddGuest()" id="btn-save-guest" class="flex-1 text-xs font-extrabold py-3.5 bg-lime-400 text-slate-950 rounded-2xl shadow-md">Simpan</button>
         </div>
       </div>
     </div>
 
     <!-- MODAL EDIT / UBAH STATUS TAMU -->
-    <div id="edit-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-xs rounded-2xl p-6 space-y-4 shadow-2xl">
+    <div id="edit-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-xs rounded-3xl p-6 space-y-4 shadow-2xl">
         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
           <h3 class="text-sm font-bold text-slate-900 dark:text-white">Edit Data Tamu</h3>
-          <button onclick="closeEditGuestModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+          <button onclick="closeEditGuestModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
         
         <input type="hidden" id="edit-guest-id" />
 
         <div class="space-y-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Nama Tamu / Kelompok</label>
-            <input type="text" id="edit-name" class="w-full text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600" />
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Nama Tamu / Kelompok</label>
+            <input type="text" id="edit-name" class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400" />
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Kategori</label>
-            <select id="edit-cat" class="w-full text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600">
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Kategori</label>
+            <select id="edit-cat" class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400">
               <option value="Keluarga">Keluarga</option>
               <option value="Teman">Teman</option>
               <option value="Tetangga">Tetangga</option>
@@ -385,31 +343,31 @@
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Kuota Orang (Pax)</label>
-            <input type="number" id="edit-pax" min="1" class="w-full text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600" />
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Kuota Orang (Pax)</label>
+            <input type="number" id="edit-pax" min="1" class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400" />
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Status RSVP</label>
-            <select id="edit-rsvp" class="w-full text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-600">
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Status RSVP</label>
+            <select id="edit-rsvp" class="w-full text-xs p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-lime-400">
               <option value="pending">Pending</option>
               <option value="hadir">Hadir</option>
               <option value="tidak_hadir">Absen (Tidak Hadir)</option>
             </select>
           </div>
 
-          <div class="flex items-center justify-between p-3 bg-slate-100 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
-            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Status Check-in</span>
+          <div class="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Status Check-in</span>
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" id="edit-checkedin" class="sr-only peer">
-              <div class="w-9 h-5 bg-slate-300 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+              <div class="w-9 h-5 bg-slate-300 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-lime-400"></div>
             </label>
           </div>
         </div>
 
         <div class="flex gap-2 pt-2">
-          <button onclick="closeEditGuestModal()" class="flex-1 text-xs font-semibold py-3 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">Batal</button>
-          <button onclick="submitEditGuest()" id="btn-update-guest" class="flex-1 text-xs font-semibold py-3 bg-blue-600 text-white rounded-xl shadow-md">Simpan</button>
+          <button onclick="closeEditGuestModal()" class="flex-1 text-xs font-bold py-3.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl">Batal</button>
+          <button onclick="submitEditGuest()" id="btn-update-guest" class="flex-1 text-xs font-extrabold py-3.5 bg-lime-400 text-slate-950 rounded-2xl shadow-md">Simpan</button>
         </div>
       </div>
     </div>
@@ -505,41 +463,35 @@
   }
 
   function renderUI() {
-    const { client, event, stats, guests } = globalData;
+    const { client, event, stats, categories, guests } = globalData;
 
     // Header & Welcome
-    document.getElementById('header-client-slug').innerText = client.slug;
+    document.getElementById('header-client-slug').innerText = `@${client.slug}`;
     document.getElementById('home-client-name').innerText = client.name;
     document.getElementById('account-name').innerText = client.name;
     document.getElementById('account-slug').innerText = `@${client.slug}`;
 
     const eventDateFormatted = new Date(event.event_date);
-    document.getElementById('home-event-date').innerText = eventDateFormatted.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-    document.getElementById('home-event-location').innerText = event.location;
 
     // Isi Form Edit Acara
     document.getElementById('ev-title').value = event.title || '';
-    // Format YYYY-MM-DDThh:mm untuk input datetime-local
     const tzOffset = eventDateFormatted.getTimezoneOffset() * 60000;
     const localISOTime = (new Date(eventDateFormatted - tzOffset)).toISOString().slice(0, 16);
     document.getElementById('ev-date').value = localISOTime;
     document.getElementById('ev-location').value = event.location || '';
     document.getElementById('ev-caption').value = event.caption || '';
 
-    // Stats Grid
-    document.getElementById('stat-total-guests').innerText = stats.total_guests;
-    document.getElementById('stat-total-pax').innerText = `${stats.total_max_pax} Pax`;
-    document.getElementById('stat-hadir-pax').innerText = stats.total_hadir;
-    
+    // Hero Progress (Mirip Daily Intake)
+    document.getElementById('hero-hadir-text').innerText = `${stats.total_hadir} / ${stats.total_max_pax} Pax`;
     const hadirPct = stats.total_max_pax > 0 ? Math.round((stats.total_hadir / stats.total_max_pax) * 100) : 0;
-    document.getElementById('stat-hadir-pct').innerText = `${hadirPct}%`;
-    document.getElementById('stat-absen-count').innerText = stats.count_absen_groups;
-    document.getElementById('stat-pending-count').innerText = stats.count_pending_groups;
+    document.getElementById('hero-pct-text').innerText = `${hadirPct}%`;
 
-    // Card Checked-in
-    document.getElementById('card-checkedin-count').innerText = String(stats.total_checked_in).padStart(2, '0');
-    document.getElementById('card-waiting-count').innerText = `${stats.count_hadir_groups - stats.total_checked_in} Tamu`;
-    document.getElementById('card-est-pax').innerText = `${stats.total_hadir} Orang`;
+    // Stats Cards
+    document.getElementById('stat-hadir-groups').innerText = stats.count_hadir_groups;
+    document.getElementById('stat-checkedin-count').innerText = stats.total_checked_in;
+
+    // Render Grafik Batang Kategori (Statistic Style)
+    renderCategoryChart(categories);
 
     // Histori RSVP
     renderRecentRSVP(guests);
@@ -554,6 +506,35 @@
     initIcons();
   }
 
+  function renderCategoryChart(categories) {
+    const container = document.getElementById('category-chart-container');
+    container.innerHTML = '';
+
+    if (!categories || categories.length === 0) {
+      container.innerHTML = '<p class="text-xs text-slate-500">Belum ada data kategori.</p>';
+      return;
+    }
+
+    // Cari max total untuk persentase tinggi bar grafik
+    const maxTotal = Math.max(...categories.map(c => c.total), 1);
+
+    categories.forEach(c => {
+      const pct = Math.round((c.total / maxTotal) * 100);
+      const div = document.createElement('div');
+      div.className = "space-y-1";
+      div.innerHTML = `
+        <div class="flex justify-between text-xs font-bold">
+          <span class="text-slate-700 dark:text-slate-300">${c.category}</span>
+          <span class="text-slate-500 font-mono">${c.hadir} Hadir / ${c.total} Total</span>
+        </div>
+        <div class="w-full bg-slate-100 dark:bg-slate-950 rounded-xl h-3 overflow-hidden p-0.5 border border-slate-200 dark:border-slate-800">
+          <div class="bg-lime-400 h-full rounded-lg transition-all duration-500" style="width: ${pct}%"></div>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
   function renderRecentRSVP(guests) {
     const container = document.getElementById('recent-rsvp-list');
     container.innerHTML = '';
@@ -565,15 +546,15 @@
     }
 
     recent.forEach(g => {
-      let badge = '<span class="w-2 h-2 rounded-full bg-amber-400"></span>';
-      if (g.rsvp_status === 'hadir') badge = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span>';
-      if (g.rsvp_status === 'tidak_hadir') badge = '<span class="w-2 h-2 rounded-full bg-rose-500"></span>';
+      let badge = '<span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>';
+      if (g.rsvp_status === 'hadir') badge = '<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>';
+      if (g.rsvp_status === 'tidak_hadir') badge = '<span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>';
 
       const div = document.createElement('div');
-      div.className = "flex items-center justify-between text-xs p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80";
+      div.className = "flex items-center justify-between text-xs p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80";
       div.innerHTML = `
-        <div class="flex items-center gap-2.5">
-          <div class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center text-[10px] border border-blue-500/20">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl bg-lime-400/10 text-lime-600 dark:text-lime-400 font-extrabold flex items-center justify-center text-xs border border-lime-400/20">
             ${g.group_name.substring(0,2).toUpperCase()}
           </div>
           <div>
@@ -583,7 +564,7 @@
         </div>
         <div class="flex items-center gap-2">
           ${badge}
-          <span class="text-[10px] text-slate-500 font-medium">Terbaru</span>
+          <span class="text-[10px] text-slate-500 font-bold">Terbaru</span>
         </div>
       `;
       container.appendChild(div);
@@ -626,32 +607,32 @@
       if (g.is_checked_in) { badgeClass = "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"; badgeText = "Checked"; }
 
       const card = document.createElement('div');
-      card.className = "bg-slate-50 dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between transition-colors";
+      card.className = "bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between shadow-sm transition-colors";
       card.innerHTML = `
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold flex items-center justify-center text-xs border border-slate-300 dark:border-slate-700">
+          <div class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-extrabold flex items-center justify-center text-xs border border-slate-200 dark:border-slate-700">
             ${g.group_name.substring(0,2).toUpperCase()}
           </div>
           <div>
-            <h4 class="font-bold text-xs text-slate-900 dark:text-white">${g.group_name}</h4>
+            <h4 class="font-extrabold text-xs text-slate-900 dark:text-white">${g.group_name}</h4>
             <div class="flex items-center gap-2 mt-0.5">
               <span class="text-[10px] text-slate-500">${g.category} • ${g.max_pax} Pax</span>
-              <span class="text-[9px] font-semibold px-2 py-0.5 rounded-md ${badgeClass}">${badgeText}</span>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded-lg ${badgeClass}">${badgeText}</span>
             </div>
           </div>
         </div>
         <div class="flex items-center gap-1">
-          <button onclick="copyLink('${link}', this)" class="p-1.5 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition" title="Salin Tautan">
-            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          <button onclick="copyLink('${link}', this)" class="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Salin Tautan">
+            <i data-lucide="copy" class="w-4 h-4"></i>
           </button>
-          <a href="https://wa.me/?text=${waMessage}" target="_blank" class="p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition" title="Kirim WA">
-            <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+          <a href="https://wa.me/?text=${waMessage}" target="_blank" class="p-2 text-slate-400 hover:text-emerald-500 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Kirim WA">
+            <i data-lucide="message-square" class="w-4 h-4"></i>
           </a>
-          <button onclick="openEditGuestModal('${g.id}')" class="p-1.5 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition" title="Edit Data/Status">
-            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+          <button onclick="openEditGuestModal('${g.id}')" class="p-2 text-slate-400 hover:text-amber-500 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Edit Data/Status">
+            <i data-lucide="edit-3" class="w-4 h-4"></i>
           </button>
-          <button onclick="deleteGuest('${g.id}', '${g.group_name}')" class="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition" title="Hapus Tamu">
-            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <button onclick="deleteGuest('${g.id}', '${g.group_name}')" class="p-2 text-slate-400 hover:text-rose-500 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Hapus Tamu">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
           </button>
         </div>
       `;
@@ -668,10 +649,10 @@
       const btn = document.getElementById(`nav-${t}`);
       if (t === tab) {
         el.classList.remove('hidden');
-        btn.className = "nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-0.5 text-[10px] font-bold bg-blue-600 text-white shadow-md transition";
+        btn.className = "nav-btn flex-1 py-2.5 rounded-2xl flex flex-col items-center gap-0.5 text-[10px] font-extrabold bg-lime-400 text-slate-950 shadow-md transition";
       } else {
         el.classList.add('hidden');
-        btn.className = "nav-btn flex-1 py-2 rounded-xl flex flex-col items-center gap-0.5 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
+        btn.className = "nav-btn flex-1 py-2.5 rounded-2xl flex flex-col items-center gap-0.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
       }
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -680,9 +661,9 @@
   function setFilter(filter, e) {
     activeFilter = filter;
     document.querySelectorAll('#filter-pills button').forEach(btn => {
-      btn.className = "pill-btn px-3.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap text-xs font-semibold";
+      btn.className = "pill-btn px-4 py-2 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 whitespace-nowrap text-xs font-bold";
     });
-    if (e) e.target.className = "pill-btn active px-3.5 py-1.5 rounded-lg bg-blue-600 text-white whitespace-nowrap text-xs font-semibold";
+    if (e) e.target.className = "pill-btn active px-4 py-2 rounded-xl bg-lime-400 text-slate-950 shadow-sm whitespace-nowrap text-xs font-bold";
     renderGuestList();
   }
 
@@ -697,7 +678,6 @@
     });
   }
 
-  // EVENT EDIT LOGIC
   async function submitEditEvent(e) {
     e.preventDefault();
     const title = document.getElementById('ev-title').value.trim();
