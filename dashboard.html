@@ -130,6 +130,7 @@ input, select, textarea { font-size: 16px !important; }
 /* Tombol Ikon Bundar Tipis */
 .ib{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card);transition:all .15s}
 .ib:hover{border-color:var(--brand);color:var(--brand)}
+.ib.sent{background:var(--green-bg);border-color:var(--green);color:var(--green-ink)}
 .ib svg{width:15px;height:15px}
 
 /* Check-in brand card */
@@ -232,7 +233,7 @@ input, select, textarea { font-size: 16px !important; }
 .stepper button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-weight:600;font-size:18px;color:var(--brand)}
 .stepper span{font-family:'Geist Mono',monospace;font-size:18px;font-weight:600;min-width:24px;text-align:center}
 
-/* Floating nav dengan Efek Blur (Glassmorphism) */
+/* Floating nav dengan Efek Blur */
 .tabbar{
   position:fixed;left:50%;transform:translateX(-50%);
   bottom:calc(14px + env(safe-area-inset-bottom));
@@ -730,6 +731,7 @@ function renderGuestList() {
   
   box.innerHTML = list.map((g, i) => {
     const [k, txt] = guestBadge(g);
+    const isSentClass = g.is_sent ? 'sent' : '';
     return `<div class="gl" data-id="${esc(g.id)}">
       <button class="main" data-open style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;text-align:left">
         ${avatar(g, i)}
@@ -738,12 +740,13 @@ function renderGuestList() {
           <div class="tags">
             <span class="tag">${esc(g.category)}</span>
             <span class="st st-${k}">${txt}</span>
+            ${g.is_sent ? '<span class="tag" style="background:var(--green-bg);color:var(--green-ink)">Terkirim</span>' : ''}
           </div>
         </div>
       </button>
       <div class="gl-actions">
         <button class="ib" data-copy title="Salin tautan" aria-label="Salin tautan"><i data-lucide="link"></i></button>
-        <button class="ib" data-wa title="Kirim WhatsApp" aria-label="Kirim WhatsApp"><i data-lucide="message-circle"></i></button>
+        <button class="ib ${isSentClass}" data-wa title="Kirim WhatsApp" aria-label="Kirim WhatsApp"><i data-lucide="message-circle"></i></button>
       </div>
     </div>`;
   }).join('');
@@ -795,12 +798,17 @@ function openGuestActions(id) {
   $('sheet').querySelectorAll('[data-a]').forEach(b => b.onclick = () => guestAction(b.dataset.a, g));
 }
 
-function guestAction(a, g) {
+async function guestAction(a, g) {
   if (a === 'copy') {
     navigator.clipboard.writeText(guestLink(g)).then(() => toast('Tautan disalin'), () => toast('Gagal menyalin tautan', false));
     closeSheet();
   } else if (a === 'wa') {
-    window.open(`https://wa.me/?text=${encodeURIComponent(waText(g))}`, '_blank'); closeSheet();
+    // Otomatis tandai terkirim di database
+    await supabaseClient.rpc('update_guest_sent_status', { p_guest_id: g.id, p_is_sent: true });
+    g.is_sent = true;
+    window.open(`https://wa.me/?text=${encodeURIComponent(waText(g))}`, '_blank');
+    closeSheet();
+    loadDashboard();
   } else if (a === 'edit') openGuestSheet(g.id);
   else if (a === 'del') confirmDelete(g);
 }
@@ -854,7 +862,7 @@ function openGuestSheet(id) {
         <option value="pending" ${g.rsvp_status === 'pending' ? 'selected' : ''}>Pending</option>
         <option value="hadir" ${g.rsvp_status === 'hadir' ? 'selected' : ''}>Hadir</option>
         <option value="tidak_hadir" ${g.rsvp_status === 'tidak_hadir' ? 'selected' : ''}>Absen</option></select></div>
-      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Sudah check-in</label><span class="switch"><input type="checkbox" id="gs-checked" ${g.is_checked_in ? 'checked' : ''}><span></span></span></div>` : ''}
+      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Terkirim</label><span class="switch"><input type="checkbox" id="gs-sent" ${g.is_sent ? 'checked' : ''}><span></span></span></div>` : ''}
     </div>`);
   $('gs-save').onclick = () => saveGuest(g);
   if (!g) setTimeout(() => $('gs-name').focus(), 350);
@@ -889,14 +897,23 @@ async function saveGuest(g) {
   if (!name || isNaN(pax) || pax < 1) return toast('Isi nama dan kuota dengan benar.', false);
   const btn = $('gs-save'); btn.disabled = true;
   
-  const call = g
-    ? supabaseClient.rpc('update_guest_by_client', { p_guest_id: g.id, p_group_name: name, p_category: cat, p_max_pax: pax, p_rsvp_status: $('gs-rsvp').value, p_is_checked_in: $('gs-checked').checked })
-    : supabaseClient.rpc('add_guest_by_client', { p_group_name: name, p_category: cat, p_max_pax: pax });
-  
-  const { data, error } = await call;
+  if (g) {
+    // Update data utama tamu
+    await supabaseClient.rpc('update_guest_by_client', { 
+      p_guest_id: g.id, p_group_name: name, p_category: cat, p_max_pax: pax, p_rsvp_status: $('gs-rsvp').value, p_is_checked_in: g.is_checked_in 
+    });
+    // Update status terkirim dari toggle
+    await supabaseClient.rpc('update_guest_sent_status', { 
+      p_guest_id: g.id, p_is_sent: $('gs-sent').checked 
+    });
+  } else {
+    await supabaseClient.rpc('add_guest_by_client', { p_group_name: name, p_category: cat, p_max_pax: pax });
+  }
+
   btn.disabled = false;
-  if (error || !data || !data.success) return toast(data?.message || 'Gagal menyimpan tamu.', false);
-  closeSheet(); toast(g ? 'Tamu diperbarui' : 'Tamu ditambahkan'); loadDashboard();
+  closeSheet(); 
+  toast(g ? 'Tamu diperbarui' : 'Tamu ditambahkan'); 
+  loadDashboard();
 }
 
 function openPending() {
