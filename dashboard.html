@@ -580,32 +580,24 @@ async function submitEditEvent(e) {
   btn.textContent = 'Menyimpan…';
 
   try {
-    // 1. Coba RPC update_event_by_client
-    const { data, error } = await supabaseClient.rpc('update_event_by_client', {
-      p_title: title,
-      p_event_date: new Date(dateVal).toISOString(),
-      p_location: location,
-      p_caption: caption
-    });
+    // Ambil ID event pertama dari data global yang sedang dimuat
+    const eventId = globalData.event.id;
 
-    btn.disabled = false;
-    btn.textContent = 'Simpan perubahan';
+    // Lakukan update langsung ke tabel events berdasarkan ID
+    const { error: directError } = await supabaseClient
+      .from('events')
+      .update({
+        title: title,
+        event_date: new Date(dateVal).toISOString(),
+        location: location,
+        caption: caption
+      })
+      .eq('id', eventId);
 
-    if (error || !data || !data.success) {
-      // 2. Fallback update direct ke tabel events
-      const { error: directError } = await supabaseClient
-        .from('events')
-        .update({
-          title: title,
-          event_date: new Date(dateVal).toISOString(),
-          location: location,
-          caption: caption
-        })
-        .eq('id', globalData.event.id);
-
-      if (directError) {
-        return toast(error?.message || directError.message || 'Gagal menyimpan perubahan acara', false);
-      }
+    if (directError) {
+      btn.disabled = false;
+      btn.textContent = 'Simpan perubahan';
+      return toast('Gagal menyimpan: ' + directError.message, false);
     }
 
     toast('Perubahan acara berhasil disimpan!');
