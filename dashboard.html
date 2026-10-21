@@ -904,12 +904,13 @@ async function saveGuest(g) {
   const btn = $('gs-save'); btn.disabled = true;
   
   if (g) {
+    const isSentVal = $('gs-sent') ? $('gs-sent').checked : g.is_sent;
     await supabaseClient.rpc('update_guest_by_client', { 
       p_guest_id: g.id, p_group_name: name, p_category: cat, p_max_pax: pax, p_rsvp_status: $('gs-rsvp').value, p_is_checked_in: g.is_checked_in 
     });
     await supabaseClient
       .from('guests')
-      .update({ is_sent: $('gs-sent').checked })
+      .update({ is_sent: isSentVal })
       .eq('id', g.id);
   } else {
     await supabaseClient.rpc('add_guest_by_client', { p_group_name: name, p_category: cat, p_max_pax: pax });
@@ -927,11 +928,27 @@ function openPending() {
     <div class="sheet-head"><h3>Tamu pending · ${list.length}</h3><button onclick="closeSheet()">Tutup</button></div>
     ${list.length
       ? `<div class="listcard">${list.map((g, i) => `
-          <a class="act" style="text-decoration:none" href="https://wa.me/?text=${encodeURIComponent(waText(g))}" target="_blank" rel="noopener">
+          <button class="act" style="width:100%;text-align:left" onclick="sendPendingWA('${g.id}')">
             ${avatar(g, i)}
             <div style="flex:1;min-width:0"><div style="font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(g.group_name)}</div><div style="font-size:13px;color:var(--sub)">${g.max_pax} pax · ${esc(g.category)}</div></div>
-            <i data-lucide="send"></i></a>`).join('')}</div>`
+            <i data-lucide="send"></i></button>`).join('')}</div>`
       : '<div class="empty">Semua tamu sudah menjawab.</div>'}`);
+}
+
+async function sendPendingWA(id) {
+  const g = findGuest(id); if (!g) return;
+  try {
+    await supabaseClient
+      .from('guests')
+      .update({ is_sent: true })
+      .eq('id', g.id);
+    g.is_sent = true;
+  } catch (err) {
+    console.log(err);
+  }
+  window.open(`https://wa.me/?text=${encodeURIComponent(waText(g))}`, '_blank');
+  closeSheet();
+  loadDashboard();
 }
 
 /* ---------- Mode Check-in Cepat dari Dashboard ---------- */
