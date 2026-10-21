@@ -14,13 +14,11 @@
   --bg:#f2f2f7; --card:#fff; --text:#000; --sub:#8e8e93; --sep:rgba(60,60,67,.14);
   --fill:rgba(118,118,128,.12); --blue:#007aff; --green:#34c759; --orange:#ff9500; --red:#ff3b30;
   --glass-rgb:255,255,255; --ga:.5; --gb:22px; --edge:rgba(255,255,255,.8); --edge2:rgba(255,255,255,.35); --gshadow:0 10px 34px rgba(30,40,80,.16);
-  --blob:.5;
 }
 :root[data-dark="1"]{
   --bg:#000; --card:#1c1c1e; --text:#fff; --sub:#98989f; --sep:rgba(84,84,88,.5);
   --fill:rgba(118,118,128,.26); --blue:#0a84ff; --green:#30d158; --orange:#ff9f0a; --red:#ff453a;
   --glass-rgb:64,64,68; --edge:rgba(255,255,255,.28); --edge2:rgba(255,255,255,.08); --gshadow:0 10px 34px rgba(0,0,0,.5);
-  --blob:.32;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{background:var(--bg)}
@@ -31,13 +29,6 @@ button{background:none;border:0;padding:0;cursor:pointer}
 #app{width:100%;max-width:480px;min-height:100vh;position:relative}
 svg.lucide{width:1.2em;height:1.2em;stroke-width:2}
 
-/* Latar warna: memberi "isi" yang dibiaskan kaca */
-.ambient{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.ambient i{position:absolute;border-radius:50%;filter:blur(70px);opacity:var(--blob)}
-.ambient i:nth-child(1){width:340px;height:340px;background:#5ac8fa;top:-110px;left:-90px}
-.ambient i:nth-child(2){width:300px;height:300px;background:#ff6482;top:32%;right:-130px}
-.ambient i:nth-child(3){width:360px;height:360px;background:#bf5af2;bottom:-150px;left:-70px}
-#app{z-index:1}
 
 /* Liquid Glass: kaca hanya untuk kontrol, konten tetap solid */
 .glass,.nav-btn,.nav-title,.tabbar,.seg,.sheet,.toast,.search input{
@@ -167,14 +158,21 @@ input[type=range]::-moz-range-thumb{width:34px;height:24px;border:0;border-radiu
 #login h1{text-align:center;margin:0;font-size:30px;font-weight:800;letter-spacing:-.03em}
 #login p{text-align:center;color:var(--sub);font-size:15px;margin:6px 24px 28px}
 
+/* Animasi: hanya saat berpindah tab, tampil pertama, dan grafik */
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.enter{animation:rise .45s cubic-bezier(.2,.8,.2,1) both}
+.stack i{transform-origin:left;animation:grow .8s cubic-bezier(.2,.8,.2,1) both}
+.stack i:nth-child(2){animation-delay:.06s}.stack i:nth-child(3){animation-delay:.12s}.stack i:nth-child(4){animation-delay:.18s}
+.row,.tile,.hero{transition:background .2s,transform .25s cubic-bezier(.3,1.5,.5,1)}
+.tile:active{transform:scale(.97)}
 @media (prefers-reduced-transparency:reduce){
   .glass,.nav-btn,.nav-title,.tabbar,.seg,.sheet,.toast,.search input{background:var(--card)!important;-webkit-backdrop-filter:none;backdrop-filter:none}
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
-<div class="ambient"><i></i><i></i><i></i></div>
 <div id="app">
 
   <!-- LOGIN -->
@@ -374,11 +372,25 @@ async function login(e) {
 async function logout() { await supabaseClient.auth.signOut(); location.reload(); }
 
 async function loadDashboard() {
-  $('login').classList.add('hidden'); $('dash').classList.remove('hidden');
+  $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); enter($('dash'));
   const { data, error } = await supabaseClient.rpc('get_client_dashboard_data');
   if (error || !data || !data.success) return toast('Gagal memuat data. Silakan masuk lagi.', false);
   globalData = data; renderUI();
 }
+
+/* ---------- Animasi angka ---------- */
+const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function num(el, to, suffix = '') {
+  if (still || !to) { el.textContent = to + suffix; return; }
+  const t0 = performance.now(), dur = 700;
+  const step = t => {
+    const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+    el.textContent = Math.round(to * e) + suffix;
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+function enter(el) { el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter'); }
 
 /* ---------- Render ---------- */
 function renderUI() {
@@ -396,12 +408,12 @@ function renderUI() {
 
   const pct = stats.total_max_pax > 0 ? Math.round(stats.total_hadir / stats.total_max_pax * 100) : 0;
   $('hero-hadir-text').textContent = `${stats.total_hadir} / ${stats.total_max_pax}`;
-  $('hero-pct-text').textContent = pct + '%';
+  num($('hero-pct-text'), pct, '%');
   $('ring-fg').style.strokeDashoffset = 276.46 * (1 - Math.min(pct, 100) / 100);
-  $('stat-hadir-groups').textContent = stats.count_hadir_groups;
-  $('stat-checkedin-count').textContent = stats.total_checked_in;
-  $('stat-pending').textContent = guests.filter(g => g.rsvp_status === 'pending').length;
-  $('stat-absen').textContent = guests.filter(g => g.rsvp_status === 'tidak_hadir').length;
+  num($('stat-hadir-groups'), stats.count_hadir_groups);
+  num($('stat-checkedin-count'), stats.total_checked_in);
+  num($('stat-pending'), guests.filter(g => g.rsvp_status === 'pending').length);
+  num($('stat-absen'), guests.filter(g => g.rsvp_status === 'tidak_hadir').length);
 
   renderCategories(categories);
   renderRecent(guests);
@@ -478,6 +490,8 @@ function switchTab(tab) {
     $('tab-' + t).classList.toggle('hidden', t !== tab);
     $('nav-' + t).classList.toggle('on', t === tab);
   });
+  enter($('tab-' + tab));
+  if (tab === 'home' && globalData) renderCategories(globalData.categories);
   window.scrollTo(0, 0);
   document.body.classList.remove('scrolled');
 }
