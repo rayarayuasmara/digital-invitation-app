@@ -93,8 +93,25 @@ input, select, textarea { font-size: 16px !important; }
 .hl .st{font-size:13px;font-weight:600;white-space:nowrap}
 
 /* Avatar Lingkaran Sempurna */
-.av{width:48px;height:48px;min-width:48px;min-height:48px;border-radius:50%;background:var(--soft);color:var(--brand);display:grid;place-items:center;font-weight:600;font-size:15px;position:relative;flex-shrink:0}
-.av .bdg{position:absolute;right:-1px;bottom:-1px;width:14px;height:14px;border-radius:50%;border:2px solid var(--card)}
+.av {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+  border-radius: 50% !important;
+  background: var(--soft);
+  color: var(--brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 15px;
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+}
 .bdg-hadir{background:var(--green)}
 .bdg-absen{background:#e5484d}
 .bdg-pending{background:#f5a524}
@@ -179,7 +196,41 @@ input, select, textarea { font-size: 16px !important; }
 .gl .main{flex:1;min-width:0;display:flex;gap:12px;align-items:center}
 .gl .main>div{min-width:0;flex:1}
 .gl .n{font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
-.gl-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.gl-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px !important; /* Dirapatkan jarak antar tombol */
+  flex-shrink: 0;
+}
+
+.ib {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  color: var(--sub);
+  flex-shrink: 0;
+  background: var(--card);
+  transition: all .15s;
+}
+
+.ib svg {
+  width: 15px !important;
+  height: 15px !important;
+}
+
+.ib-arrow {
+  background: none;
+  border: 0;
+  color: var(--sub);
+  padding: 2px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
 
 .quota .qt{display:flex;justify-content:space-between;align-items:center}
 .quota .qt b{font-family:"Space Grotesk",sans-serif;font-size:24px;font-weight:600;color:var(--green-ink)}
