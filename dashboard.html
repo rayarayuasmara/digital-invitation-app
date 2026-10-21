@@ -38,7 +38,6 @@ svg.lucide{width:1.15em;height:1.15em;stroke-width:1.8}
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top) + 22px) 20px 8px}
 .topbar h1{margin:0;font-size:32px;color:var(--brand)}
 .logo{width:40px;height:40px;border-radius:12px;background:var(--brand);color:#fff;display:grid;place-items:center;font-family:Manrope;font-weight:800;font-size:19px}
-.topbar .back{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--ink);background:var(--card);box-shadow:var(--shadow)}
 
 .page{padding:8px 16px calc(130px + env(safe-area-inset-bottom))}
 .page>*+*{margin-top:12px}
@@ -46,7 +45,6 @@ svg.lucide{width:1.15em;height:1.15em;stroke-width:1.8}
 .ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .ch h3{margin:0;font-family:Manrope;font-weight:700;font-size:19px}
 .link{color:var(--sub);font-size:14px;display:flex;align-items:center;gap:6px}
-.link svg{width:18px;height:18px}
 .sub{color:var(--sub)}
 
 /* Hero */
@@ -69,7 +67,6 @@ svg.lucide{width:1.15em;height:1.15em;stroke-width:1.8}
 .rowk{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:15px;color:var(--sub)}
 .rowk b{font-family:"Space Grotesk",sans-serif;font-size:22px;font-weight:600;color:var(--ink)}
 .hadir-top{display:flex;align-items:flex-end;gap:10px;margin-top:14px}
-.hadir-top .sub{font-size:14px;line-height:1.3}
 
 /* Histori */
 .hl{display:flex;gap:14px;align-items:center;padding:12px 0}
@@ -106,7 +103,6 @@ svg.lucide{width:1.15em;height:1.15em;stroke-width:1.8}
 .brandcard .sr{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid rgba(255,255,255,.2);font-size:15px;opacity:.95}
 .brandcard .sr:first-child{border-top:0;padding-top:0}
 .brandcard .sr b{font-family:"Space Grotesk",sans-serif;font-size:26px;font-weight:600}
-.brandcard .go{margin-top:14px;width:100%;height:46px;border-radius:14px;background:#fff;color:var(--brand);font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px}
 
 /* Aksi */
 .tiles2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -116,8 +112,6 @@ svg.lucide{width:1.15em;height:1.15em;stroke-width:1.8}
 .tile .ico{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;align-self:flex-end}
 .tile.w .ico{background:var(--brand);color:#fff}
 .tile.g .ico{background:rgba(255,255,255,.22);color:#fff}
-.tile:active{transform:scale(.98)}
-.tile{transition:transform .15s}
 
 /* Kategori */
 .cr{display:flex;align-items:center;gap:14px;padding:12px 0}
@@ -162,7 +156,6 @@ svg.lucide{width:1.15em;height:1.15em;stroke-width:1.8}
 .st.st-checked{background:var(--blue-bg)}
 .ib{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card)}
 .ib svg{width:18px;height:18px}
-.ib.more{border:0;background:transparent;width:24px}
 
 .quota .qt{display:flex;justify-content:space-between;align-items:center}
 .quota .qt b{font-family:"Space Grotesk",sans-serif;font-size:24px;font-weight:600;color:var(--green-ink)}
@@ -189,10 +182,7 @@ svg.lucide{width:1.15em;height:1.15em;stroke-width:1.8}
 .btn{width:100%;height:54px;border-radius:18px;background:var(--brand);color:#fff;font-weight:600;font-size:17px;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s,opacity .2s}
 .btn:active{transform:scale(.98)}
 .btn:disabled{opacity:.5}
-.btn.gray{background:var(--soft);color:var(--brand)}
-.btn.red{background:var(--card);color:#e5484d;box-shadow:var(--shadow)}
 .btn.line{background:var(--card);color:var(--brand);box-shadow:var(--shadow)}
-input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0}
 
 /* Floating nav */
 .tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));width:calc(100% - 28px);max-width:440px;display:flex;align-items:center;gap:12px;z-index:30}
@@ -219,7 +209,6 @@ input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px
 .sheet .act.danger{color:#e5484d}
 .sheet .act svg{width:20px;height:20px}
 .act-title{padding:16px 0 4px;color:var(--sub);font-size:14px;text-align:center}
-.sheet .btn+.btn,.sheet .listcard+.btn,.sheet .btn+.listcard,.sheet .listcard+.listcard{margin-top:12px}
 
 /* Toast */
 .toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translate(-50%,-160%);z-index:80;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:999px;font-size:14px;font-weight:500;display:flex;gap:8px;align-items:center;transition:transform .4s cubic-bezier(.32,.72,0,1);max-width:92%;box-shadow:0 10px 30px rgba(0,0,0,.2)}
@@ -249,18 +238,12 @@ input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px
 .ci.on .n{color:var(--sub)}
 
 .empty{padding:32px 8px;text-align:center;color:var(--sub);font-size:15px}
-
-/* Animasi halus */
-@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.enter>*{animation:rise .4s cubic-bezier(.2,.8,.2,1) both}
-.enter>*:nth-child(2){animation-delay:.04s}.enter>*:nth-child(3){animation-delay:.08s}.enter>*:nth-child(4){animation-delay:.12s}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- LOGIN -->
+  <!-- 1. FORM LOGIN -->
   <section id="login">
     <div class="card">
       <div class="logo">R</div>
@@ -276,10 +259,10 @@ input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px
     </div>
   </section>
 
-  <!-- DASHBOARD -->
+  <!-- 2. DASHBOARD AREA -->
   <section id="dash" class="hidden">
 
-    <!-- HOME -->
+    <!-- TAB HOME -->
     <div id="tab-home">
       <header class="topbar"><h1>Home</h1><span class="logo">R</span></header>
       <div class="page">
@@ -349,7 +332,7 @@ input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px
       </div>
     </div>
 
-    <!-- TAMU -->
+    <!-- TAB TAMU -->
     <div id="tab-tamu" class="hidden">
       <header class="topbar"><h1>Daftar Tamu</h1><span class="logo">R</span></header>
       <div class="page">
@@ -387,7 +370,7 @@ input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px
       </div>
     </div>
 
-    <!-- ACARA -->
+    <!-- TAB ACARA -->
     <div id="tab-acara" class="hidden">
       <header class="topbar"><h1>Acara</h1><span class="logo">R</span></header>
       <form class="page" id="event-form" onsubmit="submitEditEvent(event)">
@@ -401,7 +384,7 @@ input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px
       </form>
     </div>
 
-    <!-- AKUN -->
+    <!-- TAB AKUN -->
     <div id="tab-akun" class="hidden">
       <header class="topbar"><h1>Akun</h1><span class="logo">R</span></header>
       <div class="page">
@@ -423,6 +406,7 @@ input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px
   </section>
 </div>
 
+<!-- FLOATING BOTTOM NAV -->
 <nav class="tabbar hidden" id="tabbar">
   <div class="pillnav">
     <button id="nav-home" class="on" onclick="switchTab('home')"><i data-lucide="house"></i><span>Home</span></button>
@@ -433,6 +417,7 @@ input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px
   <button class="fab" onclick="openCheckin()" aria-label="Mode check-in"><i data-lucide="scan-line"></i></button>
 </nav>
 
+<!-- CHECK-IN MODAL FULLSCREEN -->
 <div class="checkin hidden" id="checkin" role="dialog" aria-modal="true" aria-label="Mode check-in">
   <div class="ci-wrap">
     <div class="ci-head"><div><h1>Check-in</h1><p id="ci-count">0</p></div><button class="txt-btn" onclick="closeCheckin()">Selesai</button></div>
@@ -446,6 +431,9 @@ input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px
 <div class="toast" id="toast"></div>
 
 <script>
+// ==========================================
+// KONFIGURASI SUPABASE
+// ==========================================
 const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -460,7 +448,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const icons = () => window.lucide && lucide.createIcons();
 const initials = s => String(s || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
 
-/* ---------- Tema ---------- */
+/* ---------- Tema Tampilan ---------- */
 const mq = window.matchMedia('(prefers-color-scheme: dark)');
 function applyTheme() {
   const pref = localStorage.getItem('rr_theme') || 'auto';
@@ -480,7 +468,7 @@ $('theme-seg').addEventListener('click', e => {
   localStorage.setItem('rr_theme', b.dataset.t); applyTheme();
 });
 
-/* ---------- Toast & sheet ---------- */
+/* ---------- Toast & Sheet ---------- */
 let toastTimer;
 function toast(msg, ok = true) {
   const t = $('toast');
@@ -495,7 +483,7 @@ function openSheet(html) {
 }
 function closeSheet() { $('backdrop').classList.remove('open'); $('sheet').classList.remove('open'); }
 
-/* ---------- Auth ---------- */
+/* ---------- Autentikasi ---------- */
 async function checkSession() {
   applyTheme();
   const { data: { session } } = await supabaseClient.auth.getSession();
@@ -521,21 +509,7 @@ async function loadDashboard() {
   globalData = data; renderUI();
 }
 
-/* ---------- Animasi angka ---------- */
-const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-function num(el, to, suffix = '') {
-  if (still || !to) { el.textContent = to + suffix; return; }
-  const t0 = performance.now(), dur = 700;
-  const step = t => {
-    const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
-    el.textContent = Math.round(to * e) + suffix;
-    if (k < 1) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
-}
-function enter(tab) { tab.classList.remove('enter'); void tab.offsetWidth; tab.classList.add('enter'); }
-
-/* ---------- Render ---------- */
+/* ---------- Render Antarmuka ---------- */
 const guestBadge = g => {
   if (g.is_checked_in) return ['checked', 'Check-in'];
   if (g.rsvp_status === 'hadir') return ['hadir', 'Hadir'];
@@ -561,22 +535,24 @@ function renderUI() {
 
   const pct = stats.total_max_pax > 0 ? Math.round(stats.total_hadir / stats.total_max_pax * 100) : 0;
   $('hero-pct-text').textContent = pct + '%';
-  num($('hero-hadir'), stats.total_hadir);
+  $('hero-hadir').textContent = stats.total_hadir;
   $('hero-hadir-text').textContent = `Dari ${stats.total_max_pax} pax terkonfirmasi`;
 
-  num($('stat-total'), stats.total_guests);
-  num($('stat-kuota'), Math.max(0, 100 - stats.total_guests));
-  num($('stat-absen'), guests.filter(g => g.rsvp_status === 'tidak_hadir').length);
-  num($('stat-pending'), guests.filter(g => g.rsvp_status === 'pending').length);
+  // Kuota Dinamis
+  const maxQuota = stats.max_quota || 100;
+  $('stat-total').textContent = stats.total_guests;
+  $('stat-kuota').textContent = Math.max(0, maxQuota - stats.total_guests);
+  $('stat-absen').textContent = guests.filter(g => g.rsvp_status === 'tidak_hadir').length;
+  $('stat-pending').textContent = guests.filter(g => g.rsvp_status === 'pending').length;
 
-  // Total check-in (ring)
+  // Ring Diagram Check-in
   const att = guests.filter(g => g.rsvp_status === 'hadir' || g.is_checked_in);
   const checked = att.filter(g => g.is_checked_in).length;
   const ratio = att.length ? checked / att.length : 0;
   $('ring-fg').style.strokeDashoffset = 276.46 * (1 - ratio);
-  num($('ring-num'), checked);
-  num($('ci-wait'), guests.filter(g => g.rsvp_status === 'pending').length);
-  num($('ci-est'), stats.total_hadir);
+  $('ring-num').textContent = checked;
+  $('ci-wait').textContent = guests.filter(g => g.rsvp_status === 'pending').length;
+  $('ci-est').textContent = stats.total_hadir;
 
   renderCategories(categories);
   renderRecent(guests);
@@ -584,9 +560,61 @@ function renderUI() {
   renderGuestList();
 
   $('quota-used').textContent = stats.total_guests;
-  $('quota-max').textContent = 100;
-  $('quota-bar').style.width = Math.min(100, stats.total_guests) + '%';
+  $('quota-max').textContent = maxQuota;
+  $('quota-bar').style.width = Math.min(100, Math.round((stats.total_guests / maxQuota) * 100)) + '%';
   icons();
+}
+
+// FIX: Implementasi Fungsi submitEditEvent yang sebelumnya hilang!
+async function submitEditEvent(e) {
+  e.preventDefault();
+  const title = $('ev-title').value.trim();
+  const dateVal = $('ev-date').value;
+  const location = $('ev-location').value.trim();
+  const caption = $('ev-caption').value.trim();
+
+  if (!title || !dateVal) return toast('Judul dan waktu wajib diisi', false);
+
+  const btn = $('btn-save-event');
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan…';
+
+  try {
+    // 1. Coba RPC update_event_by_client
+    const { data, error } = await supabaseClient.rpc('update_event_by_client', {
+      p_title: title,
+      p_event_date: new Date(dateVal).toISOString(),
+      p_location: location,
+      p_caption: caption
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'Simpan perubahan';
+
+    if (error || !data || !data.success) {
+      // 2. Fallback update direct ke tabel events
+      const { error: directError } = await supabaseClient
+        .from('events')
+        .update({
+          title: title,
+          event_date: new Date(dateVal).toISOString(),
+          location: location,
+          caption: caption
+        })
+        .eq('id', globalData.event.id);
+
+      if (directError) {
+        return toast(error?.message || directError.message || 'Gagal menyimpan perubahan acara', false);
+      }
+    }
+
+    toast('Perubahan acara berhasil disimpan!');
+    loadDashboard();
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Simpan perubahan';
+    toast('Terjadi kesalahan: ' + err.message, false);
+  }
 }
 
 function renderCategories(cats) {
@@ -629,7 +657,6 @@ function renderCategorySelect() {
 }
 function setCategory(c) { activeCategory = c; renderCategorySelect(); renderGuestList(); }
 
-/* Urutan: pakai created_at jika ada; jika tidak, urutan database (diasumsikan lama → baru) */
 function sortGuests(list) {
   const hasTs = list.length && list.every(g => g.created_at);
   let arr = [...list];
@@ -667,6 +694,7 @@ function renderGuestList() {
   }).join('');
   icons();
 }
+
 $('guest-list-container').addEventListener('click', e => {
   const row = e.target.closest('.gl'); if (!row) return;
   const g = findGuest(row.dataset.id); if (!g) return;
@@ -683,19 +711,18 @@ $('sort-opts').addEventListener('click', e => {
   activeSort = b.dataset.s; renderGuestList();
 });
 
-/* ---------- Navigasi ---------- */
+/* ---------- Navigasi Antar Tab ---------- */
 function switchTab(tab) {
   ['home', 'tamu', 'acara', 'akun'].forEach(t => {
     $('tab-' + t).classList.toggle('hidden', t !== tab);
     $('nav-' + t).classList.toggle('on', t === tab);
   });
-  enter($('tab-' + tab));
   if (tab === 'home' && globalData) renderCategories(globalData.categories);
   window.scrollTo(0, 0);
   icons();
 }
 
-/* ---------- Aksi tamu ---------- */
+/* ---------- Aksi Tamu (Copy, WhatsApp, Edit, Delete) ---------- */
 const findGuest = id => globalData.guests.find(g => g.id === id);
 const guestLink = g => `${window.location.origin}/${globalData.client.slug}/${g.invitation_token}`;
 const waText = g => `Halo *${g.group_name}*,\n\nKami mengundang Anda untuk menghadiri acara *${globalData.event.title}*.\n\nSilakan konfirmasi kehadiran Anda melalui tautan resmi berikut:\n${guestLink(g)}`;
@@ -712,6 +739,7 @@ function openGuestActions(id) {
     </div>`);
   $('sheet').querySelectorAll('[data-a]').forEach(b => b.onclick = () => guestAction(b.dataset.a, g));
 }
+
 function guestAction(a, g) {
   if (a === 'copy') {
     navigator.clipboard.writeText(guestLink(g)).then(() => toast('Tautan disalin'), () => toast('Gagal menyalin tautan', false));
@@ -721,6 +749,7 @@ function guestAction(a, g) {
   } else if (a === 'edit') openGuestSheet(g.id);
   else if (a === 'del') confirmDelete(g);
 }
+
 function confirmDelete(g) {
   openSheet(`
     <div class="sheet-head"><h3>Hapus tamu?</h3><button onclick="closeSheet()">Batal</button></div>
@@ -755,6 +784,7 @@ function openGuestSheet(id) {
   $('gs-save').onclick = () => saveGuest(g);
   if (!g) setTimeout(() => $('gs-name').focus(), 350);
 }
+
 async function saveGuest(g) {
   const name = $('gs-name').value.trim(), cat = $('gs-cat').value, pax = parseInt($('gs-pax').value);
   if (!name || isNaN(pax) || pax < 1) return toast('Isi nama dan kuota dengan benar.', false);
@@ -768,7 +798,6 @@ async function saveGuest(g) {
   closeSheet(); toast(g ? 'Tamu diperbarui' : 'Tamu ditambahkan'); loadDashboard();
 }
 
-/* ---------- Kirim undangan ke tamu pending ---------- */
 function openPending() {
   const list = globalData.guests.filter(g => g.rsvp_status === 'pending');
   openSheet(`
@@ -782,7 +811,7 @@ function openPending() {
       : '<div class="empty">Semua tamu sudah menjawab.</div>'}`);
 }
 
-/* ---------- Mode check-in ---------- */
+/* ---------- Mode Check-in Cepat dari Dashboard ---------- */
 const attending = () => globalData.guests.filter(g => g.rsvp_status === 'hadir' || g.is_checked_in);
 function openCheckin() {
   $('ci-search').value = '';
@@ -792,6 +821,7 @@ function openCheckin() {
   icons();
 }
 function closeCheckin() { $('checkin').classList.add('hidden'); loadDashboard(); }
+
 function renderCheckin() {
   const q = $('ci-search').value.toLowerCase().trim();
   const all = attending();
@@ -804,9 +834,11 @@ function renderCheckin() {
         <span class="tick"></span></button>`).join('')
     : '<div class="empty">Tidak ada tamu yang cocok.</div>';
 }
+
 $('ci-list').addEventListener('click', e => {
   const b = e.target.closest('[data-ci]'); if (b) toggleCheckin(b.dataset.ci);
 });
+
 async function toggleCheckin(id) {
   const g = findGuest(id); if (!g || g.busy) return;
   const next = !g.is_checked_in;
