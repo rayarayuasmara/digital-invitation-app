@@ -905,17 +905,15 @@ async function saveGuest(g) {
   
   if (g) {
     const isSentVal = $('gs-sent') ? $('gs-sent').checked : g.is_sent;
-    
-    // 1. Update data utama lewat RPC
     await supabaseClient.rpc('update_guest_by_client', { 
-      p_guest_id: g.id, p_group_name: name, p_category: cat, p_max_pax: pax, p_rsvp_status: $('gs-rsvp').value, p_is_checked_in: g.is_checked_in 
+      p_guest_id: g.id, 
+      p_group_name: name, 
+      p_category: cat, 
+      p_max_pax: pax, 
+      p_rsvp_status: $('gs-rsvp').value, 
+      p_is_checked_in: g.is_checked_in,
+      p_is_sent: isSentVal 
     });
-    
-    // 2. Update status is_sent secara langsung ke tabel guests agar toggle terkirim bisa aktif/nonaktif
-    await supabaseClient
-      .from('guests')
-      .update({ is_sent: isSentVal })
-      .eq('id', g.id);
   } else {
     await supabaseClient.rpc('add_guest_by_client', { p_group_name: name, p_category: cat, p_max_pax: pax });
   }
