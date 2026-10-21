@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#f4f5f8" id="meta-theme" />
 <title>Dashboard Klien - RayaRayu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -33,6 +33,13 @@ input{background:transparent}
 svg.lucide{width:1.15em;height:1.15em;stroke-width:1.8}
 .display{font-family:Manrope,Inter,sans-serif;font-weight:800;letter-spacing:-.02em}
 .num{font-family:"Space Grotesk",Inter,sans-serif;font-weight:600;letter-spacing:-.01em}
+
+/* Mencegah auto-zoom form di iOS & mendukung smooth scroll gestur */
+input, select, textarea { font-size: 16px !important; }
+@media screen and (max-width: 768px) {
+  input, select, textarea { font-size: 16px !important; }
+}
+.smooth-scroll { overflow-x: auto; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
 
 /* Header */
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top) + 22px) 20px 8px}
@@ -68,23 +75,32 @@ svg.lucide{width:1.15em;height:1.15em;stroke-width:1.8}
 .rowk b{font-family:"Space Grotesk",sans-serif;font-size:22px;font-weight:600;color:var(--ink)}
 .hadir-top{display:flex;align-items:flex-end;gap:10px;margin-top:14px}
 
-/* Histori */
+/* Histori & Tamu List Styling (Referensi Apple UI) */
 .hl{display:flex;gap:14px;align-items:center;padding:12px 0}
 .hl+.hl{border-top:1px solid var(--line)}
 .hl .txt{flex:1;min-width:0}
 .hl .n{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hl .s{color:var(--sub);font-size:14px;margin-top:2px}
 .hl .st{font-size:13px;font-weight:600;white-space:nowrap}
-.av{width:48px;height:48px;border-radius:50%;background:var(--soft);color:var(--brand);display:grid;place-items:center;font-weight:600;font-size:14px;position:relative;flex-shrink:0}
+.av{width:48px;height:48px;border-radius:50%;background:var(--soft);color:var(--brand);display:grid;place-items:center;font-weight:600;font-size:15px;position:relative;flex-shrink:0}
 .av .bdg{position:absolute;right:-1px;bottom:-1px;width:14px;height:14px;border-radius:50%;border:2px solid var(--card)}
 .bdg-hadir{background:var(--green)}
 .bdg-absen{background:#e5484d}
 .bdg-pending{background:#f5a524}
 .bdg-checked{background:var(--brand)}
-.st-hadir{color:var(--green-ink)}
-.st-absen{color:var(--red-ink)}
-.st-pending{color:var(--amber-ink)}
-.st-checked{color:var(--brand)}
+
+/* Badge Status Alami (Natural Pills) */
+.st{font-size:12px;padding:4px 11px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;font-weight:600;letter-spacing:-0.01em}
+.st::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.st.st-hadir{background:var(--green-bg);color:var(--green-ink)}
+.st.st-absen{background:var(--red-bg);color:var(--red-ink)}
+.st.st-pending{background:var(--amber-bg);color:var(--amber-ink)}
+.st.st-checked{background:var(--blue-bg);color:var(--brand)}
+
+/* Tombol Ikon Bundar Tipis ala Referensi */
+.ib{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card);transition:all .15s}
+.ib:hover{border-color:var(--brand);color:var(--brand)}
+.ib svg{width:16px;height:16px}
 
 /* Check-in brand card */
 .brandcard{background:var(--brand);color:#fff}
@@ -133,29 +149,23 @@ svg.lucide{width:1.15em;height:1.15em;stroke-width:1.8}
 .fsel>svg{position:absolute;right:6px;pointer-events:none;width:16px;height:16px}
 
 .listcard{background:var(--card);border-radius:24px;padding:4px 18px 8px;box-shadow:var(--shadow)}
-.tabs{display:flex;gap:22px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:22px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
 .tabs::-webkit-scrollbar{display:none}
-.tabs button{padding:14px 0 13px;color:var(--sub);font-weight:500;font-size:16px;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button{padding:14px 0 13px;color:var(--sub);font-weight:500;font-size:16px;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;flex-shrink:0}
 .tabs button.on{color:var(--brand);border-bottom-color:var(--brand);font-weight:600}
 .sort{display:flex;justify-content:flex-end;gap:14px;padding:12px 0 2px;font-size:14px;color:var(--sub)}
 .sort button{padding:2px 0}
 .sort button.on{color:var(--brand);font-weight:600}
 
-.gl{display:flex;align-items:center;gap:10px;padding:14px 0}
+/* List Item Tamu ala Referensi */
+.gl{display:flex;align-items:center;gap:12px;padding:14px 0}
 .gl+.gl{border-top:1px solid var(--line)}
 .gl .main{flex:1;min-width:0;display:flex;gap:12px;align-items:center}
 .gl .main>div{min-width:0;flex:1}
-.gl .n{font-weight:600;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tags{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
-.tag{font-size:13px;padding:3px 10px;border-radius:999px;background:var(--tag);color:var(--tag-ink)}
-.st{font-size:13px;padding:3px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;font-weight:500}
-.st::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
-.st.st-hadir{background:var(--green-bg)}
-.st.st-absen{background:var(--red-bg)}
-.st.st-pending{background:var(--amber-bg)}
-.st.st-checked{background:var(--blue-bg)}
-.ib{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card)}
-.ib svg{width:18px;height:18px}
+.gl .n{font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.tags{display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:wrap}
+.tag{font-size:12px;padding:4px 11px;border-radius:999px;background:var(--tag);color:var(--tag-ink);font-weight:500}
+.gl-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 
 .quota .qt{display:flex;justify-content:space-between;align-items:center}
 .quota .qt b{font-family:"Space Grotesk",sans-serif;font-size:24px;font-weight:600;color:var(--green-ink)}
@@ -344,7 +354,7 @@ svg.lucide{width:1.15em;height:1.15em;stroke-width:1.8}
         </div>
 
         <div class="listcard">
-          <div class="tabs" id="filter-tabs">
+          <div class="tabs smooth-scroll" id="filter-tabs">
             <button class="on" data-f="all">Semua</button>
             <button data-f="hadir">Hadir</button>
             <button data-f="tidak_hadir">Absen</button>
@@ -394,10 +404,10 @@ svg.lucide{width:1.15em;height:1.15em;stroke-width:1.8}
         </div>
         <div class="card">
           <div class="ch"><h3>Tampilan</h3></div>
-          <div class="tabs" id="theme-seg" style="border:0;gap:8px">
-            <button data-t="auto" class="on" style="border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px">Otomatis</button>
-            <button data-t="light" style="border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px">Terang</button>
-            <button data-t="dark" style="border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px">Gelap</button>
+          <div class="tabs smooth-scroll" id="theme-seg" style="border:0;gap:8px">
+            <button data-t="auto" class="on" style="border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;flex-shrink:0">Otomatis</button>
+            <button data-t="light" style="border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;flex-shrink:0">Terang</button>
+            <button data-t="dark" style="border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;flex-shrink:0">Gelap</button>
           </div>
         </div>
         <button class="btn line" onclick="logout()">Keluar</button>
@@ -511,7 +521,7 @@ async function loadDashboard() {
 
 /* ---------- Render Antarmuka ---------- */
 const guestBadge = g => {
-  if (g.is_checked_in) return ['checked', 'Check-in'];
+  if (g.is_checked_in) return ['checked', 'Checked'];
   if (g.rsvp_status === 'hadir') return ['hadir', 'Hadir'];
   if (g.rsvp_status === 'tidak_hadir') return ['absen', 'Absen'];
   return ['pending', 'Pending'];
@@ -538,14 +548,12 @@ function renderUI() {
   $('hero-hadir').textContent = stats.total_hadir;
   $('hero-hadir-text').textContent = `Dari ${stats.total_max_pax} pax terkonfirmasi`;
 
-  // Kuota Dinamis
   const maxQuota = stats.max_quota || 100;
   $('stat-total').textContent = stats.total_guests;
   $('stat-kuota').textContent = Math.max(0, maxQuota - stats.total_guests);
   $('stat-absen').textContent = guests.filter(g => g.rsvp_status === 'tidak_hadir').length;
   $('stat-pending').textContent = guests.filter(g => g.rsvp_status === 'pending').length;
 
-  // Ring Diagram Check-in
   const att = guests.filter(g => g.rsvp_status === 'hadir' || g.is_checked_in);
   const checked = att.filter(g => g.is_checked_in).length;
   const ratio = att.length ? checked / att.length : 0;
@@ -565,7 +573,6 @@ function renderUI() {
   icons();
 }
 
-// FIX: Implementasi Fungsi submitEditEvent yang sebelumnya hilang!
 async function submitEditEvent(e) {
   e.preventDefault();
   const title = $('ev-title').value.trim();
@@ -581,8 +588,6 @@ async function submitEditEvent(e) {
 
   try {
     const eventId = globalData.event.id;
-
-    // Lakukan update langsung ke tabel events berdasarkan ID
     const { error: directError } = await supabaseClient
       .from('events')
       .update({
@@ -593,7 +598,6 @@ async function submitEditEvent(e) {
       })
       .eq('id', eventId);
 
-    // Kembalikan tombol ke kondisi semula terlebih dahulu
     btn.disabled = false;
     btn.textContent = 'Simpan perubahan';
 
@@ -602,8 +606,6 @@ async function submitEditEvent(e) {
     }
 
     toast('Perubahan acara berhasil disimpan!');
-    
-    // Muat ulang data dashboard dengan aman
     loadDashboard();
   } catch (err) {
     btn.disabled = false;
@@ -673,18 +675,22 @@ function renderGuestList() {
   else if (activeFilter !== 'all') list = list.filter(g => g.rsvp_status === activeFilter);
 
   if (!list.length) { box.innerHTML = '<div class="empty">Tidak ada tamu yang sesuai.</div>'; return; }
+  
+  // Render Item Daftar Tamu Sesuai Referensi Apple UI
   box.innerHTML = list.map((g, i) => {
     const [k, txt] = guestBadge(g);
     return `<div class="gl" data-id="${esc(g.id)}">
-      <button class="main" data-open>
+      <button class="main" data-open style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;text-align:left">
         ${avatar(g, i)}
-        <div>
+        <div style="min-width:0;flex:1">
           <div class="n">${esc(g.group_name)}</div>
           <div class="tags"><span class="tag">${esc(g.category)}</span><span class="st st-${k}">${txt}</span></div>
         </div>
       </button>
-      <button class="ib" data-copy title="Salin tautan" aria-label="Salin tautan"><i data-lucide="link"></i></button>
-      <button class="ib" data-wa title="Kirim WhatsApp" aria-label="Kirim WhatsApp"><i data-lucide="message-circle"></i></button>
+      <div class="gl-actions">
+        <button class="ib" data-copy title="Salin tautan" aria-label="Salin tautan"><i data-lucide="link"></i></button>
+        <button class="ib" data-wa title="Kirim WhatsApp" aria-label="Kirim WhatsApp"><i data-lucide="message-circle"></i></button>
+      </div>
     </div>`;
   }).join('');
   icons();
