@@ -803,9 +803,13 @@ async function guestAction(a, g) {
     navigator.clipboard.writeText(guestLink(g)).then(() => toast('Tautan disalin'), () => toast('Gagal menyalin tautan', false));
     closeSheet();
   } else if (a === 'wa') {
-    // Otomatis tandai terkirim di database
-    await supabaseClient.rpc('update_guest_sent_status', { p_guest_id: g.id, p_is_sent: true });
-    g.is_sent = true;
+    // Ubah status terkirim di database agar tombol berubah warna hijau
+    try {
+      await supabaseClient.rpc('update_guest_sent_status', { p_guest_id: g.id, p_is_sent: true });
+      g.is_sent = true;
+    } catch (err) {
+      console.error(err);
+    }
     window.open(`https://wa.me/?text=${encodeURIComponent(waText(g))}`, '_blank');
     closeSheet();
     loadDashboard();
