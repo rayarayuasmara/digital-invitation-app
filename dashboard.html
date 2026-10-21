@@ -297,15 +297,15 @@ input[type=range]::-moz-range-thumb{width:34px;height:24px;border:0;border-radiu
       </div>
     </div>
 
-    <!-- TAB BAR -->
-    <nav class="tabbar">
+  </section>
+</div>
+
+<nav class="tabbar hidden" id="tabbar">
       <button id="nav-home" class="on" onclick="switchTab('home')"><i data-lucide="layout-grid"></i><span>Ringkasan</span></button>
       <button id="nav-tamu" onclick="switchTab('tamu')"><i data-lucide="users"></i><span>Tamu</span></button>
       <button id="nav-acara" onclick="switchTab('acara')"><i data-lucide="calendar-days"></i><span>Acara</span></button>
       <button id="nav-akun" onclick="switchTab('akun')"><i data-lucide="user-round"></i><span>Akun</span></button>
     </nav>
-  </section>
-</div>
 
 <div class="backdrop" id="backdrop" onclick="closeSheet()"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
@@ -372,7 +372,7 @@ async function login(e) {
 async function logout() { await supabaseClient.auth.signOut(); location.reload(); }
 
 async function loadDashboard() {
-  $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); enter($('dash'));
+  $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); $('tabbar').classList.remove('hidden'); enter($('tab-home'));
   const { data, error } = await supabaseClient.rpc('get_client_dashboard_data');
   if (error || !data || !data.success) return toast('Gagal memuat data. Silakan masuk lagi.', false);
   globalData = data; renderUI();
@@ -390,7 +390,7 @@ function num(el, to, suffix = '') {
   };
   requestAnimationFrame(step);
 }
-function enter(el) { el.classList.remove('enter'); void el.offsetWidth; el.classList.add('enter'); }
+function enter(tab) { tab.querySelectorAll('.large, .page').forEach(n => { n.classList.remove('enter'); void n.offsetWidth; n.classList.add('enter'); }); }
 
 /* ---------- Render ---------- */
 function renderUI() {
