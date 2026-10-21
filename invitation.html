@@ -2,11 +2,14 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Undangan Pernikahan - RayaRayu</title>
-  <!-- Tailwind CSS & Font -->
+  <!-- Tailwind CSS & Google Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
   <!-- Supabase & QRCode Lib -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -14,167 +17,229 @@
   <style>
     body { font-family: 'Poppins', sans-serif; }
     .font-serif-custom { font-family: 'Playfair Display', serif; }
+    .cover-slide-up {
+      transform: translateY(-100%);
+      transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+    }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex justify-center">
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex justify-center selection:bg-amber-500 selection:text-white">
 
-  <div class="w-full max-w-md bg-white min-h-screen shadow-xl flex flex-col relative overflow-x-hidden">
+  <div class="w-full max-w-md bg-white min-h-screen shadow-2xl flex flex-col relative overflow-x-hidden">
 
-    <!-- Loading Screen -->
-    <div id="loading" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
-      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-600"></div>
-      <p class="mt-3 text-slate-500 text-sm">Memuat Undangan...</p>
+    <!-- 1. LOADING SCREEN -->
+    <div id="loading" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center space-y-3">
+      <div class="animate-spin rounded-full h-10 w-10 border-4 border-amber-600 border-t-transparent"></div>
+      <p class="text-slate-500 text-xs font-medium tracking-wide">Mempersiapkan Undangan Eksklusif...</p>
     </div>
 
-    <!-- Error Screen -->
-    <div id="error-msg" class="hidden p-6 text-center text-red-600 font-bold my-auto"></div>
+    <!-- 2. ERROR SCREEN -->
+    <div id="error-screen" class="hidden fixed inset-0 bg-white z-50 flex flex-col items-center justify-center p-6 text-center space-y-4">
+      <div class="w-16 h-16 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center text-2xl font-bold border border-rose-200">
+        ⚠️
+      </div>
+      <div>
+        <h2 class="text-base font-bold text-slate-800">Undangan Tidak Ditemukan</h2>
+        <p id="error-text" class="text-xs text-slate-500 mt-1 max-w-xs leading-relaxed">
+          Tautan undangan tidak valid atau token belum terdaftar.
+        </p>
+      </div>
+      <a href="/" class="text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 px-4 py-2 rounded-xl transition">
+        Kembali ke Beranda
+      </a>
+    </div>
 
-    <!-- Content Undangan -->
+    <!-- 3. KONTEN UTAMA UNDANGAN -->
     <div id="main-content" class="hidden">
 
-      <!-- 1. SAMPUL DEPAN (COVER) -->
-      <section id="cover" class="fixed inset-0 z-40 bg-slate-900 text-white flex flex-col justify-between p-8 text-center bg-cover bg-center transition-transform duration-700 max-w-md mx-auto" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80');">
+      <!-- COVER DEPAN (SAMPUL) -->
+      <section id="cover" class="fixed inset-0 z-40 bg-slate-900 text-white flex flex-col justify-between p-8 text-center bg-cover bg-center transition-transform duration-700 max-w-md mx-auto" style="background-image: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.75)), url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80');">
         <div class="mt-8">
-          <p class="text-xs uppercase tracking-widest text-amber-300 font-medium">The Wedding Of</p>
-          <h1 id="cover-title" class="font-serif-custom text-3xl font-bold mt-2 text-amber-100"></h1>
+          <p class="text-[11px] uppercase tracking-widest text-amber-300 font-semibold">The Wedding Of</p>
+          <h1 id="cover-title" class="font-serif-custom text-3xl font-bold mt-2 text-amber-100">Pernikahan Rudi & Irul</h1>
         </div>
 
-        <div class="my-auto bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20">
-          <p class="text-xs text-slate-200">Kepada Yth. Bapak/Ibu/Saudara/i:</p>
-          <h2 id="cover-guest-name" class="text-lg font-semibold text-amber-300 mt-1"></h2>
-          <p class="text-xs text-slate-300 mt-1">Kuota: <span id="cover-max-pax"></span> Orang</p>
+        <div class="my-auto bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-2xl">
+          <p class="text-xs text-slate-300">Kepada Yth. Bapak/Ibu/Saudara/i:</p>
+          <h2 id="cover-guest-name" class="text-lg font-bold text-amber-300 mt-1.5 tracking-tight">Tamu Undangan</h2>
+          <p class="text-xs text-slate-300 mt-1">Kuota: <span id="cover-max-pax" class="font-semibold text-white">2</span> Orang</p>
           
-          <button onclick="openInvitation()" class="mt-5 w-full bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold py-3 px-6 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-            ✉️ Buka Undangan
+          <button onclick="openInvitation()" class="mt-5 w-full bg-amber-600 hover:bg-amber-500 active:scale-95 text-white text-xs font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-amber-900/40 transition flex items-center justify-center gap-2">
+            <span>✉️</span> Buka Undangan
           </button>
         </div>
 
-        <p class="text-[10px] text-slate-400 mb-4">Mohon maaf apabila ada kesalahan penulisan nama/gelar</p>
+        <p class="text-[10px] text-slate-400 mb-2">Mohon maaf apabila ada kesalahan penulisan nama/gelar</p>
       </section>
 
-      <!-- ISI UNDANGAN -->
-      <main class="pb-12">
+      <!-- ISI UNDANGAN LENGKAP -->
+      <main class="pb-16">
 
-        <!-- Header Photo Banner -->
-        <div class="h-64 bg-cover bg-center relative flex items-end p-6 text-white" style="background-image: linear-gradient(to top, rgba(15,23,42,0.9), transparent), url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80');">
+        <!-- Banner Header Foto -->
+        <div class="h-64 bg-cover bg-center relative flex items-end p-6 text-white" style="background-image: linear-gradient(to top, rgba(15,23,42,0.95), transparent), url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80');">
           <div>
-            <span class="text-xs uppercase tracking-widest text-amber-400 font-semibold">Walimatul 'Ursy</span>
-            <h1 id="header-title" class="font-serif-custom text-2xl font-bold mt-1 text-amber-100"></h1>
+            <span class="text-[10px] uppercase tracking-widest text-amber-400 font-bold">Walimatul 'Ursy</span>
+            <h1 id="header-title" class="font-serif-custom text-2xl font-bold mt-1 text-amber-100">Pernikahan Rudi & Irul</h1>
           </div>
         </div>
 
-        <!-- 2. SALAM PEMBUKA -->
-        <section class="p-6 text-center border-b border-slate-100">
-          <p class="font-serif-custom text-amber-700 text-lg italic">Bismillahirrahmanirrahim</p>
-          <p class="text-xs text-slate-600 leading-relaxed mt-3" id="event-caption"></p>
+        <!-- Salam Pembuka -->
+        <section class="p-6 text-center border-b border-slate-100 space-y-2">
+          <p class="font-serif-custom text-amber-700 text-lg italic font-semibold">Bismillahirrahmanirrahim</p>
+          <p class="text-xs text-slate-600 leading-relaxed max-w-sm mx-auto" id="event-caption">
+            Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kami.
+          </p>
         </section>
 
-        <!-- 3. INFORMASI MEMPELAI / PENYELENGGARA -->
-        <section class="p-6 text-center bg-amber-50/50">
+        <!-- Informasi Pasangan Mempelai -->
+        <section class="p-6 text-center bg-amber-50/40 border-b border-slate-100">
           <h2 class="font-serif-custom text-xl font-bold text-slate-800">Mempelai</h2>
-          <div class="mt-4 space-y-4 text-sm">
-            <div>
-              <h3 id="bride-groom-names" class="font-serif-custom text-2xl font-bold text-amber-700"></h3>
-              <p class="text-xs text-slate-500 mt-1">Putra & Putri Tercinta dari Keluarga Besar Kami</p>
-            </div>
+          <div class="mt-4 space-y-2">
+            <h3 id="bride-groom-names" class="font-serif-custom text-2xl font-bold text-amber-700 tracking-tight">Rudi & Irul</h3>
+            <p class="text-xs text-slate-500">Putra & Putri Tercinta dari Keluarga Besar Kami</p>
           </div>
         </section>
 
-        <!-- 4. DETAIL ACARA & MAPS -->
+        <!-- Waktu, Lokasi & Hitung Mundur Acara -->
         <section class="p-6 text-center border-b border-slate-100">
-          <h2 class="font-serif-custom text-xl font-bold text-slate-800 mb-4">Waktu & Lokasi</h2>
+          <h2 class="font-serif-custom text-xl font-bold text-slate-800 mb-4">Waktu & Tempat Acara</h2>
           
-          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
-            <p id="event-date" class="font-semibold text-slate-800 text-sm"></p>
-            <p id="event-location" class="text-xs text-slate-600 mt-2 leading-relaxed"></p>
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+            <div class="inline-block bg-amber-100 text-amber-800 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+              Akad & Resepsi
+            </div>
+            <p id="event-date" class="font-bold text-slate-800 text-sm">-</p>
+            <p id="event-location" class="text-xs text-slate-600 leading-relaxed px-2">-</p>
 
-            <!-- Google Maps Button -->
-            <a id="maps-btn" href="#" target="_blank" class="mt-4 inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold py-2.5 px-4 rounded-lg transition">
-              📍 Buka di Google Maps
-            </a>
+            <!-- Tombol Google Maps -->
+            <div class="pt-2">
+              <a id="maps-btn" href="#" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold py-2.5 px-4 rounded-xl shadow transition">
+                <span>📍</span> Buka di Google Maps
+              </a>
+            </div>
           </div>
 
           <!-- Countdown Timer -->
           <div class="mt-6">
-            <p class="text-xs text-slate-500 mb-2">Hitung Mundur Acara:</p>
+            <p class="text-xs text-slate-500 mb-3">Hitung Mundur Hari Bahagia:</p>
             <div id="countdown" class="flex justify-center gap-2 text-center text-xs font-bold">
-              <div class="bg-amber-100 text-amber-800 p-2.5 rounded-lg w-16"><span id="cd-days" class="text-base block">0</span>Hari</div>
-              <div class="bg-amber-100 text-amber-800 p-2.5 rounded-lg w-16"><span id="cd-hours" class="text-base block">0</span>Jam</div>
-              <div class="bg-amber-100 text-amber-800 p-2.5 rounded-lg w-16"><span id="cd-mins" class="text-base block">0</span>Menit</div>
+              <div class="bg-amber-100 text-amber-900 p-2.5 rounded-xl w-16 border border-amber-200">
+                <span id="cd-days" class="text-base font-extrabold block">0</span>Hari
+              </div>
+              <div class="bg-amber-100 text-amber-900 p-2.5 rounded-xl w-16 border border-amber-200">
+                <span id="cd-hours" class="text-base font-extrabold block">0</span>Jam
+              </div>
+              <div class="bg-amber-100 text-amber-900 p-2.5 rounded-xl w-16 border border-amber-200">
+                <span id="cd-mins" class="text-base font-extrabold block">0</span>Menit
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- 5. FITUR INTERAKTIF: RSVP & TIKET QR -->
-        <section class="p-6 bg-slate-50">
-          <h2 class="font-serif-custom text-xl font-bold text-center text-slate-800 mb-4">Konfirmasi Kehadiran</h2>
+        <!-- FORM RSVP & TIKET QR CHECK-IN -->
+        <section class="p-6 bg-slate-50 border-b border-slate-100">
+          <h2 class="font-serif-custom text-xl font-bold text-center text-slate-800 mb-2">Konfirmasi Kehadiran</h2>
+          <p class="text-xs text-slate-500 text-center mb-5">Mohon konfirmasikan kehadiran Anda untuk persiapan konsumsi & tempat duduk.</p>
 
-          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-            <p class="text-xs text-slate-600">Tamu: <strong id="rsvp-guest-name" class="text-slate-800"></strong></p>
-            <p class="text-xs text-slate-500 mb-4">Maksimal kuota: <span id="rsvp-max-pax"></span> Orang</p>
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+              <div>
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Nama Tamu:</span>
+                <strong id="rsvp-guest-name" class="text-slate-800 text-xs font-bold">-</strong>
+              </div>
+              <div class="text-right">
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Maksimal:</span>
+                <span class="text-xs font-bold text-amber-700"><span id="rsvp-max-pax">2</span> Pax</span>
+              </div>
+            </div>
 
+            <!-- Form Pilihan Kehadiran -->
             <form id="rsvp-form" class="space-y-3">
               <div>
                 <label class="block text-xs font-medium text-slate-700 mb-1">Status Kehadiran</label>
-                <select id="status-select" onchange="togglePaxInput()" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-amber-500 outline-none">
-                  <option value="">-- Pilih Status --</option>
-                  <option value="hadir">Hadir</option>
-                  <option value="tidak_hadir">Tidak Hadir</option>
+                <select id="status-select" onchange="togglePaxInput()" class="w-full text-xs p-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 outline-none bg-white font-medium" required>
+                  <option value="">-- Pilih Kehadiran Anda --</option>
+                  <option value="hadir">Insya Allah Hadir</option>
+                  <option value="tidak_hadir">Mohon Maaf Belum Bisa Hadir</option>
                 </select>
               </div>
 
               <div id="pax-group" class="hidden">
-                <label class="block text-xs font-medium text-slate-700 mb-1">Jumlah Orang Hadir</label>
-                <input type="number" id="pax-input" min="1" class="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-amber-500 outline-none" />
+                <label class="block text-xs font-medium text-slate-700 mb-1">Jumlah Orang yang Hadir</label>
+                <input type="number" id="pax-input" min="1" class="w-full text-xs p-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 outline-none font-medium" />
               </div>
 
-              <button type="submit" id="btn-submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-3 rounded-lg shadow transition">
-                Kirim RSVP
+              <button type="submit" id="btn-submit" class="w-full bg-amber-600 hover:bg-amber-500 active:scale-98 text-white text-xs font-bold py-3.5 rounded-xl shadow-md transition">
+                Simpan Konfirmasi RSVP
               </button>
             </form>
 
-            <!-- TIKET QR -->
-            <div id="ticket-section" class="hidden mt-6 pt-6 border-t border-dashed border-slate-300 text-center">
-              <h3 class="font-bold text-sm text-slate-800">Tiket Masuk Anda</h3>
-              <p class="text-[11px] text-slate-500 mt-1">Tunjukkan QR Code ini kepada petugas check-in di lokasi acara.</p>
-              <div class="flex justify-center my-4" id="qrcode"></div>
+            <!-- TIKET QR CODE (MUNCUL OTOMATIS JIKA HADIR) -->
+            <div id="ticket-section" class="hidden mt-6 pt-5 border-t-2 border-dashed border-slate-200 text-center space-y-2">
+              <span class="inline-block bg-emerald-100 text-emerald-800 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                🎫 Tiket Masuk Resmi
+              </span>
+              <h3 class="font-bold text-sm text-slate-800">QR Code Check-in Anda</h3>
+              <p class="text-[11px] text-slate-500 max-w-xs mx-auto leading-relaxed">
+                Tunjukkan QR Code ini kepada petugas penerima tamu di gerbang saat tiba di lokasi.
+              </p>
+
+              <!-- QR Code Container -->
+              <div class="flex flex-col items-center justify-center my-3">
+                <div class="p-3 bg-white rounded-2xl border-2 border-slate-800 shadow-md inline-block">
+                  <div id="qrcode"></div>
+                </div>
+                <span id="ticket-token-label" class="mt-2 font-mono text-[11px] font-bold text-slate-700 tracking-wider"></span>
+              </div>
+
+              <p id="checkin-status-note" class="text-[11px] text-slate-500"></p>
             </div>
           </div>
         </section>
 
-        <!-- 6. DIGITAL GIFT / AMPLOP DIGITAL -->
-        <section class="p-6 text-center border-t border-slate-100">
-          <h2 class="font-serif-custom text-xl font-bold text-slate-800 mb-2">Amplop Digital</h2>
-          <p class="text-xs text-slate-500 mb-4">Doa restu Anda adalah karunia terindah, namun jika ingin memberikan tanda kasih:</p>
+        <!-- DIGITAL GIFT / AMPLOP DIGITAL -->
+        <section class="p-6 text-center border-b border-slate-100 space-y-3">
+          <h2 class="font-serif-custom text-xl font-bold text-slate-800">Tanda Kasih & Amplop Digital</h2>
+          <p class="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
+            Doa restu Anda merupakan karunia terindah bagi kami. Namun jika ingin memberikan tanda kasih secara digital:
+          </p>
 
-          <div class="bg-amber-50 p-4 rounded-xl border border-amber-200/60 text-left text-xs space-y-2">
-            <p class="font-bold text-slate-700">BCA: <span class="font-normal text-slate-900 select-all">1234567890</span></p>
-            <p class="text-slate-500">a.n. Rudi & Irul</p>
+          <div class="bg-amber-50/70 p-4 rounded-2xl border border-amber-200/80 text-left text-xs space-y-2 max-w-sm mx-auto shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-800 tracking-wide">Bank BCA</span>
+              <button onclick="copyRekening('1234567890')" class="text-[11px] font-bold text-amber-700 hover:text-amber-800 bg-white px-2.5 py-1 rounded-lg border border-amber-200 transition">
+                📋 Salin No. Rekening
+              </button>
+            </div>
+            <p class="text-sm font-mono font-bold text-slate-900 select-all">1234567890</p>
+            <p class="text-[11px] text-slate-500">a.n. Rudi & Irul</p>
           </div>
         </section>
 
-        <!-- 7. BUKU TAMU & UCAPAN DOA -->
-        <section class="p-6 bg-slate-50 border-t border-slate-100">
-          <h2 class="font-serif-custom text-xl font-bold text-center text-slate-800 mb-4">Ucapan & Doa</h2>
+        <!-- BUKU TAMU & UCAPAN DOA -->
+        <section class="p-6 bg-slate-50 border-b border-slate-100 space-y-4">
+          <h2 class="font-serif-custom text-xl font-bold text-center text-slate-800">Kirim Doa & Ucapan</h2>
 
-          <form id="wish-form" class="space-y-3 mb-6">
-            <textarea id="wish-message" rows="3" placeholder="Tuliskan ucapan & doa restu Anda..." class="w-full text-xs p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-amber-500 outline-none" required></textarea>
-            <button type="submit" id="btn-wish" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2.5 rounded-lg shadow transition">
+          <form id="wish-form" class="space-y-3">
+            <textarea id="wish-message" rows="3" placeholder="Tuliskan ucapan selamat & doa restu Anda di sini..." class="w-full text-xs p-3.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 outline-none bg-white leading-relaxed" required></textarea>
+            <button type="submit" id="btn-wish" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-3 rounded-xl shadow transition">
               Kirim Ucapan
             </button>
           </form>
 
-          <!-- Daftar Ucapan -->
-          <div id="wishes-container" class="space-y-3 max-h-60 overflow-y-auto">
-            <!-- Items injected by JS -->
+          <!-- List Ucapan Doa -->
+          <div id="wishes-container" class="space-y-2.5 max-h-64 overflow-y-auto pt-2">
+            <!-- Disuntikkan lewat JS -->
           </div>
         </section>
 
-        <!-- 8. PENUTUP -->
-        <section class="p-8 text-center bg-slate-900 text-white">
-          <p class="text-xs text-slate-400">Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir.</p>
-          <p class="font-serif-custom text-base text-amber-300 mt-4">Terima Kasih</p>
-          <p class="text-xs text-slate-400 mt-1" id="footer-client-name"></p>
+        <!-- FOOTER PENUTUP -->
+        <section class="p-8 text-center bg-slate-900 text-white space-y-3">
+          <p class="text-xs text-slate-400 leading-relaxed max-w-xs mx-auto">
+            Merupakan kehormatan & kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.
+          </p>
+          <p class="font-serif-custom text-base text-amber-300 font-bold">Terima Kasih</p>
+          <p class="text-xs text-slate-400" id="footer-client-name">Rudi & Irul</p>
         </section>
 
       </main>
@@ -182,22 +247,27 @@
   </div>
 
 <script>
-  // CREDENTIALS SUPABASE
+  // ==========================================
+  // KONFIGURASI SUPABASE
+  // ==========================================
   const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
-
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // Sanitasi String Token
+  let guestData = null;
+  let eventDateObj = null;
+
+  // Sanitasi Token
   function cleanTokenString(str) {
     if (!str) return '';
     return String(str)
       .trim()
       .toLowerCase()
-      .replace(/[\u200B-\u200D\uFEFF]/g, '') // Hapus zero-width characters
-      .replace(/[\u2010-\u2015\u2212]/g, '-'); // Normalisasi karakter dash/minus
+      .replace(/[\u200B-\u200D\uFEFF]/g, '')
+      .replace(/[\u2010-\u2015\u2212]/g, '-');
   }
 
+  // Mendapatkan token baik lewat ?token= maupun pathname /:slug/:token
   function getInvitationToken() {
     const urlParams = new URLSearchParams(window.location.search);
     const queryToken = urlParams.get('token');
@@ -206,7 +276,7 @@
     const pathSegments = window.location.pathname.split('/').filter(Boolean);
     if (pathSegments.length >= 2) {
       return cleanTokenString(pathSegments[pathSegments.length - 1]);
-    } else if (pathSegments.length === 1 && pathSegments[0] !== 'invitation' && pathSegments[0] !== 'invitation.html') {
+    } else if (pathSegments.length === 1 && !pathSegments[0].includes('.html')) {
       return cleanTokenString(pathSegments[0]);
     }
 
@@ -214,60 +284,117 @@
   }
 
   const token = getInvitationToken();
-  let eventDateObj = null;
 
+  // Inisialisasi Memuat Data
   async function init() {
     if (!token) {
-      showError("Tautan undangan tidak valid atau token tidak ditemukan.");
+      showError("Tautan undangan tidak memiliki kode token. Silakan periksa kembali tautan yang dikirimkan.");
       return;
     }
 
+    // Panggil RPC get_invitation_details
     const { data, error } = await supabaseClient.rpc('get_invitation_details', { p_token: token });
 
     if (error || !data || data.length === 0) {
-      showError("Undangan tidak ditemukan.");
-      return;
+      // Fallback direct query jika RPC get_invitation_details belum aktif
+      return await fallbackLoadDetails(token);
     }
 
-    const guest = data[0];
+    renderInvitation(data[0]);
+  }
+
+  // Fallback direct query jika RPC bermasalah
+  async function fallbackLoadDetails(cleanToken) {
+    try {
+      const { data: guests, error } = await supabaseClient
+        .from('guests')
+        .select(`
+          id, group_name, category, max_pax, invitation_token, event_id,
+          events ( title, event_date, location, caption, client_id, clients ( name ) )
+        `)
+        .ilike('invitation_token', cleanToken)
+        .limit(1);
+
+      if (error || !guests || guests.length === 0) {
+        showError("Undangan untuk token '" + cleanToken + "' tidak ditemukan di database.");
+        return;
+      }
+
+      const g = guests[0];
+      const ev = g.events || {};
+      const clientName = ev.clients ? ev.clients.name : "Mempelai";
+
+      // Cek RSVP dan Tiket
+      const [rsvpRes, ticketRes] = await Promise.all([
+        supabaseClient.from('rsvps').select('status, pax_confirmed').eq('guest_id', g.id).limit(1),
+        supabaseClient.from('tickets').select('ticket_token, is_checked_in, checked_in_at').eq('guest_id', g.id).limit(1)
+      ]);
+
+      const rsvp = rsvpRes.data && rsvpRes.data[0];
+      const ticket = ticketRes.data && ticketRes.data[0];
+
+      const formatted = {
+        group_name: g.group_name,
+        category: g.category,
+        max_pax: g.max_pax,
+        invitation_token: g.invitation_token,
+        event_title: ev.title || "Pernikahan",
+        event_date: ev.event_date,
+        event_location: ev.location,
+        event_caption: ev.caption,
+        client_name: clientName,
+        rsvp_status: rsvp ? rsvp.status : null,
+        pax_confirmed: rsvp ? rsvp.pax_confirmed : null,
+        ticket_token: ticket ? ticket.ticket_token : g.invitation_token,
+        is_checked_in: ticket ? ticket.is_checked_in : false
+      };
+
+      renderInvitation(formatted);
+    } catch (err) {
+      showError("Gagal menghubungkan ke server: " + err.message);
+    }
+  }
+
+  function renderInvitation(guest) {
+    guestData = guest;
     eventDateObj = new Date(guest.event_date);
 
     // Cover
-    document.getElementById('cover-title').innerText = guest.event_title;
-    document.getElementById('cover-guest-name').innerText = guest.group_name;
-    document.getElementById('cover-max-pax').innerText = guest.max_pax;
+    document.getElementById('cover-title').innerText = guest.event_title || 'Pernikahan';
+    document.getElementById('cover-guest-name').innerText = guest.group_name || 'Tamu Undangan';
+    document.getElementById('cover-max-pax').innerText = guest.max_pax || 2;
 
-    // Header & Content
-    document.getElementById('header-title').innerText = guest.event_title;
-    document.getElementById('bride-groom-names').innerText = guest.client_name;
-    document.getElementById('event-caption').innerText = guest.event_caption;
-    document.getElementById('event-date').innerText = eventDateObj.toLocaleString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-    document.getElementById('event-location').innerText = guest.event_location;
-    document.getElementById('footer-client-name').innerText = guest.client_name;
+    // Konten Isi
+    document.getElementById('header-title').innerText = guest.event_title || 'Pernikahan';
+    document.getElementById('bride-groom-names').innerText = guest.client_name || 'Mempelai';
+    document.getElementById('event-caption').innerText = guest.event_caption || '';
+    
+    if (guest.event_date) {
+      document.getElementById('event-date').innerText = eventDateObj.toLocaleString('id-ID', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      }) + ' WIB';
+    }
+    document.getElementById('event-location').innerText = guest.event_location || '';
+    document.getElementById('footer-client-name').innerText = guest.client_name || '';
 
-    // Maps
-    document.getElementById('maps-btn').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(guest.event_location)}`;
+    // Tombol Maps
+    document.getElementById('maps-btn').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(guest.event_location || '')}`;
 
-    // RSVP Form Details
+    // Detail Form RSVP
     document.getElementById('rsvp-guest-name').innerText = guest.group_name;
     document.getElementById('rsvp-max-pax').innerText = guest.max_pax;
     document.getElementById('pax-input').max = guest.max_pax;
 
+    // Status RSVP Tamu yang sudah tersimpan sebelumnya
     if (guest.rsvp_status) {
       document.getElementById('status-select').value = guest.rsvp_status;
       togglePaxInput();
+
       if (guest.rsvp_status === 'hadir') {
         document.getElementById('pax-input').value = guest.pax_confirmed || guest.max_pax;
-        
-        // PAKSA GUNAKAN TOKEN PENDEK BERSIH
-        let activeToken = cleanTokenString(guest.invitation_token || guest.ticket_token || token);
-        
-        // Proteksi: Jika terlanjur membawa UUID panjang (> 20 karakter), gunakan fallback token dari URL
-        if (activeToken.length > 20 && token) {
-          activeToken = token;
-        }
-
-        renderQRCode(activeToken);
+        // Generate QR code dengan token yang valid
+        const activeToken = cleanTokenString(guest.invitation_token || token);
+        renderQRCode(activeToken, guest.is_checked_in);
       }
     }
 
@@ -275,7 +402,8 @@
       document.getElementById('status-select').disabled = true;
       document.getElementById('pax-input').disabled = true;
       document.getElementById('btn-submit').disabled = true;
-      document.getElementById('btn-submit').innerText = "Sudah Check-in";
+      document.getElementById('btn-submit').innerText = "✓ Sudah Check-in di Lokasi";
+      document.getElementById('btn-submit').className = "w-full bg-slate-300 text-slate-600 text-xs font-bold py-3.5 rounded-xl cursor-not-allowed";
     }
 
     startCountdown();
@@ -286,7 +414,11 @@
   }
 
   function openInvitation() {
-    document.getElementById('cover').classList.add('-translate-y-full');
+    const cover = document.getElementById('cover');
+    cover.classList.add('cover-slide-up');
+    setTimeout(() => {
+      cover.classList.add('hidden');
+    }, 800);
   }
 
   function togglePaxInput() {
@@ -294,23 +426,28 @@
     const paxGroup = document.getElementById('pax-group');
     if (status === 'hadir') {
       paxGroup.classList.remove('hidden');
-      document.getElementById('pax-input').value = document.getElementById('pax-input').value || 1;
+      const curPax = document.getElementById('pax-input').value;
+      if (!curPax || curPax === '0') {
+        document.getElementById('pax-input').value = guestData ? guestData.max_pax : 1;
+      }
     } else {
       paxGroup.classList.add('hidden');
     }
   }
 
+  // Handle Submit RSVP
   document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const status = document.getElementById('status-select').value;
     const pax = status === 'hadir' ? parseInt(document.getElementById('pax-input').value) : 0;
 
-    if (!status) return alert("Pilih status kehadiran.");
+    if (!status) return alert("Pilih status kehadiran Anda.");
 
     const btn = document.getElementById('btn-submit');
     btn.disabled = true;
-    btn.innerText = "Menyimpan...";
+    btn.innerText = "Menyimpan RSVP...";
 
+    // 1. Coba RPC submit_rsvp
     const { data, error } = await supabaseClient.rpc('submit_rsvp', {
       p_invitation_token: token,
       p_status: status,
@@ -318,33 +455,64 @@
     });
 
     btn.disabled = false;
-    btn.innerText = "Kirim RSVP";
+    btn.innerText = "Simpan Konfirmasi RSVP";
 
     if (error || !data || !data.success) {
-      alert(data ? data.message : "Gagal menyimpan RSVP.");
-      return;
+      // Fallback jika RPC gagal
+      const ok = await fallbackSubmitRsvp(status, pax);
+      if (!ok) return;
     }
 
-    // Tampilkan notifikasi berhasil tanpa reload halaman
-    alert("RSVP berhasil disimpan!");
+    alert(status === 'hadir' ? "Terima kasih! Konfirmasi kehadiran Anda berhasil disimpan." : "Terima kasih telah mengonfirmasi.");
 
-    // JIKA STATUS HADIR: LANGSUNG GENERATE QR CODE SECARA DYNAMICAL (TANPA REFRESH)
     if (status === 'hadir') {
-      let activeToken = cleanTokenString(token);
-      renderQRCode(activeToken);
-      
-      // Scroll perlahan ke area Tiket QR agar tamu langsung melihatnya
+      const activeToken = cleanTokenString(token);
+      renderQRCode(activeToken, false);
       const ticketSection = document.getElementById('ticket-section');
       if (ticketSection) {
         ticketSection.scrollIntoView({ behavior: 'smooth' });
       }
     } else {
-      // Jika memilih tidak hadir, sembunyikan area tiket jika sebelumnya terbuka
       const ticketSection = document.getElementById('ticket-section');
       if (ticketSection) ticketSection.classList.add('hidden');
     }
   });
 
+  // Fallback submit RSVP langsung ke tabel rsvps dan tickets
+  async function fallbackSubmitRsvp(status, pax) {
+    try {
+      const { data: gList } = await supabaseClient.from('guests').select('id, invitation_token').ilike('invitation_token', token).limit(1);
+      if (!gList || gList.length === 0) {
+        alert("Gagal menyimpan: data tamu tidak ditemukan.");
+        return false;
+      }
+      const gId = gList[0].id;
+
+      // Upsert RSVP
+      await supabaseClient.from('rsvps').upsert({
+        guest_id: gId,
+        status: status,
+        pax_confirmed: pax,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'guest_id' });
+
+      // Jika hadir, pastikan row di tabel tickets ada
+      if (status === 'hadir') {
+        await supabaseClient.from('tickets').upsert({
+          guest_id: gId,
+          ticket_token: token,
+          is_checked_in: false
+        }, { onConflict: 'guest_id' });
+      }
+
+      return true;
+    } catch (err) {
+      alert("Kesalahan saat menyimpan RSVP: " + err.message);
+      return false;
+    }
+  }
+
+  // Handle Kirim Ucapan
   document.getElementById('wish-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const msg = document.getElementById('wish-message').value.trim();
@@ -353,31 +521,99 @@
     const btn = document.getElementById('btn-wish');
     btn.disabled = true;
 
+    // Coba RPC send_wish
     const { data, error } = await supabaseClient.rpc('send_wish', { p_token: token, p_message: msg });
+
     if (!error && data && data.success) {
       document.getElementById('wish-message').value = '';
       loadWishes();
+      alert("Ucapan & doa Anda berhasil dikirimkan!");
     } else {
-      alert("Gagal mengirim ucapan.");
+      // Fallback insert langsung ke tabel wishes
+      await fallbackSendWish(msg);
     }
+
     btn.disabled = false;
   });
 
+  async function fallbackSendWish(msg) {
+    try {
+      const { data: gList } = await supabaseClient.from('guests').select('id, group_name, event_id').ilike('invitation_token', token).limit(1);
+      if (gList && gList.length > 0) {
+        await supabaseClient.from('wishes').insert({
+          event_id: gList[0].event_id,
+          guest_name: gList[0].group_name,
+          message: msg,
+          created_at: new Date().toISOString()
+        });
+        document.getElementById('wish-message').value = '';
+        loadWishes();
+        alert("Ucapan & doa Anda berhasil dikirimkan!");
+      }
+    } catch (e) {
+      alert("Gagal mengirim ucapan.");
+    }
+  }
+
   async function loadWishes() {
-    const { data } = await supabaseClient.rpc('get_event_wishes', { p_token: token });
     const container = document.getElementById('wishes-container');
     container.innerHTML = '';
 
-    if (!data || data.length === 0) {
-      container.innerHTML = '<p class="text-xs text-slate-400 text-center">Belum ada ucapan.</p>';
+    // Coba via RPC
+    const { data, error } = await supabaseClient.rpc('get_event_wishes', { p_token: token });
+
+    let list = data;
+    if (error || !list) {
+      // Fallback query tabel wishes
+      const { data: directWishes } = await supabaseClient
+        .from('wishes')
+        .select('guest_name, message')
+        .order('created_at', { ascending: false })
+        .limit(15);
+      list = directWishes;
+    }
+
+    if (!list || list.length === 0) {
+      container.innerHTML = '<p class="text-xs text-slate-400 text-center py-2">Belum ada ucapan. Jadilah yang pertama memberikan doa!</p>';
       return;
     }
 
-    data.forEach(w => {
+    list.forEach(w => {
       const card = document.createElement('div');
-      card.className = "bg-white p-3 rounded-lg border border-slate-200 text-xs";
-      card.innerHTML = `<p class="font-bold text-slate-800">${w.guest_name}</p><p class="text-slate-600 mt-1">${w.message}</p>`;
+      card.className = "bg-white p-3 rounded-xl border border-slate-200 text-xs shadow-sm";
+      card.innerHTML = `<p class="font-bold text-slate-800">${escapeHtml(w.guest_name)}</p><p class="text-slate-600 mt-1 leading-relaxed">${escapeHtml(w.message)}</p>`;
       container.appendChild(card);
+    });
+  }
+
+  function renderQRCode(ticketToken, isCheckedIn) {
+    if (!ticketToken) return;
+
+    const ticketSection = document.getElementById('ticket-section');
+    const qrContainer = document.getElementById("qrcode");
+    const tokenLabel = document.getElementById("ticket-token-label");
+    const statusNote = document.getElementById("checkin-status-note");
+
+    if (!qrContainer || !ticketSection) return;
+
+    ticketSection.classList.remove('hidden');
+    qrContainer.innerHTML = '';
+
+    const cleanToken = cleanTokenString(ticketToken);
+    tokenLabel.innerText = "Kode: " + cleanToken;
+
+    if (isCheckedIn) {
+      statusNote.innerHTML = '<strong class="text-emerald-600">✓ Sudah diverifikasi masuk oleh petugas gerbang</strong>';
+    } else {
+      statusNote.innerText = "Status: Belum Check-in";
+    }
+
+    // Render QR Code baru
+    new QRCode(qrContainer, {
+      text: cleanToken,
+      width: 160,
+      height: 160,
+      correctLevel: QRCode.CorrectLevel.H
     });
   }
 
@@ -387,7 +623,12 @@
       const now = new Date().getTime();
       const distance = eventDateObj.getTime() - now;
 
-      if (distance < 0) return;
+      if (distance < 0) {
+        document.getElementById('cd-days').innerText = "0";
+        document.getElementById('cd-hours').innerText = "0";
+        document.getElementById('cd-mins').innerText = "0";
+        return;
+      }
 
       document.getElementById('cd-days').innerText = Math.floor(distance / (1000 * 60 * 60 * 24));
       document.getElementById('cd-hours').innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -395,29 +636,22 @@
     }, 1000);
   }
 
-  function renderQRCode(ticketToken) {
-    if (!ticketToken) return;
-
-    const ticketSection = document.getElementById('ticket-section');
-    const qrContainer = document.getElementById("qrcode");
-    if (!qrContainer || !ticketSection) return;
-
-    ticketSection.classList.remove('hidden');
-    qrContainer.innerHTML = '';
-
-    // Cetak murni string token pendek yang bersih
-    new QRCode(qrContainer, {
-      text: cleanTokenString(ticketToken),
-      width: 160,
-      height: 160,
-      correctLevel: QRCode.CorrectLevel.H
+  function copyRekening(nomor) {
+    navigator.clipboard.writeText(nomor).then(() => {
+      alert("Nomor rekening " + nomor + " berhasil disalin ke clipboard!");
+    }).catch(() => {
+      prompt("Salin nomor rekening berikut:", nomor);
     });
   }
 
   function showError(msg) {
     document.getElementById('loading').classList.add('hidden');
-    document.getElementById('error-msg').innerText = msg;
-    document.getElementById('error-msg').classList.remove('hidden');
+    document.getElementById('error-text').innerText = msg;
+    document.getElementById('error-screen').classList.remove('hidden');
+  }
+
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
   window.addEventListener('DOMContentLoaded', init);
