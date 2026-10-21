@@ -57,7 +57,7 @@
         <button onclick="toggleTorch()" id="btn-torch" class="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl flex items-center justify-center text-sm border border-slate-700 transition" title="Lampu Senter">
           🔦
         </button>
-        <button onclick="logout()" class="w-9 h-9 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center text-sm border border-rose-500/30 transition font-bold" title="Logout">
+        <button onclick="logout()" class="w-9 h-9 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center text-sm border border-rose-500/30 transition font-bold" title="Keluar">
           🚪
         </button>
       </div>
@@ -97,10 +97,11 @@
       </div>
 
       <!-- Quick Manual Input Option -->
-      <div class="mt-8 text-center z-10">
+      <div class="mt-8 text-center z-10 space-y-2">
         <button onclick="openManualModal()" class="text-xs font-bold text-slate-400 hover:text-emerald-400 transition underline underline-offset-4 flex items-center gap-1.5 mx-auto">
           <span>🔍</span> Cari & Masukkan Tamu Manual
         </button>
+        <p id="guest-count-badge" class="text-[11px] text-slate-500">Memuat status tamu...</p>
       </div>
 
     </main>
@@ -111,7 +112,7 @@
     </footer>
 
     <!-- MODAL MANUAL CHECK-IN & DAFTAR NAMA TAMU -->
-    <div id="manual-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-end justify-center p-4 transition-all duration-300 transform translate-y-full opacity-0">
+    <div id="manual-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-end justify-center p-4 transition-all duration-300 transform translate-y-full opacity-0 pointer-events-none">
       <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-2xl relative">
         
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -134,7 +135,7 @@
         <div class="pt-2 border-t border-slate-800/80">
           <p class="text-[10px] text-slate-500 mb-1.5 font-semibold uppercase tracking-wider">Atau Masukkan Kode Token Tiket:</p>
           <div class="flex gap-2">
-            <input type="text" id="manual-token-input" placeholder="Contoh: f4d30e93" class="flex-1 text-xs p-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 outline-none uppercase font-mono" />
+            <input type="text" id="manual-token-input" placeholder="Contoh: 115b0522 / f4d30e93" class="flex-1 text-xs p-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 outline-none uppercase font-mono" />
             <button onclick="submitManualTokenInput()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold px-4 rounded-xl shadow-md transition">
               Proses
             </button>
@@ -145,7 +146,7 @@
     </div>
 
     <!-- RESULT MODAL SLIDE-UP -->
-    <div id="result-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-end justify-center p-4 transition-all duration-300 transform translate-y-full opacity-0">
+    <div id="result-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-end justify-center p-4 transition-all duration-300 transform translate-y-full opacity-0 pointer-events-none">
       <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-2xl relative overflow-hidden">
         
         <div id="modal-glow" class="absolute -top-12 left-1/2 -translate-x-1/2 w-40 h-20 bg-emerald-500/20 blur-2xl rounded-full pointer-events-none"></div>
@@ -161,15 +162,15 @@
         <div id="modal-details" class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 space-y-2 text-xs">
           <div class="flex justify-between items-center border-b border-slate-800/60 pb-2">
             <span class="text-slate-400">Nama Tamu</span>
-            <strong id="res-guest-name" class="text-white text-sm font-bold">Budi Santoso</strong>
+            <strong id="res-guest-name" class="text-white text-sm font-bold">-</strong>
           </div>
           <div class="flex justify-between items-center border-b border-slate-800/60 pb-2">
             <span class="text-slate-400">Kategori</span>
-            <span id="res-category" class="bg-slate-800 text-slate-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold">Keluarga</span>
+            <span id="res-category" class="bg-slate-800 text-slate-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold">Umum</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-slate-400">Jumlah Pax</span>
-            <span id="res-pax" class="text-emerald-400 font-extrabold text-sm">2 Orang</span>
+            <span id="res-pax" class="text-emerald-400 font-extrabold text-sm">-</span>
           </div>
         </div>
 
@@ -183,22 +184,32 @@
   </div>
 
 <script>
-  // CREDENTIALS SUPABASE
+  // ==========================================
+  // KONFIGURASI SUPABASE
+  // ==========================================
   const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
-
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   let html5QrcodeScanner = null;
   let isProcessing = false;
   let allRegisteredGuests = [];
 
+  function cleanTokenString(str) {
+    if (!str) return '';
+    return String(str)
+      .trim()
+      .toLowerCase()
+      .replace(/[\u200B-\u200D\uFEFF]/g, '')
+      .replace(/[\u2010-\u2015\u2212]/g, '-');
+  }
+
   async function startScanner() {
     html5QrcodeScanner = new Html5Qrcode("reader");
 
     const config = { 
       fps: 10,
-      qrbox: { width: 200, height: 200 }
+      qrbox: { width: 220, height: 220 }
     };
 
     try {
@@ -208,27 +219,76 @@
         onScanSuccess
       );
     } catch (err) {
-      console.warn("Mencoba kamera depan...", err);
+      console.warn("Mencoba kamera alternatif...", err);
       try {
         await html5QrcodeScanner.start({ facingMode: "user" }, config, onScanSuccess);
       } catch (errUser) {
-        alert("Gagal mengaktifkan kamera. Pastikan izin kamera sudah diberikan.");
+        console.info("Kamera tidak aktif. Mode pencarian manual siap digunakan.");
       }
     }
 
-    // Muat daftar tamu untuk pilihan manual
+    // Ambil daftar tamu untuk pencarian manual
     fetchRegisteredGuests();
   }
 
+  // FIX BUG: Jangan query ticket_token atau is_checked_in dari tabel guests!
   async function fetchRegisteredGuests() {
-    const { data, error } = await supabaseClient
-      .from('guests')
-      .select('id, group_name, category, invitation_token, ticket_token, is_checked_in')
-      .order('group_name', { ascending: true });
+    // 1. Coba panggil RPC get_scanner_guests
+    const { data: rpcData, error: rpcError } = await supabaseClient.rpc('get_scanner_guests');
 
-    if (!error && data) {
-      allRegisteredGuests = data;
+    if (!rpcError && rpcData && Array.isArray(rpcData)) {
+      allRegisteredGuests = rpcData;
+      updateGuestCountBadge();
       renderManualGuestList(allRegisteredGuests);
+      return;
+    }
+
+    // 2. Fallback query join yang valid
+    try {
+      const [guestsRes, ticketsRes, rsvpsRes] = await Promise.all([
+        supabaseClient.from('guests').select('id, group_name, category, max_pax, invitation_token').order('group_name', { ascending: true }),
+        supabaseClient.from('tickets').select('guest_id, ticket_token, is_checked_in'),
+        supabaseClient.from('rsvps').select('guest_id, status, pax_confirmed')
+      ]);
+
+      if (guestsRes.data) {
+        const ticketMap = new Map();
+        (ticketsRes.data || []).forEach(t => ticketMap.set(t.guest_id, t));
+
+        const rsvpMap = new Map();
+        (rsvpsRes.data || []).forEach(r => rsvpMap.set(r.guest_id, r));
+
+        allRegisteredGuests = guestsRes.data.map(g => {
+          const t = ticketMap.get(g.id);
+          const r = rsvpMap.get(g.id);
+          return {
+            id: g.id,
+            group_name: g.group_name,
+            category: g.category || 'Umum',
+            max_pax: g.max_pax || 2,
+            invitation_token: g.invitation_token,
+            ticket_token: t?.ticket_token || g.invitation_token,
+            is_checked_in: !!t?.is_checked_in,
+            pax_confirmed: r?.pax_confirmed || g.max_pax,
+            rsvp_status: r?.status || 'pending'
+          };
+        });
+
+        updateGuestCountBadge();
+        renderManualGuestList(allRegisteredGuests);
+      }
+    } catch (err) {
+      console.error("Gagal memuat daftar tamu:", err);
+      document.getElementById('manual-guest-list').innerHTML = '<p class="text-xs text-rose-400 text-center py-4">Gagal memuat data tamu dari database.</p>';
+    }
+  }
+
+  function updateGuestCountBadge() {
+    const total = allRegisteredGuests.length;
+    const checked = allRegisteredGuests.filter(g => g.is_checked_in).length;
+    const badge = document.getElementById('guest-count-badge');
+    if (badge) {
+      badge.textContent = `${checked} dari ${total} tamu telah check-in`;
     }
   }
 
@@ -242,7 +302,7 @@
     }
 
     guests.forEach(g => {
-      const activeToken = g.ticket_token || g.invitation_token;
+      const activeToken = g.invitation_token || g.ticket_token;
       const statusBadge = g.is_checked_in 
         ? '<span class="text-[9px] bg-blue-500/20 text-blue-400 font-bold px-2 py-0.5 rounded-full border border-blue-500/30">Checked</span>'
         : '<span class="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">Ready</span>';
@@ -251,9 +311,9 @@
       div.className = "bg-slate-950 p-3 rounded-xl border border-slate-800/80 flex items-center justify-between hover:border-emerald-500/50 transition cursor-pointer";
       div.onclick = () => selectManualGuest(activeToken);
       div.innerHTML = `
-        <div>
-          <p class="text-xs font-bold text-white">${g.group_name}</p>
-          <p class="text-[10px] text-slate-400 mt-0.5">${g.category || 'Umum'} • Code: <span class="font-mono text-slate-300">${activeToken}</span></p>
+        <div class="min-w-0 pr-2">
+          <p class="text-xs font-bold text-white truncate">${g.group_name}</p>
+          <p class="text-[10px] text-slate-400 mt-0.5 truncate">${g.category || 'Umum'} • Kode: <span class="font-mono text-emerald-300 font-bold">${activeToken}</span></p>
         </div>
         <div>${statusBadge}</div>
       `;
@@ -263,7 +323,11 @@
 
   function filterManualGuests() {
     const search = document.getElementById('manual-search-input').value.toLowerCase();
-    const filtered = allRegisteredGuests.filter(g => g.group_name.toLowerCase().includes(search));
+    const filtered = allRegisteredGuests.filter(g => 
+      g.group_name.toLowerCase().includes(search) || 
+      (g.invitation_token && g.invitation_token.toLowerCase().includes(search)) ||
+      (g.ticket_token && g.ticket_token.toLowerCase().includes(search))
+    );
     renderManualGuestList(filtered);
   }
 
@@ -271,12 +335,13 @@
     closeResultModal();
     fetchRegisteredGuests();
     const modal = document.getElementById('manual-modal');
-    modal.classList.remove('translate-y-full', 'opacity-0');
+    modal.classList.remove('translate-y-full', 'opacity-0', 'pointer-events-none');
+    setTimeout(() => document.getElementById('manual-search-input')?.focus(), 200);
   }
 
   function closeManualModal() {
     const modal = document.getElementById('manual-modal');
-    modal.classList.add('translate-y-full', 'opacity-0');
+    modal.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
   }
 
   function selectManualGuest(token) {
@@ -287,12 +352,13 @@
   }
 
   function submitManualTokenInput() {
-    const token = document.getElementById('manual-token-input').value.trim();
+    const token = cleanTokenString(document.getElementById('manual-token-input').value);
     if (!token) return alert("Masukkan kode token terlebih dahulu.");
     closeManualModal();
     processCheckIn(token);
   }
 
+  // Handle saat QR Code terbaca kamera
   async function onScanSuccess(decodedText) {
     if (isProcessing) return;
 
@@ -302,7 +368,7 @@
     isProcessing = true;
     if (navigator.vibrate) navigator.vibrate(100);
 
-    // Ambil token secara bersih jika yang di-scan berupa URL
+    // Ekstrak token jika QR berupa URL link
     let extractedToken = rawText;
     if (rawText.includes('?token=')) {
       extractedToken = rawText.split('?token=')[1].split('&')[0];
@@ -311,23 +377,74 @@
       extractedToken = parts[parts.length - 1];
     }
 
+    extractedToken = cleanTokenString(extractedToken);
     await processCheckIn(extractedToken);
   }
 
+  // Proses Check-in Hybrid (Mendukung Token Pendek maupun UUID)
   async function processCheckIn(ticketToken) {
-    const { data, error } = await supabaseClient.rpc('check_in_guest', { p_ticket_token: ticketToken });
+    const tokenClean = cleanTokenString(ticketToken);
+
+    // 1. Coba RPC check_in_guest
+    const { data, error } = await supabaseClient.rpc('check_in_guest', { p_ticket_token: tokenClean });
 
     if (error) {
-      console.error("Supabase Error:", error);
-      showModal(false, "Kesalahan Sistem", error.message || "Gagal menghubungkan ke server.", null);
-      return;
+      console.warn("RPC Error, beralih ke fallback check-in:", error);
+      return await fallbackDirectCheckIn(tokenClean);
     }
 
     if (!data.success) {
-      // Tampilkan teks yang terbaca kamera di subtitle modal error untuk debugging
-      showModal(false, "Peringatan Tiket", `${data.message}\n(Teks terbaca: "${ticketToken}")`, data.guest || null);
+      showModal(false, "Peringatan Tiket", `${data.message}\n(Kode terbaca: "${tokenClean}")`, data.guest || null);
     } else {
       showModal(true, "Berhasil Check-in!", "Tamu terverifikasi resmi.", data.guest);
+      fetchRegisteredGuests();
+    }
+  }
+
+  // Fallback direct check-in jika Stored Procedure SQL di database belum diupdate
+  async function fallbackDirectCheckIn(tokenClean) {
+    try {
+      const { data: guests } = await supabaseClient
+        .from('guests')
+        .select('id, group_name, category, max_pax, invitation_token')
+        .ilike('invitation_token', tokenClean)
+        .limit(1);
+
+      if (!guests || guests.length === 0) {
+        showModal(false, "Tiket Tidak Ditemukan", `Kode token "${tokenClean}" tidak terdaftar di daftar undangan.`, null);
+        return;
+      }
+
+      const g = guests[0];
+      const { data: tickets } = await supabaseClient
+        .from('tickets')
+        .select('*')
+        .eq('guest_id', g.id)
+        .limit(1);
+
+      if (tickets && tickets.length > 0 && tickets[0].is_checked_in) {
+        showModal(false, "Sudah Pernah Check-in", `Tamu "${g.group_name}" sudah diverifikasi sebelumnya.`, {
+          group_name: g.group_name,
+          category: g.category,
+          max_pax: g.max_pax
+        });
+        return;
+      }
+
+      if (tickets && tickets.length > 0) {
+        await supabaseClient.from('tickets').update({ is_checked_in: true, checked_in_at: new Date().toISOString() }).eq('id', tickets[0].id);
+      } else {
+        await supabaseClient.from('tickets').insert({ guest_id: g.id, ticket_token: g.invitation_token, is_checked_in: true, checked_in_at: new Date().toISOString() });
+      }
+
+      showModal(true, "Berhasil Check-in!", "Tamu terverifikasi resmi (Direct Mode).", {
+        group_name: g.group_name,
+        category: g.category,
+        pax_confirmed: g.max_pax
+      });
+      fetchRegisteredGuests();
+    } catch (err) {
+      showModal(false, "Kesalahan Check-in", err.message || "Gagal memproses tiket.", null);
     }
   }
 
@@ -354,17 +471,17 @@
       document.getElementById('modal-details').classList.remove('hidden');
       document.getElementById('res-guest-name').innerText = guest.group_name || "-";
       document.getElementById('res-category').innerText = guest.category || "Umum";
-      document.getElementById('res-pax').innerText = `${guest.pax_confirmed || guest.max_pax} Orang`;
+      document.getElementById('res-pax').innerText = `${guest.pax_confirmed || guest.max_pax || 1} Orang`;
     } else {
       document.getElementById('modal-details').classList.add('hidden');
     }
 
-    modal.classList.remove('translate-y-full', 'opacity-0');
+    modal.classList.remove('translate-y-full', 'opacity-0', 'pointer-events-none');
   }
 
   function closeResultModal() {
     const modal = document.getElementById('result-modal');
-    modal.classList.add('translate-y-full', 'opacity-0');
+    modal.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
   }
 
   function resumeScanner() {
@@ -383,15 +500,15 @@
           advanced: [{ torch: !torchState }]
         });
       } else {
-        alert("Senter tidak didukung pada perangkat ini.");
+        alert("Senter tidak didukung pada kamera perangkat ini.");
       }
     } catch (e) {
-      alert("Fitur senter tidak aktif.");
+      alert("Fitur senter tidak dapat diaktifkan.");
     }
   }
 
   async function logout() {
-    if (confirm("Apakah Anda yakin ingin keluar dari mode scanner?")) {
+    if (confirm("Keluar dari mode scanner?")) {
       await supabaseClient.auth.signOut();
       window.location.href = "/";
     }
