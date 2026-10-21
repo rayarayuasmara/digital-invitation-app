@@ -34,12 +34,21 @@ svg.lucide{width:1.15em;height:1.15em;stroke-width:1.8}
 .display{font-family:Manrope,Inter,sans-serif;font-weight:800;letter-spacing:-.02em}
 .num{font-family:"Space Grotesk",Inter,sans-serif;font-weight:600;letter-spacing:-.01em}
 
-/* Mencegah auto-zoom form di iOS & mendukung smooth scroll gestur */
 input, select, textarea { font-size: 16px !important; }
 @media screen and (max-width: 768px) {
   input, select, textarea { font-size: 16px !important; }
 }
-.smooth-scroll { overflow-x: auto; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+
+/* Smooth Touch Scrolling untuk Tab & Filter */
+.smooth-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.smooth-scroll::-webkit-scrollbar { display: none; }
 
 /* Header */
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top) + 22px) 20px 8px}
@@ -75,7 +84,7 @@ input, select, textarea { font-size: 16px !important; }
 .rowk b{font-family:"Space Grotesk",sans-serif;font-size:22px;font-weight:600;color:var(--ink)}
 .hadir-top{display:flex;align-items:flex-end;gap:10px;margin-top:14px}
 
-/* Histori & Tamu List Styling (Referensi Apple UI) */
+/* Histori */
 .hl{display:flex;gap:14px;align-items:center;padding:12px 0}
 .hl+.hl{border-top:1px solid var(--line)}
 .hl .txt{flex:1;min-width:0}
@@ -89,8 +98,8 @@ input, select, textarea { font-size: 16px !important; }
 .bdg-pending{background:#f5a524}
 .bdg-checked{background:var(--brand)}
 
-/* Badge Status Alami (Natural Pills) */
-.st{font-size:12px;padding:4px 11px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;font-weight:600;letter-spacing:-0.01em}
+/* Status Pill Alami & Natural */
+.st{font-size:12px;padding:4px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;font-weight:600;letter-spacing:-0.01em}
 .st::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
 .st.st-hadir{background:var(--green-bg);color:var(--green-ink)}
 .st.st-absen{background:var(--red-bg);color:var(--red-ink)}
@@ -145,11 +154,11 @@ input, select, textarea { font-size: 16px !important; }
 .sbar input::placeholder{color:var(--sub)}
 .vr{width:1px;height:24px;background:var(--line);flex-shrink:0}
 .fsel{position:relative;display:flex;align-items:center;gap:4px;padding:0 10px 0 6px;color:var(--sub);font-size:15px;height:100%;flex-shrink:0}
-.fsel select{appearance:none;-webkit-appearance:none;border:0;background:transparent;outline:none;color:var(--ink);font-size:15px;font-weight:500;padding:0 16px 0 0;cursor:pointer;max-width:120px}
+.fsel select{appearance:none;-webkit-appearance:none;border:0;background:transparent;outline:none;color:var(--ink);font-size:15px;font-weight:500;padding:0 18px 0 0;cursor:pointer;max-width:115px}
 .fsel>svg{position:absolute;right:6px;pointer-events:none;width:16px;height:16px}
 
 .listcard{background:var(--card);border-radius:24px;padding:4px 18px 8px;box-shadow:var(--shadow)}
-.tabs{display:flex;gap:22px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
+.tabs{display:flex;gap:18px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
 .tabs::-webkit-scrollbar{display:none}
 .tabs button{padding:14px 0 13px;color:var(--sub);font-weight:500;font-size:16px;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;flex-shrink:0}
 .tabs button.on{color:var(--brand);border-bottom-color:var(--brand);font-weight:600}
@@ -157,7 +166,7 @@ input, select, textarea { font-size: 16px !important; }
 .sort button{padding:2px 0}
 .sort button.on{color:var(--brand);font-weight:600}
 
-/* List Item Tamu ala Referensi */
+/* List Item Tamu Presisi Sesuai Referensi Gambar */
 .gl{display:flex;align-items:center;gap:12px;padding:14px 0}
 .gl+.gl{border-top:1px solid var(--line)}
 .gl .main{flex:1;min-width:0;display:flex;gap:12px;align-items:center}
@@ -354,6 +363,7 @@ input, select, textarea { font-size: 16px !important; }
         </div>
 
         <div class="listcard">
+          <!-- Area scroll horizontal tab filter status yang natural -->
           <div class="tabs smooth-scroll" id="filter-tabs">
             <button class="on" data-f="all">Semua</button>
             <button data-f="hadir">Hadir</button>
@@ -650,7 +660,8 @@ function renderRecent(guests) {
 function renderCategorySelect() {
   const cats = [...new Set(globalData.guests.map(g => g.category).filter(Boolean))];
   const sel = $('cat-select');
-  sel.innerHTML = ['all', ...cats].map(c => `<option value="${esc(c)}" ${c === activeCategory ? 'selected' : ''}>${c === 'all' ? 'Semua kategori' : esc(c)}</option>`).join('');
+  // Mengubah teks opsi default dari "Semua kategori" menjadi "Kategori" sesuai permintaan
+  sel.innerHTML = ['all', ...cats].map(c => `<option value="${esc(c)}" ${c === activeCategory ? 'selected' : ''}>${c === 'all' ? 'Kategori' : esc(c)}</option>`).join('');
 }
 function setCategory(c) { activeCategory = c; renderCategorySelect(); renderGuestList(); }
 
@@ -676,7 +687,7 @@ function renderGuestList() {
 
   if (!list.length) { box.innerHTML = '<div class="empty">Tidak ada tamu yang sesuai.</div>'; return; }
   
-  // Render Item Daftar Tamu Sesuai Referensi Apple UI
+  // Render Item Daftar Tamu Persisi Sesuai Referensi Gambar (Ikon Bulat Tipis Link, WhatsApp, & Panah Detail)
   box.innerHTML = list.map((g, i) => {
     const [k, txt] = guestBadge(g);
     return `<div class="gl" data-id="${esc(g.id)}">
@@ -690,6 +701,7 @@ function renderGuestList() {
       <div class="gl-actions">
         <button class="ib" data-copy title="Salin tautan" aria-label="Salin tautan"><i data-lucide="link"></i></button>
         <button class="ib" data-wa title="Kirim WhatsApp" aria-label="Kirim WhatsApp"><i data-lucide="message-circle"></i></button>
+        <button class="ib" data-open style="color:var(--sub);"><i data-lucide="chevron-right"></i></button>
       </div>
     </div>`;
   }).join('');
