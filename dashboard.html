@@ -91,25 +91,32 @@ input, select, textarea { font-size: 16px !important; }
 .hl .n{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hl .s{color:var(--sub);font-size:14px;margin-top:2px}
 .hl .st{font-size:13px;font-weight:600;white-space:nowrap}
-.av{width:48px;height:48px;border-radius:50%;background:var(--soft);color:var(--brand);display:grid;place-items:center;font-weight:600;font-size:15px;position:relative;flex-shrink:0}
+
+/* Avatar Lingkaran Sempurna */
+.av{width:48px;height:48px;min-width:48px;min-height:48px;border-radius:50%;background:var(--soft);color:var(--brand);display:grid;place-items:center;font-weight:600;font-size:15px;position:relative;flex-shrink:0}
 .av .bdg{position:absolute;right:-1px;bottom:-1px;width:14px;height:14px;border-radius:50%;border:2px solid var(--card)}
 .bdg-hadir{background:var(--green)}
 .bdg-absen{background:#e5484d}
 .bdg-pending{background:#f5a524}
 .bdg-checked{background:var(--brand)}
 
-/* Status Pill Alami & Natural */
-.st{font-size:12px;padding:4px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;font-weight:600;letter-spacing:-0.01em}
+/* Status Pill Alami & Sejajar */
+.tags{display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:nowrap}
+.tag{font-size:12px;padding:4px 11px;border-radius:999px;background:var(--tag);color:var(--tag-ink);font-weight:500;white-space:nowrap}
+.st{font-size:12px;padding:4px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;font-weight:600;letter-spacing:-0.01em;white-space:nowrap}
 .st::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
 .st.st-hadir{background:var(--green-bg);color:var(--green-ink)}
 .st.st-absen{background:var(--red-bg);color:var(--red-ink)}
 .st.st-pending{background:var(--amber-bg);color:var(--amber-ink)}
 .st.st-checked{background:var(--blue-bg);color:var(--brand)}
 
-/* Tombol Ikon Bundar Tipis ala Referensi */
+/* Tombol Ikon Bundar Tipis & Panah Polos Tanpa Lingkaran */
 .ib{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card);transition:all .15s}
 .ib:hover{border-color:var(--brand);color:var(--brand)}
 .ib svg{width:16px;height:16px}
+.ib-arrow{background:none;border:0;color:var(--sub);padding:4px;display:grid;place-items:center;cursor:pointer;flex-shrink:0;transition:color .15s}
+.ib-arrow:hover{color:var(--brand)}
+.ib-arrow svg{width:18px;height:18px}
 
 /* Check-in brand card */
 .brandcard{background:var(--brand);color:#fff}
@@ -166,14 +173,12 @@ input, select, textarea { font-size: 16px !important; }
 .sort button{padding:2px 0}
 .sort button.on{color:var(--brand);font-weight:600}
 
-/* List Item Tamu Presisi Sesuai Referensi Gambar */
+/* List Item Tamu */
 .gl{display:flex;align-items:center;gap:12px;padding:14px 0}
 .gl+.gl{border-top:1px solid var(--line)}
 .gl .main{flex:1;min-width:0;display:flex;gap:12px;align-items:center}
 .gl .main>div{min-width:0;flex:1}
 .gl .n{font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
-.tags{display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:wrap}
-.tag{font-size:12px;padding:4px 11px;border-radius:999px;background:var(--tag);color:var(--tag-ink);font-weight:500}
 .gl-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 
 .quota .qt{display:flex;justify-content:space-between;align-items:center}
@@ -363,7 +368,6 @@ input, select, textarea { font-size: 16px !important; }
         </div>
 
         <div class="listcard">
-          <!-- Area scroll horizontal tab filter status yang natural -->
           <div class="tabs smooth-scroll" id="filter-tabs">
             <button class="on" data-f="all">Semua</button>
             <button data-f="hadir">Hadir</button>
@@ -409,7 +413,7 @@ input, select, textarea { font-size: 16px !important; }
       <header class="topbar"><h1>Akun</h1><span class="logo">R</span></header>
       <div class="page">
         <div class="card" style="display:flex;align-items:center;gap:14px">
-          <div class="av" id="account-avatar" style="width:60px;height:60px;font-size:22px">R</div>
+          <div class="av" id="account-avatar" style="width:60px;height:60px;min-width:60px;min-height:60px;font-size:22px">R</div>
           <div style="min-width:0"><div class="display" id="account-name" style="font-size:20px;color:var(--ink)">…</div><div class="sub" id="account-slug" style="font-size:14px">…</div></div>
         </div>
         <div class="card">
@@ -660,7 +664,6 @@ function renderRecent(guests) {
 function renderCategorySelect() {
   const cats = [...new Set(globalData.guests.map(g => g.category).filter(Boolean))];
   const sel = $('cat-select');
-  // Mengubah teks opsi default dari "Semua kategori" menjadi "Kategori" sesuai permintaan
   sel.innerHTML = ['all', ...cats].map(c => `<option value="${esc(c)}" ${c === activeCategory ? 'selected' : ''}>${c === 'all' ? 'Kategori' : esc(c)}</option>`).join('');
 }
 function setCategory(c) { activeCategory = c; renderCategorySelect(); renderGuestList(); }
@@ -687,7 +690,6 @@ function renderGuestList() {
 
   if (!list.length) { box.innerHTML = '<div class="empty">Tidak ada tamu yang sesuai.</div>'; return; }
   
-  // Render Item Daftar Tamu Persisi Sesuai Referensi Gambar (Ikon Bulat Tipis Link, WhatsApp, & Panah Detail)
   box.innerHTML = list.map((g, i) => {
     const [k, txt] = guestBadge(g);
     return `<div class="gl" data-id="${esc(g.id)}">
@@ -695,13 +697,16 @@ function renderGuestList() {
         ${avatar(g, i)}
         <div style="min-width:0;flex:1">
           <div class="n">${esc(g.group_name)}</div>
-          <div class="tags"><span class="tag">${esc(g.category)}</span><span class="st st-${k}">${txt}</span></div>
+          <div class="tags">
+            <span class="tag">${esc(g.category)}</span>
+            <span class="st st-${k}">${txt}</span>
+          </div>
         </div>
       </button>
       <div class="gl-actions">
         <button class="ib" data-copy title="Salin tautan" aria-label="Salin tautan"><i data-lucide="link"></i></button>
         <button class="ib" data-wa title="Kirim WhatsApp" aria-label="Kirim WhatsApp"><i data-lucide="message-circle"></i></button>
-        <button class="ib" data-open style="color:var(--sub);"><i data-lucide="chevron-right"></i></button>
+        <button class="ib-arrow" data-open title="Detail" aria-label="Detail"><i data-lucide="chevron-right"></i></button>
       </div>
     </div>`;
   }).join('');
