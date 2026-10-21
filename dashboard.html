@@ -580,7 +580,6 @@ async function submitEditEvent(e) {
   btn.textContent = 'Menyimpan…';
 
   try {
-    // Ambil ID event pertama dari data global yang sedang dimuat
     const eventId = globalData.event.id;
 
     // Lakukan update langsung ke tabel events berdasarkan ID
@@ -594,13 +593,17 @@ async function submitEditEvent(e) {
       })
       .eq('id', eventId);
 
+    // Kembalikan tombol ke kondisi semula terlebih dahulu
+    btn.disabled = false;
+    btn.textContent = 'Simpan perubahan';
+
     if (directError) {
-      btn.disabled = false;
-      btn.textContent = 'Simpan perubahan';
       return toast('Gagal menyimpan: ' + directError.message, false);
     }
 
     toast('Perubahan acara berhasil disimpan!');
+    
+    // Muat ulang data dashboard dengan aman
     loadDashboard();
   } catch (err) {
     btn.disabled = false;
