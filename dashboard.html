@@ -127,13 +127,10 @@ input, select, textarea { font-size: 16px !important; }
 .st.st-pending{background:var(--amber-bg);color:var(--amber-ink)}
 .st.st-checked{background:var(--blue-bg);color:var(--brand)}
 
-/* Tombol Ikon Bundar Tipis & Panah Polos Tanpa Lingkaran */
-.ib{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card);transition:all .15s}
+/* Tombol Ikon Bundar Tipis */
+.ib{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card);transition:all .15s}
 .ib:hover{border-color:var(--brand);color:var(--brand)}
-.ib svg{width:16px;height:16px}
-.ib-arrow{background:none;border:0;color:var(--sub);padding:4px;display:grid;place-items:center;cursor:pointer;flex-shrink:0;transition:color .15s}
-.ib-arrow:hover{color:var(--brand)}
-.ib-arrow svg{width:18px;height:18px}
+.ib svg{width:15px;height:15px}
 
 /* Check-in brand card */
 .brandcard{background:var(--brand);color:#fff}
@@ -199,36 +196,7 @@ input, select, textarea { font-size: 16px !important; }
 .gl-actions {
   display: flex;
   align-items: center;
-  gap: 4px !important;
-  flex-shrink: 0;
-}
-
-.ib {
-  width: 34px !important;
-  height: 34px !important;
-  border-radius: 50%;
-  border: 1px solid var(--line);
-  display: grid;
-  place-items: center;
-  color: var(--sub);
-  flex-shrink: 0;
-  background: var(--card);
-  transition: all .15s;
-}
-
-.ib svg {
-  width: 15px !important;
-  height: 15px !important;
-}
-
-.ib-arrow {
-  background: none;
-  border: 0;
-  color: var(--sub);
-  padding: 2px;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
+  gap: 6px !important;
   flex-shrink: 0;
 }
 
@@ -264,15 +232,29 @@ input, select, textarea { font-size: 16px !important; }
 .stepper button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-weight:600;font-size:18px;color:var(--brand)}
 .stepper span{font-family:'Geist Mono',monospace;font-size:18px;font-weight:600;min-width:24px;text-align:center}
 
-/* Floating nav */
-.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));width:calc(100% - 28px);max-width:440px;display:flex;align-items:center;gap:12px;z-index:30}
-.pillnav{flex:1;background:var(--brand);border-radius:999px;display:flex;padding:6px;box-shadow:0 14px 34px rgba(10,61,194,.35)}
+/* Floating nav dengan Efek Blur (Glassmorphism) */
+.tabbar{
+  position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(14px + env(safe-area-inset-bottom));
+  width:calc(100% - 28px);max-width:440px;
+  display:flex;align-items:center;gap:12px;z-index:30;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  background:rgba(244,245,248,0.65);
+  padding:6px;border-radius:999px;
+  box-shadow:0 10px 30px rgba(12,24,60,.1);
+}
+:root[data-dark="1"] .tabbar{
+  background:rgba(11,15,26,0.65);
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
+}
+.pillnav{flex:1;background:var(--brand);border-radius:999px;display:flex;padding:4px;box-shadow:0 8px 24px rgba(10,61,194,.3)}
 .pillnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:rgba(255,255,255,.72);font-size:12px;font-weight:500;padding:8px 0;border-radius:999px;transition:background .2s,color .2s}
 .pillnav button svg{width:22px;height:22px}
 .pillnav button.on{background:#fff;color:var(--brand)}
-.fab{width:64px;height:64px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;box-shadow:0 14px 34px rgba(10,61,194,.4);flex-shrink:0;transition:transform .15s}
+.fab{width:56px;height:56px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;box-shadow:0 8px 24px rgba(10,61,194,.35);flex-shrink:0;transition:transform .15s}
 .fab:active{transform:scale(.94)}
-.fab svg{width:26px;height:26px}
+.fab svg{width:24px;height:24px}
 
 /* Sheet */
 .backdrop{position:fixed;inset:0;background:rgba(9,16,40,.4);z-index:50;opacity:0;pointer-events:none;transition:opacity .3s}
@@ -762,7 +744,6 @@ function renderGuestList() {
       <div class="gl-actions">
         <button class="ib" data-copy title="Salin tautan" aria-label="Salin tautan"><i data-lucide="link"></i></button>
         <button class="ib" data-wa title="Kirim WhatsApp" aria-label="Kirim WhatsApp"><i data-lucide="message-circle"></i></button>
-        <button class="ib-arrow" data-open title="Detail" aria-label="Detail"><i data-lucide="chevron-right"></i></button>
       </div>
     </div>`;
   }).join('');
@@ -840,7 +821,6 @@ function confirmDelete(g) {
 
 function openGuestSheet(id) {
   const g = id ? findGuest(id) : null;
-  // Mengambil daftar kategori unik secara dinamis dari database/guests yang ada
   const existingCats = [...new Set(globalData.guests.map(g => g.category).filter(Boolean))];
   const defaultCats = ['Keluarga', 'Teman', 'Tetangga', 'Kolega', 'Umum'];
   const cats = [...new Set([...defaultCats, ...existingCats])];
