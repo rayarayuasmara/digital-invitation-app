@@ -54,7 +54,7 @@ input, select, textarea { font-size: 16px !important; }
 .topbar h1{margin:0;font-size:32px;color:var(--brand);font-family:'Geist',sans-serif;font-weight:800}
 .logo{width:40px;height:40px;border-radius:12px;background:var(--brand);color:#fff;display:grid;place-items:center;font-family:'Geist',sans-serif;font-weight:800;font-size:19px}
 
-.page{padding:8px 16px calc(130px + env(safe-area-inset-bottom))}
+.page{padding:8px 16px calc(140px + env(safe-area-inset-bottom))}
 .page>*+*{margin-top:12px}
 .card{background:var(--card);border-radius:24px;padding:20px;box-shadow:var(--shadow)}
 .ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -144,7 +144,7 @@ input, select, textarea { font-size: 16px !important; }
   background: rgba(255, 255, 255, 0.15);
   border-radius: 999px;
   padding: 3px;
-  margin-bottom: 8px;
+  margin-bottom: 2px;
 }
 .card-switch button {
   background: transparent;
@@ -172,11 +172,11 @@ input, select, textarea { font-size: 16px !important; }
 .ring .fgc{stroke:#fff;transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1)}
 .ring .in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .ring .in small{font-size:14px;opacity:.85}
-.ring .in b{font-family:'Geist Mono',monospace;font-size:40px;font-weight:600;line-height:1.1}
+.ring .in b{font-family:'Geist Mono',monospace;font-size:36px;font-weight:600;line-height:1.1}
 .brandcard .side{flex:1}
-.brandcard .sr{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid rgba(255,255,255,.2);font-size:15px;opacity:.95}
+.brandcard .sr{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid rgba(255,255,255,.2);font-size:15px;opacity:.95}
 .brandcard .sr:first-child{border-top:0;padding-top:0}
-.brandcard .sr b{font-family:'Geist Mono',monospace;font-size:26px;font-weight:600}
+.brandcard .sr b{font-family:'Geist Mono',monospace;font-size:22px;font-weight:600}
 
 /* Aksi */
 .tiles2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -260,21 +260,31 @@ input, select, textarea { font-size: 16px !important; }
 .stepper button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-weight:600;font-size:18px;color:var(--brand)}
 .stepper span{font-family:'Geist Mono',monospace;font-size:18px;font-weight:600;min-width:24px;text-align:center}
 
-/* Floating nav dengan Efek Blur */
-.tabbar{
+/* Container gradasi blur di belakang floating nav */
+.nav-container-wrap{
   position:fixed;left:50%;transform:translateX(-50%);
-  bottom:calc(14px + env(safe-area-inset-bottom));
-  width:calc(100% - 28px);max-width:440px;
-  display:flex;align-items:center;gap:12px;z-index:30;
-  backdrop-filter:blur(16px);
-  -webkit-backdrop-filter:blur(16px);
-  background:rgba(244,245,248,0.65);
-  padding:6px;border-radius:999px;
-  box-shadow:0 10px 30px rgba(12,24,60,.1);
+  bottom:0;
+  width:100%;max-width:480px;
+  height:calc(90px + env(safe-area-inset-bottom));
+  z-index:30;
+  pointer-events:none;
+  background: linear-gradient(to top, rgba(244,245,248,0.92) 30%, rgba(244,245,248,0.4) 70%, rgba(244,245,248,0) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display:flex;align-items:center;justify-content:center;
+  padding-bottom:calc(10px + env(safe-area-inset-bottom));
 }
-:root[data-dark="1"] .tabbar{
-  background:rgba(11,15,26,0.65);
-  box-shadow:0 10px 30px rgba(0,0,0,.3);
+:root[data-dark="1"] .nav-container-wrap{
+  background: linear-gradient(to top, rgba(11,15,26,0.92) 30%, rgba(11,15,26,0.4) 70%, rgba(11,15,26,0) 100%);
+}
+
+/* Floating nav */
+.tabbar{
+  pointer-events:auto;
+  width:calc(100% - 28px);max-width:440px;
+  display:flex;align-items:center;gap:12px;
+  background: transparent;
+  padding:0;border-radius:999px;
 }
 .pillnav{flex:1;background:var(--brand);border-radius:999px;display:flex;padding:4px;box-shadow:0 8px 24px rgba(10,61,194,.3)}
 .pillnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:rgba(255,255,255,.72);font-size:12px;font-weight:500;padding:8px 0;border-radius:999px;transition:background .2s,color .2s}
@@ -379,7 +389,7 @@ input, select, textarea { font-size: 16px !important; }
             <div class="card">
               <div class="lbl">Hadir <i data-lucide="square-check"></i></div>
               <div class="hadir-top"><span class="kpi sm" id="hero-hadir" style="margin:0">0</span><span class="pct" id="hero-pct-text">0%</span></div>
-              <div class="sub" style="font-size:14px;margin-top:8px" id="hero-hadir-text">Dari 0 pax</div>
+              <div class="sub" style="font-size:14px;margin-top:8px" id="hero-hadir-text">Dari 0 undangan</div>
               <div class="rowk"><span>Absen</span><b id="stat-absen">0</b></div>
             </div>
             <div class="card" style="padding:16px 20px">
@@ -395,13 +405,10 @@ input, select, textarea { font-size: 16px !important; }
 
         <!-- CARD BIRU DENGAN TOMBOL SWITCH VIEW STATISTIK -->
         <div class="card brandcard">
-          <div class="ch">
-            <div style="display:flex; flex-direction:column; gap:4px;">
-              <div class="card-switch" id="stat-switch">
-                <button class="active" onclick="switchCardView('checkin')">Check-In</button>
-                <button onclick="switchCardView('rsvp')">RSVP Status</button>
-              </div>
-              <h3 id="card-title-label" style="margin:0;">Total Check-In</h3>
+          <div class="ch" style="margin-bottom:8px;">
+            <div class="card-switch" id="stat-switch">
+              <button class="active" onclick="switchCardView('checkin')">Check-In</button>
+              <button onclick="switchCardView('rsvp')">RSVP Status</button>
             </div>
             <button class="link" onclick="openCheckin()" id="card-action-link">Buka <i data-lucide="circle-arrow-right"></i></button>
           </div>
@@ -422,11 +429,16 @@ input, select, textarea { font-size: 16px !important; }
 
           <!-- View 2: RSVP Status -->
           <div id="view-rsvp" class="stat-view hidden">
-            <div class="side" style="display:flex; flex-direction:column; gap:4px; margin-top:2px;">
-              <div class="sr"><span>Hadir</span><b id="rsvp-stat-hadir">0</b></div>
-              <div class="sr"><span>Absen</span><b id="rsvp-stat-absen">0</b></div>
-              <div class="sr"><span>Pending</span><b id="rsvp-stat-pending">0</b></div>
-              <div class="sr"><span>Unsent</span><b id="rsvp-stat-unsent">0</b></div>
+            <div class="ringwrap">
+              <div class="ring">
+                <svg viewBox="0 0 100 100"><circle class="bgc" cx="50" cy="50" r="44"/><circle class="fgc" id="rsvp-ring-fg" cx="50" cy="50" r="44" stroke-dasharray="276.46" stroke-dashoffset="276.46"/></svg>
+                <div class="in"><small>Hadir</small><b id="rsvp-ring-num">0</b></div>
+              </div>
+              <div class="side">
+                <div class="sr"><span>Est. Tamu</span><b id="rsvp-est-pax">0</b></div>
+                <div class="sr"><span>Absen</span><b id="rsvp-stat-absen">0</b></div>
+                <div class="sr"><span>Pending</span><b id="rsvp-stat-pending">0</b></div>
+              </div>
             </div>
           </div>
         </div>
@@ -499,38 +511,51 @@ input, select, textarea { font-size: 16px !important; }
       </form>
     </div>
 
-    <!-- TAB AKUN -->
-    <div id="tab-akun" class="hidden">
-      <header class="topbar"><h1>Akun</h1><span class="logo">R</span></header>
+    <!-- TAB BANTUAN (GANTI AKUN) -->
+    <div id="tab-bantuan" class="hidden">
+      <header class="topbar"><h1>Bantuan</h1><span class="logo">R</span></header>
       <div class="page">
         <div class="card" style="display:flex;align-items:center;gap:14px">
           <div class="av" id="account-avatar" style="width:60px;height:60px;min-width:60px;min-height:60px;font-size:22px">R</div>
           <div style="min-width:0"><div class="display" id="account-name" style="font-size:20px;color:var(--ink)">…</div><div class="sub" id="account-slug" style="font-size:14px">…</div></div>
         </div>
+        
         <div class="card">
-          <div class="ch"><h3>Tampilan</h3></div>
+          <div class="ch"><h3>Panduan Singkat</h3></div>
+          <div style="font-size:15px; color:var(--sub); display:flex; flex-direction:column; gap:10px; line-height:1.5;">
+            <div><b>1. Tambah Tamu:</b> Gunakan tombol tambah tamu untuk memasukkan nama, kategori, nomor WA, dan kuota pax.</div>
+            <div><b>2. Kirim Undangan WA:</b> Klik ikon WhatsApp pada daftar tamu untuk mengirim pesan otomatis yang dilengkapi tautan undangan unik.</div>
+            <div><b>3. Check-In Acara:</b> Gunakan mode *Check-In* untuk mencatat kehadiran tamu saat hari H pernikahan.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ch"><h3>Tampilan Tema</h3></div>
           <div class="tabs smooth-scroll" id="theme-seg" style="border:0;gap:8px">
             <button data-t="auto" class="on" style="border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;flex-shrink:0">Otomatis</button>
             <button data-t="light" style="border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;flex-shrink:0">Terang</button>
             <button data-t="dark" style="border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;flex-shrink:0">Gelap</button>
           </div>
         </div>
-        <button class="btn line" onclick="logout()">Keluar</button>
+
+        <button class="btn line" onclick="logout()">Keluar dari Akun</button>
       </div>
     </div>
   </section>
 </div>
 
-<!-- FLOATING BOTTOM NAV -->
-<nav class="tabbar hidden" id="tabbar">
-  <div class="pillnav">
-    <button id="nav-home" class="on" onclick="switchTab('home')"><i data-lucide="house"></i><span>Home</span></button>
-    <button id="nav-tamu" onclick="switchTab('tamu')"><i data-lucide="users"></i><span>Tamu</span></button>
-    <button id="nav-acara" onclick="switchTab('acara')"><i data-lucide="calendar-days"></i><span>Acara</span></button>
-    <button id="nav-akun" onclick="switchTab('akun')"><i data-lucide="settings"></i><span>Akun</span></button>
-  </div>
-  <button class="fab" onclick="openCheckin()" aria-label="Mode check-in"><i data-lucide="scan-line"></i></button>
-</nav>
+<!-- FLOATING BOTTOM NAV DENGAN GRADASI BLUR DI BELAKANGNYA -->
+<div class="nav-container-wrap hidden" id="nav-container-wrap">
+  <nav class="tabbar" id="tabbar">
+    <div class="pillnav">
+      <button id="nav-home" class="on" onclick="switchTab('home')"><i data-lucide="house"></i><span id="nav-label-home">Home</span></button>
+      <button id="nav-tamu" onclick="switchTab('tamu')"><i data-lucide="users"></i><span>Tamu</span></button>
+      <button id="nav-acara" onclick="switchTab('acara')"><i data-lucide="calendar-days"></i><span>Acara</span></button>
+      <button id="nav-bantuan" onclick="switchTab('bantuan')"><i data-lucide="help-circle"></i><span>Bantuan</span></button>
+    </div>
+    <button class="fab" onclick="openCheckin()" aria-label="Mode check-in"><i data-lucide="scan-line"></i></button>
+  </nav>
+</div>
 
 <!-- CHECK-IN MODAL FULLSCREEN -->
 <div class="checkin hidden" id="checkin" role="dialog" aria-modal="true" aria-label="Mode check-in">
@@ -557,6 +582,7 @@ let globalData = null;
 let activeFilter = 'all';
 let activeCategory = 'all';
 let activeSort = 'new';
+let currentActiveTab = 'home';
 const COLORS = ['#0a3dc2','#12b76a','#f5a524','#e5484d','#7c5cff','#0ea5e9','#ec4899'];
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -637,7 +663,7 @@ async function logout() {
 async function loadDashboard() {
   $('login').classList.add('hidden');
   $('dash').classList.remove('hidden');
-  $('tabbar').classList.remove('hidden');
+  $('nav-container-wrap').classList.remove('hidden');
   const { data, error } = await supabaseClient.rpc('get_client_dashboard_data');
   if (error || !data || !data.success) return toast('Gagal memuat data. Silakan masuk lagi.', false);
   globalData = data; renderUI();
@@ -668,17 +694,26 @@ function renderUI() {
   $('ev-location').value = event.location || '';
   $('ev-caption').value = event.caption || '';
 
-  const pct = stats.total_max_pax > 0 ? Math.round(stats.total_hadir / stats.total_max_pax * 100) : 0;
-  $('hero-pct-text').textContent = pct + '%';
-  $('hero-hadir').textContent = stats.total_hadir;
-  $('hero-hadir-text').textContent = `Dari ${stats.total_max_pax} pax terkonfirmasi`;
+  const hadirGroupsCount = guests.filter(g => g.rsvp_status === 'hadir').length;
+  const totalGuestsCount = stats.total_guests || guests.length;
+  const hadirPct = totalGuestsCount > 0 ? Math.round((hadirGroupsCount / totalGuestsCount) * 100) : 0;
+
+  $('hero-pct-text').textContent = hadirPct + '%';
+  $('hero-hadir').textContent = hadirGroupsCount;
+  $('hero-hadir-text').textContent = `Dari ${totalGuestsCount} undangan`;
 
   const maxQuota = stats.max_quota || 100;
-  $('stat-total').textContent = stats.total_guests;
-  $('stat-kuota').textContent = Math.max(0, maxQuota - stats.total_guests);
-  $('stat-absen').textContent = guests.filter(g => g.rsvp_status === 'tidak_hadir').length;
-  $('stat-pending').textContent = guests.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent).length;
+  $('stat-total').textContent = totalGuestsCount;
+  $('stat-kuota').textContent = Math.max(0, maxQuota - totalGuestsCount);
+  
+  const countAbsen = guests.filter(g => g.rsvp_status === 'tidak_hadir').length;
+  const countPending = guests.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent).length;
+  const totalHadirPax = guests.filter(g => g.rsvp_status === 'hadir').reduce((sum, g) => sum + (g.max_pax || 0), 0);
 
+  $('stat-absen').textContent = countAbsen;
+  $('stat-pending').textContent = countPending;
+
+  // Render Check-In Ring Chart
   const att = guests.filter(g => g.rsvp_status === 'hadir' || g.is_checked_in);
   const checked = att.filter(g => g.is_checked_in).length;
   const ratio = att.length ? checked / att.length : 0;
@@ -687,24 +722,22 @@ function renderUI() {
   $('ci-wait').textContent = guests.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent).length;
   $('ci-est').textContent = stats.total_hadir;
 
-  const countHadir = guests.filter(g => g.rsvp_status === 'hadir').length;
-  const countAbsen = guests.filter(g => g.rsvp_status === 'tidak_hadir').length;
-  const countPending = guests.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent).length;
-  const countUnsent = guests.filter(g => !g.is_sent).length;
-
-  if ($('rsvp-stat-hadir')) $('rsvp-stat-hadir').textContent = countHadir;
-  if ($('rsvp-stat-absen')) $('rsvp-stat-absen').textContent = countAbsen;
-  if ($('rsvp-stat-pending')) $('rsvp-stat-pending').textContent = countPending;
-  if ($('rsvp-stat-unsent')) $('rsvp-stat-unsent').textContent = countUnsent;
+  // Render RSVP Status Ring Chart
+  const rsvpRatio = totalGuestsCount > 0 ? hadirGroupsCount / totalGuestsCount : 0;
+  $('rsvp-ring-fg').style.strokeDashoffset = 276.46 * (1 - rsvpRatio);
+  $('rsvp-ring-num').textContent = hadirGroupsCount;
+  $('rsvp-est-pax').textContent = totalHadirPax;
+  $('rsvp-stat-absen').textContent = countAbsen;
+  $('rsvp-stat-pending').textContent = countPending;
 
   renderCategories(categories);
   renderRecent(guests);
   renderCategorySelect();
   renderGuestList();
 
-  $('quota-used').textContent = stats.total_guests;
+  $('quota-used').textContent = totalGuestsCount;
   $('quota-max').textContent = maxQuota;
-  $('quota-bar').style.width = Math.min(100, Math.round((stats.total_guests / maxQuota) * 100)) + '%';
+  $('quota-bar').style.width = Math.min(100, Math.round((totalGuestsCount / maxQuota) * 100)) + '%';
   icons();
 }
 
@@ -713,7 +746,6 @@ function switchCardView(type) {
   const btnRsvp = document.querySelector('#stat-switch button:nth-child(2)');
   const viewCheckin = $('view-checkin');
   const viewRsvp = $('view-rsvp');
-  const titleLabel = $('card-title-label');
   const actionLink = $('card-action-link');
 
   if (type === 'checkin') {
@@ -721,14 +753,12 @@ function switchCardView(type) {
     btnRsvp.classList.remove('active');
     viewCheckin.classList.remove('hidden');
     viewRsvp.classList.add('hidden');
-    titleLabel.textContent = 'Total Check-In';
     actionLink.style.display = 'flex';
   } else {
     btnRsvp.classList.add('active');
     btnCheckin.classList.remove('active');
     viewRsvp.classList.remove('hidden');
     viewCheckin.classList.add('hidden');
-    titleLabel.textContent = 'Statistik RSVP Status';
     actionLink.style.display = 'none';
   }
 }
@@ -885,12 +915,32 @@ $('sort-opts').addEventListener('click', e => {
   activeSort = b.dataset.s; renderGuestList();
 });
 
-/* ---------- Navigasi Antar Tab ---------- */
+/* ---------- Navigasi Antar Tab (Tombol Kiri Dinamis) ---------- */
 function switchTab(tab) {
-  ['home', 'tamu', 'acara', 'akun'].forEach(t => {
+  currentActiveTab = tab;
+  ['home', 'tamu', 'acara', 'bantuan'].forEach(t => {
     $('tab-' + t).classList.toggle('hidden', t !== tab);
     $('nav-' + t).classList.toggle('on', t === tab);
   });
+
+  // Update tombol kiri dinamis sesuai tab aktif
+  const homeBtnSpan = $('nav-label-home');
+  const homeBtnIcon = document.querySelector('#nav-home i');
+  
+  if (tab === 'home') {
+    homeBtnIcon.setAttribute('data-lucide', 'house');
+    homeBtnSpan.textContent = 'Home';
+  } else if (tab === 'tamu') {
+    homeBtnIcon.setAttribute('data-lucide', 'users');
+    homeBtnSpan.textContent = 'Tamu';
+  } else if (tab === 'acara') {
+    homeBtnIcon.setAttribute('data-lucide', 'calendar-days');
+    homeBtnSpan.textContent = 'Acara';
+  } else if (tab === 'bantuan') {
+    homeBtnIcon.setAttribute('data-lucide', 'help-circle');
+    homeBtnSpan.textContent = 'Bantuan';
+  }
+
   if (tab === 'home' && globalData) renderCategories(globalData.categories);
   window.scrollTo(0, 0);
   icons();
