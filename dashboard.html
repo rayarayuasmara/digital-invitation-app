@@ -258,7 +258,7 @@ input, select, textarea { font-size: 16px !important; }
 .stepper button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-weight:600;font-size:18px;color:var(--brand)}
 .stepper span{font-family:'Geist Mono',monospace;font-size:18px;font-weight:600;min-width:24px;text-align:center}
 
-/* Container floating nav */
+/* Container floating nav (Original dashboard-4.html) */
 .nav-container-wrap{
   position:fixed;left:50%;transform:translateX(-50%);
   bottom:0;
@@ -386,31 +386,6 @@ html.lock{overflow:hidden}
 .shake{animation:shake .45s var(--ease)}
 @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
 
-.pillnav{position:relative;background:var(--glass);-webkit-backdrop-filter:blur(26px) saturate(1.8);backdrop-filter:blur(26px) saturate(1.8);border:1px solid var(--glass-line);box-shadow:0 14px 34px -10px rgba(12,24,60,.35),inset 0 1px 0 rgba(255,255,255,.5);padding:5px}
-.pillnav button{position:relative;z-index:1;background:transparent!important;color:var(--sub);transition:padding .35s var(--ease),color .25s}
-.pillnav button.on{color:var(--brand)}
-.pillnav button svg{transition:transform .5s var(--spring)}
-.pillnav button.on svg{transform:translateY(-1px) scale(1.12)}
-.pillnav button span{max-height:16px;overflow:hidden;transition:max-height .35s var(--ease),opacity .25s,margin .35s var(--ease)}
-.min .pillnav button span{max-height:0;opacity:0;margin-top:-3px}
-.min .pillnav button{padding:12px 0}
-.fab{background:linear-gradient(145deg,#3a73ff,var(--brand));border:1px solid rgba(255,255,255,.25);box-shadow:0 12px 28px -6px rgba(10,61,194,.6),inset 0 1px 0 rgba(255,255,255,.35)}
-.fab:active{transform:scale(.9)}
-.fab.swap svg{animation:swap .6s var(--spring)}
-
-.brandcard{position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 100% 0%,#5b86ff 0%,transparent 58%),linear-gradient(155deg,#1a55e8 0%,#0a3dc2 55%,#072a8c 100%);box-shadow:0 22px 44px -16px rgba(10,61,194,.65),inset 0 1px 0 rgba(255,255,255,.25)}
-.brandcard::before{content:"";position:absolute;z-index:-1;top:-90px;right:-70px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.26),transparent 66%);animation:drift 10s ease-in-out infinite alternate}
-.card-switch{position:relative;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding:3px}
-.card-switch button{position:relative;z-index:1;padding:7px 16px;background:transparent!important;box-shadow:none!important;color:rgba(255,255,255,.78)}
-.card-switch button.active{color:var(--brand)}
-.cs-thumb{position:absolute;top:3px;bottom:3px;left:0;border-radius:999px;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.2);transition:transform .5s var(--spring),width .5s var(--spring)}
-.stat-view{animation:viewIn .6s var(--ease) both}
-.ring .fgc{transition:stroke-dashoffset 1.3s var(--ease);filter:drop-shadow(0 0 7px rgba(255,255,255,.6))}
-.ring .bgc{stroke:rgba(255,255,255,.18)}
-.ring .in b{font-size:40px}
-.brandcard .side{display:flex;flex-direction:column;gap:8px}
-.brandcard .sr,.brandcard .sr:first-child{margin:0;padding:11px 14px;border:0;border-radius:14px;background:rgba(255,255,255,.1)}
-
 .backdrop{transition:opacity .35s var(--ease)}
 .sheet{border-radius:32px 32px 0 0;transition:transform .6s var(--ease);box-shadow:0 -20px 60px rgba(9,16,40,.25)}
 .grab{position:relative}.grab::after{content:"";position:absolute;inset:-14px -90px}
@@ -449,7 +424,7 @@ html.lock{overflow:hidden}
       <div class="page">
         <div class="card hero" style="position:relative;">
           <div style="position:absolute; top:20px; right:20px;">
-            <div class="ib" style="width:44px; height:44px; background:var(--soft); color:var(--brand); border:0;"><i data-lucide="users" style="width:22px; height:22px;"></i></div>
+            <i data-lucide="users" style="width:20px; height:20px; color:var(--sub);"></i>
           </div>
           <p class="hi">Halo</p>
           <h2 id="home-client-name">Memuat…</h2>
@@ -505,9 +480,9 @@ html.lock{overflow:hidden}
                 <div class="in"><small>masuk</small><b id="ring-num">0</b></div>
               </div>
               <div class="side">
-                <div class="sr"><span>Total Undangan (Hadir)</span><b id="ci-total-hadir">0</b></div>
+                <div class="sr"><span>Undangan</span><b id="ci-total-hadir">0</b></div>
                 <div class="sr"><span>Belum Masuk</span><b id="ci-belum-masuk">0</b></div>
-                <div class="sr"><span>Est. Orang Masuk</span><b id="ci-est-pax">0</b></div>
+                <div class="sr"><span>Orang Masuk</span><b id="ci-est-pax">0</b></div>
               </div>
             </div>
           </div>
@@ -555,7 +530,6 @@ html.lock{overflow:hidden}
             <button data-f="tidak_hadir">Absen</button>
             <button data-f="checked_in">Check-in</button>
           </div>
-          <!-- Sort opts lama dihapus, dipindah ke sticky head pill -->
           <div id="guest-list-container"></div>
         </div>
 
@@ -609,7 +583,7 @@ html.lock{overflow:hidden}
   </section>
 </div>
 
-<!-- FLOATING BOTTOM NAVIGATION -->
+<!-- FLOATING BOTTOM NAVIGATION (Original dashboard-4.html) -->
 <div class="nav-container-wrap hidden" id="nav-container-wrap">
   <nav class="tabbar" id="tabbar">
     <div class="pillnav">
@@ -662,8 +636,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let globalData = null;
 let activeFilter = 'all';
 let activeCategory = 'all';
-let activeSortBy = 'created'; // 'name', 'updated', 'created'
-let activeSortOrder = 'desc'; // 'asc', 'desc'
+let activeSortBy = 'created'; 
+let activeSortOrder = 'desc'; 
 let currentActiveTab = 'home';
 let currentCardViewMode = 'checkin';
 let currentCiMode = 'scan';
@@ -760,7 +734,6 @@ const guestBadge = g => {
   return ['unsent', 'Unsent'];
 };
 
-// Avatar seragam seperti di tab home
 const avatar = g => `<div class="av">${esc(initials(g.group_name))}</div>`;
 
 function renderUI() {
@@ -799,7 +772,6 @@ function renderUI() {
   $('stat-absen').textContent = countAbsen;
   $('stat-pending').textContent = countPending;
 
-  // Check-in stats perhitungan baru
   const att = guests.filter(g => g.rsvp_status === 'hadir' || g.is_checked_in);
   const checked = att.filter(g => g.is_checked_in).length;
   const ratio = att.length ? checked / att.length : 0;
@@ -955,7 +927,7 @@ function sortGuests(list) {
     } else if (activeSortBy === 'updated') {
       valA = a.updated_at ? Date.parse(a.updated_at) : 0;
       valB = b.updated_at ? Date.parse(b.updated_at) : 0;
-    } else { // created
+    } else { 
       valA = a.created_at ? Date.parse(a.created_at) : 0;
       valB = b.created_at ? Date.parse(b.created_at) : 0;
     }
@@ -1344,7 +1316,6 @@ function openPending() {
       : '<div class="empty">Semua tamu sudah menjawab.</div>'}`);
 }
 
-/* ---------- Mode Check-in & QR Scanner Kamera ---------- */
 function switchCiMode(mode) {
   currentCiMode = mode;
   const btnScan = document.querySelector('#ci-mode-switch button:nth-child(1)');
@@ -1520,21 +1491,10 @@ checkSession();
   }
   function enter(id) { const t = $(id); if (!t || reduce) return; t.classList.remove('tab-in'); void t.offsetWidth; t.classList.add('tab-in'); }
 
-  function place(parent, cls, sel) {
-    const a = parent && parent.querySelector(sel); if (!a || !a.offsetWidth) return;
-    let t = parent.querySelector('.' + cls); const fresh = !t;
-    if (fresh) { t = document.createElement('i'); t.className = cls; t.style.transition = 'none'; parent.append(t); }
-    t.style.width = a.offsetWidth + 'px'; t.style.transform = `translateX(${a.offsetLeft}px)`;
-    if (fresh) { void t.offsetWidth; t.style.transition = ''; }
-  }
-  const placeAll = () => { place(document.querySelector('.pillnav'), 'thumb', 'button.on'); place($('stat-switch'), 'cs-thumb', 'button.active'); };
-  const ro = new ResizeObserver(placeAll); ro.observe(document.querySelector('.pillnav')); ro.observe($('stat-switch'));
-
   const head = document.createElement('div'); head.className = 'sticky-head';
   const sb = document.querySelector('#tab-tamu .sbar'); sb.before(head); head.append(sb);
   const STAT = [['all', 'Semua'], ['unsent', 'Belum dikirim'], ['pending', 'Menunggu'], ['hadir', 'Hadir'], ['checked_in', 'Check-in'], ['tidak_hadir', 'Absen']];
   
-  // Sticky head container with status chips and sort pill on the right
   head.insertAdjacentHTML('beforeend', `
     <div style="display:flex; align-items:center; gap:8px;">
       <div class="chips" id="st-chips" style="flex:1; margin:0; padding:0 0 2px 0;-webkit-mask-image:none;mask-image:none;">
@@ -1549,9 +1509,7 @@ checkSession();
     </div>
   `);
 
-  // Sort sheet / dialog handler
   window.openSortSheet = function() {
-    const sortLabels = { name: 'Nama', updated: 'Diperbarui', created: 'Dibuat' };
     const orderLabels = { asc: 'Ascending (Naik / A-Z)', desc: 'Descending (Turun / Z-A)' };
     openSheet(`
       <div class="sheet-head"><h3>Urutkan Tamu</h3><button onclick="closeSheet()">Tutup</button></div>
@@ -1625,16 +1583,15 @@ checkSession();
     NUMS.forEach(id => { const el = $(id); if (el) countUp(el); });
     if (first) { first = false; enter('tab-home'); }
     if (!ringsPlayed) { ringsPlayed = true; playRings(); }
-    placeAll();
   };
   const _sw = switchTab;
   window.switchTab = function (t) {
     _sw.apply(this, arguments); enter('tab-' + t); $('nav-container-wrap').classList.remove('min');
     const f = $('fab-btn'); f.classList.remove('swap'); void f.offsetWidth; f.classList.add('swap');
-    placeAll(); if (t === 'tamu') { anim = true; renderGuestList(); }
+    if (t === 'tamu') { anim = true; renderGuestList(); }
   };
   const _sc = switchCardView;
-  window.switchCardView = function () { _sc.apply(this, arguments); placeAll(); playRings(); };
+  window.switchCardView = function () { _sc.apply(this, arguments); playRings(); };
 
   let ly = scrollY;
   addEventListener('scroll', () => {
