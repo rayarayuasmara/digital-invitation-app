@@ -116,6 +116,7 @@ input, select, textarea { font-size: 16px !important; }
 .bdg-absen{background:#e5484d}
 .bdg-pending{background:#f5a524}
 .bdg-checked{background:var(--brand)}
+.bdg-unsent{background:var(--sub)}
 
 /* Status Pill Alami & Sejajar */
 .tags{display:flex;gap:4px;margin-top:6px;align-items:center;flex-wrap:nowrap}
@@ -126,6 +127,7 @@ input, select, textarea { font-size: 16px !important; }
 .st.st-absen{background:var(--red-bg);color:var(--red-ink)}
 .st.st-pending{background:var(--amber-bg);color:var(--amber-ink)}
 .st.st-checked{background:var(--blue-bg);color:var(--brand)}
+.st.st-unsent{background:var(--tag);color:var(--tag-ink)}
 
 /* Tombol Ikon Bundar Tipis */
 .ib{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card);transition:all .15s}
@@ -577,12 +579,13 @@ async function loadDashboard() {
   globalData = data; renderUI();
 }
 
-/* ---------- Render Antarmuka ---------- */
+/* ---------- Render Antarmuka & Status Hirarki ---------- */
 const guestBadge = g => {
   if (g.is_checked_in) return ['checked', 'Checked-in'];
   if (g.rsvp_status === 'hadir') return ['hadir', 'Hadir'];
   if (g.rsvp_status === 'tidak_hadir') return ['absen', 'Absen'];
-  return ['pending', 'Pending'];
+  if (g.is_sent) return ['pending', 'Pending'];
+  return ['unsent', 'Unsent'];
 };
 const avatar = (g, i) => `<div class="av" style="background:${COLORS[i % COLORS.length]}22;color:${COLORS[i % COLORS.length]}">${esc(initials(g.group_name))}</div>`;
 
@@ -610,14 +613,14 @@ function renderUI() {
   $('stat-total').textContent = stats.total_guests;
   $('stat-kuota').textContent = Math.max(0, maxQuota - stats.total_guests);
   $('stat-absen').textContent = guests.filter(g => g.rsvp_status === 'tidak_hadir').length;
-  $('stat-pending').textContent = guests.filter(g => g.rsvp_status === 'pending').length;
+  $('stat-pending').textContent = guests.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent).length;
 
   const att = guests.filter(g => g.rsvp_status === 'hadir' || g.is_checked_in);
   const checked = att.filter(g => g.is_checked_in).length;
   const ratio = att.length ? checked / att.length : 0;
   $('ring-fg').style.strokeDashoffset = 276.46 * (1 - ratio);
   $('ring-num').textContent = checked;
-  $('ci-wait').textContent = guests.filter(g => g.rsvp_status === 'pending').length;
+  $('ci-wait').textContent = guests.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent).length;
   $('ci-est').textContent = stats.total_hadir;
 
   renderCategories(categories);
@@ -736,11 +739,7 @@ function renderGuestList() {
   
   box.innerHTML = list.map((g, i) => {
     const [k, txt] = guestBadge(g);
-    const isSent = g.is_sent || g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir';
-    const sendLabel = isSent 
-      ? '<span class="tag" style="background:var(--green-bg);color:var(--green-ink)">Pending</span>' 
-      : '<span class="tag" style="background:var(--tag);color:var(--tag-ink)">Unsent</span>';
-    const isSentClass = isSent ? 'sent' : '';
+    const isSentClass = g.is_sent ? 'sent' : '';
     return `<div class="gl" data-id="${esc(g.id)}">
       <button class="main" data-open style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;text-align:left">
         ${avatar(g, i)}
@@ -749,7 +748,6 @@ function renderGuestList() {
           <div class="tags">
             <span class="tag">${esc(g.category)}</span>
             <span class="st st-${k}">${txt}</span>
-            ${sendLabel}
           </div>
         </div>
       </button>
@@ -813,13 +811,16 @@ async function guestAction(a, g) {
     closeSheet();
   } else if (a === 'wa') {
     try {
-      await supabaseClient
-        .from('guests')
-        .update({ is_sent: true })
-        .eq('id', g.id);
-      
-      const targetGuest = globalData.guests.find(item => item.id === g.id);
-      if (targetGuest) targetGuest.is_sent = true;
+      // Ubah status is_sent di database menjadi true (Pending)
+      await supabaseClient.rpc('update_guest_by_client', {
+        p_guest_id: g.id,
+        p_group_name: g.group_name,
+        p_category: g.category,
+        p_max_pax: g.max_pax,
+        p_rsvp_status: g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir' ? g.rsvp_status : 'pending',
+        p_is_checked_in: g.is_checked_in,
+        p_is_sent: true
+      });
     } catch (err) {
       console.log('Update status terkirim:', err);
     }
@@ -834,7 +835,7 @@ async function guestAction(a, g) {
     }
     
     closeSheet();
-    renderGuestList();
+    loadDashboard();
   } else if (a === 'edit') openGuestSheet(g.id);
   else if (a === 'del') confirmDelete(g);
 }
@@ -842,13 +843,15 @@ async function guestAction(a, g) {
 async function sendPendingWA(id) {
   const g = findGuest(id); if (!g) return;
   try {
-    await supabaseClient
-      .from('guests')
-      .update({ is_sent: true })
-      .eq('id', g.id);
-    
-    const targetGuest = globalData.guests.find(item => item.id === g.id);
-    if (targetGuest) targetGuest.is_sent = true;
+    await supabaseClient.rpc('update_guest_by_client', {
+      p_guest_id: g.id,
+      p_group_name: g.group_name,
+      p_category: g.category,
+      p_max_pax: g.max_pax,
+      p_rsvp_status: g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir' ? g.rsvp_status : 'pending',
+      p_is_checked_in: g.is_checked_in,
+      p_is_sent: true
+    });
   } catch (err) {
     console.log(err);
   }
@@ -863,7 +866,7 @@ async function sendPendingWA(id) {
   }
   
   closeSheet();
-  renderGuestList();
+  loadDashboard();
 }
 
 function confirmDelete(g) {
@@ -887,7 +890,9 @@ function openGuestSheet(id) {
   const cats = [...new Set([...defaultCats, ...existingCats])];
   const cur = g ? (g.category || 'Umum') : cats[0];
 
-  const isSentChecked = g ? (g.is_sent || g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir') : false;
+  const isSentChecked = g ? (g.is_sent || g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir' || g.is_checked_in) : false;
+  const isCheckinChecked = g ? g.is_checked_in : false;
+  const rsvpVal = g ? g.rsvp_status : 'pending';
 
   openSheet(`
     <div class="sheet-head"><button onclick="closeSheet()">Batal</button><h3>${g ? 'Edit tamu' : 'Tamu baru'}</h3><button id="gs-save">${g ? 'Simpan' : 'Tambah'}</button></div>
@@ -914,20 +919,40 @@ function openGuestSheet(id) {
       </div>
       ${g ? `
       <div class="field"><label>RSVP</label><select id="gs-rsvp" onchange="onRsvpChange(this)">
-        <option value="pending" ${g.rsvp_status === 'pending' ? 'selected' : ''}>Pending</option>
-        <option value="hadir" ${g.rsvp_status === 'hadir' ? 'selected' : ''}>Hadir</option>
-        <option value="tidak_hadir" ${g.rsvp_status === 'tidak_hadir' ? 'selected' : ''}>Absen</option></select></div>
-      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Terkirim</label><span class="switch"><input type="checkbox" id="gs-sent" ${isSentChecked ? 'checked' : ''}><span></span></span></div>
-      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Check-In</label><span class="switch"><input type="checkbox" id="gs-checkin" ${g.is_checked_in ? 'checked' : ''}><span></span></span></div>` : ''}
+        <option value="pending" ${rsvpVal === 'pending' ? 'selected' : ''}>Pending</option>
+        <option value="hadir" ${rsvpVal === 'hadir' ? 'selected' : ''}>Hadir</option>
+        <option value="tidak_hadir" ${rsvpVal === 'tidak_hadir' ? 'selected' : ''}>Absen</option></select></div>
+      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Terkirim</label><span class="switch"><input type="checkbox" id="gs-sent" ${isSentChecked ? 'checked' : ''} onchange="onSentToggleChange(this)"><span></span></span></div>
+      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Check-In</label><span class="switch"><input type="checkbox" id="gs-checkin" ${isCheckinChecked ? 'checked' : ''} onchange="onCheckinToggleChange(this)"><span></span></span></div>` : ''}
     </div>`);
   $('gs-save').onclick = () => saveGuest(g);
   if (!g) setTimeout(() => $('gs-name').focus(), 350);
 }
 
 function onRsvpChange(sel) {
-  if (sel.value === 'hadir' || sel.value === 'tidak_hadir') {
-    const sentToggle = $('gs-sent');
+  const sentToggle = $('gs-sent');
+  if ((sel.value === 'hadir' || sel.value === 'tidak_hadir') && sentToggle) {
+    sentToggle.checked = true;
+  }
+}
+
+function onSentToggleChange(chk) {
+  const rsvpSel = $('gs-rsvp');
+  const checkinToggle = $('gs-checkin');
+  if (!chk.checked) {
+    if (rsvpSel) rsvpSel.value = 'pending';
+    if (checkinToggle) checkinToggle.checked = false;
+  }
+}
+
+function onCheckinToggleChange(chk) {
+  const sentToggle = $('gs-sent');
+  const rsvpSel = $('gs-rsvp');
+  if (chk.checked) {
     if (sentToggle) sentToggle.checked = true;
+    if (rsvpSel) rsvpSel.value = 'hadir';
+  } else {
+    if (rsvpSel) rsvpSel.value = 'hadir';
   }
 }
 
@@ -965,8 +990,6 @@ async function saveGuest(g) {
     const isCheckinVal = $('gs-checkin') ? $('gs-checkin').checked : g.is_checked_in;
     const rsvpVal = $('gs-rsvp') ? $('gs-rsvp').value : g.rsvp_status;
 
-    const finalSentVal = (rsvpVal === 'hadir' || rsvpVal === 'tidak_hadir') ? true : isSentVal;
-
     await supabaseClient.rpc('update_guest_by_client', { 
       p_guest_id: g.id, 
       p_group_name: name, 
@@ -974,7 +997,7 @@ async function saveGuest(g) {
       p_max_pax: pax, 
       p_rsvp_status: rsvpVal, 
       p_is_checked_in: isCheckinVal,
-      p_is_sent: finalSentVal 
+      p_is_sent: isSentVal 
     });
   } else {
     await supabaseClient.rpc('add_guest_by_client', { p_group_name: name, p_category: cat, p_max_pax: pax });
@@ -987,7 +1010,7 @@ async function saveGuest(g) {
 }
 
 function openPending() {
-  const list = globalData.guests.filter(g => g.rsvp_status === 'pending');
+  const list = globalData.guests.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent);
   openSheet(`
     <div class="sheet-head"><h3>Tamu pending · ${list.length}</h3><button onclick="closeSheet()">Tutup</button></div>
     ${list.length
@@ -1033,8 +1056,8 @@ async function toggleCheckin(id) {
   g.busy = true;
   const { data, error } = await supabaseClient.rpc('update_guest_by_client', {
     p_guest_id: g.id, p_group_name: g.group_name, p_category: g.category,
-    p_max_pax: g.max_pax, p_rsvp_status: g.rsvp_status, p_is_checked_in: next,
-    p_is_sent: g.is_sent
+    p_max_pax: g.max_pax, p_rsvp_status: next ? 'hadir' : (g.rsvp_status || 'hadir'), p_is_checked_in: next,
+    p_is_sent: true
   });
   g.busy = false;
   if (error || !data || !data.success) return toast(data?.message || 'Gagal mengubah check-in.', false);
