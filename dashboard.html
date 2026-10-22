@@ -562,14 +562,14 @@ async function login(e) {
   loadDashboard();
 }
 async function logout() { 
-  try {
-    await supabaseClient.auth.signOut();
-  } catch (err) {
-    console.log('Error saat signOut:', err);
-  }
-  // Hapus manual item penyimpanan sesi lokal jika ada yang tertinggal
+  // 1. Langsung bersihkan penyimpanan sesi lokal dan cache browser seketika
   localStorage.clear();
   sessionStorage.clear();
+  
+  // 2. Kirim permintaan signOut ke server di background tanpa harus menunggu responsnya
+  supabaseClient.auth.signOut().catch(err => console.log('SignOut background error:', err));
+  
+  // 3. Langsung muat ulang halaman ke form login
   location.reload(); 
 }
 
