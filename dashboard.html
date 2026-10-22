@@ -812,7 +812,11 @@ async function guestAction(a, g) {
     } catch (err) {
       console.log('Update status terkirim:', err);
     }
-    window.open(`https://wa.me/?text=${encodeURIComponent(waText(g))}`, '_blank');
+    
+    // Menggunakan window.location.href agar aman dari pemblokiran popup browser di desktop & smartphone
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(waText(g))}`;
+    window.location.href = waUrl;
+    
     closeSheet();
     loadDashboard();
   } else if (a === 'edit') openGuestSheet(g.id);
@@ -948,7 +952,7 @@ async function sendPendingWA(id) {
   } catch (err) {
     console.log(err);
   }
-  window.open(`https://wa.me/?text=${encodeURIComponent(waText(g))}`, '_blank');
+  window.location.href = `https://wa.me/?text=${encodeURIComponent(waText(g))}`;
   closeSheet();
   loadDashboard();
 }
