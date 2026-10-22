@@ -409,11 +409,13 @@ input, select, textarea { font-size: 16px !important; }
         </div>
 
         <div class="listcard">
+          <!-- Filter Status Diperbarui Sesuai Urutan Hirarki Baru -->
           <div class="tabs smooth-scroll" id="filter-tabs">
             <button class="on" data-f="all">Semua</button>
+            <button data-f="unsent">Unsent</button>
+            <button data-f="pending">Pending</button>
             <button data-f="hadir">Hadir</button>
             <button data-f="tidak_hadir">Absen</button>
-            <button data-f="pending">Pending</button>
             <button data-f="checked_in">Check-in</button>
           </div>
           <div class="sort" id="sort-opts">
@@ -732,8 +734,19 @@ function renderGuestList() {
   const q = $('search-input').value.toLowerCase().trim();
   if (q) list = list.filter(g => g.group_name.toLowerCase().includes(q));
   if (activeCategory !== 'all') list = list.filter(g => g.category === activeCategory);
-  if (activeFilter === 'checked_in') list = list.filter(g => g.is_checked_in);
-  else if (activeFilter !== 'all') list = list.filter(g => g.rsvp_status === activeFilter);
+  
+  // Filter berdasarkan hirarki status baru
+  if (activeFilter === 'checked_in') {
+    list = list.filter(g => g.is_checked_in);
+  } else if (activeFilter === 'hadir') {
+    list = list.filter(g => g.rsvp_status === 'hadir' && !g.is_checked_in);
+  } else if (activeFilter === 'tidak_hadir') {
+    list = list.filter(g => g.rsvp_status === 'tidak_hadir');
+  } else if (activeFilter === 'pending') {
+    list = list.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent);
+  } else if (activeFilter === 'unsent') {
+    list = list.filter(g => !g.is_sent);
+  }
 
   if (!list.length) { box.innerHTML = '<div class="empty">Tidak ada tamu yang sesuai.</div>'; return; }
   
@@ -811,13 +824,13 @@ async function guestAction(a, g) {
     closeSheet();
   } else if (a === 'wa') {
     try {
-      // Ubah status is_sent di database menjadi true (Pending)
+      // Saat klik WA, is_sent menjadi true dan status RSVP tetap dipertahankan
       await supabaseClient.rpc('update_guest_by_client', {
         p_guest_id: g.id,
         p_group_name: g.group_name,
         p_category: g.category,
         p_max_pax: g.max_pax,
-        p_rsvp_status: g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir' ? g.rsvp_status : 'pending',
+        p_rsvp_status: g.rsvp_status,
         p_is_checked_in: g.is_checked_in,
         p_is_sent: true
       });
@@ -848,7 +861,7 @@ async function sendPendingWA(id) {
       p_group_name: g.group_name,
       p_category: g.category,
       p_max_pax: g.max_pax,
-      p_rsvp_status: g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir' ? g.rsvp_status : 'pending',
+      p_rsvp_status: g.rsvp_status,
       p_is_checked_in: g.is_checked_in,
       p_is_sent: true
     });
