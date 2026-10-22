@@ -260,22 +260,17 @@ input, select, textarea { font-size: 16px !important; }
 .stepper button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-weight:600;font-size:18px;color:var(--brand)}
 .stepper span{font-family:'Geist Mono',monospace;font-size:18px;font-weight:600;min-width:24px;text-align:center}
 
-/* Container gradasi blur di belakang floating nav */
+/* Container floating nav tanpa background blur gradient */
 .nav-container-wrap{
   position:fixed;left:50%;transform:translateX(-50%);
   bottom:0;
   width:100%;max-width:480px;
-  height:calc(90px + env(safe-area-inset-bottom));
+  height:calc(80px + env(safe-area-inset-bottom));
   z-index:30;
   pointer-events:none;
-  background: linear-gradient(to top, rgba(244,245,248,0.92) 30%, rgba(244,245,248,0.4) 70%, rgba(244,245,248,0) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: transparent;
   display:flex;align-items:center;justify-content:center;
   padding-bottom:calc(10px + env(safe-area-inset-bottom));
-}
-:root[data-dark="1"] .nav-container-wrap{
-  background: linear-gradient(to top, rgba(11,15,26,0.92) 30%, rgba(11,15,26,0.4) 70%, rgba(11,15,26,0) 100%);
 }
 
 /* Floating nav */
@@ -403,14 +398,14 @@ input, select, textarea { font-size: 16px !important; }
           <div id="recent-rsvp-list"></div>
         </div>
 
-        <!-- CARD BIRU DENGAN TOMBOL SWITCH VIEW STATISTIK -->
+        <!-- CARD BIRU STATISTIK (POSISI TOMBOL BUKA RATA ATAS) -->
         <div class="card brandcard">
-          <div class="ch" style="margin-bottom:8px;">
+          <div class="ch" style="margin-bottom:8px; align-items:flex-start;">
             <div class="card-switch" id="stat-switch">
               <button class="active" onclick="switchCardView('checkin')">Check-In</button>
-              <button onclick="switchCardView('rsvp')">RSVP Status</button>
+              <button onclick="switchCardView('rsvp')">RSVP</button>
             </div>
-            <button class="link" onclick="openCheckin()" id="card-action-link">Buka <i data-lucide="circle-arrow-right"></i></button>
+            <button class="link" onclick="handleCardAction()" id="card-action-link" style="margin-top:4px;">Buka <i data-lucide="circle-arrow-right"></i></button>
           </div>
 
           <!-- View 1: Check-In -->
@@ -427,7 +422,7 @@ input, select, textarea { font-size: 16px !important; }
             </div>
           </div>
 
-          <!-- View 2: RSVP Status -->
+          <!-- View 2: RSVP -->
           <div id="view-rsvp" class="stat-view hidden">
             <div class="ringwrap">
               <div class="ring">
@@ -511,24 +506,15 @@ input, select, textarea { font-size: 16px !important; }
       </form>
     </div>
 
-    <!-- TAB BANTUAN -->
-    <div id="tab-bantuan" class="hidden">
-      <header class="topbar"><h1>Bantuan</h1><span class="logo">R</span></header>
+    <!-- TAB AKUN -->
+    <div id="tab-akun" class="hidden">
+      <header class="topbar"><h1>Akun</h1><span class="logo">R</span></header>
       <div class="page">
         <div class="card" style="display:flex;align-items:center;gap:14px">
           <div class="av" id="account-avatar" style="width:60px;height:60px;min-width:60px;min-height:60px;font-size:22px">R</div>
           <div style="min-width:0"><div class="display" id="account-name" style="font-size:20px;color:var(--ink)">…</div><div class="sub" id="account-slug" style="font-size:14px">…</div></div>
         </div>
         
-        <div class="card">
-          <div class="ch"><h3>Panduan Singkat</h3></div>
-          <div style="font-size:15px; color:var(--sub); display:flex; flex-direction:column; gap:10px; line-height:1.5;">
-            <div><b>1. Tambah Tamu:</b> Gunakan tombol tambah tamu untuk memasukkan nama, kategori, nomor WA, dan kuota pax.</div>
-            <div><b>2. Kirim Undangan WA:</b> Klik ikon WhatsApp pada daftar tamu untuk mengirim pesan otomatis yang dilengkapi tautan undangan unik.</div>
-            <div><b>3. Check-In Acara:</b> Gunakan mode *Check-In* untuk mencatat kehadiran tamu saat hari H pernikahan.</div>
-          </div>
-        </div>
-
         <div class="card">
           <div class="ch"><h3>Tampilan Tema</h3></div>
           <div class="tabs smooth-scroll" id="theme-seg" style="border:0;gap:8px">
@@ -544,14 +530,14 @@ input, select, textarea { font-size: 16px !important; }
   </section>
 </div>
 
-<!-- FLOATING BOTTOM NAV DENGAN FAB DINAMIS -->
+<!-- FLOATING BOTTOM NAVIGATION (TANPA BLUR GRADIENT) -->
 <div class="nav-container-wrap hidden" id="nav-container-wrap">
   <nav class="tabbar" id="tabbar">
     <div class="pillnav">
       <button id="nav-home" class="on" onclick="switchTab('home')"><i data-lucide="house"></i><span>Home</span></button>
       <button id="nav-tamu" onclick="switchTab('tamu')"><i data-lucide="users"></i><span>Tamu</span></button>
       <button id="nav-acara" onclick="switchTab('acara')"><i data-lucide="calendar-days"></i><span>Acara</span></button>
-      <button id="nav-bantuan" onclick="switchTab('bantuan')"><i data-lucide="help-circle"></i><span>Bantuan</span></button>
+      <button id="nav-akun" onclick="switchTab('akun')"><i data-lucide="user"></i><span>Akun</span></button>
     </div>
     <!-- Tombol Bulat Kanan (FAB Dinamis) -->
     <button class="fab" id="fab-btn" onclick="handleFabClick()" aria-label="Aksi Cepat"><i data-lucide="scan-line" id="fab-icon"></i></button>
@@ -584,6 +570,7 @@ let activeFilter = 'all';
 let activeCategory = 'all';
 let activeSort = 'new';
 let currentActiveTab = 'home';
+let currentCardViewMode = 'checkin';
 const COLORS = ['#0a3dc2','#12b76a','#f5a524','#e5484d','#7c5cff','#0ea5e9','#ec4899'];
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -743,24 +730,34 @@ function renderUI() {
 }
 
 function switchCardView(type) {
+  currentCardViewMode = type;
   const btnCheckin = document.querySelector('#stat-switch button:nth-child(1)');
   const btnRsvp = document.querySelector('#stat-switch button:nth-child(2)');
   const viewCheckin = $('view-checkin');
   const viewRsvp = $('view-rsvp');
-  const actionLink = $('card-action-link');
 
   if (type === 'checkin') {
     btnCheckin.classList.add('active');
     btnRsvp.classList.remove('active');
     viewCheckin.classList.remove('hidden');
     viewRsvp.classList.add('hidden');
-    actionLink.style.display = 'flex';
   } else {
     btnRsvp.classList.add('active');
     btnCheckin.classList.remove('active');
     viewRsvp.classList.remove('hidden');
     viewCheckin.classList.add('hidden');
-    actionLink.style.display = 'none';
+  }
+}
+
+// Handler tombol "Buka" pada Card Biru Home
+function handleCardAction() {
+  if (currentCardViewMode === 'checkin') {
+    openCheckin();
+  } else {
+    // Jika tab RSVP, arahkan ke tab Tamu dengan filter "hadir"
+    switchTab('tamu');
+    activeFilter = 'hadir';
+    renderGuestList();
   }
 }
 
@@ -919,7 +916,7 @@ $('sort-opts').addEventListener('click', e => {
 /* ---------- Navigasi Antar Tab & FAB Dinamis ---------- */
 function switchTab(tab) {
   currentActiveTab = tab;
-  ['home', 'tamu', 'acara', 'bantuan'].forEach(t => {
+  ['home', 'tamu', 'acara', 'akun'].forEach(t => {
     $('tab-' + t).classList.toggle('hidden', t !== tab);
     $('nav-' + t).classList.toggle('on', t === tab);
   });
@@ -932,7 +929,7 @@ function switchTab(tab) {
     fabIcon.setAttribute('data-lucide', 'plus');
   } else if (tab === 'acara') {
     fabIcon.setAttribute('data-lucide', 'share-2');
-  } else if (tab === 'bantuan') {
+  } else if (tab === 'akun') {
     fabIcon.setAttribute('data-lucide', 'help-circle');
   }
 
@@ -948,7 +945,6 @@ function handleFabClick() {
   } else if (currentActiveTab === 'tamu') {
     openGuestSheet();
   } else if (currentActiveTab === 'acara') {
-    // Salin link acara atau link undangan umum
     if (globalData && globalData.client) {
       const eventLink = `${window.location.origin}/${globalData.client.slug}`;
       navigator.clipboard.writeText(eventLink).then(() => {
@@ -959,8 +955,18 @@ function handleFabClick() {
     } else {
       toast('Data acara belum siap', false);
     }
-  } else if (currentActiveTab === 'bantuan') {
-    toast('Butuh bantuan? Hubungi tim support RayaRayu.');
+  } else if (currentActiveTab === 'akun') {
+    // Munculkan Popup Panduan Singkat
+    openSheet(`
+      <div class="sheet-head"><h3>Panduan Singkat</h3><button onclick="closeSheet()">Tutup</button></div>
+      <div class="listcard" style="padding-bottom:16px;">
+        <div style="font-size:15px; color:var(--sub); display:flex; flex-direction:column; gap:14px; line-height:1.5; padding-top:12px;">
+          <div><b>1. Tambah Tamu:</b> Gunakan tombol tambah tamu untuk memasukkan nama, kategori, nomor WA, dan kuota pax.</div>
+          <div><b>2. Kirim Undangan WA:</b> Klik ikon WhatsApp pada daftar tamu untuk mengirim pesan otomatis yang dilengkapi tautan undangan unik.</div>
+          <div><b>3. Check-In Acara:</b> Gunakan mode *Check-In* untuk mencatat kehadiran tamu saat hari H pernikahan.</div>
+        </div>
+      </div>
+    `);
   }
 }
 
@@ -1239,7 +1245,6 @@ const attending = () => globalData.guests.filter(g => g.rsvp_status === 'hadir' 
 function openCheckin() {
   $('ci-search').value = '';
   renderCheckin();
-  $('checkin').classList.min ? $('checkin').classList.remove('hidden') : $('checkin').classList.remove('hidden');
   $('checkin').classList.remove('hidden');
   window.scrollTo(0, 0);
   icons();
