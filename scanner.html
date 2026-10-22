@@ -188,6 +188,12 @@ html.lock{overflow:hidden}
   </header>
 
   <div class="page">
+    <!-- Mode (Scan QR / Cari Manual) di atas Kotak Scanner -->
+    <div class="card-switch" id="mode-switch">
+      <button class="active" onclick="switchMode('scan')"><i data-lucide="scan-line"></i>Scan QR</button>
+      <button onclick="switchMode('manual')"><i data-lucide="search"></i>Cari Manual</button>
+    </div>
+
     <!-- Scan -->
     <div id="view-scan" class="view">
       <div class="card" style="padding:14px">
@@ -203,7 +209,7 @@ html.lock{overflow:hidden}
       </div>
     </div>
 
-    <!-- Manual View (jika mode manual aktif) -->
+    <!-- Manual -->
     <div id="view-manual" class="hidden view">
       <div class="sbar"><i data-lucide="search"></i><input type="search" id="manual-search-input" placeholder="Ketik nama tamu atau kode…" oninput="filterManualGuests()" /></div>
       <div class="chips" id="manual-chips">
@@ -219,12 +225,6 @@ html.lock{overflow:hidden}
           <button class="btn" onclick="submitManualTokenInput()">Proses</button>
         </div>
       </div>
-    </div>
-
-    <!-- Mode (Scan QR / Cari Manual) -->
-    <div class="card-switch" id="mode-switch">
-      <button class="active" onclick="switchMode('scan')"><i data-lucide="scan-line"></i>Scan QR</button>
-      <button onclick="switchMode('manual')"><i data-lucide="search"></i>Cari Manual</button>
     </div>
 
     <!-- Statistik (Card Biru) -->
