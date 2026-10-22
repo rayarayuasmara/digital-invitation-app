@@ -1124,9 +1124,9 @@ async function saveGuest(g) {
   const btn = $('gs-save'); btn.disabled = true;
   
   if (g) {
-    const isSentVal = $('gs-sent') ? $('gs-sent'].checked : g.is_sent;
-    const isCheckinVal = $('gs-checkin') ? $('gs-checkin'].checked : g.is_checked_in;
-    const rsvpVal = $('gs-rsvp') ? $('gs-rsvp'].value : g.rsvp_status;
+    const isSentVal = $('gs-sent') ? $('gs-sent').checked : g.is_sent;
+    const isCheckinVal = $('gs-checkin') ? $('gs-checkin').checked : g.is_checked_in;
+    const rsvpVal = $('gs-rsvp') ? $('gs-rsvp').value : g.rsvp_status;
 
     await supabaseClient.rpc('update_guest_by_client', { 
       p_guest_id: g.id, 
