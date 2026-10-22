@@ -562,14 +562,9 @@ async function login(e) {
   loadDashboard();
 }
 async function logout() { 
-  // 1. Langsung bersihkan penyimpanan sesi lokal dan cache browser seketika
   localStorage.clear();
   sessionStorage.clear();
-  
-  // 2. Kirim permintaan signOut ke server di background tanpa harus menunggu responsnya
   supabaseClient.auth.signOut().catch(err => console.log('SignOut background error:', err));
-  
-  // 3. Langsung muat ulang halaman ke form login
   location.reload(); 
 }
 
@@ -584,7 +579,7 @@ async function loadDashboard() {
 
 /* ---------- Render Antarmuka ---------- */
 const guestBadge = g => {
-  if (g.is_checked_in) return ['checked', 'Checked'];
+  if (g.is_checked_in) return ['checked', 'Checked-in'];
   if (g.rsvp_status === 'hadir') return ['hadir', 'Hadir'];
   if (g.rsvp_status === 'tidak_hadir') return ['absen', 'Absen'];
   return ['pending', 'Pending'];
@@ -741,6 +736,10 @@ function renderGuestList() {
   
   box.innerHTML = list.map((g, i) => {
     const [k, txt] = guestBadge(g);
+    // Label status kirim: Unsent jika belum dikirim, Pend/Terkirim jika sudah
+    const sendLabel = g.is_sent 
+      ? '<span class="tag" style="background:var(--green-bg);color:var(--green-ink)">Pending</span>' 
+      : '<span class="tag" style="background:var(--tag);color:var(--tag-ink)">Unsent</span>';
     const isSentClass = g.is_sent ? 'sent' : '';
     return `<div class="gl" data-id="${esc(g.id)}">
       <button class="main" data-open style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;text-align:left">
@@ -750,7 +749,7 @@ function renderGuestList() {
           <div class="tags">
             <span class="tag">${esc(g.category)}</span>
             <span class="st st-${k}">${txt}</span>
-            ${g.is_sent ? '<span class="tag" style="background:var(--green-bg);color:var(--green-ink)">Terkirim</span>' : ''}
+            ${sendLabel}
           </div>
         </div>
       </button>
@@ -813,21 +812,18 @@ async function guestAction(a, g) {
     navigator.clipboard.writeText(guestLink(g)).then(() => toast('Tautan disalin'), () => toast('Gagal menyalin tautan', false));
     closeSheet();
   } else if (a === 'wa') {
-    // 1. Perbarui status is_sent di database dan pastikan objek lokal ikut diperbarui secara permanen
     try {
       await supabaseClient
         .from('guests')
         .update({ is_sent: true })
         .eq('id', g.id);
       
-      // Update langsung di data global agar permanen dan tidak hilang saat render
       const targetGuest = globalData.guests.find(item => item.id === g.id);
       if (targetGuest) targetGuest.is_sent = true;
     } catch (err) {
       console.log('Update status terkirim:', err);
     }
     
-    // 2. Gunakan protokol native WhatsApp agar langsung merespon untuk memilih kontak di HP
     const message = waText(g);
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
@@ -838,7 +834,7 @@ async function guestAction(a, g) {
     }
     
     closeSheet();
-    renderGuestList(); // Render ulang daftar tamu agar tombol langsung berubah hijau & label Terkirim permanen
+    renderGuestList();
   } else if (a === 'edit') openGuestSheet(g.id);
   else if (a === 'del') confirmDelete(g);
 }
@@ -919,7 +915,8 @@ function openGuestSheet(id) {
         <option value="pending" ${g.rsvp_status === 'pending' ? 'selected' : ''}>Pending</option>
         <option value="hadir" ${g.rsvp_status === 'hadir' ? 'selected' : ''}>Hadir</option>
         <option value="tidak_hadir" ${g.rsvp_status === 'tidak_hadir' ? 'selected' : ''}>Absen</option></select></div>
-      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Terkirim</label><span class="switch"><input type="checkbox" id="gs-sent" ${g.is_sent ? 'checked' : ''}><span></span></span></div>` : ''}
+      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Terkirim (Pending)</label><span class="switch"><input type="checkbox" id="gs-sent" ${g.is_sent ? 'checked' : ''}><span></span></span></div>
+      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Check-In (Hadir)</label><span class="switch"><input type="checkbox" id="gs-checkin" ${g.is_checked_in ? 'checked' : ''}><span></span></span></div>` : ''}
     </div>`);
   $('gs-save').onclick = () => saveGuest(g);
   if (!g) setTimeout(() => $('gs-name').focus(), 350);
@@ -956,13 +953,14 @@ async function saveGuest(g) {
   
   if (g) {
     const isSentVal = $('gs-sent') ? $('gs-sent').checked : g.is_sent;
+    const isCheckinVal = $('gs-checkin') ? $('gs-checkin').checked : g.is_checked_in;
     await supabaseClient.rpc('update_guest_by_client', { 
       p_guest_id: g.id, 
       p_group_name: name, 
       p_category: cat, 
       p_max_pax: pax, 
       p_rsvp_status: $('gs-rsvp').value, 
-      p_is_checked_in: g.is_checked_in,
+      p_is_checked_in: isCheckinVal,
       p_is_sent: isSentVal 
     });
   } else {
