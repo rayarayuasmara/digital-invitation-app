@@ -561,7 +561,17 @@ async function login(e) {
   if (error) return toast('Login gagal: ' + error.message, false);
   loadDashboard();
 }
-async function logout() { await supabaseClient.auth.signOut(); location.reload(); }
+async function logout() { 
+  try {
+    await supabaseClient.auth.signOut();
+  } catch (err) {
+    console.log('Error saat signOut:', err);
+  }
+  // Hapus manual item penyimpanan sesi lokal jika ada yang tertinggal
+  localStorage.clear();
+  sessionStorage.clear();
+  location.reload(); 
+}
 
 async function loadDashboard() {
   $('login').classList.add('hidden');
