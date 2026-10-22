@@ -803,7 +803,6 @@ async function guestAction(a, g) {
     navigator.clipboard.writeText(guestLink(g)).then(() => toast('Tautan disalin'), () => toast('Gagal menyalin tautan', false));
     closeSheet();
   } else if (a === 'wa') {
-    // 1. Ubah status di database terlebih dahulu secara background (tanpa reload halaman utama)
     try {
       await supabaseClient
         .from('guests')
@@ -814,16 +813,14 @@ async function guestAction(a, g) {
       console.log('Update status terkirim:', err);
     }
     
-    // 2. Buka WhatsApp menggunakan window.open dengan target _blank yang aman
     const waUrl = `https://wa.me/?text=${encodeURIComponent(waText(g))}`;
     const newWindow = window.open(waUrl, '_blank');
     if (!newWindow) {
-      // Fallback jika popup tetap diblokir browser
       window.location.href = waUrl;
     }
     
     closeSheet();
-    renderGuestList(); // Cukup render ulang list tamu lokal agar tombol berubah hijau, tanpa memuat ulang seluruh dashboard
+    renderGuestList();
   } else if (a === 'edit') openGuestSheet(g.id);
   else if (a === 'del') confirmDelete(g);
 }
@@ -848,7 +845,7 @@ async function sendPendingWA(id) {
   
   closeSheet();
   renderGuestList();
-}}
+}
 
 function confirmDelete(g) {
   openSheet(`
@@ -968,22 +965,6 @@ function openPending() {
       : '<div class="empty">Semua tamu sudah menjawab.</div>'}`);
 }
 
-async function sendPendingWA(id) {
-  const g = findGuest(id); if (!g) return;
-  try {
-    await supabaseClient
-      .from('guests')
-      .update({ is_sent: true })
-      .eq('id', g.id);
-    g.is_sent = true;
-  } catch (err) {
-    console.log(err);
-  }
-  window.location.href = `https://wa.me/?text=${encodeURIComponent(waText(g))}`;
-  closeSheet();
-  loadDashboard();
-}
-
 /* ---------- Mode Check-in Cepat dari Dashboard ---------- */
 const attending = () => globalData.guests.filter(g => g.rsvp_status === 'hadir' || g.is_checked_in);
 function openCheckin() {
@@ -1018,7 +999,8 @@ async function toggleCheckin(id) {
   g.busy = true;
   const { data, error } = await supabaseClient.rpc('update_guest_by_client', {
     p_guest_id: g.id, p_group_name: g.group_name, p_category: g.category,
-    p_max_pax: g.max_pax, p_rsvp_status: g.rsvp_status, p_is_checked_in: next
+    p_max_pax: g.max_pax, p_rsvp_status: g.rsvp_status, p_is_checked_in: next,
+    p_is_sent: g.is_sent
   });
   g.busy = false;
   if (error || !data || !data.success) return toast(data?.message || 'Gagal mengubah check-in.', false);
