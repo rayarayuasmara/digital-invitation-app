@@ -333,6 +333,83 @@ input, select, textarea { font-size: 16px !important; }
 .ci.on .n{color:var(--sub)}
 
 .empty{padding:32px 8px;text-align:center;color:var(--sub);font-size:15px}
+
+/* ===== Lapisan UI: animasi, filter chip, navigasi kaca, kartu biru ===== */
+/* dashboard-ui.css - lapisan tampilan & animasi untuk dashboard biru */
+:root{--ease:cubic-bezier(.32,.72,0,1);--spring:cubic-bezier(.34,1.56,.64,1);--glass:rgba(255,255,255,.7);--glass-line:rgba(255,255,255,.65);--bgs:rgba(244,245,248,.82)}
+:root[data-dark="1"]{--glass:rgba(30,37,58,.62);--glass-line:rgba(255,255,255,.1);--bgs:rgba(11,15,26,.8)}
+@keyframes rise{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes viewIn{from{opacity:0;transform:translateY(10px) scale(.98);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+@keyframes swap{from{transform:rotate(-120deg) scale(.5);opacity:0}to{transform:none;opacity:1}}
+@keyframes drift{to{transform:translate(-50px,36px) scale(1.2)}}
+
+/* Perpindahan tab: judul dan kartu muncul bergantian */
+.tab-in .topbar,.tab-in .page>*{animation:rise .7s var(--ease) both}
+.tab-in .page>*:nth-child(2){animation-delay:55ms}.tab-in .page>*:nth-child(3){animation-delay:110ms}.tab-in .page>*:nth-child(4){animation-delay:165ms}.tab-in .page>*:nth-child(5){animation-delay:220ms}.tab-in .page>*:nth-child(6){animation-delay:275ms}.tab-in .page>*:nth-child(7){animation-delay:330ms}.tab-in .page>*:nth-child(8){animation-delay:385ms}
+.gl.in{animation:rise .5s var(--ease) both}
+
+/* Respons sentuhan */
+.tile,.ib,.fab,.btn,.chip,.card-switch button,.gl .main,.cr .go{transition:transform .35s var(--spring),background .25s,color .25s,opacity .25s,box-shadow .3s}
+.tile:active,.ib:active,.btn:active,.chip:active{transform:scale(.95)}
+.gl .main:active,.cr .go:active{transform:scale(.98);opacity:.7}
+.card,.listcard{border-radius:26px}
+.tile.g{background:linear-gradient(150deg,#22d184,#0ea960)}
+.topbar h1{letter-spacing:-.03em}
+
+/* Pencarian + filter menempel di atas saat scroll */
+.sticky-head{position:sticky;top:0;z-index:20;margin:0 -16px;padding:calc(env(safe-area-inset-top) + 8px) 16px 8px;background:var(--bgs);-webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6)}
+.sticky-head>*+*{margin-top:10px}
+.sticky-head .sbar{box-shadow:none;border:1px solid var(--line)}
+#filter-tabs,.sbar .vr,.sbar .fsel{display:none!important}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;position:relative;margin:0 -16px;padding:2px 16px;scroll-snap-type:x proximity}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink);font-size:14px;font-weight:600;white-space:nowrap;scroll-snap-align:center}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.chip em{font-style:normal;font-family:'Geist Mono',monospace;font-size:12px;color:var(--sub);min-width:14px;text-align:center}
+.chip.on{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 8px 18px -8px rgba(10,61,194,.7)}
+.chip.on i{background:#fff}.chip.on em{color:inherit;opacity:.8}
+:root[data-dark="1"] .chip.on{color:#0b0f1a}:root[data-dark="1"] .chip.on i{background:#0b0f1a}
+.chip.z:not(.on){opacity:.45}
+.chip.sm{height:32px;font-size:13px;font-weight:500;background:transparent;color:var(--sub)}
+.chip.sm.on{background:var(--soft);border-color:transparent;color:var(--brand);box-shadow:none}
+.reset{margin-top:12px;height:40px;padding:0 18px;border-radius:999px;background:var(--soft);color:var(--brand);font-weight:600}
+
+/* Navigasi mengambang: kaca, indikator meluncur, ringkas saat scroll */
+.pillnav{position:relative;background:var(--glass);-webkit-backdrop-filter:blur(26px) saturate(1.8);backdrop-filter:blur(26px) saturate(1.8);border:1px solid var(--glass-line);box-shadow:0 14px 34px -10px rgba(12,24,60,.35),inset 0 1px 0 rgba(255,255,255,.5);padding:5px}
+.pillnav button{position:relative;z-index:1;background:transparent!important;color:var(--sub);transition:padding .35s var(--ease),color .25s}
+.pillnav button.on{color:var(--brand)}
+.pillnav button svg{transition:transform .5s var(--spring)}
+.pillnav button.on svg{transform:translateY(-1px) scale(1.12)}
+.pillnav button span{max-height:16px;overflow:hidden;transition:max-height .35s var(--ease),opacity .25s,margin .35s var(--ease)}
+.pillnav .thumb{position:absolute;top:5px;bottom:5px;left:0;z-index:0;border-radius:999px;background:var(--card);box-shadow:0 3px 12px rgba(10,61,194,.2),0 0 0 1px var(--line);transition:transform .55s var(--spring),width .55s var(--spring)}
+.min .pillnav button span{max-height:0;opacity:0;margin-top:-3px}
+.min .pillnav button{padding:12px 0}
+.fab{background:linear-gradient(145deg,#3a73ff,var(--brand));border:1px solid rgba(255,255,255,.25);box-shadow:0 12px 28px -6px rgba(10,61,194,.6),inset 0 1px 0 rgba(255,255,255,.35)}
+.fab:active{transform:scale(.9)}
+.fab.swap svg{animation:swap .6s var(--spring)}
+
+/* Kartu biru */
+.brandcard{position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 100% 0%,#5b86ff 0%,transparent 58%),linear-gradient(155deg,#1a55e8 0%,#0a3dc2 55%,#072a8c 100%);box-shadow:0 22px 44px -16px rgba(10,61,194,.65),inset 0 1px 0 rgba(255,255,255,.25)}
+.brandcard::before{content:"";position:absolute;z-index:-1;top:-90px;right:-70px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.26),transparent 66%);animation:drift 10s ease-in-out infinite alternate}
+.card-switch{position:relative;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding:3px}
+.card-switch button{position:relative;z-index:1;padding:7px 16px;background:transparent!important;box-shadow:none!important;color:rgba(255,255,255,.78)}
+.card-switch button.active{color:var(--brand)}
+.cs-thumb{position:absolute;top:3px;bottom:3px;left:0;border-radius:999px;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.2);transition:transform .5s var(--spring),width .5s var(--spring)}
+.stat-view{animation:viewIn .6s var(--ease) both}
+.ring .fgc{transition:stroke-dashoffset 1.3s var(--ease);filter:drop-shadow(0 0 7px rgba(255,255,255,.6))}
+.ring .bgc{stroke:rgba(255,255,255,.18)}
+.ring .in b{font-size:40px}
+.brandcard .side{display:flex;flex-direction:column;gap:8px}
+.brandcard .sr,.brandcard .sr:first-child{margin:0;padding:11px 14px;border:0;border-radius:14px;background:rgba(255,255,255,.1)}
+
+/* Sheet & toast ala iOS */
+.backdrop{-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:opacity .45s var(--ease)}
+.sheet{border-radius:32px 32px 0 0;transition:transform .6s var(--ease);box-shadow:0 -20px 60px rgba(9,16,40,.25)}
+.grab{position:relative}.grab::after{content:"";position:absolute;inset:-14px -90px}
+.sheet .grab,.sheet .sheet-head{touch-action:none}
+.toast{transition:transform .6s var(--spring);background:var(--glass);color:var(--ink);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid var(--glass-line)}
+@media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -1286,6 +1363,106 @@ async function toggleCheckin(id) {
 }
 
 checkSession();
+</script>
+<script>
+/* ===== Lapisan UI (dijalankan setelah script utama) ===== */
+(() => { try {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let anim = false, first = true, ringsPlayed = false, sig = '';
+
+  /* Angka naik halus */
+  const NUMS = ['stat-total','stat-kuota','hero-hadir','hero-pct-text','stat-absen','stat-pending','ring-num','ci-wait','ci-est','rsvp-ring-num','rsvp-est-pax','rsvp-stat-absen','rsvp-stat-pending','quota-used'];
+  function countUp(el) {
+    const m = /^(\D*)(\d+)(\D*)$/.exec(el.textContent.trim()); if (!m) return;
+    const to = +m[2], from = +(el.dataset.v || 0); el.dataset.v = to;
+    cancelAnimationFrame(el._r);
+    if (reduce || from === to) return;
+    const t0 = performance.now();
+    const step = t => { const k = Math.min(1, (t - t0) / 800), e = 1 - Math.pow(1 - k, 4); el.textContent = m[1] + Math.round(from + (to - from) * e) + m[3]; if (k < 1) el._r = requestAnimationFrame(step); };
+    el._r = requestAnimationFrame(step);
+  }
+  function playRings() {
+    if (reduce) return;
+    ['ring-fg', 'rsvp-ring-fg'].forEach(id => { const c = $(id), to = c.style.strokeDashoffset; c.style.transition = 'none'; c.style.strokeDashoffset = '276.46'; c.getBoundingClientRect(); c.style.transition = ''; c.style.strokeDashoffset = to; });
+  }
+  function enter(id) { const t = $(id); if (!t || reduce) return; t.classList.remove('tab-in'); void t.offsetWidth; t.classList.add('tab-in'); }
+
+  /* Indikator meluncur (navigasi bawah & switch kartu biru) */
+  function place(parent, cls, sel) {
+    const a = parent && parent.querySelector(sel); if (!a || !a.offsetWidth) return;
+    let t = parent.querySelector('.' + cls); const fresh = !t;
+    if (fresh) { t = document.createElement('i'); t.className = cls; t.style.transition = 'none'; parent.prepend(t); }
+    t.style.width = a.offsetWidth + 'px'; t.style.transform = `translateX(${a.offsetLeft}px)`;
+    if (fresh) { void t.offsetWidth; t.style.transition = ''; }
+  }
+  const placeAll = () => { place(document.querySelector('.pillnav'), 'thumb', 'button.on'); place($('stat-switch'), 'cs-thumb', 'button.active'); };
+  const ro = new ResizeObserver(placeAll); ro.observe(document.querySelector('.pillnav')); ro.observe($('stat-switch'));
+
+  /* Filter: pencarian + chip status (dengan jumlah) + chip kategori */
+  const head = document.createElement('div'); head.className = 'sticky-head';
+  const sb = document.querySelector('#tab-tamu .sbar'); sb.before(head); head.append(sb);
+  head.insertAdjacentHTML('beforeend', '<div class="chips" id="st-chips"></div><div class="chips sm hidden" id="ct-chips"></div>');
+  $('sort-opts').insertAdjacentHTML('afterbegin', '<span id="res-n" class="sub" style="margin-right:auto"></span>');
+  const STAT = [['all', 'Semua', 'var(--sub)'], ['unsent', 'Belum dikirim', '#8b93a7'], ['pending', 'Menunggu', '#f5a524'], ['hadir', 'Hadir', '#12b76a'], ['checked_in', 'Check-in', '#0a3dc2'], ['tidak_hadir', 'Absen', '#e5484d']];
+  const pass = { all: () => true, unsent: g => !g.is_sent, pending: g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent, hadir: g => g.rsvp_status === 'hadir' && !g.is_checked_in, checked_in: g => g.is_checked_in, tidak_hadir: g => g.rsvp_status === 'tidak_hadir' };
+  function chips() {
+    const gs = globalData.guests, inCat = g => activeCategory === 'all' || g.category === activeCategory;
+    const cats = [...new Set(gs.map(g => g.category).filter(Boolean))];
+    const s = STAT.map(([k, l, c]) => ({ k, l, c, n: gs.filter(g => inCat(g) && pass[k](g)).length }));
+    const cc = ['all', ...cats].map(c => ({ c, n: gs.filter(g => (c === 'all' || g.category === c) && pass[activeFilter](g)).length }));
+    const key = JSON.stringify([s.map(x => x.n), cc.map(x => x.n), activeFilter, activeCategory]); if (key === sig) return; sig = key;
+    const a = $('st-chips').scrollLeft, b = $('ct-chips').scrollLeft;
+    $('st-chips').innerHTML = s.map(x => `<button class="chip${x.k === activeFilter ? ' on' : ''}${x.n || x.k === activeFilter ? '' : ' z'}" data-f="${x.k}" style="--c:${x.c}"><i></i>${x.l}<em>${x.n}</em></button>`).join('');
+    $('ct-chips').innerHTML = cc.map(x => `<button class="chip sm${x.c === activeCategory ? ' on' : ''}" data-c="${esc(x.c)}">${x.c === 'all' ? 'Semua kategori' : esc(x.c)}<em>${x.n}</em></button>`).join('');
+    $('ct-chips').classList.toggle('hidden', cats.length < 2);
+    $('st-chips').scrollLeft = a; $('ct-chips').scrollLeft = b;
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('#st-chips .chip, #ct-chips .chip'); if (!b) return;
+    anim = true;
+    if (b.dataset.f) { activeFilter = b.dataset.f; renderGuestList(); } else setCategory(b.dataset.c);
+  });
+  window.resetFilters = () => { activeFilter = 'all'; activeCategory = 'all'; $('search-input').value = ''; anim = true; renderCategorySelect(); renderGuestList(); };
+
+  /* Pembungkus fungsi bawaan */
+  const _rg = renderGuestList;
+  window.renderGuestList = function () {
+    _rg.apply(this, arguments); chips();
+    const box = $('guest-list-container'), items = box.querySelectorAll('.gl');
+    $('res-n').textContent = items.length + ' tamu';
+    if (!items.length && globalData.guests.length) box.innerHTML = '<div class="empty"><b style="color:var(--ink)">Tidak ada tamu yang cocok</b><br><button class="reset" onclick="resetFilters()">Reset filter</button></div>';
+    if (anim && !reduce) items.forEach((el, i) => { el.classList.add('in'); el.style.animationDelay = Math.min(i, 12) * 35 + 'ms'; });
+    if (anim) document.querySelectorAll('.chips .chip.on').forEach(c => { const r = c.parentElement; r.scrollTo({ left: c.offsetLeft - (r.clientWidth - c.offsetWidth) / 2, behavior: 'smooth' }); });
+    anim = false;
+  };
+  const _ru = renderUI;
+  window.renderUI = function () {
+    _ru.apply(this, arguments);
+    NUMS.forEach(id => { const el = $(id); if (el) countUp(el); });
+    if (first) { first = false; enter('tab-home'); }
+    if (!ringsPlayed) { ringsPlayed = true; playRings(); }
+    placeAll();
+  };
+  const _sw = switchTab;
+  window.switchTab = function (t) {
+    _sw.apply(this, arguments); enter('tab-' + t); $('nav-container-wrap').classList.remove('min');
+    const f = $('fab-btn'); f.classList.remove('swap'); void f.offsetWidth; f.classList.add('swap');
+    placeAll(); if (t === 'tamu') { anim = true; renderGuestList(); }
+  };
+  const _sc = switchCardView;
+  window.switchCardView = function () { _sc.apply(this, arguments); placeAll(); playRings(); };
+
+  /* Navigasi ringkas (hanya ikon) saat scroll ke bawah */
+  let ly = scrollY;
+  addEventListener('scroll', () => { const y = scrollY, w = $('nav-container-wrap'); if (y > ly + 6 && y > 80) w.classList.add('min'); else if (y < ly - 6 || y < 40) w.classList.remove('min'); ly = y; }, { passive: true });
+
+  /* Sheet bisa ditarik ke bawah untuk menutup */
+  const s = $('sheet'); let y0 = null, dy = 0;
+  s.addEventListener('pointerdown', e => { if (e.target.closest('.grab, .sheet-head') && !e.target.closest('button')) { y0 = e.clientY; dy = 0; s.style.transition = 'none'; s.setPointerCapture(e.pointerId); } });
+  s.addEventListener('pointermove', e => { if (y0 === null) return; dy = Math.max(0, e.clientY - y0); s.style.transform = `translate(-50%,${dy}px)`; });
+  const end = () => { if (y0 === null) return; s.style.transition = ''; s.style.transform = ''; if (dy > 110) closeSheet(); y0 = null; };
+  s.addEventListener('pointerup', end); s.addEventListener('pointercancel', end);
+} catch (err) { console.warn('dashboard-ui:', err); } })();
 </script>
 </body>
 </html>
