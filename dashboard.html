@@ -673,7 +673,6 @@ function renderUI() {
   $('ci-wait').textContent = guests.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent).length;
   $('ci-est').textContent = stats.total_hadir;
 
-  // Statistik untuk View RSVP Status di Card Biru
   const countHadir = guests.filter(g => g.rsvp_status === 'hadir').length;
   const countAbsen = guests.filter(g => g.rsvp_status === 'tidak_hadir').length;
   const countPending = guests.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent).length;
@@ -883,7 +882,7 @@ function switchTab(tab) {
   icons();
 }
 
-/* ---------- Aksi Tamu (Copy, WhatsApp, Edit, Delete) ---------- */
+/* ---------- Aksi Tamu (Smart WA, Copy, Edit, Delete) ---------- */
 const findGuest = id => globalData.guests.find(g => g.id === id);
 const guestLink = g => `${window.location.origin}/${globalData.client.slug}/${g.invitation_token}`;
 const waText = g => `Halo *${g.group_name}*,\n\nKami mengundang Anda untuk menghadiri acara *${globalData.event.title}*.\n\nSilakan konfirmasi kehadiran Anda melalui tautan resmi berikut:\n${guestLink(g)}`;
@@ -912,6 +911,7 @@ async function guestAction(a, g) {
         p_group_name: g.group_name,
         p_category: g.category,
         p_max_pax: g.max_pax,
+        p_phone: g.phone || null,
         p_rsvp_status: g.rsvp_status,
         p_is_checked_in: g.is_checked_in,
         p_is_sent: true
@@ -921,12 +921,27 @@ async function guestAction(a, g) {
     }
     
     const message = waText(g);
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
-    if (isMobile) {
-      window.location.href = `whatsapp://send?text=${encodeURIComponent(message)}`;
+    // Fitur Smart WhatsApp: Cek apakah nomor telepon tamu terisi
+    if (g.phone && g.phone.trim() !== '') {
+      let cleanPhone = g.phone.trim().replace(/\D/g, '');
+      if (cleanPhone.startsWith('0')) {
+        cleanPhone = '62' + cleanPhone.slice(1);
+      }
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        window.location.href = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+      } else {
+        window.open(`https://web.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`, '_blank');
+      }
+      toast('Membuka WhatsApp…');
     } else {
-      window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+      // Jika nomor kosong, otomatis copy teks & link ke clipboard
+      navigator.clipboard.writeText(message).then(() => {
+        toast('Nomor WA kosong. Pesan & tautan disalin!');
+      }, () => {
+        toast('Gagal menyalin teks', false);
+      });
     }
     
     closeSheet();
@@ -943,6 +958,7 @@ async function sendPendingWA(id) {
       p_group_name: g.group_name,
       p_category: g.category,
       p_max_pax: g.max_pax,
+      p_phone: g.phone || null,
       p_rsvp_status: g.rsvp_status,
       p_is_checked_in: g.is_checked_in,
       p_is_sent: true
@@ -952,12 +968,25 @@ async function sendPendingWA(id) {
   }
   
   const message = waText(g);
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   
-  if (isMobile) {
-    window.location.href = `whatsapp://send?text=${encodeURIComponent(message)}`;
+  if (g.phone && g.phone.trim() !== '') {
+    let cleanPhone = g.phone.trim().replace(/\D/g, '');
+    if (cleanPhone.startsWith('0')) {
+      cleanPhone = '62' + cleanPhone.slice(1);
+    }
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      window.location.href = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    } else {
+      window.open(`https://web.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`, '_blank');
+    }
+    toast('Membuka WhatsApp…');
   } else {
-    window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+    navigator.clipboard.writeText(message).then(() => {
+      toast('Nomor WA kosong. Pesan & tautan disalin!');
+    }, () => {
+      toast('Gagal menyalin teks', false);
+    });
   }
   
   closeSheet();
@@ -993,6 +1022,7 @@ function openGuestSheet(id) {
     <div class="sheet-head"><button onclick="closeSheet()">Batal</button><h3>${g ? 'Edit tamu' : 'Tamu baru'}</h3><button id="gs-save">${g ? 'Simpan' : 'Tambah'}</button></div>
     <div class="listcard">
       <div class="field"><label>Nama</label><input type="text" id="gs-name" placeholder="Budi Santoso & Keluarga" value="${esc(g?.group_name || '')}" /></div>
+      <div class="field"><label>No. WhatsApp</label><input type="tel" id="gs-phone" placeholder="08123456789 (Opsional)" value="${esc(g?.phone || '')}" /></div>
       <div class="field">
         <label>Kategori</label>
         <select id="gs-cat" onchange="checkCustomCategory(this)">
@@ -1070,6 +1100,7 @@ function adjustPax(amount) {
 
 async function saveGuest(g) {
   const name = $('gs-name').value.trim();
+  const phone = $('gs-phone').value.trim();
   let cat = $('gs-cat').value;
   if (cat === '__custom__') {
     cat = $('gs-custom-cat').value.trim();
@@ -1081,7 +1112,7 @@ async function saveGuest(g) {
   const btn = $('gs-save'); btn.disabled = true;
   
   if (g) {
-    const isSentVal = $('gs-sent') ? $('gs-sent').checked : g.is_sent;
+    const isSentVal = $('gs-sent') ? $('gs-sent'].checked : g.is_sent;
     const isCheckinVal = $('gs-checkin') ? $('gs-checkin').checked : g.is_checked_in;
     const rsvpVal = $('gs-rsvp') ? $('gs-rsvp').value : g.rsvp_status;
 
@@ -1090,12 +1121,18 @@ async function saveGuest(g) {
       p_group_name: name, 
       p_category: cat, 
       p_max_pax: pax, 
+      p_phone: phone,
       p_rsvp_status: rsvpVal, 
       p_is_checked_in: isCheckinVal,
       p_is_sent: isSentVal 
     });
   } else {
-    await supabaseClient.rpc('add_guest_by_client', { p_group_name: name, p_category: cat, p_max_pax: pax });
+    await supabaseClient.rpc('add_guest_by_client', { 
+      p_group_name: name, 
+      p_category: cat, 
+      p_max_pax: pax, 
+      p_phone: phone 
+    });
   }
 
   btn.disabled = false;
@@ -1151,7 +1188,7 @@ async function toggleCheckin(id) {
   g.busy = true;
   const { data, error } = await supabaseClient.rpc('update_guest_by_client', {
     p_guest_id: g.id, p_group_name: g.group_name, p_category: g.category,
-    p_max_pax: g.max_pax, p_rsvp_status: next ? 'hadir' : (g.rsvp_status || 'hadir'), p_is_checked_in: next,
+    p_max_pax: g.max_pax, p_phone: g.phone || null, p_rsvp_status: next ? 'hadir' : (g.rsvp_status || 'hadir'), p_is_checked_in: next,
     p_is_sent: true
   });
   g.busy = false;
