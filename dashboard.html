@@ -736,11 +736,11 @@ function renderGuestList() {
   
   box.innerHTML = list.map((g, i) => {
     const [k, txt] = guestBadge(g);
-    // Label status kirim: Unsent jika belum dikirim, Pend/Terkirim jika sudah
-    const sendLabel = g.is_sent 
+    const isSent = g.is_sent || g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir';
+    const sendLabel = isSent 
       ? '<span class="tag" style="background:var(--green-bg);color:var(--green-ink)">Pending</span>' 
       : '<span class="tag" style="background:var(--tag);color:var(--tag-ink)">Unsent</span>';
-    const isSentClass = g.is_sent ? 'sent' : '';
+    const isSentClass = isSent ? 'sent' : '';
     return `<div class="gl" data-id="${esc(g.id)}">
       <button class="main" data-open style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;text-align:left">
         ${avatar(g, i)}
@@ -887,7 +887,6 @@ function openGuestSheet(id) {
   const cats = [...new Set([...defaultCats, ...existingCats])];
   const cur = g ? (g.category || 'Umum') : cats[0];
 
-  // Jika RSVP sudah Hadir/Absen, otomatis is_sent dianggap true
   const isSentChecked = g ? (g.is_sent || g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir') : false;
 
   openSheet(`
@@ -925,7 +924,6 @@ function openGuestSheet(id) {
   if (!g) setTimeout(() => $('gs-name').focus(), 350);
 }
 
-// Fungsi otomatis menyalakan toggle terkirim jika RSVP diubah ke Hadir/Absen
 function onRsvpChange(sel) {
   if (sel.value === 'hadir' || sel.value === 'tidak_hadir') {
     const sentToggle = $('gs-sent');
@@ -951,7 +949,7 @@ function adjustPax(amount) {
 }
 
 async function saveGuest(g) {
-  const name = $('gs-name'].value.trim();
+  const name = $('gs-name').value.trim();
   let cat = $('gs-cat').value;
   if (cat === '__custom__') {
     cat = $('gs-custom-cat').value.trim();
@@ -963,11 +961,10 @@ async function saveGuest(g) {
   const btn = $('gs-save'); btn.disabled = true;
   
   if (g) {
-    const isSentVal = $('gs-sent') ? $('gs-sent'].checked : g.is_sent;
-    const isCheckinVal = $('gs-checkin') ? $('gs-checkin'].checked : g.is_checked_in;
-    const rsvpVal = $('gs-rsvp') ? $('gs-rsvp'].value : g.rsvp_status;
+    const isSentVal = $('gs-sent') ? $('gs-sent').checked : g.is_sent;
+    const isCheckinVal = $('gs-checkin') ? $('gs-checkin').checked : g.is_checked_in;
+    const rsvpVal = $('gs-rsvp') ? $('gs-rsvp').value : g.rsvp_status;
 
-    // Jika RSVP sudah Hadir/Absen, pastikan is_sent otomatis true
     const finalSentVal = (rsvpVal === 'hadir' || rsvpVal === 'tidak_hadir') ? true : isSentVal;
 
     await supabaseClient.rpc('update_guest_by_client', { 
@@ -982,12 +979,6 @@ async function saveGuest(g) {
   } else {
     await supabaseClient.rpc('add_guest_by_client', { p_group_name: name, p_category: cat, p_max_pax: pax });
   }
-
-  btn.disabled = false;
-  closeSheet(); 
-  toast(g ? 'Tamu diperbarui' : 'Tamu ditambahkan'); 
-  loadDashboard();
-}
 
   btn.disabled = false;
   closeSheet(); 
