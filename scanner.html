@@ -188,7 +188,40 @@ html.lock{overflow:hidden}
   </header>
 
   <div class="page">
-    <!-- Mode (Scan QR / Cari Manual) di atas Card Biru -->
+    <!-- Scan -->
+    <div id="view-scan" class="view">
+      <div class="card" style="padding:14px">
+        <div class="cam">
+          <div id="reader"></div>
+          <div class="vf"><div class="vf-box"><i></i><i></i><i></i><i></i><div class="laser"></div></div></div>
+          <div class="cam-flash" id="cam-flash"></div>
+        </div>
+        <div class="cam-bar">
+          <p id="cam-hint">Arahkan kamera ke QR Code tiket tamu</p>
+          <button class="ib" onclick="switchCamera()" aria-label="Ganti kamera"><i data-lucide="switch-camera"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manual View (jika mode manual aktif) -->
+    <div id="view-manual" class="hidden view">
+      <div class="sbar"><i data-lucide="search"></i><input type="search" id="manual-search-input" placeholder="Ketik nama tamu atau kode…" oninput="filterManualGuests()" /></div>
+      <div class="chips" id="manual-chips">
+        <button class="chip on" data-f="all">Semua</button>
+        <button class="chip" data-f="wait">Belum masuk</button>
+        <button class="chip" data-f="done">Sudah masuk</button>
+      </div>
+      <div class="listcard" id="manual-guest-list" style="margin-top:12px"><div class="empty">Memuat daftar tamu...</div></div>
+      <div class="card" style="margin-top:12px">
+        <div class="lbl">Atau masukkan kode token tiket</div>
+        <div class="tokrow">
+          <div class="sbar"><i data-lucide="ticket"></i><input type="text" id="manual-token-input" placeholder="Contoh: 115b0522" autocomplete="off" autocapitalize="none" spellcheck="false" onkeydown="if(event.key==='Enter')submitManualTokenInput()" /></div>
+          <button class="btn" onclick="submitManualTokenInput()">Proses</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode (Scan QR / Cari Manual) -->
     <div class="card-switch" id="mode-switch">
       <button class="active" onclick="switchMode('scan')"><i data-lucide="scan-line"></i>Scan QR</button>
       <button onclick="switchMode('manual')"><i data-lucide="search"></i>Cari Manual</button>
@@ -206,39 +239,6 @@ html.lock{overflow:hidden}
           <div class="sr"><span>Total grup</span><b id="st-total">0</b></div>
           <div class="sr"><span>Belum masuk</span><b id="st-wait">0</b></div>
           <div class="sr"><span>Orang masuk</span><b id="st-pax">0</b></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Scan -->
-    <div id="view-scan" class="view">
-      <div class="card" style="padding:14px">
-        <div class="cam">
-          <div id="reader"></div>
-          <div class="vf"><div class="vf-box"><i></i><i></i><i></i><i></i><div class="laser"></div></div></div>
-          <div class="cam-flash" id="cam-flash"></div>
-        </div>
-        <div class="cam-bar">
-          <p id="cam-hint">Arahkan kamera ke QR Code tiket tamu</p>
-          <button class="ib" onclick="switchCamera()" aria-label="Ganti kamera"><i data-lucide="switch-camera"></i></button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Manual -->
-    <div id="view-manual" class="hidden view">
-      <div class="sbar"><i data-lucide="search"></i><input type="search" id="manual-search-input" placeholder="Ketik nama tamu atau kode…" oninput="filterManualGuests()" /></div>
-      <div class="chips" id="manual-chips">
-        <button class="chip on" data-f="all">Semua</button>
-        <button class="chip" data-f="wait">Belum masuk</button>
-        <button class="chip" data-f="done">Sudah masuk</button>
-      </div>
-      <div class="listcard" id="manual-guest-list" style="margin-top:12px"><div class="empty">Memuat daftar tamu...</div></div>
-      <div class="card" style="margin-top:12px">
-        <div class="lbl">Atau masukkan kode token tiket</div>
-        <div class="tokrow">
-          <div class="sbar"><i data-lucide="ticket"></i><input type="text" id="manual-token-input" placeholder="Contoh: 115b0522" autocomplete="off" autocapitalize="none" spellcheck="false" onkeydown="if(event.key==='Enter')submitManualTokenInput()" /></div>
-          <button class="btn" onclick="submitManualTokenInput()">Proses</button>
         </div>
       </div>
     </div>
