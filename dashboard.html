@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@500;600&family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 :root{
   --bg:#f4f5f8; --card:#ffffff; --ink:#0d1424; --sub:#6b7385; --line:#e6e8ef;
@@ -260,7 +261,7 @@ input, select, textarea { font-size: 16px !important; }
 .stepper button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-weight:600;font-size:18px;color:var(--brand)}
 .stepper span{font-family:'Geist Mono',monospace;font-size:18px;font-weight:600;min-width:24px;text-align:center}
 
-/* Container floating nav tanpa background blur gradient */
+/* Container floating nav */
 .nav-container-wrap{
   position:fixed;left:50%;transform:translateX(-50%);
   bottom:0;
@@ -273,7 +274,6 @@ input, select, textarea { font-size: 16px !important; }
   padding-bottom:calc(10px + env(safe-area-inset-bottom));
 }
 
-/* Floating nav */
 .tabbar{
   pointer-events:auto;
   width:calc(100% - 28px);max-width:440px;
@@ -318,7 +318,7 @@ input, select, textarea { font-size: 16px !important; }
 #login p{color:var(--sub);margin:6px 0 22px;font-size:15px}
 #login .group{border:1px solid var(--line);border-radius:18px;padding:0 4px;margin-bottom:16px}
 
-/* Check-in overlay */
+/* Check-in overlay & QR Scanner */
 .checkin{position:fixed;inset:0;z-index:60;background:var(--bg);overflow-y:auto;display:flex;justify-content:center}
 .ci-wrap{width:100%;max-width:480px;padding:calc(env(safe-area-inset-top) + 20px) 16px calc(env(safe-area-inset-bottom) + 32px)}
 .ci-head{display:flex;justify-content:space-between;align-items:center;padding:0 4px 16px}
@@ -331,6 +331,17 @@ input, select, textarea { font-size: 16px !important; }
 .ci.on .tick{background:var(--green);border-color:var(--green)}
 .ci.on .tick::after{opacity:1}
 .ci.on .n{color:var(--sub)}
+
+#reader {
+  border-radius: 18px;
+  overflow: hidden;
+  border: 2px solid var(--line);
+  background: var(--card);
+}
+#reader video {
+  border-radius: 16px;
+  object-fit: cover;
+}
 
 .empty{padding:32px 8px;text-align:center;color:var(--sub);font-size:15px}
 
@@ -517,8 +528,6 @@ html.lock{overflow:hidden}
           </div>
         </div>
 
-        <!-- Bagian Aksi Cepat sudah dihapus di sini -->
-
         <div class="card">
           <div class="ch"><h3>Top Kategori</h3><i data-lucide="users" style="color:var(--sub)"></i></div>
           <div id="cat-group"></div>
@@ -616,12 +625,31 @@ html.lock{overflow:hidden}
   </nav>
 </div>
 
-<!-- CHECK-IN MODAL FULLSCREEN -->
+<!-- CHECK-IN MODAL FULLSCREEN DENGAN SCANNER QR -->
 <div class="checkin hidden" id="checkin" role="dialog" aria-modal="true" aria-label="Mode check-in">
   <div class="ci-wrap">
-    <div class="ci-head"><div><h1>Check-in</h1><p id="ci-count">0</p></div><button class="txt-btn" onclick="closeCheckin()">Selesai</button></div>
-    <div class="sbar"><i data-lucide="search"></i><input type="search" id="ci-search" placeholder="Cari nama tamu…" oninput="renderCheckin()" /></div>
-    <div class="listcard" id="ci-list" style="margin-top:14px"></div>
+    <div class="ci-head">
+      <div><h1>Check-in</h1><p id="ci-count">0</p></div>
+      <button class="txt-btn" onclick="closeCheckin()">Selesai</button>
+    </div>
+
+    <!-- Pilihan Mode: Scan QR atau Cari Manual -->
+    <div class="card-switch" id="ci-mode-switch" style="margin-bottom: 14px; width: 100%; display: flex;">
+      <button class="active" style="flex:1;" onclick="switchCiMode('scan')">Scan QR</button>
+      <button style="flex:1;" onclick="switchCiMode('manual')">Cari Manual</button>
+    </div>
+
+    <!-- Tampilan Scanner Kamera -->
+    <div id="ci-scanner-view">
+      <div id="reader" style="width:100%; min-height:260px;"></div>
+      <p style="text-align:center; color:var(--sub); font-size:14px; margin-top:14px;">Arahkan kamera ke QR Code undangan tamu</p>
+    </div>
+
+    <!-- Tampilan Pencarian Manual -->
+    <div id="ci-manual-view" class="hidden">
+      <div class="sbar"><i data-lucide="search"></i><input type="search" id="ci-search" placeholder="Cari nama tamu…" oninput="renderCheckin()" /></div>
+      <div class="listcard" id="ci-list" style="margin-top:14px"></div>
+    </div>
   </div>
 </div>
 
@@ -640,6 +668,9 @@ let activeCategory = 'all';
 let activeSort = 'new';
 let currentActiveTab = 'home';
 let currentCardViewMode = 'checkin';
+let currentCiMode = 'scan';
+let html5QrCode = null;
+
 const COLORS = ['#0a3dc2','#12b76a','#f5a524','#e5484d','#7c5cff','#0ea5e9','#ec4899'];
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1021,7 +1052,7 @@ function handleFabClick() {
         <div style="font-size:15px; color:var(--sub); display:flex; flex-direction:column; gap:14px; line-height:1.5; padding-top:12px;">
           <div><b>1. Tambah Tamu:</b> Gunakan tombol tambah tamu untuk memasukkan nama, kategori, nomor WA, dan kuota pax.</div>
           <div><b>2. Kirim Undangan WA:</b> Klik ikon WhatsApp pada daftar tamu untuk mengirim pesan otomatis yang dilengkapi tautan undangan unik.</div>
-          <div><b>3. Check-In Acara:</b> Gunakan mode *Check-In* untuk mencatat kehadiran tamu saat hari H pernikahan.</div>
+          <div><b>3. Check-In Acara:</b> Gunakan tombol Scan QR di Home untuk memindai QR Code tamu saat hari H pernikahan.</div>
         </div>
       </div>
     `);
@@ -1297,15 +1328,127 @@ function openPending() {
       : '<div class="empty">Semua tamu sudah menjawab.</div>'}`);
 }
 
+/* ---------- Mode Check-in & QR Scanner Kamera ---------- */
+function switchCiMode(mode) {
+  currentCiMode = mode;
+  const btnScan = document.querySelector('#ci-mode-switch button:nth-child(1)');
+  const btnManual = document.querySelector('#ci-mode-switch button:nth-child(2)');
+  const viewScan = $('ci-scanner-view');
+  const viewManual = $('ci-manual-view');
+
+  if (mode === 'scan') {
+    btnScan.classList.add('active');
+    btnManual.classList.remove('active');
+    viewScan.classList.remove('hidden');
+    viewManual.classList.add('hidden');
+    startQrScanner();
+  } else {
+    btnManual.classList.add('active');
+    btnScan.classList.remove('active');
+    viewManual.classList.remove('hidden');
+    viewScan.classList.add('hidden');
+    stopQrScanner();
+    renderCheckin();
+  }
+}
+
+function startQrScanner() {
+  if (!html5QrCode) {
+    html5QrCode = new Html5Qrcode("reader");
+  }
+  if (!html5QrCode.isScanning) {
+    html5QrCode.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 220, height: 220 } },
+      async (decodedText) => {
+        handleScannedCode(decodedText);
+      },
+      (errorMessage) => {}
+    ).catch(err => {
+      console.error("Gagal memulai kamera scanner:", err);
+    });
+  }
+}
+
+function stopQrScanner() {
+  if (html5QrCode && html5QrCode.isScanning) {
+    html5QrCode.stop().catch(err => console.log("Gagal menghentikan scanner", err));
+  }
+}
+
+async function handleScannedCode(text) {
+  // Ambil token dari URL atau teks hasil scan
+  let token = text.trim();
+  if (token.includes('/')) {
+    const parts = token.split('/');
+    token = parts[parts.length - 1];
+  }
+
+  const guest = globalData.guests.find(g => g.invitation_token === token || g.id === text);
+  if (!guest) {
+    return toast('QR Code tidak valid / Tamu tidak ditemukan', false);
+  }
+
+  if (guest.is_checked_in) {
+    toast(`⚠️ "${guest.group_name}" sudah check-in sebelumnya!`, false);
+    return;
+  }
+
+  // Lakukan check-in otomatis
+  guest.busy = true;
+  const { data, error } = await supabaseClient.rpc('update_guest_by_client', {
+    p_guest_id: guest.id, 
+    p_group_name: guest.group_name, 
+    p_category: guest.category,
+    p_max_pax: guest.max_pax, 
+    p_phone: guest.phone || null, 
+    p_rsvp_status: 'hadir', 
+    p_is_checked_in: true,
+    p_is_sent: true
+  });
+  guest.busy = false;
+
+  if (error || !data || !data.success) {
+    return toast(data?.message || 'Gagal melakukan check-in.', false);
+  }
+
+  guest.is_checked_in = true;
+  if (navigator.vibrate) navigator.vibrate(50);
+  toast(`✅ Berhasil Check-in: ${guest.group_name} (${guest.max_pax} pax)`);
+  
+  // Jeda sejenak agar tidak double-scan beruntun
+  stopQrScanner();
+  setTimeout(() => {
+    if (currentCiMode === 'scan') startQrScanner();
+  }, 2000);
+
+  loadDashboard();
+}
+
 const attending = () => globalData.guests.filter(g => g.rsvp_status === 'hadir' || g.is_checked_in);
 function openCheckin() {
+  currentCiMode = 'scan';
+  const btnScan = document.querySelector('#ci-mode-switch button:nth-child(1)');
+  const btnManual = document.querySelector('#ci-mode-switch button:nth-child(2)');
+  if (btnScan && btnManual) {
+    btnScan.classList.add('active');
+    btnManual.classList.remove('active');
+  }
+  $('ci-scanner-view').classList.remove('hidden');
+  $('ci-manual-view').classList.add('hidden');
   $('ci-search').value = '';
-  renderCheckin();
+  
   $('checkin').classList.remove('hidden');
   window.scrollTo(0, 0);
   icons();
+  startQrScanner();
 }
-function closeCheckin() { $('checkin').classList.add('hidden'); loadDashboard(); }
+
+function closeCheckin() {
+  stopQrScanner();
+  $('checkin').classList.add('hidden');
+  loadDashboard();
+}
 
 function renderCheckin() {
   const q = $('ci-search').value.toLowerCase().trim();
@@ -1346,7 +1489,7 @@ checkSession();
 <script>
 (() => { try {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let anim = false, first = true, ringsPlayed = false, sig = '';
+  let anim = false, first = true, ringsPlayed = false;
 
   const NUMS = ['stat-total','stat-kuota','hero-hadir','hero-pct-text','stat-absen','stat-pending','ring-num','ci-wait','ci-est','rsvp-ring-num','rsvp-est-pax','rsvp-stat-absen','rsvp-stat-pending','quota-used'];
   function countUp(el) {
