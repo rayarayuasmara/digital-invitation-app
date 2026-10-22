@@ -625,7 +625,6 @@ async function login(e) {
     return toast('Login gagal: ' + error.message, false);
   }
   
-  // Jika berhasil, langsung muat dashboard
   loadDashboard();
 }
 async function logout() { 
@@ -937,7 +936,6 @@ async function guestAction(a, g) {
     
     const message = waText(g);
     
-    // Fitur Smart WhatsApp: Cek apakah nomor telepon tamu terisi
     if (g.phone && g.phone.trim() !== '') {
       let cleanPhone = g.phone.trim().replace(/\D/g, '');
       if (cleanPhone.startsWith('0')) {
@@ -951,7 +949,6 @@ async function guestAction(a, g) {
       }
       toast('Membuka WhatsApp…');
     } else {
-      // Jika nomor kosong, otomatis copy teks & link ke clipboard
       navigator.clipboard.writeText(message).then(() => {
         toast('Nomor WA kosong. Pesan & tautan disalin!');
       }, () => {
@@ -1128,8 +1125,8 @@ async function saveGuest(g) {
   
   if (g) {
     const isSentVal = $('gs-sent') ? $('gs-sent'].checked : g.is_sent;
-    const isCheckinVal = $('gs-checkin') ? $('gs-checkin').checked : g.is_checked_in;
-    const rsvpVal = $('gs-rsvp') ? $('gs-rsvp').value : g.rsvp_status;
+    const isCheckinVal = $('gs-checkin') ? $('gs-checkin'].checked : g.is_checked_in;
+    const rsvpVal = $('gs-rsvp') ? $('gs-rsvp'].value : g.rsvp_status;
 
     await supabaseClient.rpc('update_guest_by_client', { 
       p_guest_id: g.id, 
