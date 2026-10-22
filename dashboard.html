@@ -813,24 +813,23 @@ async function guestAction(a, g) {
     navigator.clipboard.writeText(guestLink(g)).then(() => toast('Tautan disalin'), () => toast('Gagal menyalin tautan', false));
     closeSheet();
   } else if (a === 'wa') {
+    // 1. Simpan status is_sent ke database Supabase
     try {
       await supabaseClient
         .from('guests')
         .update({ is_sent: true })
         .eq('id', g.id);
-      g.is_sent = true;
+      g.is_sent = true; // Update data lokal secara instan
     } catch (err) {
       console.log('Update status terkirim:', err);
     }
     
-    const waUrl = `https://wa.me/?text=${encodeURIComponent(waText(g))}`;
-    const newWindow = window.open(waUrl, '_blank');
-    if (!newWindow) {
-      window.location.href = waUrl;
-    }
+    // 2. Gunakan format API WhatsApp universal agar otomatis mendeteksi aplikasi dan siap pilih kontak
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(waText(g))}`;
+    window.open(waUrl, '_blank');
     
     closeSheet();
-    renderGuestList();
+    renderGuestList(); // Render ulang daftar tamu lokal agar label "Terkirim" langsung muncul tanpa mereset seluruh halaman
   } else if (a === 'edit') openGuestSheet(g.id);
   else if (a === 'del') confirmDelete(g);
 }
@@ -847,11 +846,8 @@ async function sendPendingWA(id) {
     console.log(err);
   }
   
-  const waUrl = `https://wa.me/?text=${encodeURIComponent(waText(g))}`;
-  const newWindow = window.open(waUrl, '_blank');
-  if (!newWindow) {
-    window.location.href = waUrl;
-  }
+  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(waText(g))}`;
+  window.open(waUrl, '_blank');
   
   closeSheet();
   renderGuestList();
