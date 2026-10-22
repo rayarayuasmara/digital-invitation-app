@@ -607,10 +607,25 @@ async function checkSession() {
 async function login(e) {
   e.preventDefault();
   const btn = $('btn-login');
-  btn.disabled = true; btn.textContent = 'Memproses…';
-  const { error } = await supabaseClient.auth.signInWithPassword({ email: $('email').value, password: $('password').value });
-  btn.disabled = false; btn.textContent = 'Masuk';
-  if (error) return toast('Login gagal: ' + error.message, false);
+  btn.disabled = true; 
+  btn.textContent = 'Memproses…';
+  
+  const emailVal = $('email').value.trim();
+  const passwordVal = $('password').value;
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ 
+    email: emailVal, 
+    password: passwordVal 
+  });
+  
+  btn.disabled = false; 
+  btn.textContent = 'Masuk';
+  
+  if (error) {
+    return toast('Login gagal: ' + error.message, false);
+  }
+  
+  // Jika berhasil, langsung muat dashboard
   loadDashboard();
 }
 async function logout() { 
