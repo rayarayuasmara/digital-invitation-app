@@ -511,7 +511,7 @@ input, select, textarea { font-size: 16px !important; }
       </form>
     </div>
 
-    <!-- TAB BANTUAN (GANTI AKUN) -->
+    <!-- TAB BANTUAN -->
     <div id="tab-bantuan" class="hidden">
       <header class="topbar"><h1>Bantuan</h1><span class="logo">R</span></header>
       <div class="page">
@@ -544,16 +544,17 @@ input, select, textarea { font-size: 16px !important; }
   </section>
 </div>
 
-<!-- FLOATING BOTTOM NAV DENGAN GRADASI BLUR DI BELAKANGNYA -->
+<!-- FLOATING BOTTOM NAV DENGAN FAB DINAMIS -->
 <div class="nav-container-wrap hidden" id="nav-container-wrap">
   <nav class="tabbar" id="tabbar">
     <div class="pillnav">
-      <button id="nav-home" class="on" onclick="switchTab('home')"><i data-lucide="house"></i><span id="nav-label-home">Home</span></button>
+      <button id="nav-home" class="on" onclick="switchTab('home')"><i data-lucide="house"></i><span>Home</span></button>
       <button id="nav-tamu" onclick="switchTab('tamu')"><i data-lucide="users"></i><span>Tamu</span></button>
       <button id="nav-acara" onclick="switchTab('acara')"><i data-lucide="calendar-days"></i><span>Acara</span></button>
       <button id="nav-bantuan" onclick="switchTab('bantuan')"><i data-lucide="help-circle"></i><span>Bantuan</span></button>
     </div>
-    <button class="fab" onclick="openCheckin()" aria-label="Mode check-in"><i data-lucide="scan-line"></i></button>
+    <!-- Tombol Bulat Kanan (FAB Dinamis) -->
+    <button class="fab" id="fab-btn" onclick="handleFabClick()" aria-label="Aksi Cepat"><i data-lucide="scan-line" id="fab-icon"></i></button>
   </nav>
 </div>
 
@@ -915,7 +916,7 @@ $('sort-opts').addEventListener('click', e => {
   activeSort = b.dataset.s; renderGuestList();
 });
 
-/* ---------- Navigasi Antar Tab (Tombol Kiri Dinamis) ---------- */
+/* ---------- Navigasi Antar Tab & FAB Dinamis ---------- */
 function switchTab(tab) {
   currentActiveTab = tab;
   ['home', 'tamu', 'acara', 'bantuan'].forEach(t => {
@@ -923,27 +924,44 @@ function switchTab(tab) {
     $('nav-' + t).classList.toggle('on', t === tab);
   });
 
-  // Update tombol kiri dinamis sesuai tab aktif
-  const homeBtnSpan = $('nav-label-home');
-  const homeBtnIcon = document.querySelector('#nav-home i');
-  
+  // Ubah ikon FAB (tombol bulat kanan) secara dinamis sesuai tab aktif
+  const fabIcon = $('fab-icon');
   if (tab === 'home') {
-    homeBtnIcon.setAttribute('data-lucide', 'house');
-    homeBtnSpan.textContent = 'Home';
+    fabIcon.setAttribute('data-lucide', 'scan-line');
   } else if (tab === 'tamu') {
-    homeBtnIcon.setAttribute('data-lucide', 'users');
-    homeBtnSpan.textContent = 'Tamu';
+    fabIcon.setAttribute('data-lucide', 'plus');
   } else if (tab === 'acara') {
-    homeBtnIcon.setAttribute('data-lucide', 'calendar-days');
-    homeBtnSpan.textContent = 'Acara';
+    fabIcon.setAttribute('data-lucide', 'share-2');
   } else if (tab === 'bantuan') {
-    homeBtnIcon.setAttribute('data-lucide', 'help-circle');
-    homeBtnSpan.textContent = 'Bantuan';
+    fabIcon.setAttribute('data-lucide', 'help-circle');
   }
 
   if (tab === 'home' && globalData) renderCategories(globalData.categories);
   window.scrollTo(0, 0);
   icons();
+}
+
+// Logika aksi saat tombol FAB diklik berdasarkan tab aktif
+function handleFabClick() {
+  if (currentActiveTab === 'home') {
+    openCheckin();
+  } else if (currentActiveTab === 'tamu') {
+    openGuestSheet();
+  } else if (currentActiveTab === 'acara') {
+    // Salin link acara atau link undangan umum
+    if (globalData && globalData.client) {
+      const eventLink = `${window.location.origin}/${globalData.client.slug}`;
+      navigator.clipboard.writeText(eventLink).then(() => {
+        toast('Tautan acara disalin!');
+      }, () => {
+        toast('Gagal menyalin tautan', false);
+      });
+    } else {
+      toast('Data acara belum siap', false);
+    }
+  } else if (currentActiveTab === 'bantuan') {
+    toast('Butuh bantuan? Hubungi tim support RayaRayu.');
+  }
 }
 
 /* ---------- Aksi Tamu (Smart WA, Copy, Edit, Delete) ---------- */
@@ -1221,6 +1239,7 @@ const attending = () => globalData.guests.filter(g => g.rsvp_status === 'hadir' 
 function openCheckin() {
   $('ci-search').value = '';
   renderCheckin();
+  $('checkin').classList.min ? $('checkin').classList.remove('hidden') : $('checkin').classList.remove('hidden');
   $('checkin').classList.remove('hidden');
   window.scrollTo(0, 0);
   icons();
