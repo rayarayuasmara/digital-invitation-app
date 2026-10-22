@@ -335,7 +335,6 @@ input, select, textarea { font-size: 16px !important; }
 .empty{padding:32px 8px;text-align:center;color:var(--sub);font-size:15px}
 
 /* ===== Lapisan UI ===== */
-/* dashboard-ui.css - lapisan tampilan & animasi untuk dashboard biru */
 :root{--ease:cubic-bezier(.32,.72,0,1);--spring:cubic-bezier(.34,1.56,.64,1);--glass:rgba(255,255,255,.7);--glass-line:rgba(255,255,255,.65);--bgs:rgba(244,245,248,.82)}
 :root[data-dark="1"]{--glass:rgba(30,37,58,.62);--glass-line:rgba(255,255,255,.1);--bgs:rgba(11,15,26,.8)}
 @keyframes rise{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
@@ -343,12 +342,10 @@ input, select, textarea { font-size: 16px !important; }
 @keyframes swap{from{transform:rotate(-120deg) scale(.5);opacity:0}to{transform:none;opacity:1}}
 @keyframes drift{to{transform:translate(-50px,36px) scale(1.2)}}
 
-/* Perpindahan tab: judul dan kartu muncul bergantian */
 .tab-in .topbar,.tab-in .page>*{animation:rise .7s var(--ease) both}
 .tab-in .page>*:nth-child(2){animation-delay:55ms}.tab-in .page>*:nth-child(3){animation-delay:110ms}.tab-in .page>*:nth-child(4){animation-delay:165ms}.tab-in .page>*:nth-child(5){animation-delay:220ms}.tab-in .page>*:nth-child(6){animation-delay:275ms}.tab-in .page>*:nth-child(7){animation-delay:330ms}.tab-in .page>*:nth-child(8){animation-delay:385ms}
 .gl.in{animation:rise .5s var(--ease) both}
 
-/* Respons sentuhan */
 .tile,.ib,.fab,.btn,.chip,.card-switch button,.gl .main,.cr .go{transition:transform .35s var(--spring),background .25s,color .25s,opacity .25s,box-shadow .3s}
 .tile:active,.ib:active,.btn:active,.chip:active{transform:scale(.95)}
 .gl .main:active,.cr .go:active{transform:scale(.98);opacity:.7}
@@ -356,7 +353,6 @@ input, select, textarea { font-size: 16px !important; }
 .tile.g{background:linear-gradient(150deg,#22d184,#0ea960)}
 .topbar h1{letter-spacing:-.03em}
 
-/* Pencarian + kategori satu baris, label status di bawahnya; menempel saat scroll */
 .sticky-head{position:sticky;top:0;z-index:20;margin:0 -16px;padding:calc(env(safe-area-inset-top) + 8px) 16px 10px;background:var(--bgs);-webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6);transition:transform .45s var(--ease)}
 .sticky-head.away{transform:translateY(-110%)}
 .sticky-head>*+*{margin-top:10px}
@@ -371,7 +367,6 @@ input, select, textarea { font-size: 16px !important; }
 html.lock{overflow:hidden}
 .sheet,.checkin{overscroll-behavior:contain}
 
-/* Form login */
 #login .card{animation:rise .8s var(--ease) both}
 #login .group{transition:border-color .2s,box-shadow .2s}
 #login .group:focus-within{border-color:var(--brand);box-shadow:0 0 0 4px var(--soft)}
@@ -383,7 +378,6 @@ html.lock{overflow:hidden}
 .shake{animation:shake .45s var(--ease)}
 @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
 
-/* Navigasi mengambang: kaca, indikator meluncur, ringkas saat scroll */
 .pillnav{position:relative;background:var(--glass);-webkit-backdrop-filter:blur(26px) saturate(1.8);backdrop-filter:blur(26px) saturate(1.8);border:1px solid var(--glass-line);box-shadow:0 14px 34px -10px rgba(12,24,60,.35),inset 0 1px 0 rgba(255,255,255,.5);padding:5px}
 .pillnav button{position:relative;z-index:1;background:transparent!important;color:var(--sub);transition:padding .35s var(--ease),color .25s}
 .pillnav button.on{color:var(--brand)}
@@ -397,7 +391,6 @@ html.lock{overflow:hidden}
 .fab:active{transform:scale(.9)}
 .fab.swap svg{animation:swap .6s var(--spring)}
 
-/* Kartu biru */
 .brandcard{position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 100% 0%,#5b86ff 0%,transparent 58%),linear-gradient(155deg,#1a55e8 0%,#0a3dc2 55%,#072a8c 100%);box-shadow:0 22px 44px -16px rgba(10,61,194,.65),inset 0 1px 0 rgba(255,255,255,.25)}
 .brandcard::before{content:"";position:absolute;z-index:-1;top:-90px;right:-70px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.26),transparent 66%);animation:drift 10s ease-in-out infinite alternate}
 .card-switch{position:relative;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding:3px}
@@ -411,14 +404,12 @@ html.lock{overflow:hidden}
 .brandcard .side{display:flex;flex-direction:column;gap:8px}
 .brandcard .sr,.brandcard .sr:first-child{margin:0;padding:11px 14px;border:0;border-radius:14px;background:rgba(255,255,255,.1)}
 
-/* Sheet & toast ala iOS */
 .backdrop{transition:opacity .35s var(--ease)}
 .sheet{border-radius:32px 32px 0 0;transition:transform .6s var(--ease);box-shadow:0 -20px 60px rgba(9,16,40,.25)}
 .grab{position:relative}.grab::after{content:"";position:absolute;inset:-14px -90px}
 .sheet .grab,.sheet .sheet-head{touch-action:none}
 .toast{transition:transform .6s var(--spring);background:var(--glass);color:var(--ink);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid var(--glass-line)}
 @media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
-
 </style>
 </head>
 <body>
@@ -486,7 +477,7 @@ html.lock{overflow:hidden}
           <div id="recent-rsvp-list"></div>
         </div>
 
-        <!-- CARD BIRU STATISTIK (POSISI TOMBOL BUKA RATA ATAS) -->
+        <!-- CARD BIRU STATISTIK -->
         <div class="card brandcard">
           <div class="ch" style="margin-bottom:8px; align-items:flex-start;">
             <div class="card-switch" id="stat-switch">
@@ -526,13 +517,7 @@ html.lock{overflow:hidden}
           </div>
         </div>
 
-        <div>
-          <div class="ch" style="padding:0 4px"><h3 class="display" style="font-size:19px;margin:0">Aksi cepat</h3></div>
-          <div class="tiles2">
-            <button class="tile w" onclick="openGuestSheet()"><span>Tambah<br>Tamu</span><span class="ico"><i data-lucide="plus"></i></span></button>
-            <button class="tile g" onclick="openPending()"><span>Kirim<br>Undangan</span><span class="ico"><i data-lucide="message-circle"></i></span></button>
-          </div>
-        </div>
+        <!-- Bagian Aksi Cepat sudah dihapus di sini -->
 
         <div class="card">
           <div class="ch"><h3>Top Kategori</h3><i data-lucide="users" style="color:var(--sub)"></i></div>
@@ -618,7 +603,7 @@ html.lock{overflow:hidden}
   </section>
 </div>
 
-<!-- FLOATING BOTTOM NAVIGATION (TANPA BLUR GRADIENT) -->
+<!-- FLOATING BOTTOM NAVIGATION -->
 <div class="nav-container-wrap hidden" id="nav-container-wrap">
   <nav class="tabbar" id="tabbar">
     <div class="pillnav">
@@ -627,7 +612,6 @@ html.lock{overflow:hidden}
       <button id="nav-acara" onclick="switchTab('acara')"><i data-lucide="calendar-days"></i><span>Acara</span></button>
       <button id="nav-akun" onclick="switchTab('akun')"><i data-lucide="user"></i><span>Akun</span></button>
     </div>
-    <!-- Tombol Bulat Kanan (FAB Dinamis) -->
     <button class="fab" id="fab-btn" onclick="handleFabClick()" aria-label="Aksi Cepat"><i data-lucide="scan-line" id="fab-icon"></i></button>
   </nav>
 </div>
@@ -646,9 +630,6 @@ html.lock{overflow:hidden}
 <div class="toast" id="toast"></div>
 
 <script>
-// ==========================================
-// KONFIGURASI SUPABASE
-// ==========================================
 const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -665,7 +646,6 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const icons = () => window.lucide && lucide.createIcons();
 const initials = s => String(s || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
 
-/* ---------- Tema Tampilan ---------- */
 const mq = window.matchMedia('(prefers-color-scheme: dark)');
 function applyTheme() {
   const pref = localStorage.getItem('rr_theme') || 'auto';
@@ -685,7 +665,6 @@ $('theme-seg').addEventListener('click', e => {
   localStorage.setItem('rr_theme', b.dataset.t); applyTheme();
 });
 
-/* ---------- Toast & Sheet ---------- */
 let toastTimer;
 function toast(msg, ok = true) {
   const t = $('toast');
@@ -700,7 +679,6 @@ function openSheet(html) {
 }
 function closeSheet() { $('backdrop').classList.remove('open'); $('sheet').classList.remove('open'); }
 
-/* ---------- Autentikasi ---------- */
 async function checkSession() {
   applyTheme();
   const { data: { session } } = await supabaseClient.auth.getSession();
@@ -746,7 +724,6 @@ async function loadDashboard() {
   globalData = data; renderUI();
 }
 
-/* ---------- Render Antarmuka & Status Hirarki ---------- */
 const guestBadge = g => {
   if (g.is_checked_in) return ['checked', 'Checked-in'];
   if (g.rsvp_status === 'hadir') return ['hadir', 'Hadir'];
@@ -790,7 +767,6 @@ function renderUI() {
   $('stat-absen').textContent = countAbsen;
   $('stat-pending').textContent = countPending;
 
-  // Render Check-In Ring Chart
   const att = guests.filter(g => g.rsvp_status === 'hadir' || g.is_checked_in);
   const checked = att.filter(g => g.is_checked_in).length;
   const ratio = att.length ? checked / att.length : 0;
@@ -799,7 +775,6 @@ function renderUI() {
   $('ci-wait').textContent = guests.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent).length;
   $('ci-est').textContent = stats.total_hadir;
 
-  // Render RSVP Status Ring Chart
   const rsvpRatio = totalGuestsCount > 0 ? hadirGroupsCount / totalGuestsCount : 0;
   $('rsvp-ring-fg').style.strokeDashoffset = 276.46 * (1 - rsvpRatio);
   $('rsvp-ring-num').textContent = hadirGroupsCount;
@@ -838,12 +813,10 @@ function switchCardView(type) {
   }
 }
 
-// Handler tombol "Buka" pada Card Biru Home
 function handleCardAction() {
   if (currentCardViewMode === 'checkin') {
     openCheckin();
   } else {
-    // Jika tab RSVP, arahkan ke tab Tamu dengan filter "hadir"
     switchTab('tamu');
     activeFilter = 'hadir';
     renderGuestList();
@@ -914,7 +887,7 @@ $('cat-group').addEventListener('click', e => {
 function renderRecent(guests) {
   const box = $('recent-rsvp-list');
   const recent = guests.slice(0, 5);
-  if (!recent.length) { box.innerHTML = '<div class="empty">Belum ada tamu. Tambahkan lewat Aksi cepat.</div>'; return; }
+  if (!recent.length) { box.innerHTML = '<div class="empty">Belum ada tamu. Tambahkan lewat tab Tamu.</div>'; return; }
   box.innerHTML = recent.map((g, i) => {
     const [k, txt] = guestBadge(g);
     return `<div class="hl">
@@ -1002,7 +975,6 @@ $('sort-opts').addEventListener('click', e => {
   activeSort = b.dataset.s; renderGuestList();
 });
 
-/* ---------- Navigasi Antar Tab & FAB Dinamis ---------- */
 function switchTab(tab) {
   currentActiveTab = tab;
   ['home', 'tamu', 'acara', 'akun'].forEach(t => {
@@ -1010,7 +982,6 @@ function switchTab(tab) {
     $('nav-' + t).classList.toggle('on', t === tab);
   });
 
-  // Ubah ikon FAB (tombol bulat kanan) secara dinamis sesuai tab aktif
   const fabIcon = $('fab-icon');
   if (tab === 'home') {
     fabIcon.setAttribute('data-lucide', 'scan-line');
@@ -1027,7 +998,6 @@ function switchTab(tab) {
   icons();
 }
 
-// Logika aksi saat tombol FAB diklik berdasarkan tab aktif
 function handleFabClick() {
   if (currentActiveTab === 'home') {
     openCheckin();
@@ -1045,7 +1015,6 @@ function handleFabClick() {
       toast('Data acara belum siap', false);
     }
   } else if (currentActiveTab === 'akun') {
-    // Munculkan Popup Panduan Singkat
     openSheet(`
       <div class="sheet-head"><h3>Panduan Singkat</h3><button onclick="closeSheet()">Tutup</button></div>
       <div class="listcard" style="padding-bottom:16px;">
@@ -1059,7 +1028,6 @@ function handleFabClick() {
   }
 }
 
-/* ---------- Aksi Tamu (Smart WA, Copy, Edit, Delete) ---------- */
 const findGuest = id => globalData.guests.find(g => g.id === id);
 const guestLink = g => `${window.location.origin}/${globalData.client.slug}/${g.invitation_token}`;
 const waText = g => `Halo *${g.group_name}*,\n\nKami mengundang Anda untuk menghadiri acara *${globalData.event.title}*.\n\nSilakan konfirmasi kehadiran Anda melalui tautan resmi berikut:\n${guestLink(g)}`;
@@ -1329,7 +1297,6 @@ function openPending() {
       : '<div class="empty">Semua tamu sudah menjawab.</div>'}`);
 }
 
-/* ---------- Mode Check-in Cepat dari Dashboard ---------- */
 const attending = () => globalData.guests.filter(g => g.rsvp_status === 'hadir' || g.is_checked_in);
 function openCheckin() {
   $('ci-search').value = '';
@@ -1377,12 +1344,10 @@ async function toggleCheckin(id) {
 checkSession();
 </script>
 <script>
-/* ===== Lapisan UI (setelah script utama) ===== */
 (() => { try {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let anim = false, first = true, ringsPlayed = false, sig = '';
 
-  /* Angka naik halus */
   const NUMS = ['stat-total','stat-kuota','hero-hadir','hero-pct-text','stat-absen','stat-pending','ring-num','ci-wait','ci-est','rsvp-ring-num','rsvp-est-pax','rsvp-stat-absen','rsvp-stat-pending','quota-used'];
   function countUp(el) {
     const m = /^(\D*)(\d+)(\D*)$/.exec(el.textContent.trim()); if (!m) return;
@@ -1399,7 +1364,6 @@ checkSession();
   }
   function enter(id) { const t = $(id); if (!t || reduce) return; t.classList.remove('tab-in'); void t.offsetWidth; t.classList.add('tab-in'); }
 
-  /* Indikator meluncur (navigasi bawah & switch kartu biru) */
   function place(parent, cls, sel) {
     const a = parent && parent.querySelector(sel); if (!a || !a.offsetWidth) return;
     let t = parent.querySelector('.' + cls); const fresh = !t;
@@ -1410,7 +1374,6 @@ checkSession();
   const placeAll = () => { place(document.querySelector('.pillnav'), 'thumb', 'button.on'); place($('stat-switch'), 'cs-thumb', 'button.active'); };
   const ro = new ResizeObserver(placeAll); ro.observe(document.querySelector('.pillnav')); ro.observe($('stat-switch'));
 
-  /* Filter: pencarian + kategori di satu baris, label status di bawahnya (tanpa angka) */
   const head = document.createElement('div'); head.className = 'sticky-head';
   const sb = document.querySelector('#tab-tamu .sbar'); sb.before(head); head.append(sb);
   const STAT = [['all', 'Semua'], ['unsent', 'Belum dikirim'], ['pending', 'Menunggu'], ['hadir', 'Hadir'], ['checked_in', 'Check-in'], ['tidak_hadir', 'Absen']];
@@ -1421,7 +1384,6 @@ checkSession();
   window.setCategory = function () { anim = true; _cat.apply(this, arguments); toList(); };
   window.resetFilters = () => { activeFilter = 'all'; activeCategory = 'all'; $('search-input').value = ''; anim = true; renderCategorySelect(); renderGuestList(); };
 
-  /* Pembungkus fungsi bawaan */
   const _rg = renderGuestList;
   window.renderGuestList = function () {
     _rg.apply(this, arguments);
@@ -1449,7 +1411,6 @@ checkSession();
   const _sc = switchCardView;
   window.switchCardView = function () { _sc.apply(this, arguments); placeAll(); playRings(); };
 
-  /* Scroll: navigasi jadi ikon saja & filter menyingkir saat turun, muncul lagi saat naik */
   let ly = scrollY;
   addEventListener('scroll', () => {
     const y = scrollY, w = $('nav-container-wrap'), dn = y > ly + 6, up = y < ly - 6;
@@ -1457,18 +1418,15 @@ checkSession();
     if (dn && y > 140) head.classList.add('away'); else if (up || y < 40) head.classList.remove('away');
     ly = y;
   }, { passive: true });
-  /* Halaman di belakang tidak ikut bergeser saat sheet / check-in terbuka */
   const lock = () => document.documentElement.classList.toggle('lock', $('sheet').classList.contains('open') || !$('checkin').classList.contains('hidden'));
   const mo = new MutationObserver(lock); [$('sheet'), $('checkin')].forEach(el => mo.observe(el, { attributes: true, attributeFilter: ['class'] }));
 
-  /* Form login: ikon mata, peringatan Caps Lock, pesan error + getar */
   const pw = $('password'), eye = $('pw-eye');
   eye.onclick = () => { const show = pw.type === 'password'; pw.type = show ? 'text' : 'password'; eye.setAttribute('aria-pressed', show); eye.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password'); eye.innerHTML = `<i data-lucide="${show ? 'eye-off' : 'eye'}"></i>`; icons(); pw.focus(); };
   pw.addEventListener('keyup', e => $('caps').classList.toggle('hidden', !(e.getModifierState && e.getModifierState('CapsLock'))));
   ['email', 'password'].forEach(id => $(id).addEventListener('input', () => { $('login-err').textContent = ''; }));
   window.loginFail = m => { $('login-err').textContent = /invalid/i.test(m) ? 'Email atau password tidak cocok.' : m; const g = document.querySelector('#login .group'); g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake'); };
 
-  /* Sheet bisa ditarik ke bawah untuk menutup */
   const s = $('sheet'); let y0 = null, dy = 0;
   s.addEventListener('pointerdown', e => { if (e.target.closest('.grab, .sheet-head') && !e.target.closest('button')) { y0 = e.clientY; dy = 0; s.style.transition = 'none'; s.setPointerCapture(e.pointerId); } });
   s.addEventListener('pointermove', e => { if (y0 === null) return; dy = Math.max(0, e.clientY - y0); s.style.transform = `translate(-50%,${dy}px)`; });
