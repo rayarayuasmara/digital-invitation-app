@@ -887,6 +887,9 @@ function openGuestSheet(id) {
   const cats = [...new Set([...defaultCats, ...existingCats])];
   const cur = g ? (g.category || 'Umum') : cats[0];
 
+  // Jika RSVP sudah Hadir/Absen, otomatis is_sent dianggap true
+  const isSentChecked = g ? (g.is_sent || g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir') : false;
+
   openSheet(`
     <div class="sheet-head"><button onclick="closeSheet()">Batal</button><h3>${g ? 'Edit tamu' : 'Tamu baru'}</h3><button id="gs-save">${g ? 'Simpan' : 'Tambah'}</button></div>
     <div class="listcard">
@@ -911,15 +914,23 @@ function openGuestSheet(id) {
         </div>
       </div>
       ${g ? `
-      <div class="field"><label>RSVP</label><select id="gs-rsvp">
+      <div class="field"><label>RSVP</label><select id="gs-rsvp" onchange="onRsvpChange(this)">
         <option value="pending" ${g.rsvp_status === 'pending' ? 'selected' : ''}>Pending</option>
         <option value="hadir" ${g.rsvp_status === 'hadir' ? 'selected' : ''}>Hadir</option>
         <option value="tidak_hadir" ${g.rsvp_status === 'tidak_hadir' ? 'selected' : ''}>Absen</option></select></div>
-      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Terkirim (Pending)</label><span class="switch"><input type="checkbox" id="gs-sent" ${g.is_sent ? 'checked' : ''}><span></span></span></div>
-      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Check-In (Hadir)</label><span class="switch"><input type="checkbox" id="gs-checkin" ${g.is_checked_in ? 'checked' : ''}><span></span></span></div>` : ''}
+      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Terkirim</label><span class="switch"><input type="checkbox" id="gs-sent" ${isSentChecked ? 'checked' : ''}><span></span></span></div>
+      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Check-In</label><span class="switch"><input type="checkbox" id="gs-checkin" ${g.is_checked_in ? 'checked' : ''}><span></span></span></div>` : ''}
     </div>`);
   $('gs-save').onclick = () => saveGuest(g);
   if (!g) setTimeout(() => $('gs-name').focus(), 350);
+}
+
+// Fungsi otomatis menyalakan toggle terkirim jika RSVP diubah ke Hadir/Absen
+function onRsvpChange(sel) {
+  if (sel.value === 'hadir' || sel.value === 'tidak_hadir') {
+    const sentToggle = $('gs-sent');
+    if (sentToggle) sentToggle.checked = true;
+  }
 }
 
 function checkCustomCategory(select) {
@@ -940,7 +951,7 @@ function adjustPax(amount) {
 }
 
 async function saveGuest(g) {
-  const name = $('gs-name').value.trim();
+  const name = $('gs-name'].value.trim();
   let cat = $('gs-cat').value;
   if (cat === '__custom__') {
     cat = $('gs-custom-cat').value.trim();
@@ -952,20 +963,31 @@ async function saveGuest(g) {
   const btn = $('gs-save'); btn.disabled = true;
   
   if (g) {
-    const isSentVal = $('gs-sent') ? $('gs-sent').checked : g.is_sent;
-    const isCheckinVal = $('gs-checkin') ? $('gs-checkin').checked : g.is_checked_in;
+    const isSentVal = $('gs-sent') ? $('gs-sent'].checked : g.is_sent;
+    const isCheckinVal = $('gs-checkin') ? $('gs-checkin'].checked : g.is_checked_in;
+    const rsvpVal = $('gs-rsvp') ? $('gs-rsvp'].value : g.rsvp_status;
+
+    // Jika RSVP sudah Hadir/Absen, pastikan is_sent otomatis true
+    const finalSentVal = (rsvpVal === 'hadir' || rsvpVal === 'tidak_hadir') ? true : isSentVal;
+
     await supabaseClient.rpc('update_guest_by_client', { 
       p_guest_id: g.id, 
       p_group_name: name, 
       p_category: cat, 
       p_max_pax: pax, 
-      p_rsvp_status: $('gs-rsvp').value, 
+      p_rsvp_status: rsvpVal, 
       p_is_checked_in: isCheckinVal,
-      p_is_sent: isSentVal 
+      p_is_sent: finalSentVal 
     });
   } else {
     await supabaseClient.rpc('add_guest_by_client', { p_group_name: name, p_category: cat, p_max_pax: pax });
   }
+
+  btn.disabled = false;
+  closeSheet(); 
+  toast(g ? 'Tamu diperbarui' : 'Tamu ditambahkan'); 
+  loadDashboard();
+}
 
   btn.disabled = false;
   closeSheet(); 
