@@ -135,10 +135,35 @@ input, select, textarea { font-size: 16px !important; }
 .ib.sent{background:var(--green-bg);border-color:var(--green);color:var(--green-ink)}
 .ib svg{width:15px;height:15px}
 
-/* Check-in brand card */
+/* Check-in brand card & Switch */
 .brandcard{background:var(--brand);color:#fff}
 .brandcard .ch h3{color:#fff}
 .brandcard .link{color:rgba(255,255,255,.8)}
+.card-switch {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 3px;
+  margin-bottom: 8px;
+}
+.card-switch button {
+  background: transparent;
+  border: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all .2s;
+  text-align: center;
+}
+.card-switch button.active {
+  background: #fff;
+  color: var(--brand);
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+
 .ringwrap{display:flex;align-items:center;gap:18px;margin-top:6px}
 .ring{position:relative;width:150px;height:150px;flex-shrink:0}
 .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
@@ -368,16 +393,40 @@ input, select, textarea { font-size: 16px !important; }
           <div id="recent-rsvp-list"></div>
         </div>
 
+        <!-- CARD BIRU DENGAN TOMBOL SWITCH VIEW STATISTIK -->
         <div class="card brandcard">
-          <div class="ch"><h3>Total Check-In</h3><button class="link" onclick="openCheckin()">Buka <i data-lucide="circle-arrow-right"></i></button></div>
-          <div class="ringwrap">
-            <div class="ring">
-              <svg viewBox="0 0 100 100"><circle class="bgc" cx="50" cy="50" r="44"/><circle class="fgc" id="ring-fg" cx="50" cy="50" r="44" stroke-dasharray="276.46" stroke-dashoffset="276.46"/></svg>
-              <div class="in"><small>Checked</small><b id="ring-num">0</b></div>
+          <div class="ch">
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <div class="card-switch" id="stat-switch">
+                <button class="active" onclick="switchCardView('checkin')">Check-In</button>
+                <button onclick="switchCardView('rsvp')">RSVP Status</button>
+              </div>
+              <h3 id="card-title-label" style="margin:0;">Total Check-In</h3>
             </div>
-            <div class="side">
-              <div class="sr"><span>Menunggu</span><b id="ci-wait">0</b></div>
-              <div class="sr"><span>Est. Tamu</span><b id="ci-est">0</b></div>
+            <button class="link" onclick="openCheckin()" id="card-action-link">Buka <i data-lucide="circle-arrow-right"></i></button>
+          </div>
+
+          <!-- View 1: Check-In -->
+          <div id="view-checkin" class="stat-view">
+            <div class="ringwrap">
+              <div class="ring">
+                <svg viewBox="0 0 100 100"><circle class="bgc" cx="50" cy="50" r="44"/><circle class="fgc" id="ring-fg" cx="50" cy="50" r="44" stroke-dasharray="276.46" stroke-dashoffset="276.46"/></svg>
+                <div class="in"><small>Checked</small><b id="ring-num">0</b></div>
+              </div>
+              <div class="side">
+                <div class="sr"><span>Menunggu</span><b id="ci-wait">0</b></div>
+                <div class="sr"><span>Est. Tamu</span><b id="ci-est">0</b></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- View 2: RSVP Status -->
+          <div id="view-rsvp" class="stat-view hidden">
+            <div class="side" style="display:flex; flex-direction:column; gap:4px; margin-top:2px;">
+              <div class="sr"><span>Hadir</span><b id="rsvp-stat-hadir">0</b></div>
+              <div class="sr"><span>Absen</span><b id="rsvp-stat-absen">0</b></div>
+              <div class="sr"><span>Pending</span><b id="rsvp-stat-pending">0</b></div>
+              <div class="sr"><span>Unsent</span><b id="rsvp-stat-unsent">0</b></div>
             </div>
           </div>
         </div>
@@ -409,7 +458,6 @@ input, select, textarea { font-size: 16px !important; }
         </div>
 
         <div class="listcard">
-          <!-- Filter Status Diperbarui Sesuai Urutan Hirarki Baru -->
           <div class="tabs smooth-scroll" id="filter-tabs">
             <button class="on" data-f="all">Semua</button>
             <button data-f="unsent">Unsent</button>
@@ -625,6 +673,17 @@ function renderUI() {
   $('ci-wait').textContent = guests.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent).length;
   $('ci-est').textContent = stats.total_hadir;
 
+  // Statistik untuk View RSVP Status di Card Biru
+  const countHadir = guests.filter(g => g.rsvp_status === 'hadir').length;
+  const countAbsen = guests.filter(g => g.rsvp_status === 'tidak_hadir').length;
+  const countPending = guests.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent).length;
+  const countUnsent = guests.filter(g => !g.is_sent).length;
+
+  if ($('rsvp-stat-hadir')) $('rsvp-stat-hadir').textContent = countHadir;
+  if ($('rsvp-stat-absen')) $('rsvp-stat-absen').textContent = countAbsen;
+  if ($('rsvp-stat-pending')) $('rsvp-stat-pending').textContent = countPending;
+  if ($('rsvp-stat-unsent')) $('rsvp-stat-unsent').textContent = countUnsent;
+
   renderCategories(categories);
   renderRecent(guests);
   renderCategorySelect();
@@ -634,6 +693,31 @@ function renderUI() {
   $('quota-max').textContent = maxQuota;
   $('quota-bar').style.width = Math.min(100, Math.round((stats.total_guests / maxQuota) * 100)) + '%';
   icons();
+}
+
+function switchCardView(type) {
+  const btnCheckin = document.querySelector('#stat-switch button:nth-child(1)');
+  const btnRsvp = document.querySelector('#stat-switch button:nth-child(2)');
+  const viewCheckin = $('view-checkin');
+  const viewRsvp = $('view-rsvp');
+  const titleLabel = $('card-title-label');
+  const actionLink = $('card-action-link');
+
+  if (type === 'checkin') {
+    btnCheckin.classList.add('active');
+    btnRsvp.classList.remove('active');
+    viewCheckin.classList.remove('hidden');
+    viewRsvp.classList.add('hidden');
+    titleLabel.textContent = 'Total Check-In';
+    actionLink.style.display = 'flex';
+  } else {
+    btnRsvp.classList.add('active');
+    btnCheckin.classList.remove('active');
+    viewRsvp.classList.remove('hidden');
+    viewCheckin.classList.add('hidden');
+    titleLabel.textContent = 'Statistik RSVP Status';
+    actionLink.style.display = 'none';
+  }
 }
 
 async function submitEditEvent(e) {
@@ -735,7 +819,6 @@ function renderGuestList() {
   if (q) list = list.filter(g => g.group_name.toLowerCase().includes(q));
   if (activeCategory !== 'all') list = list.filter(g => g.category === activeCategory);
   
-  // Filter berdasarkan hirarki status baru
   if (activeFilter === 'checked_in') {
     list = list.filter(g => g.is_checked_in);
   } else if (activeFilter === 'hadir') {
@@ -824,7 +907,6 @@ async function guestAction(a, g) {
     closeSheet();
   } else if (a === 'wa') {
     try {
-      // Saat klik WA, is_sent menjadi true dan status RSVP tetap dipertahankan
       await supabaseClient.rpc('update_guest_by_client', {
         p_guest_id: g.id,
         p_group_name: g.group_name,
