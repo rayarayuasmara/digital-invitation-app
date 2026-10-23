@@ -92,7 +92,7 @@ input, select, textarea { font-size: 16px !important; }
 .hl .s{color:var(--sub);font-size:14px;margin-top:2px}
 .hl .st{font-size:13px;white-space:nowrap}
 
-/* Avatar Seragam */
+/* Avatar Lingkaran Sempurna */
 .av {
   width: 48px !important;
   height: 48px !important;
@@ -177,7 +177,7 @@ input, select, textarea { font-size: 16px !important; }
 .brandcard .side{flex:1}
 .brandcard .sr{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid rgba(255,255,255,.2);font-size:15px;opacity:.95}
 .brandcard .sr:first-child{border-top:0;padding-top:0}
-.brandcard .sr b{font-family:'Geist Mono',monospace;font-size:20px;font-weight:600}
+.brandcard .sr b{font-family:'Geist Mono',monospace;font-size:22px;font-weight:600}
 
 /* Aksi */
 .tiles2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -212,6 +212,9 @@ input, select, textarea { font-size: 16px !important; }
 .tabs::-webkit-scrollbar{display:none}
 .tabs button{padding:14px 0 13px;color:var(--sub);font-weight:500;font-size:16px;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;flex-shrink:0}
 .tabs button.on{color:var(--brand);border-bottom-color:var(--brand);font-weight:600}
+.sort{display:flex;justify-content:flex-end;gap:14px;padding:12px 0 2px;font-size:14px;color:var(--sub)}
+.sort button{padding:2px 0}
+.sort button.on{color:var(--brand);font-weight:600}
 
 /* List Item Tamu */
 .gl{display:flex;align-items:center;gap:12px;padding:14px 0}
@@ -258,7 +261,7 @@ input, select, textarea { font-size: 16px !important; }
 .stepper button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-weight:600;font-size:18px;color:var(--brand)}
 .stepper span{font-family:'Geist Mono',monospace;font-size:18px;font-weight:600;min-width:24px;text-align:center}
 
-/* Container floating nav (Original dashboard-4.html) */
+/* Container floating nav */
 .nav-container-wrap{
   position:fixed;left:50%;transform:translateX(-50%);
   bottom:0;
@@ -386,12 +389,51 @@ html.lock{overflow:hidden}
 .shake{animation:shake .45s var(--ease)}
 @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
 
+.pillnav{position:relative;background:var(--glass);-webkit-backdrop-filter:blur(26px) saturate(1.8);backdrop-filter:blur(26px) saturate(1.8);border:1px solid var(--glass-line);box-shadow:0 14px 34px -10px rgba(12,24,60,.35),inset 0 1px 0 rgba(255,255,255,.5);padding:5px}
+.pillnav button{position:relative;z-index:1;background:transparent!important;color:var(--sub);transition:padding .35s var(--ease),color .25s}
+.pillnav button.on{color:var(--brand)}
+.pillnav button svg{transition:transform .5s var(--spring)}
+.pillnav button.on svg{transform:translateY(-1px) scale(1.12)}
+.pillnav button span{max-height:16px;overflow:hidden;transition:max-height .35s var(--ease),opacity .25s,margin .35s var(--ease)}
+.pillnav .thumb{position:absolute;top:5px;bottom:5px;left:0;z-index:0;border-radius:999px;background:var(--card);box-shadow:0 3px 12px rgba(10,61,194,.2),0 0 0 1px var(--line);transition:transform .55s var(--spring),width .55s var(--spring)}
+.min .pillnav button span{max-height:0;opacity:0;margin-top:-3px}
+.min .pillnav button{padding:12px 0}
+.fab{background:linear-gradient(145deg,#3a73ff,var(--brand));border:1px solid rgba(255,255,255,.25);box-shadow:0 12px 28px -6px rgba(10,61,194,.6),inset 0 1px 0 rgba(255,255,255,.35)}
+.fab:active{transform:scale(.9)}
+.fab.swap svg{animation:swap .6s var(--spring)}
+
+.brandcard{position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 100% 0%,#5b86ff 0%,transparent 58%),linear-gradient(155deg,#1a55e8 0%,#0a3dc2 55%,#072a8c 100%);box-shadow:0 22px 44px -16px rgba(10,61,194,.65),inset 0 1px 0 rgba(255,255,255,.25)}
+.brandcard::before{content:"";position:absolute;z-index:-1;top:-90px;right:-70px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.26),transparent 66%);animation:drift 10s ease-in-out infinite alternate}
+.card-switch{position:relative;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding:3px}
+.card-switch button{position:relative;z-index:1;padding:7px 16px;background:transparent!important;box-shadow:none!important;color:rgba(255,255,255,.78)}
+.card-switch button.active{color:var(--brand)}
+.cs-thumb{position:absolute;top:3px;bottom:3px;left:0;border-radius:999px;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.2);transition:transform .5s var(--spring),width .5s var(--spring)}
+.stat-view{animation:viewIn .6s var(--ease) both}
+.ring .fgc{transition:stroke-dashoffset 1.3s var(--ease);filter:drop-shadow(0 0 7px rgba(255,255,255,.6))}
+.ring .bgc{stroke:rgba(255,255,255,.18)}
+.ring .in b{font-size:40px}
+.brandcard .side{display:flex;flex-direction:column;gap:8px}
+.brandcard .sr,.brandcard .sr:first-child{margin:0;padding:11px 14px;border:0;border-radius:14px;background:rgba(255,255,255,.1)}
+
 .backdrop{transition:opacity .35s var(--ease)}
 .sheet{border-radius:32px 32px 0 0;transition:transform .6s var(--ease);box-shadow:0 -20px 60px rgba(9,16,40,.25)}
 .grab{position:relative}.grab::after{content:"";position:absolute;inset:-14px -90px}
 .sheet .grab,.sheet .sheet-head{touch-action:none}
 .toast{transition:transform .6s var(--spring);background:var(--glass);color:var(--ink);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid var(--glass-line)}
 @media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
+
+/* ===== Revisi: sortir, hero, kartu check-in ===== */
+.hi{font-weight:400}
+.chiprow{display:flex;align-items:flex-start;gap:6px;margin-top:0}
+.chiprow .chips{flex:1;min-width:0;margin:0 0 0 -16px;padding:12px 6px 2px 16px}
+.sortpill{flex-shrink:0;margin-top:12px;height:36px;display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:0 3px 0 12px}
+.sortpill select{appearance:none;-webkit-appearance:none;border:0;background:transparent;outline:none;color:var(--ink);font-size:14px!important;font-weight:600;padding:0;cursor:pointer}
+.sortpill button{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:var(--brand);background:var(--soft);flex-shrink:0}
+.sortpill button svg{width:15px;height:15px}
+.brandcard .ringwrap{gap:14px}
+.brandcard .ring{width:132px;height:132px}
+.brandcard .side .sr,.brandcard .side .sr:first-child{padding:10px 12px;font-size:13px;white-space:nowrap}
+.brandcard .side .sr b{font-size:19px}
 </style>
 </head>
 <body>
@@ -422,11 +464,8 @@ html.lock{overflow:hidden}
     <div id="tab-home">
       <header class="topbar"><h1>Home</h1><span class="logo">R</span></header>
       <div class="page">
-        <div class="card hero" style="position:relative;">
-          <div style="position:absolute; top:20px; right:20px;">
-            <i data-lucide="users" style="width:20px; height:20px; color:var(--sub);"></i>
-          </div>
-          <p class="hi">Halo</p>
+        <div class="card hero">
+          <div class="lbl"><p class="hi">Halo</p><i data-lucide="venus-and-mars"></i></div>
           <h2 id="home-client-name">Memuat…</h2>
           <div class="hr"></div>
           <div class="meta">
@@ -477,12 +516,12 @@ html.lock{overflow:hidden}
             <div class="ringwrap">
               <div class="ring">
                 <svg viewBox="0 0 100 100"><circle class="bgc" cx="50" cy="50" r="44"/><circle class="fgc" id="ring-fg" cx="50" cy="50" r="44" stroke-dasharray="276.46" stroke-dashoffset="276.46"/></svg>
-                <div class="in"><small>masuk</small><b id="ring-num">0</b></div>
+                <div class="in"><small>Masuk</small><b id="ring-num">0</b></div>
               </div>
               <div class="side">
-                <div class="sr"><span>Undangan</span><b id="ci-total-hadir">0</b></div>
-                <div class="sr"><span>Belum Masuk</span><b id="ci-belum-masuk">0</b></div>
-                <div class="sr"><span>Orang Masuk</span><b id="ci-est-pax">0</b></div>
+                <div class="sr"><span>Hadir RSVP</span><b id="ci-att">0</b></div>
+                <div class="sr"><span>Belum Masuk</span><b id="ci-wait">0</b></div>
+                <div class="sr"><span>Orang Masuk</span><b id="ci-est">0</b></div>
               </div>
             </div>
           </div>
@@ -583,7 +622,7 @@ html.lock{overflow:hidden}
   </section>
 </div>
 
-<!-- FLOATING BOTTOM NAVIGATION (Original dashboard-4.html) -->
+<!-- FLOATING BOTTOM NAVIGATION -->
 <div class="nav-container-wrap hidden" id="nav-container-wrap">
   <nav class="tabbar" id="tabbar">
     <div class="pillnav">
@@ -636,13 +675,14 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let globalData = null;
 let activeFilter = 'all';
 let activeCategory = 'all';
-let activeSortBy = 'created'; 
-let activeSortOrder = 'desc'; 
+let sortField = 'created';
+let sortDir = 'desc';
 let currentActiveTab = 'home';
 let currentCardViewMode = 'checkin';
 let currentCiMode = 'scan';
 let html5QrCode = null;
 
+const COLORS = ['#0a3dc2','#12b76a','#f5a524','#e5484d','#7c5cff','#0ea5e9','#ec4899'];
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icons = () => window.lucide && lucide.createIcons();
@@ -733,7 +773,6 @@ const guestBadge = g => {
   if (g.is_sent) return ['pending', 'Pending'];
   return ['unsent', 'Unsent'];
 };
-
 const avatar = g => `<div class="av">${esc(initials(g.group_name))}</div>`;
 
 function renderUI() {
@@ -744,9 +783,7 @@ function renderUI() {
   $('account-avatar').textContent = initials(client.name);
 
   const d = new Date(event.event_date);
-  const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long' });
-  const yearStr = d.toLocaleDateString('id-ID', { year: 'numeric' });
-  $('ev-date-txt').innerHTML = `${dateStr}<br>${yearStr}`;
+  $('ev-date-txt').innerHTML = esc(d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long' })) + '<br>' + d.getFullYear();
   $('ev-loc-txt').textContent = event.location || '–';
   $('ev-title').value = event.title || '';
   $('ev-date').value = new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -777,14 +814,9 @@ function renderUI() {
   const ratio = att.length ? checked / att.length : 0;
   $('ring-fg').style.strokeDashoffset = 276.46 * (1 - ratio);
   $('ring-num').textContent = checked;
-
-  const totalHadirGroups = guests.filter(g => g.rsvp_status === 'hadir').length;
-  const belumMasuk = guests.filter(g => g.rsvp_status === 'hadir' && !g.is_checked_in).length;
-  const estOrangMasuk = guests.filter(g => g.rsvp_status === 'hadir' || g.is_checked_in).reduce((sum, g) => sum + (g.max_pax || 0), 0);
-
-  $('ci-total-hadir').textContent = totalHadirGroups;
-  $('ci-belum-masuk').textContent = belumMasuk;
-  $('ci-est-pax').textContent = estOrangMasuk;
+  $('ci-att').textContent = att.length;
+  $('ci-wait').textContent = Math.max(0, att.length - checked);
+  $('ci-est').textContent = att.filter(g => g.is_checked_in).reduce((sum, g) => sum + (g.max_pax || 0), 0);
 
   const rsvpRatio = totalGuestsCount > 0 ? hadirGroupsCount / totalGuestsCount : 0;
   $('rsvp-ring-fg').style.strokeDashoffset = 276.46 * (1 - rsvpRatio);
@@ -902,11 +934,10 @@ function renderRecent(guests) {
   box.innerHTML = recent.map((g, i) => {
     const [k, txt] = guestBadge(g);
     return `<div class="hl">
-      <div class="av">${esc(initials(g.group_name))}</div>
+      <div class="av">${esc(initials(g.group_name))}<span class="bdg bdg-${k}"></span></div>
       <div class="txt"><div class="n">${esc(g.group_name)}</div><div class="s">${esc(g.category)} · ${g.max_pax} pax</div></div>
       <span class="st st-${k}">${txt}</span></div>`;
   }).join('');
-  icons();
 }
 
 function renderCategorySelect() {
@@ -917,21 +948,15 @@ function renderCategorySelect() {
 function setCategory(c) { activeCategory = c; renderCategorySelect(); renderGuestList(); }
 
 function sortGuests(list) {
-  let arr = [...list];
+  const idx = new Map(globalData.guests.map((g, i) => [g.id, i]));
+  const ts = g => { const v = Date.parse(sortField === 'updated' ? (g.updated_at || g.created_at) : g.created_at); return isNaN(v) ? null : v; };
+  const arr = [...list];
   arr.sort((a, b) => {
-    let valA, valB;
-    if (activeSortBy === 'name') {
-      valA = (a.group_name || '').toLowerCase();
-      valB = (b.group_name || '').toLowerCase();
-      return activeSortOrder === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
-    } else if (activeSortBy === 'updated') {
-      valA = a.updated_at ? Date.parse(a.updated_at) : 0;
-      valB = b.updated_at ? Date.parse(b.updated_at) : 0;
-    } else { 
-      valA = a.created_at ? Date.parse(a.created_at) : 0;
-      valB = b.created_at ? Date.parse(b.created_at) : 0;
-    }
-    return activeSortOrder === 'asc' ? valA - valB : valB - valA;
+    let r;
+    if (sortField === 'name') r = String(a.group_name || '').localeCompare(String(b.group_name || ''), 'id', { sensitivity: 'base', numeric: true });
+    else { const ta = ts(a), tb = ts(b); r = (ta !== null && tb !== null) ? ta - tb : idx.get(a.id) - idx.get(b.id); }
+    if (r === 0) r = idx.get(a.id) - idx.get(b.id);
+    return sortDir === 'asc' ? r : -r;
   });
   return arr;
 }
@@ -964,7 +989,7 @@ function renderGuestList() {
     const isSentClass = g.is_sent ? 'sent' : '';
     return `<div class="gl" data-id="${esc(g.id)}">
       <button class="main" data-open style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;text-align:left">
-        ${avatar(g)}
+        ${avatar(g, i)}
         <div style="min-width:0;flex:1">
           <div class="n">${esc(g.group_name)}</div>
           <div class="tags">
@@ -1310,12 +1335,13 @@ function openPending() {
     ${list.length
       ? `<div class="listcard">${list.map((g, i) => `
           <button class="act" style="width:100%;text-align:left" onclick="sendPendingWA('${g.id}')">
-            ${avatar(g)}
+            ${avatar(g, i)}
             <div style="flex:1;min-width:0"><div style="font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(g.group_name)}</div><div style="font-size:13px;color:var(--sub)">${g.max_pax} pax · ${esc(g.category)}</div></div>
             <i data-lucide="send"></i></button>`).join('')}</div>`
       : '<div class="empty">Semua tamu sudah menjawab.</div>'}`);
 }
 
+/* ---------- Mode Check-in & QR Scanner Kamera ---------- */
 function switchCiMode(mode) {
   currentCiMode = mode;
   const btnScan = document.querySelector('#ci-mode-switch button:nth-child(1)');
@@ -1364,6 +1390,7 @@ function stopQrScanner() {
 }
 
 async function handleScannedCode(text) {
+  // Ambil token dari URL atau teks hasil scan
   let token = text.trim();
   if (token.includes('/')) {
     const parts = token.split('/');
@@ -1380,6 +1407,7 @@ async function handleScannedCode(text) {
     return;
   }
 
+  // Lakukan check-in otomatis
   guest.busy = true;
   const { data, error } = await supabaseClient.rpc('update_guest_by_client', {
     p_guest_id: guest.id, 
@@ -1401,6 +1429,7 @@ async function handleScannedCode(text) {
   if (navigator.vibrate) navigator.vibrate(50);
   toast(`✅ Berhasil Check-in: ${guest.group_name} (${guest.max_pax} pax)`);
   
+  // Jeda sejenak agar tidak double-scan beruntun
   stopQrScanner();
   setTimeout(() => {
     if (currentCiMode === 'scan') startQrScanner();
@@ -1442,7 +1471,7 @@ function renderCheckin() {
   $('ci-count').textContent = `${all.filter(g => g.is_checked_in).length} dari ${all.length} grup sudah masuk`;
   $('ci-list').innerHTML = list.length
     ? list.map((g, i) => `<button class="gl ci ${g.is_checked_in ? 'on' : ''}" style="width:100%" data-ci="${esc(g.id)}">
-        <div class="main">${avatar(g)}<div><div class="n">${esc(g.group_name)}</div><div class="s" style="color:var(--sub);font-size:14px">${g.max_pax} pax · ${esc(g.category)}</div></div></div>
+        <div class="main">${avatar(g, i)}<div><div class="n">${esc(g.group_name)}</div><div class="s" style="color:var(--sub);font-size:14px">${g.max_pax} pax · ${esc(g.category)}</div></div></div>
         <span class="tick"></span></button>`).join('')
     : '<div class="empty">Tidak ada tamu yang cocok.</div>';
 }
@@ -1475,7 +1504,7 @@ checkSession();
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let anim = false, first = true, ringsPlayed = false;
 
-  const NUMS = ['stat-total','stat-kuota','hero-hadir','hero-pct-text','stat-absen','stat-pending','ring-num','ci-total-hadir','ci-belum-masuk','ci-est-pax','rsvp-ring-num','rsvp-est-pax','rsvp-stat-absen','rsvp-stat-pending','quota-used'];
+  const NUMS = ['stat-total','stat-kuota','hero-hadir','hero-pct-text','stat-absen','stat-pending','ring-num','ci-att','ci-wait','ci-est','rsvp-ring-num','rsvp-est-pax','rsvp-stat-absen','rsvp-stat-pending','quota-used'];
   function countUp(el) {
     const m = /^(\D*)(\d+)(\D*)$/.exec(el.textContent.trim()); if (!m) return;
     const to = +m[2], from = +(el.dataset.v || 0); el.dataset.v = to;
@@ -1491,107 +1520,62 @@ checkSession();
   }
   function enter(id) { const t = $(id); if (!t || reduce) return; t.classList.remove('tab-in'); void t.offsetWidth; t.classList.add('tab-in'); }
 
+  function place(parent, cls, sel) {
+    const a = parent && parent.querySelector(sel); if (!a || !a.offsetWidth) return;
+    let t = parent.querySelector('.' + cls); const fresh = !t;
+    if (fresh) { t = document.createElement('i'); t.className = cls; t.style.transition = 'none'; parent.append(t); }
+    t.style.width = a.offsetWidth + 'px'; t.style.transform = `translateX(${a.offsetLeft}px)`;
+    if (fresh) { void t.offsetWidth; t.style.transition = ''; }
+  }
+  const placeAll = () => { place(document.querySelector('.pillnav'), 'thumb', 'button.on'); place($('stat-switch'), 'cs-thumb', 'button.active'); };
+  const ro = new ResizeObserver(placeAll); ro.observe(document.querySelector('.pillnav')); ro.observe($('stat-switch'));
+
   const head = document.createElement('div'); head.className = 'sticky-head';
   const sb = document.querySelector('#tab-tamu .sbar'); sb.before(head); head.append(sb);
   const STAT = [['all', 'Semua'], ['unsent', 'Belum dikirim'], ['pending', 'Menunggu'], ['hadir', 'Hadir'], ['checked_in', 'Check-in'], ['tidak_hadir', 'Absen']];
-  
-  head.insertAdjacentHTML('beforeend', `
-    <div style="display:flex; align-items:center; gap:8px;">
-      <div class="chips" id="st-chips" style="flex:1; margin:0; padding:0 0 2px 0;-webkit-mask-image:none;mask-image:none;">
-        ` + STAT.map(([k, l]) => `<button class="chip" data-f="${k}">${l}</button>`).join('') + `
-      </div>
-      <div style="flex-shrink:0;">
-        <button id="sort-pill-btn" class="chip" style="display:flex; align-items:center; gap:6px; background:var(--card); border:1px solid var(--line); color:var(--ink); cursor:pointer;">
-          <span id="sort-pill-label">Dibuat ↓</span>
-          <i data-lucide="arrow-up-down" style="width:14px; height:14px;"></i>
-        </button>
-      </div>
-    </div>
-  `);
-
-  window.openSortSheet = function() {
-    const orderLabels = { asc: 'Ascending (Naik / A-Z)', desc: 'Descending (Turun / Z-A)' };
-    openSheet(`
-      <div class="sheet-head"><h3>Urutkan Tamu</h3><button onclick="closeSheet()">Tutup</button></div>
-      <div class="listcard" style="padding-bottom:16px;">
-        <div class="act-title">Berdasarkan</div>
-        <button class="act" onclick="setSortBy('name')"><i data-lucide="user"></i> Nama ${activeSortBy === 'name' ? '✓' : ''}</button>
-        <button class="act" onclick="setSortBy('updated')"><i data-lucide="refresh-cw"></i> Tanggal Diperbarui ${activeSortBy === 'updated' ? '✓' : ''}</button>
-        <button class="act" onclick="setSortBy('created')"><i data-lucide="calendar"></i> Tanggal Dibuat ${activeSortBy === 'created' ? '✓' : ''}</button>
-        <div class="act-title" style="margin-top:12px;">Arah Urutan</div>
-        <button class="act" onclick="setSortOrder('${activeSortOrder === 'asc' ? 'desc' : 'asc'}')">
-          <i data-lucide="${activeSortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}"></i> 
-          ${orderLabels[activeSortOrder]}
-        </button>
-      </div>
-    `);
+  const SORT_HTML = '<div class="sortpill" id="sort-pill"><label class="sp-sel"><select id="sort-field" aria-label="Urutkan berdasarkan"><option value="name">Nama</option><option value="updated">Diubah</option><option value="created">Dibuat</option></select></label><button type="button" id="sort-dir"></button></div>';
+  head.insertAdjacentHTML('beforeend', '<div class="chiprow"><div class="chips" id="st-chips">' + STAT.map(([k, l]) => `<button class="chip" data-f="${k}">${l}</button>`).join('') + '</div>' + SORT_HTML + '</div>');
+  const syncSort = () => {
+    $('sort-field').value = sortField;
+    const b = $('sort-dir'), asc = sortDir === 'asc';
+    b.setAttribute('aria-label', asc ? 'Urutan naik' : 'Urutan turun');
+    b.innerHTML = `<i data-lucide="${asc ? 'arrow-up' : 'arrow-down'}"></i>`; icons();
   };
-
-  window.setSortBy = function(by) {
-    activeSortBy = by;
-    closeSheet();
-    updateSortPillText();
-    renderGuestList();
-  };
-
-  window.setSortOrder = function(ord) {
-    activeSortOrder = ord;
-    closeSheet();
-    updateSortPillText();
-    renderGuestList();
-  };
-
-  window.updateSortPillText = function() {
-    const labels = { name: 'Nama', updated: 'Diperbarui', created: 'Dibuat' };
-    const arrow = activeSortOrder === 'asc' ? '↑' : '↓';
-    const lbl = $('sort-pill-label');
-    if (lbl) lbl.textContent = `${labels[activeSortBy]} ${arrow}`;
-  };
-
-  document.addEventListener('click', e => {
-    const sortBtn = e.target.closest('#sort-pill-btn');
-    if (sortBtn) {
-      openSortSheet();
-      return;
-    }
-    const b = e.target.closest('#st-chips .chip'); 
-    if (!b) return; 
-    anim = true; 
-    activeFilter = b.dataset.f; 
-    renderGuestList(); 
-  });
-
+  $('sort-field').addEventListener('change', e => { sortField = e.target.value; anim = true; renderGuestList(); });
+  $('sort-dir').addEventListener('click', () => { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; syncSort(); anim = true; renderGuestList(); });
+  syncSort();
+  const toList = () => { const l = document.querySelector('#tab-tamu .listcard'); if (!l) return; const top = l.getBoundingClientRect().top + scrollY - head.offsetHeight - 8; if (scrollY > top) scrollTo({ top, behavior: 'smooth' }); };
+  document.addEventListener('click', e => { const b = e.target.closest('#st-chips .chip'); if (!b) return; anim = true; activeFilter = b.dataset.f; renderGuestList(); toList(); });
   const _cat = setCategory;
-  window.setCategory = function () { anim = true; _cat.apply(this, arguments); };
+  window.setCategory = function () { anim = true; _cat.apply(this, arguments); toList(); };
   window.resetFilters = () => { activeFilter = 'all'; activeCategory = 'all'; $('search-input').value = ''; anim = true; renderCategorySelect(); renderGuestList(); };
 
   const _rg = renderGuestList;
   window.renderGuestList = function () {
     _rg.apply(this, arguments);
     document.querySelectorAll('#st-chips .chip').forEach(c => c.classList.toggle('on', c.dataset.f === activeFilter));
-    updateSortPillText();
     const box = $('guest-list-container'), items = box.querySelectorAll('.gl');
     if (!items.length && globalData.guests.length) box.innerHTML = '<div class="empty"><b style="color:var(--ink)">Tidak ada tamu yang cocok</b><br><button class="reset" onclick="resetFilters()">Reset filter</button></div>';
     if (anim && !reduce) items.forEach((el, i) => { el.classList.add('in'); el.style.animationDelay = Math.min(i, 12) * 35 + 'ms'; });
     if (anim) document.querySelectorAll('#st-chips .chip.on').forEach(c => { const r = c.parentElement; r.scrollTo({ left: c.offsetLeft - (r.clientWidth - c.offsetWidth) / 2, behavior: 'smooth' }); });
     anim = false;
   };
-
   const _ru = renderUI;
   window.renderUI = function () {
     _ru.apply(this, arguments);
     NUMS.forEach(id => { const el = $(id); if (el) countUp(el); });
     if (first) { first = false; enter('tab-home'); }
     if (!ringsPlayed) { ringsPlayed = true; playRings(); }
+    placeAll();
   };
   const _sw = switchTab;
   window.switchTab = function (t) {
     _sw.apply(this, arguments); enter('tab-' + t); $('nav-container-wrap').classList.remove('min');
     const f = $('fab-btn'); f.classList.remove('swap'); void f.offsetWidth; f.classList.add('swap');
-    if (t === 'tamu') { anim = true; renderGuestList(); }
+    placeAll(); if (t === 'tamu') { anim = true; renderGuestList(); }
   };
   const _sc = switchCardView;
-  window.switchCardView = function () { _sc.apply(this, arguments); playRings(); };
+  window.switchCardView = function () { _sc.apply(this, arguments); placeAll(); playRings(); };
 
   let ly = scrollY;
   addEventListener('scroll', () => {
