@@ -1297,7 +1297,6 @@ function renderGuestList() {
           <div class="n">${esc(g.group_name)}</div>
           <div class="tags">
             <span class="tag">${esc(g.category)}</span>
-            <span class="tag" style="background:var(--soft);color:var(--brand);font-weight:600">${g.invitation_type === 'cetak' ? 'Cetak' : 'Digital'}</span>
             <span class="st st-${k}">${txt}</span>
           </div>
         </div>
@@ -1508,9 +1507,9 @@ function openGuestSheet(id) {
   const cur = g ? (g.category || 'Umum') : cats[0];
   const currentType = g ? (g.invitation_type || 'digital') : 'digital';
 
-  const isSentChecked = g ? (g.is_sent || g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir' || g.is_checked_in) : false;
+  const isSentChecked = g ? (g.is_sent || g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir' || g.is_checked_in) : (currentType === 'cetak');
   const isCheckinChecked = g ? g.is_checked_in : false;
-  const rsvpVal = g ? g.rsvp_status : 'pending';
+  const rsvpVal = g ? (g.invitation_type === 'cetak' ? 'hadir' : (g.rsvp_status || 'pending')) : (currentType === 'cetak' ? 'hadir' : 'pending');
 
   openSheet(`
     <div class="sheet-head"><button onclick="closeSheet()">Batal</button><h3>${g ? 'Edit tamu' : 'Tamu baru'}</h3><button id="gs-save">${g ? 'Simpan' : 'Tambah'}</button></div>
