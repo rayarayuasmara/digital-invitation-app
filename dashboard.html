@@ -587,6 +587,34 @@ html.lock{overflow:hidden}
 .sheet .sheet-actions{display:flex;flex-direction:column;gap:10px;margin-top:20px}
 .sheet .autobar{height:4px;border-radius:999px;background:var(--line);margin-top:18px;overflow:hidden}
 .sheet .autobar i{display:block;height:100%;width:100%;background:var(--green);transform-origin:left;animation:shrink linear forwards}
+
+/* ---- Tab Acara: sub-tab & template WA ---- */
+.subpane>*+*{margin-top:12px}
+.page>.subpane{margin-top:12px}
+.dotmark{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber-ink);margin-left:6px;vertical-align:middle}
+.wa-label{font-size:13px;color:var(--sub);margin-bottom:8px}
+.wa-styles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.wa-style{border:1px solid var(--line);border-radius:16px;padding:10px 8px;text-align:center;background:var(--card);transition:all .2s}
+.wa-style b{display:block;font-size:14px;font-weight:600}
+.wa-style small{display:block;font-size:11.5px;color:var(--sub);margin-top:2px}
+.wa-style.on{border-color:var(--brand);background:var(--soft)}
+.wa-style.on b{color:var(--brand)}
+.wa-ta{width:100%;border:1px solid var(--line);border-radius:16px;background:var(--bg);padding:12px 14px;font-size:16px;line-height:1.5;resize:vertical;outline:none;min-height:150px}
+.wa-ta:focus{border-color:var(--brand)}
+.wa-vars{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.wa-vars button{font-family:'Geist Mono',monospace;font-size:12.5px;padding:6px 10px;border-radius:999px;background:var(--tag);color:var(--tag-ink);font-weight:500}
+.wa-vars button:active{transform:scale(.95)}
+.wa-meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:13px;color:var(--sub)}
+.wa-link{color:var(--red-ink);font-weight:600;font-size:13px;padding:4px 0}
+.wa-link[hidden]{display:none}
+.wa-bubble{position:relative;background:#d9fdd3;color:#111b21;border-radius:14px 14px 14px 4px;padding:10px 12px 8px;font-size:14.5px;line-height:1.45;white-space:pre-wrap;word-break:break-word;max-height:380px;overflow:auto}
+:root[data-dark="1"] .wa-bubble{background:#144d37;color:#e9edef}
+.wa-bubble b{font-weight:700}
+.wa-bubble u{text-decoration:underline;color:#027eb5}
+:root[data-dark="1"] .wa-bubble u{color:#53bdeb}
+.wa-time{display:block;text-align:right;font-size:11px;opacity:.55;margin-top:2px}
+.wa-chip-add{border-style:dashed!important;color:var(--brand)!important}
+.wa-chip-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-left:6px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -744,27 +772,53 @@ html.lock{overflow:hidden}
     <!-- TAB ACARA -->
     <div id="tab-acara" class="hidden">
       <header class="topbar"><h1>Acara</h1><span class="logo">R</span></header>
-      <form class="page" id="event-form" onsubmit="submitEditEvent(event)">
-        <div class="card" style="padding:4px 18px">
-          <div class="field"><label for="ev-title">Judul</label><input type="text" id="ev-title" required /></div>
-          <div class="field"><label for="ev-date">Waktu</label><input type="datetime-local" id="ev-date" required /></div>
-        </div>
-        <div class="card" style="padding:4px 18px"><div class="field col"><label for="ev-location">Lokasi</label><textarea id="ev-location" rows="2" required></textarea></div></div>
-        <div class="card" style="padding:4px 18px"><div class="field col"><label for="ev-caption">Pesan pembuka</label><textarea id="ev-caption" rows="4" required></textarea></div></div>
-        
-        <!-- Template WhatsApp berdasarkan Kategori -->
-        <div class="card" style="padding:16px 18px">
-          <div class="ch"><h3>Template WhatsApp per Kategori</h3></div>
-          <div class="sub" style="font-size:13px; margin-bottom:14px">
-            Gunakan variabel <b>{nama}</b> untuk nama tamu dan <b>{link}</b> untuk tautan undangan unik.
-          </div>
-          <div class="field col"><label>Keluarga / Sesepuh (Formal/Resmi)</label><textarea id="tpl-Keluarga" rows="3" placeholder="Contoh: Yth. Bapak/Ibu/Saudara/i {nama}..."></textarea></div>
-          <div class="field col"><label>Teman / Sahabat (Casual/Santai)</label><textarea id="tpl-Teman" rows="3" placeholder="Contoh: Halo {nama}! Wah akhirnya..."></textarea></div>
-          <div class="field col"><label>Kolega / Umum (General)</label><textarea id="tpl-Umum" rows="3" placeholder="Contoh: Halo {nama}, kami mengundang..."></textarea></div>
+      <div class="page">
+        <div class="tabs" id="acara-subtabs" role="tablist" style="padding:0 4px">
+          <button class="on" role="tab" aria-selected="true" data-sub="profil" onclick="switchAcaraSub('profil')">Profil Acara</button>
+          <button role="tab" aria-selected="false" data-sub="wa" onclick="switchAcaraSub('wa')">Pesan WhatsApp<i class="dotmark" id="wa-dirty" hidden></i></button>
         </div>
 
-        <button type="submit" id="btn-save-event" class="btn">Simpan perubahan</button>
-      </form>
+        <!-- Sub-tab 1: Profil acara -->
+        <form id="event-form" onsubmit="submitEditEvent(event)" class="subpane">
+          <div class="card" style="padding:4px 18px">
+            <div class="field"><label for="ev-title">Judul</label><input type="text" id="ev-title" required /></div>
+            <div class="field"><label for="ev-date">Waktu</label><input type="datetime-local" id="ev-date" required /></div>
+          </div>
+          <div class="card" style="padding:4px 18px"><div class="field col"><label for="ev-location">Lokasi</label><textarea id="ev-location" rows="2" required></textarea></div></div>
+          <div class="card" style="padding:4px 18px"><div class="field col"><label for="ev-caption">Pesan pembuka</label><textarea id="ev-caption" rows="4" required></textarea></div>
+            <div class="sub" style="font-size:12px;padding:0 4px 12px">Tampil di halaman undangan tamu, bukan di pesan WhatsApp.</div></div>
+          <button type="submit" id="btn-save-event" class="btn">Simpan profil acara</button>
+        </form>
+
+        <!-- Sub-tab 2: Template WhatsApp -->
+        <div id="wa-pane" class="subpane hidden">
+          <div class="card" style="padding:16px 18px 14px">
+            <div class="ch" style="margin-bottom:4px"><h3>Template per kategori</h3></div>
+            <div class="sub" style="font-size:13px">Pilih kategori tamu, lalu pilih gaya pesan atau tulis sendiri. Kategori tanpa template memakai template <b>Umum</b>.</div>
+            <div class="chips" id="wa-cats" role="tablist" aria-label="Kategori template"></div>
+          </div>
+
+          <div class="card" id="wa-editor" style="padding:16px 18px">
+            <div class="ch" style="margin-bottom:6px"><h3 id="wa-cat-title">Umum</h3><span class="tag" id="wa-cat-count"></span></div>
+            <div class="sub" style="font-size:13px;margin-bottom:12px" id="wa-cat-hint"></div>
+
+            <div class="wa-label">Gaya pesan</div>
+            <div class="wa-styles" id="wa-styles"></div>
+
+            <div class="wa-label" style="margin-top:16px">Isi pesan</div>
+            <textarea id="wa-text" class="wa-ta" rows="9" placeholder="Tulis pesan undangan…" oninput="onWaInput()"></textarea>
+            <div class="wa-vars" id="wa-vars" aria-label="Sisipkan variabel"></div>
+            <div class="wa-meta"><span id="wa-count">0 karakter</span><button type="button" class="wa-link" id="wa-reset" onclick="resetWaCategory()">Kosongkan</button></div>
+          </div>
+
+          <div class="card" style="padding:16px 18px">
+            <div class="ch" style="margin-bottom:10px"><h3>Pratinjau</h3><span class="sub" style="font-size:13px">Contoh: <b>Budi Santoso</b></span></div>
+            <div class="wa-bubble"><div id="wa-preview"></div><span class="wa-time">09.41 ✓✓</span></div>
+          </div>
+
+          <button type="button" id="btn-save-wa" class="btn" onclick="saveWaTemplates()">Simpan template WhatsApp</button>
+        </div>
+      </div>
     </div>
 
     <!-- TAB AKUN -->
@@ -1048,11 +1102,8 @@ function renderUI() {
   $('ev-location').value = event.location || '';
   $('ev-caption').value = event.caption || '';
 
-  // Render Template WA per Kategori di Tab Acara
-  const templates = event.wa_templates || {};
-  if ($('tpl-Keluarga')) $('tpl-Keluarga').value = templates['Keluarga'] || '';
-  if ($('tpl-Teman')) $('tpl-Teman').value = templates['Teman'] || '';
-  if ($('tpl-Umum')) $('tpl-Umum').value = templates['Umum'] || '';
+  // Template WA (tab Pesan WhatsApp)
+  initWaDraft();
 
   const hadirGroupsCount = guests.filter(g => g.rsvp_status === 'hadir').length;
   const totalGuestsCount = stats.total_guests || guests.length;
@@ -1144,12 +1195,6 @@ async function submitEditEvent(e) {
   const location = $('ev-location').value.trim();
   const caption = $('ev-caption').value.trim();
   
-  const waTemplates = {
-    'Keluarga': $('tpl-Keluarga')?.value.trim() || '',
-    'Teman': $('tpl-Teman')?.value.trim() || '',
-    'Umum': $('tpl-Umum')?.value.trim() || ''
-  };
-
   if (!title || !dateVal) return toast('Judul dan waktu wajib diisi', false);
 
   const btn = $('btn-save-event');
@@ -1164,23 +1209,22 @@ async function submitEditEvent(e) {
         title: title,
         event_date: new Date(dateVal).toISOString(),
         location: location,
-        caption: caption,
-        wa_templates: waTemplates
+        caption: caption
       })
       .eq('id', eventId);
 
     btn.disabled = false;
-    btn.textContent = 'Simpan perubahan';
+    btn.textContent = 'Simpan profil acara';
 
     if (directError) {
       return toast('Gagal menyimpan: ' + directError.message, false);
     }
 
-    toast('Perubahan acara & template berhasil disimpan!');
+    toast('Profil acara berhasil disimpan');
     loadDashboard();
   } catch (err) {
     btn.disabled = false;
-    btn.textContent = 'Simpan perubahan';
+    btn.textContent = 'Simpan profil acara';
     toast('Terjadi kesalahan: ' + err.message, false);
   }
 }
@@ -1397,16 +1441,177 @@ const findGuest = id => globalData.guests.find(g => g.id === id);
 const guestLink = g => `${window.location.origin}/${globalData.client.slug}/${g.invitation_token}`;
 
 // Template WhatsApp otomatis berbasis kategori tamu
+const WA_DEFAULT = `Halo *{nama}*,\n\nKami mengundang Anda untuk menghadiri acara *{acara}*.\n\nSilakan kunjungi tautan berikut:\n{link}`;
+function waFill(tpl, g, link) {
+  const ev = globalData.event || {};
+  const d = ev.event_date ? new Date(ev.event_date) : null;
+  const tz = 'Asia/Jakarta';
+  const tanggal = d ? d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: tz }) : '';
+  const waktu = d ? d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz }).replace(':', '.') + ' WIB' : '';
+  return tpl
+    .replace(/{nama}/g, g.group_name)
+    .replace(/{link}/g, link)
+    .replace(/{acara}/g, ev.title || '')
+    .replace(/{tanggal}/g, tanggal)
+    .replace(/{waktu}/g, waktu)
+    .replace(/{lokasi}/g, ev.location || '');
+}
 const waText = g => {
   const templates = globalData.event.wa_templates || {};
   const cat = g.category || 'Umum';
-  let tpl = templates[cat] || templates['Umum'] || globalData.event.caption || `Halo *{nama}*,\n\nKami mengundang Anda untuk menghadiri acara *${globalData.event.title}*.\n\nSilakan kunjungi tautan berikut:\n{link}`;
-  
-  return tpl
-    .replace(/{nama}/g, g.group_name)
-    .replace(/{link}/g, guestLink(g))
-    .replace(/{acara}/g, globalData.event.title);
+  const tpl = (templates[cat] || '').trim() || (templates['Umum'] || '').trim() || WA_DEFAULT;
+  return waFill(tpl, g, guestLink(g));
 };
+
+/* ===== Tab Acara: sub-tab ===== */
+function switchAcaraSub(sub) {
+  document.querySelectorAll('#acara-subtabs button').forEach(b => {
+    const on = b.dataset.sub === sub; b.classList.toggle('on', on); b.setAttribute('aria-selected', on);
+  });
+  $('event-form').classList.toggle('hidden', sub !== 'profil');
+  $('wa-pane').classList.toggle('hidden', sub !== 'wa');
+  if (sub === 'wa') renderWaEditor();
+}
+
+/* ===== Template WhatsApp: preset, kategori, editor ===== */
+const WA_PRESETS = [
+  { id: 'formal', name: 'Formal', hint: 'Resmi & sopan',
+    text: `Assalamu'alaikum Wr. Wb.\n\nYth. Bapak/Ibu/Saudara/i *{nama}*,\n\nDengan memohon rahmat dan ridho Allah SWT, kami bermaksud mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara *{acara}* yang akan dilaksanakan pada:\n\n🗓 {tanggal}\n🕙 {waktu}\n📍 {lokasi}\n\nInformasi lengkap dan konfirmasi kehadiran dapat dilihat melalui tautan berikut:\n{link}\n\nMerupakan kehormatan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.\n\nWassalamu'alaikum Wr. Wb.` },
+  { id: 'casual', name: 'Santai', hint: 'Akrab & ramah',
+    text: `Halo {nama}! 👋\n\nKami mau ngundang kamu ke *{acara}* nih 🎉\n\n🗓 {tanggal}\n🕙 {waktu}\n📍 {lokasi}\n\nCek detail & konfirmasi hadir di sini ya:\n{link}\n\nDitunggu banget kehadirannya! 🤍` },
+  { id: 'short', name: 'Singkat', hint: 'Satu paragraf',
+    text: `Halo {nama}, kami mengundang Anda ke *{acara}* pada {tanggal}, {waktu}. Detail & konfirmasi kehadiran: {link}` }
+];
+// Gaya bawaan yang disarankan per kategori (hanya untuk petunjuk)
+const WA_SUGGEST = { Keluarga: 'formal', Sesepuh: 'formal', Kolega: 'formal', Teman: 'casual', Sahabat: 'casual', Tetangga: 'short', Umum: 'short' };
+const WA_VARS = ['{nama}', '{link}', '{acara}', '{tanggal}', '{waktu}', '{lokasi}'];
+const WA_BASE_CATS = ['Umum', 'Keluarga', 'Teman', 'Kolega', 'Tetangga'];
+
+let waDraft = {}, waSaved = {}, waCats = [], waActive = 'Umum';
+
+function initWaDraft() {
+  const keepDraft = waIsDirty();
+  waSaved = { ...(globalData.event.wa_templates || {}) };
+  if (!keepDraft) waDraft = { ...waSaved };
+  const fromGuests = (globalData.guests || []).map(g => g.category).filter(Boolean);
+  waCats = [...new Set([...WA_BASE_CATS, ...fromGuests, ...Object.keys(waSaved)])];
+  if (!waCats.includes(waActive)) waActive = 'Umum';
+  if ($('wa-pane') && !$('wa-pane').classList.contains('hidden')) renderWaEditor();
+  updateWaDirty();
+}
+const waGuestCount = c => (globalData.guests || []).filter(g => (g.category || 'Umum') === c).length;
+const waHas = c => !!(waDraft[c] && waDraft[c].trim());
+function waIsDirty() {
+  const keys = new Set([...Object.keys(waDraft), ...Object.keys(waSaved)]);
+  for (const k of keys) if ((waDraft[k] || '').trim() !== (waSaved[k] || '').trim()) return true;
+  return false;
+}
+function updateWaDirty() {
+  const d = waIsDirty();
+  if ($('wa-dirty')) $('wa-dirty').hidden = !d;
+}
+
+function renderWaEditor() {
+  // chip kategori
+  $('wa-cats').innerHTML = waCats.map(c =>
+    `<button type="button" class="chip ${c === waActive ? 'on' : ''}" role="tab" aria-selected="${c === waActive}" data-c="${esc(c)}">${esc(c)}${waHas(c) ? '<i class="wa-chip-dot"></i>' : ''}</button>`
+  ).join('') + `<button type="button" class="chip wa-chip-add" onclick="addWaCategory()">+ Kategori</button>`;
+  $('wa-cats').querySelectorAll('[data-c]').forEach(b => b.onclick = () => { waActive = b.dataset.c; renderWaEditor(); });
+
+  const n = waGuestCount(waActive);
+  $('wa-cat-title').textContent = waActive;
+  $('wa-cat-count').textContent = n + ' tamu';
+  $('wa-cat-hint').textContent = waHas(waActive)
+    ? 'Template khusus kategori ini aktif.'
+    : (waActive === 'Umum' ? 'Belum ada template. Memakai pesan bawaan sistem.' : 'Belum ada template khusus, saat ini memakai template Umum.');
+
+  // gaya
+  const cur = (waDraft[waActive] || '').trim();
+  const matched = WA_PRESETS.find(p => p.text === cur);
+  const sug = WA_SUGGEST[waActive];
+  $('wa-styles').innerHTML = WA_PRESETS.map(p =>
+    `<button type="button" class="wa-style ${matched && matched.id === p.id ? 'on' : ''}" data-p="${p.id}"><b>${p.name}</b><small>${sug === p.id && !matched ? 'Disarankan' : p.hint}</small></button>`
+  ).join('');
+  $('wa-styles').querySelectorAll('[data-p]').forEach(b => b.onclick = () => applyWaPreset(b.dataset.p));
+
+  // variabel
+  $('wa-vars').innerHTML = WA_VARS.map(v => `<button type="button" data-v="${v}">${v}</button>`).join('');
+  $('wa-vars').querySelectorAll('[data-v]').forEach(b => b.onclick = () => insertWaVar(b.dataset.v));
+
+  $('wa-text').value = waDraft[waActive] || '';
+  $('wa-reset').hidden = !waHas(waActive);
+  $('wa-reset').textContent = waActive === 'Umum' ? 'Kosongkan' : 'Hapus template kategori ini';
+  updateWaMeta();
+}
+
+function applyWaPreset(id) {
+  const p = WA_PRESETS.find(x => x.id === id); if (!p) return;
+  const cur = (waDraft[waActive] || '').trim();
+  const isPreset = WA_PRESETS.some(x => x.text === cur);
+  if (cur && !isPreset && !confirm('Ganti isi pesan dengan gaya "' + p.name + '"? Tulisan Anda saat ini akan terganti.')) return;
+  waDraft[waActive] = p.text;
+  renderWaEditor(); updateWaDirty();
+}
+function insertWaVar(v) {
+  const ta = $('wa-text'), a = ta.selectionStart ?? ta.value.length, b = ta.selectionEnd ?? a;
+  ta.value = ta.value.slice(0, a) + v + ta.value.slice(b);
+  ta.focus(); ta.selectionStart = ta.selectionEnd = a + v.length;
+  onWaInput();
+}
+function onWaInput() {
+  waDraft[waActive] = $('wa-text').value;
+  updateWaMeta(); updateWaDirty();
+  // sorot gaya yang cocok
+  const cur = $('wa-text').value.trim();
+  $('wa-styles').querySelectorAll('[data-p]').forEach(b => b.classList.toggle('on', (WA_PRESETS.find(p => p.id === b.dataset.p) || {}).text === cur));
+  $('wa-reset').hidden = !cur;
+}
+function updateWaMeta() {
+  const t = $('wa-text').value;
+  $('wa-count').textContent = t.length + ' karakter';
+  const sample = { group_name: 'Budi Santoso' };
+  const tpl = t.trim() || (waDraft['Umum'] || '').trim() || WA_DEFAULT;
+  const html = esc(waFill(tpl, sample, `${location.origin}/${globalData.client.slug}/abc123`))
+    .replace(/\*([^*\n]+)\*/g, '<b>$1</b>')
+    .replace(/(https?:\/\/[^\s<]+)/g, '<u>$1</u>');
+  $('wa-preview').innerHTML = html;
+}
+function resetWaCategory() {
+  if (waActive === 'Umum') { waDraft['Umum'] = ''; }
+  else { delete waDraft[waActive]; if (!waGuestCount(waActive) && !WA_BASE_CATS.includes(waActive)) waCats = waCats.filter(c => c !== waActive), waActive = 'Umum'; }
+  renderWaEditor(); updateWaDirty();
+}
+function addWaCategory() {
+  openSheet(`
+    <div class="sheet-head"><button onclick="closeSheet()">Batal</button><h3>Kategori baru</h3><button id="wc-save">Tambah</button></div>
+    <div class="listcard"><div class="field"><label for="wc-name">Nama</label><input id="wc-name" type="text" maxlength="30" placeholder="Mis. Rekan Kantor" autocomplete="off"></div></div>
+    <div class="sub" style="font-size:13px;padding:10px 6px">Gunakan nama yang sama dengan kategori di data tamu agar template otomatis terpakai.</div>`);
+  setTimeout(() => $('wc-name')?.focus(), 300);
+  const go = () => {
+    const name = ($('wc-name').value || '').trim();
+    if (!name) return toast('Nama kategori wajib diisi', false);
+    const dup = waCats.find(c => c.toLowerCase() === name.toLowerCase());
+    if (dup) { waActive = dup; closeSheet(); renderWaEditor(); return toast('Kategori sudah ada, dipilih untuk Anda'); }
+    waCats.push(name); waActive = name; closeSheet(); renderWaEditor();
+    toast('Kategori ditambahkan. Pilih gaya pesan lalu simpan.');
+  };
+  $('wc-save').onclick = go;
+  $('wc-name').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); go(); } };
+}
+async function saveWaTemplates() {
+  const out = {};
+  Object.keys(waDraft).forEach(k => { const v = (waDraft[k] || '').trim(); if (v) out[k] = v; });
+  const btn = $('btn-save-wa'); btn.disabled = true; btn.textContent = 'Menyimpan…';
+  try {
+    const { error } = await supabaseClient.from('events').update({ wa_templates: out }).eq('id', globalData.event.id);
+    if (error) throw error;
+    globalData.event.wa_templates = out;
+    waSaved = { ...out }; waDraft = { ...out };
+    toast('Template WhatsApp tersimpan');
+    updateWaDirty(); renderWaEditor();
+  } catch (e) { toast('Gagal menyimpan: ' + (e.message || e), false); }
+  btn.disabled = false; btn.textContent = 'Simpan template WhatsApp';
+}
 
 function openGuestActions(id) {
   const g = findGuest(id); if (!g) return;
