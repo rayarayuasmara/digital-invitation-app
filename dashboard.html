@@ -434,7 +434,7 @@ html.lock{overflow:hidden}
 .brandcard .side .sr,.brandcard .side .sr:first-child{padding:10px 12px;font-size:13px;white-space:nowrap}
 .brandcard .side .sr b{font-size:19px}
 
-/* ===== Scanner Overlay & Styles (from scanner-3.html) ===== */
+/* ===== Scanner Overlay & Styles ===== */
 #scanner-overlay{position:fixed;inset:0;z-index:70;background:var(--bg);overflow-y:auto;display:flex;justify-content:center}
 #scanner-overlay .topbar{display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top) + 22px) 20px 8px}
 #scanner-overlay .topbar h1{margin:0;font-size:32px;color:var(--brand);font-weight:800;letter-spacing:-.03em}
@@ -542,12 +542,12 @@ html.lock{overflow:hidden}
 #scanner-overlay .autobar{height:4px;border-radius:99px;background:var(--line);margin-top:14px;overflow:hidden}
 #scanner-overlay .autobar i{display:block;height:100%;width:100%;background:var(--green);transform-origin:left;animation:shrink 2.6s linear forwards}
 
-/* Perbaikan: popup hasil scan harus tampil di atas overlay scanner (z-index 70) */
+/* Perbaikan: popup hasil scan harus tampil di atas overlay scanner */
 .backdrop{z-index:90}
 .sheet{z-index:91}
 .toast{z-index:100}
 
-/* ===== Histori RSVP: waktu di atas label status + tombol tampilkan lebih banyak ===== */
+/* ===== Histori RSVP ===== */
 .hl .hmeta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
 .hl .when{font-family:'Geist Mono',monospace;font-size:11.5px;color:var(--sub);white-space:nowrap}
 .morebtn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:46px;margin-top:6px;border-radius:14px;background:var(--soft);color:var(--brand);font-weight:600;font-size:15px;text-align:center}
@@ -563,12 +563,6 @@ html.lock{overflow:hidden}
 .cbar{height:6px;border-radius:99px;background:var(--soft);margin:8px 0 6px;overflow:hidden}
 .cbar i{display:block;height:100%;border-radius:inherit;background:var(--brand)}
 .cr .chev{width:18px;height:18px;color:var(--sub);flex-shrink:0}
-
-/* ===== Scanner: perbaikan input token di layar HP ===== */
-#scanner-overlay .sbar{min-width:0}
-#scanner-overlay .sbar input{width:100%;min-width:0}
-#scanner-overlay .tokrow .sbar{min-width:0}
-#scanner-overlay .tokrow .btn{flex-shrink:0;white-space:nowrap}
 
 /* ===== Scanner: popup hasil scan & konfirmasi (sheet global) ===== */
 @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
@@ -591,7 +585,7 @@ html.lock{overflow:hidden}
 .sheet .codechip{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:6px 14px;border-radius:999px;background:var(--tag);color:var(--tag-ink);font-size:13px}
 .sheet .codechip b{font-family:'Geist Mono',monospace;font-weight:600;letter-spacing:.04em}
 .sheet .sheet-actions{display:flex;flex-direction:column;gap:10px;margin-top:20px}
-.sheet .autobar{height:4px;border-radius:99px;background:var(--line);margin-top:18px;overflow:hidden}
+.sheet .autobar{height:4px;border-radius:999px;background:var(--line);margin-top:18px;overflow:hidden}
 .sheet .autobar i{display:block;height:100%;width:100%;background:var(--green);transform-origin:left;animation:shrink linear forwards}
 </style>
 </head>
@@ -733,7 +727,7 @@ html.lock{overflow:hidden}
           <div id="guest-list-container"></div>
         </div>
 
-        <!-- 3 Action Buttons in Tab Tamu, Scanner on the far right -->
+        <!-- 3 Action Buttons in Tab Tamu -->
         <div class="tiles3">
           <button class="tile w narrow" onclick="openGuestSheet()"><span class="ico" style="align-self:flex-start"><i data-lucide="plus"></i></span><span>Tambah<br>Tamu</span></button>
           <button class="tile g narrow" onclick="openPending()"><span class="ico" style="align-self:flex-start"><i data-lucide="message-circle"></i></span><span>Kirim<br>Undangan</span></button>
@@ -757,6 +751,18 @@ html.lock{overflow:hidden}
         </div>
         <div class="card" style="padding:4px 18px"><div class="field col"><label for="ev-location">Lokasi</label><textarea id="ev-location" rows="2" required></textarea></div></div>
         <div class="card" style="padding:4px 18px"><div class="field col"><label for="ev-caption">Pesan pembuka</label><textarea id="ev-caption" rows="4" required></textarea></div></div>
+        
+        <!-- Template WhatsApp berdasarkan Kategori -->
+        <div class="card" style="padding:16px 18px">
+          <div class="ch"><h3>Template WhatsApp per Kategori</h3></div>
+          <div class="sub" style="font-size:13px; margin-bottom:14px">
+            Gunakan variabel <b>{nama}</b> untuk nama tamu dan <b>{link}</b> untuk tautan undangan unik.
+          </div>
+          <div class="field col"><label>Keluarga / Sesepuh (Formal/Resmi)</label><textarea id="tpl-Keluarga" rows="3" placeholder="Contoh: Yth. Bapak/Ibu/Saudara/i {nama}..."></textarea></div>
+          <div class="field col"><label>Teman / Sahabat (Casual/Santai)</label><textarea id="tpl-Teman" rows="3" placeholder="Contoh: Halo {nama}! Wah akhirnya..."></textarea></div>
+          <div class="field col"><label>Kolega / Umum (General)</label><textarea id="tpl-Umum" rows="3" placeholder="Contoh: Halo {nama}, kami mengundang..."></textarea></div>
+        </div>
+
         <button type="submit" id="btn-save-event" class="btn">Simpan perubahan</button>
       </form>
     </div>
@@ -988,7 +994,7 @@ const guestBadge = g => {
   return ['unsent', 'Unsent'];
 };
 
-// Avatar dengan penanda ikon tipe undangan di sudut kanan bawah
+// Avatar dengan ikon tipe undangan di sudut kanan bawah
 const avatar = g => {
   const isCetak = g.invitation_type === 'cetak';
   return `<div class="av">${esc(initials(g.group_name))}<span class="type-badge ${isCetak ? 'type-cetak' : 'type-digital'}" title="${isCetak ? 'Cetak' : 'Digital'}"><i data-lucide="${isCetak ? 'printer' : 'globe'}"></i></span></div>`;
@@ -1042,6 +1048,12 @@ function renderUI() {
   $('ev-location').value = event.location || '';
   $('ev-caption').value = event.caption || '';
 
+  // Render Template WA per Kategori di Tab Acara
+  const templates = event.wa_templates || {};
+  if ($('tpl-Keluarga')) $('tpl-Keluarga').value = templates['Keluarga'] || '';
+  if ($('tpl-Teman')) $('tpl-Teman').value = templates['Teman'] || '';
+  if ($('tpl-Umum')) $('tpl-Umum').value = templates['Umum'] || '';
+
   const hadirGroupsCount = guests.filter(g => g.rsvp_status === 'hadir').length;
   const totalGuestsCount = stats.total_guests || guests.length;
   const hadirPct = totalGuestsCount > 0 ? Math.round((hadirGroupsCount / totalGuestsCount) * 100) : 0;
@@ -1053,7 +1065,6 @@ function renderUI() {
   const maxQuota = stats.max_quota || 100;
   $('stat-total').textContent = totalGuestsCount;
   
-  // Breakdown Digital vs Cetak pada Kartu Total Home
   const totalDigital = guests.filter(g => !g.invitation_type || g.invitation_type === 'digital').length;
   const totalCetak = guests.filter(g => g.invitation_type === 'cetak').length;
   if ($('stat-total-breakdown')) {
@@ -1132,6 +1143,12 @@ async function submitEditEvent(e) {
   const dateVal = $('ev-date').value;
   const location = $('ev-location').value.trim();
   const caption = $('ev-caption').value.trim();
+  
+  const waTemplates = {
+    'Keluarga': $('tpl-Keluarga')?.value.trim() || '',
+    'Teman': $('tpl-Teman')?.value.trim() || '',
+    'Umum': $('tpl-Umum')?.value.trim() || ''
+  };
 
   if (!title || !dateVal) return toast('Judul dan waktu wajib diisi', false);
 
@@ -1147,7 +1164,8 @@ async function submitEditEvent(e) {
         title: title,
         event_date: new Date(dateVal).toISOString(),
         location: location,
-        caption: caption
+        caption: caption,
+        wa_templates: waTemplates
       })
       .eq('id', eventId);
 
@@ -1158,7 +1176,7 @@ async function submitEditEvent(e) {
       return toast('Gagal menyimpan: ' + directError.message, false);
     }
 
-    toast('Perubahan acara berhasil disimpan!');
+    toast('Perubahan acara & template berhasil disimpan!');
     loadDashboard();
   } catch (err) {
     btn.disabled = false;
@@ -1287,7 +1305,7 @@ function renderGuestList() {
 
   if (!list.length) { box.innerHTML = '<div class="empty">Tidak ada tamu yang sesuai.</div>'; return; }
   
-  box.innerHTML = list.map((g, i) => {
+  box.innerHTML = list.map((g) => {
     const [k, txt] = guestBadge(g);
     const isSentClass = g.is_sent ? 'sent' : '';
     return `<div class="gl" data-id="${esc(g.id)}">
@@ -1366,9 +1384,9 @@ function handleFabClick() {
       <div class="sheet-head"><h3>Panduan Singkat</h3><button onclick="closeSheet()">Tutup</button></div>
       <div class="listcard" style="padding-bottom:16px;">
         <div style="font-size:15px; color:var(--sub); display:flex; flex-direction:column; gap:14px; line-height:1.5; padding-top:12px;">
-          <div><b>1. Tambah Tamu:</b> Pilih tipe undangan (Digital/Cetak), masukkan nama, kategori, nomor WA, dan kuota pax.</div>
-          <div><b>2. Kirim Undangan WA:</b> Klik ikon WhatsApp pada daftar tamu untuk mengirim pesan otomatis yang dilengkapi tautan undangan unik.</div>
-          <div><b>3. Check-In Acara:</b> Gunakan tombol Scan QR di Home atau di Tab Tamu untuk memindai QR Code tamu saat hari H pernikahan.</div>
+          <div><b>1. Tambah Tamu:</b> Pilih tipe undangan, masukkan nama, kategori, nomor WA, dan kuota pax.</div>
+          <div><b>2. Kirim Undangan WA:</b> Klik ikon WhatsApp untuk mengirim pesan otomatis sesuai template kategori.</div>
+          <div><b>3. Check-In Acara:</b> Gunakan tombol Scan QR di Home atau Tab Tamu saat hari H pernikahan.</div>
         </div>
       </div>
     `);
@@ -1377,7 +1395,18 @@ function handleFabClick() {
 
 const findGuest = id => globalData.guests.find(g => g.id === id);
 const guestLink = g => `${window.location.origin}/${globalData.client.slug}/${g.invitation_token}`;
-const waText = g => `Halo *${g.group_name}*,\n\nKami mengundang Anda untuk menghadiri acara *${globalData.event.title}*.\n\nSilakan konfirmasi kehadiran Anda melalui tautan resmi berikut:\n${guestLink(g)}`;
+
+// Template WhatsApp otomatis berbasis kategori tamu
+const waText = g => {
+  const templates = globalData.event.wa_templates || {};
+  const cat = g.category || 'Umum';
+  let tpl = templates[cat] || templates['Umum'] || globalData.event.caption || `Halo *{nama}*,\n\nKami mengundang Anda untuk menghadiri acara *${globalData.event.title}*.\n\nSilakan kunjungi tautan berikut:\n{link}`;
+  
+  return tpl
+    .replace(/{nama}/g, g.group_name)
+    .replace(/{link}/g, guestLink(g))
+    .replace(/{acara}/g, globalData.event.title);
+};
 
 function openGuestActions(id) {
   const g = findGuest(id); if (!g) return;
@@ -1659,7 +1688,7 @@ function openPending() {
   openSheet(`
     <div class="sheet-head"><h3>Tamu pending · ${list.length}</h3><button onclick="closeSheet()">Tutup</button></div>
     ${list.length
-      ? `<div class="listcard">${list.map((g, i) => `
+      ? `<div class="listcard">${list.map((g) => `
           <button class="act" style="width:100%;text-align:left" onclick="sendPendingWA('${g.id}')">
             ${avatar(g)}
             <div style="flex:1;min-width:0"><div style="font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(g.group_name)}</div><div style="font-size:13px;color:var(--sub)">${g.max_pax} pax · ${esc(g.category)}</div></div>
