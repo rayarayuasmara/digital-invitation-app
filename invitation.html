@@ -1,1223 +1,1309 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#faf6ee" />
-<title>Undangan Pernikahan</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#BD9F7F" />
+  <title>Undangan Pernikahan - RayaRayu</title>
 
-<!-- Supabase & QRCode Lib -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 
-<style>
-:root{
-  --ivory:#faf6ee; --paper:#fffdf9; --ink:#2d2823; --muted:#7d7367;
-  --gold:#a8884e; --gold-d:#8c6f3a; --gold-l:#e9dcc0; --line:#e8dfcc;
-  --ok:#4d7a58; --ok-bg:#e9f1ea; --no:#97574d; --no-bg:#f6e9e6;
-  --serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;
-  --sans:'Jost',system-ui,-apple-system,'Segoe UI',sans-serif;
-  --ease:cubic-bezier(.22,.8,.24,1);
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{scroll-behavior:smooth;background:#ece5d6}
-html.locked{overflow:hidden}
-body{margin:0;font-family:var(--sans);color:var(--ink);background:#ece5d6;-webkit-font-smoothing:antialiased;display:flex;justify-content:center;line-height:1.5}
-button,input,textarea{font:inherit;color:inherit}
-button{cursor:pointer;border:0;background:none;padding:0}
-a{color:inherit}
-[hidden]{display:none!important}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-#app{width:100%;max-width:448px;min-height:100vh;background:var(--ivory);position:relative;overflow-x:hidden;box-shadow:0 0 60px rgba(60,40,10,.12)}
+  <!-- Supabase & QRCode Lib -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-/* ---------- Tipografi & elemen dasar ---------- */
-.serif{font-family:var(--serif)}
-.eyebrow{font-size:11px;font-weight:500;letter-spacing:.34em;text-transform:uppercase;color:var(--gold);margin:0}
-h2.title{font-family:var(--serif);font-weight:500;font-size:36px;line-height:1.1;margin:10px 0 0;letter-spacing:.01em}
-.lead{color:var(--muted);font-size:14.5px;line-height:1.75;max-width:320px;margin:14px auto 0}
-.sec{padding:60px 26px;text-align:center;position:relative}
-.sec.alt{background:#f5efe2}
-.orn{display:flex;align-items:center;justify-content:center;gap:12px;margin:22px auto 0;color:var(--gold)}
-.orn::before,.orn::after{content:"";width:54px;height:1px;background:var(--gold-l)}
-.orn i{width:6px;height:6px;transform:rotate(45deg);border:1px solid var(--gold)}
-.card{background:var(--paper);border:1px solid var(--line);padding:24px 22px;text-align:left;position:relative}
-.names{font-family:var(--serif);font-weight:500;line-height:1.02;margin:0;letter-spacing:.005em}
-.names span{display:block}
-.names em{display:block;font-style:italic;font-weight:400;color:var(--gold);font-size:.46em;margin:.2em 0}
+  <style>
+    :root {
+      --tan: #BD9F7F;
+      --paper: #EAEAEA;
+      --sky: #76B5C0;
+      --ink: #0B0B0B;
+      --green: #58B98A;
+      --yellow: #E8BC3E;
+      --orange: #E69C78;
+      --grey: #CFCFCF;
+      --muted: rgba(11, 11, 11, .68);
+      --serif: 'Instrument Serif', 'Times New Roman', serif;
+      --sans: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      --ease: cubic-bezier(.2, .8, .2, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; background: #000; color: var(--ink);
+      font-family: var(--sans); font-size: 15px; line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    body.locked { overflow: hidden; }
+    button, input, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+    .on-dark :focus-visible, .ink :focus-visible { outline-color: var(--paper); }
+    ::selection { background: var(--ink); color: var(--paper); }
 
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:50px;padding:0 26px;border-radius:2px;background:var(--ink);color:var(--ivory);font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:500;text-decoration:none;transition:transform .3s var(--ease),background .25s,opacity .25s}
-.btn:hover{background:#443c34}
-.btn:active{transform:scale(.98)}
-.btn:disabled{opacity:.4;cursor:not-allowed}
-.btn.full{width:100%}
-.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--gold)}
-.btn.ghost:hover{background:#fbf5e8}
-.btn.sm{height:42px;padding:0 16px;font-size:11px;letter-spacing:.14em}
-.btn svg{width:16px;height:16px;flex-shrink:0}
-.btn-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.btn-row .btn{flex:1 1 140px}
-.muted{color:var(--muted)}
-.lbl{font-size:13px;font-weight:500;margin:0 0 10px;color:var(--ink)}
+    .app { max-width: 440px; margin: 0 auto; background: var(--paper); min-height: 100vh; position: relative; overflow-x: clip; }
 
-/* ---------- Muat & error ---------- */
-.fullscreen{position:fixed;inset:0;z-index:60;background:var(--ivory);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:28px}
-.loader{width:64px;height:64px;border-radius:50%;border:1px solid var(--gold-l);border-top-color:var(--gold);display:grid;place-items:center;animation:spin 1.4s linear infinite}
-.loader-wrap{position:relative;width:64px;height:64px}
-.loader-wrap b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--serif);font-style:italic;font-size:26px;color:var(--gold)}
-@keyframes spin{to{transform:rotate(360deg)}}
-.fullscreen p{margin:0;color:var(--muted);font-size:13px;letter-spacing:.08em}
-.fullscreen h2{font-family:var(--serif);font-weight:500;font-size:30px;margin:0}
+    /* ---------- Blocks ---------- */
+    .block { position: relative; padding: 26px 24px 28px; }
+    .tan { background: var(--tan); }
+    .paper { background: var(--paper); }
+    .sky { background: var(--sky); }
+    .ink { background: var(--ink); color: var(--paper); }
+    .brand { display: flex; align-items: center; gap: 7px; font-weight: 600; font-size: 15px; letter-spacing: -.01em; }
+    .brand svg { width: 16px; height: 16px; flex: none; }
+    .brand .tag { margin-left: auto; font-weight: 500; font-size: 12px; color: var(--muted); }
+    .ink .brand .tag { color: rgba(234,234,234,.65); }
+    .display { font-family: var(--serif); font-weight: 400; line-height: .98; letter-spacing: -.02em; margin: 0; }
+    .h1 { font-size: clamp(56px, 18vw, 80px); }
+    .h2 { font-size: clamp(44px, 14vw, 60px); }
+    .h3 { font-size: 34px; }
+    .it { font-style: italic; }
+    .tilde { font-family: var(--serif); font-size: 36px; line-height: 1; display: block; }
+    .lead { color: var(--muted); max-width: 34ch; margin: 14px 0 0; }
+    .rule { height: 1px; background: currentColor; border: 0; margin: 0; }
+    .foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 22px; padding-top: 14px; border-top: 1px solid currentColor; font-weight: 500; font-size: 14px; }
+    .foot a, .foot button { background: none; border: 0; padding: 0; color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; min-height: 32px; }
+    .foot svg, .arrow { width: 16px; height: 16px; flex: none; }
 
-/* ---------- Sampul ---------- */
-#cover{position:fixed;inset:0;max-width:448px;margin:0 auto;z-index:40;background:radial-gradient(120% 70% at 50% 0%,#fffdf8,#f3ead8);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:52px 38px;transition:transform .95s cubic-bezier(.77,0,.175,1)}
-#cover.up{transform:translateY(-101%)}
-.frame{position:absolute;inset:16px;border:1px solid var(--gold-l);pointer-events:none}
-.frame::before{content:"";position:absolute;inset:6px;border:1px solid var(--gold);opacity:.5}
-#cover .names{font-size:clamp(50px,16vw,68px);margin-top:20px}
-.cover-guest{margin-top:40px;width:100%}
-.cover-guest .to{font-size:12px;letter-spacing:.14em;color:var(--muted);margin:0}
-.cover-guest h2{font-family:var(--serif);font-weight:600;font-size:28px;margin:6px 0 4px;line-height:1.2;word-break:break-word}
-.cover-guest .pax{font-size:13px;color:var(--muted);margin:0 0 26px}
-.cover-note{position:absolute;left:0;right:0;bottom:36px;font-size:11px;color:var(--muted);margin:0;padding:0 40px}
-.fade-in{animation:fadeUp 1.1s var(--ease) both}
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+    /* ---------- Buttons ---------- */
+    .btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+      min-height: 52px; padding: 0 22px; border-radius: 999px; border: 1.5px solid var(--ink);
+      background: var(--ink); color: var(--paper); font-weight: 600; font-size: 15px; text-decoration: none;
+      transition: transform .15s var(--ease), background .2s, color .2s, opacity .2s;
+    }
+    .btn:hover { background: #262626; }
+    .btn:active { transform: scale(.98); }
+    .btn[disabled] { opacity: .45; cursor: not-allowed; transform: none; }
+    .btn.ghost { background: transparent; color: var(--ink); }
+    .btn.ghost:hover { background: rgba(11,11,11,.08); }
+    .btn.light { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+    .btn.light:hover { background: #fff; }
+    .btn.light.ghost { background: transparent; color: var(--paper); border-color: rgba(234,234,234,.6); }
+    .btn.light.ghost:hover { background: rgba(234,234,234,.12); }
+    .btn.sm { min-height: 44px; font-size: 14px; }
+    .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-top-color: transparent; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ---------- Hero ---------- */
-.hero{min-height:92vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:70px 28px 50px;text-align:center;background:radial-gradient(110% 60% at 50% 0%,#fffdf8,var(--ivory))}
-.hero .names{font-size:clamp(58px,19vw,80px);margin:22px 0 6px}
-.hero-date{font-family:var(--serif);font-size:24px;font-style:italic;margin:26px 0 0}
-.hero-time{font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-top:8px}
-.scroll-cue{margin-top:44px;width:1px;height:48px;background:linear-gradient(var(--gold),transparent);animation:cue 2s ease-in-out infinite}
-@keyframes cue{0%,100%{transform:scaleY(.4);transform-origin:top;opacity:.4}50%{transform:scaleY(1);opacity:1}}
-.bismillah{font-family:var(--serif);font-style:italic;font-size:26px;color:var(--gold-d);margin:0}
-.couple .names{font-size:44px;margin-top:16px}
+    /* ---------- Loading / error ---------- */
+    .fullscreen { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 28px; text-align: center; background: var(--tan); }
+    .fullscreen .display { font-size: 48px; }
+    .fullscreen p { margin: 0; max-width: 32ch; color: var(--muted); }
 
-/* ---------- Acara ---------- */
-.event-card{text-align:center;margin-top:28px}
-.event-card .tag{display:inline-block;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-d);border:1px solid var(--gold-l);padding:6px 14px;margin-bottom:16px}
-.event-date{font-family:var(--serif);font-size:27px;font-weight:500;line-height:1.2;margin:0}
-.event-time{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:6px 0 0}
-.event-loc{font-size:14.5px;line-height:1.7;color:#4a423a;margin:18px auto 0;max-width:290px;white-space:pre-line}
-.event-card .btn-row{margin-top:22px}
-.link-btn{display:inline-block;margin-top:14px;font-size:12.5px;color:var(--gold-d);text-decoration:underline;text-underline-offset:3px}
-.cal{margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}
-.cal p{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
-.countdown{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:34px}
-.cd{border:1px solid var(--line);background:var(--paper);padding:14px 0 12px}
-.cd b{display:block;font-family:var(--serif);font-weight:500;font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
-.cd span{display:block;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:8px}
-.cd-done{margin-top:30px;font-family:var(--serif);font-style:italic;font-size:21px;color:var(--gold-d)}
+    /* ---------- Cover ---------- */
+    .cover {
+      position: fixed; z-index: 60; top: 0; left: 50%; width: 100%; max-width: 440px; height: 100vh; height: 100dvh;
+      transform: translateX(-50%); background: var(--tan);
+      padding: 26px 24px calc(24px + env(safe-area-inset-bottom)); display: flex; flex-direction: column;
+      transition: transform .9s cubic-bezier(.77, 0, .175, 1);
+    }
+    .cover.gone { transform: translate(-50%, -100%); }
+    .cover-art { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+    .cover-art svg { width: min(62%, 230px); height: auto; overflow: visible; }
+    .cover-art .draw { stroke-dasharray: 600; stroke-dashoffset: 600; animation: draw 2s var(--ease) .2s forwards; }
+    .cover-art .draw.d2 { animation-delay: .5s; }
+    .cover-art .draw.d3 { animation-delay: 1s; }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+    .cover-to { text-align: center; padding-bottom: 8px; }
+    .cover-to small { display: block; color: var(--muted); font-size: 14px; }
+    .cover-guest { font-family: var(--serif); font-size: clamp(34px, 10vw, 44px); line-height: 1.02; margin: 4px 0 4px; word-break: break-word; }
+    .cover-title { text-align: center; margin-bottom: 8px; }
+    .cover-title .eyebrow { font-size: 14px; color: var(--muted); display: block; margin-bottom: 8px; }
+    .cover .btn { margin-top: 18px; }
+    .cover .note { text-align: center; font-size: 12px; color: var(--muted); margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--ink); }
 
-/* ---------- RSVP ---------- */
-.who{display:flex;justify-content:space-between;gap:16px;padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--line)}
-.who small{display:block;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
-.who strong{font-family:var(--serif);font-weight:600;font-size:21px;line-height:1.2;word-break:break-word}
-.who .r{text-align:right;flex-shrink:0}
-.banner{display:flex;gap:10px;align-items:flex-start;padding:13px 15px;border:1px solid;font-size:13.5px;line-height:1.55;margin-bottom:18px}
-.banner svg{width:18px;height:18px;flex-shrink:0;margin-top:1px}
-.banner.ok{background:var(--ok-bg);border-color:#cfe0d2;color:#355a40}
-.banner.no{background:var(--no-bg);border-color:#ecd3ce;color:#7a463e}
-.choices{display:grid;gap:10px;border:0;padding:0;margin:0 0 4px}
-.choice{position:relative;display:block;cursor:pointer}
-.choice input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
-.choice .box{display:flex;gap:14px;align-items:center;padding:16px 16px;border:1px solid var(--line);background:var(--paper);transition:border-color .25s,background .25s,box-shadow .25s}
-.choice .dot{width:22px;height:22px;border:1px solid var(--gold);border-radius:50%;flex-shrink:0;display:grid;place-items:center}
-.choice .dot::after{content:"";width:12px;height:12px;border-radius:50%;background:var(--gold);transform:scale(0);transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
-.choice input:checked + .box{border-color:var(--gold);background:#fbf5e8;box-shadow:inset 0 0 0 1px var(--gold)}
-.choice input:checked + .box .dot::after{transform:scale(1)}
-.choice input:focus-visible + .box{outline:2px solid var(--gold);outline-offset:2px}
-.choice input:disabled{cursor:not-allowed}
-.choice input:disabled + .box{opacity:.55}
-.choice b{display:block;font-weight:500;font-size:15.5px}
-.choice small{display:block;color:var(--muted);font-size:12.5px;margin-top:1px}
-.pax{margin-top:18px;animation:fadeUp .5s var(--ease) both}
-.stepper{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);background:var(--paper);padding:10px 12px}
-.stepper button{width:46px;height:46px;border:1px solid var(--gold-l);border-radius:50%;font-size:22px;line-height:1;color:var(--gold-d);display:grid;place-items:center;transition:background .2s,transform .2s}
-.stepper button:hover:not(:disabled){background:#fbf5e8}
-.stepper button:active:not(:disabled){transform:scale(.92)}
-.stepper button:disabled{opacity:.3;cursor:not-allowed}
-.stepper .val{text-align:center}
-.stepper output{display:block;font-family:var(--serif);font-size:44px;font-weight:500;line-height:1}
-.stepper small{font-size:12px;color:var(--muted)}
-#rsvp-form .btn{margin-top:20px}
+    /* ---------- Salam ---------- */
+    .salam { text-align: center; padding-top: 40px; padding-bottom: 44px; }
+    .salam .quote { font-family: var(--serif); font-size: clamp(34px, 10.5vw, 46px); line-height: 1.05; margin: 8px 0 0; }
+    .salam p.cap { margin: 20px auto 0; max-width: 36ch; color: var(--muted); }
 
-/* ---------- Tiket / Amplop ---------- */
-.ticket{--ew:min(320px,calc(100vw - 64px));margin-top:48px;text-align:center}
-.ticket h3{font-family:var(--serif);font-weight:500;font-size:30px;margin:8px 0 0}
-.ticket .sub{font-size:13.5px;color:var(--muted);margin:8px auto 0;max-width:280px}
-.env-stage{position:relative;width:var(--ew);height:calc(var(--ew)*1.12);margin:14px auto 0;cursor:pointer;outline:none}
-.env-stage:focus-visible{outline:2px solid var(--gold);outline-offset:6px}
-.env-hint{position:absolute;left:0;right:0;top:calc(var(--ew)*.2);margin:0;font-family:var(--serif);font-style:italic;font-size:19px;color:var(--gold-d);transition:opacity .4s}
-.env-stage.open .env-hint{opacity:0}
-.env{position:absolute;left:0;bottom:0;width:100%;height:calc(var(--ew)*.7);perspective:900px;filter:drop-shadow(0 16px 20px rgba(80,55,15,.2))}
-.env-back{position:absolute;inset:0;background:linear-gradient(#efe4ca,#e7dabc);border-radius:3px}
-.env-flap{position:absolute;left:0;top:0;width:100%;height:55%;transform-origin:50% 0;background:linear-gradient(#f6eddb,#e8dcbf);clip-path:polygon(0 0,100% 0,50% 100%);z-index:4;transition:transform .85s var(--ease),z-index 0s}
-.env-stage.open .env-flap{transform:rotateX(180deg);z-index:1;transition:transform .85s var(--ease),z-index 0s .4s}
-.pocket{position:absolute;inset:0;width:100%;height:100%;z-index:3}
-.seal{position:absolute;left:50%;top:55%;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#dcbd80,#a8884e 62%,#86683a);color:#fbf3e0;display:grid;place-items:center;z-index:6;font-family:var(--serif);font-style:italic;font-size:22px;line-height:1;box-shadow:0 2px 6px rgba(70,45,10,.35);transition:opacity .35s,transform .45s}
-.env-stage.open .seal{opacity:0;transform:scale(.5)}
-.letter{position:absolute;left:6%;width:88%;bottom:calc(var(--ew)*.03);height:calc(var(--ew)*.64);background:var(--paper);border:1px solid var(--gold-l);z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--ew)*.012);padding:6px 8px;box-shadow:0 3px 12px rgba(60,40,10,.1);overflow:hidden}
-.l-eyebrow{font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
-.qr-box{width:calc(var(--ew)*.37);aspect-ratio:1;background:#fff;border:1px solid var(--line);padding:4px}
-.qr-box #qrcode{width:100%;height:100%}
-.qr-box #qrcode img,.qr-box #qrcode canvas{width:100%!important;height:100%!important;display:block}
-.l-name{font-family:var(--serif);font-size:17px;font-weight:600;line-height:1.1;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.l-code{font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
-.env-stage.open .letter{animation:letterOut 1.8s var(--ease) .55s both}
-@keyframes letterOut{
-  0%{transform:translateY(0);z-index:2}
-  55%{transform:translateY(calc(var(--ew)*-.5));z-index:2}
-  56%{z-index:5}
-  100%{transform:translateY(calc(var(--ew)*-.3));z-index:5}
-}
-.chip{display:inline-flex;align-items:center;gap:7px;margin:22px 0 0;font-size:12.5px;padding:7px 14px;border:1px solid var(--line);background:var(--paper);color:var(--muted)}
-.chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
-.chip.ok{color:var(--ok);border-color:#cfe0d2;background:var(--ok-bg)}
-.ticket .btn{margin-top:16px}
+    /* ---------- Mempelai ---------- */
+    .couple { text-align: center; }
+    .couple-circles { display: flex; justify-content: center; align-items: center; margin: 30px 0 26px; }
+    .mono { width: 104px; height: 104px; border-radius: 50%; display: grid; place-items: center; font-family: var(--serif); font-size: 58px; color: var(--ink); flex: none; }
+    .mono.c1 { background: var(--green); }
+    .mono.c2 { background: var(--orange); margin-left: -14px; }
+    .mono.amp { width: 54px; height: 54px; font-size: 30px; background: var(--yellow); margin: 0 -12px; z-index: 2; border: 3px solid var(--tan); }
+    .couple .names { font-size: clamp(44px, 14vw, 62px); }
+    .couple p { margin: 14px 0 0; color: var(--muted); }
 
-/* ---------- Kado digital ---------- */
-.gift{margin-top:26px;text-align:center}
-.gift .bank{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold-d);font-weight:500}
-.gift .no{font-family:var(--serif);font-size:34px;font-weight:600;letter-spacing:.06em;margin:8px 0 2px;user-select:all}
-.gift .an{font-size:13.5px;color:var(--muted);margin:0 0 20px}
+    /* ---------- Acara & countdown ---------- */
+    .when-date { font-family: var(--serif); font-size: clamp(30px, 9vw, 38px); line-height: 1.05; margin: 22px 0 4px; }
+    .when-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid currentColor; border-radius: 999px; font-size: 13px; font-weight: 500; }
+    .where { margin: 18px 0 0; max-width: 36ch; }
+    .cd { display: grid; grid-template-columns: 1fr 1fr; margin-top: 26px; border-top: 1px solid var(--ink); }
+    .cd > div { padding: 16px 0 14px; }
+    .cd > div:nth-child(odd) { border-right: 1px solid var(--ink); padding-right: 16px; }
+    .cd > div:nth-child(even) { padding-left: 20px; }
+    .cd > div:nth-child(n+3) { border-top: 1px solid var(--ink); }
+    .cd b { display: block; font-family: var(--serif); font-weight: 400; font-size: 64px; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+    .cd span { font-size: 14px; }
+    .when-actions { display: grid; gap: 10px; margin-top: 22px; }
 
-/* ---------- Ucapan ---------- */
-.wish-form{margin-top:26px;text-align:left}
-.as{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.avatar{width:40px;height:40px;border-radius:50%;border:1px solid var(--gold);display:grid;place-items:center;font-family:var(--serif);font-size:19px;font-weight:600;color:var(--gold-d);background:#fbf5e8;flex-shrink:0}
-.as small{display:block;font-size:11.5px;color:var(--muted)}
-.as strong{font-size:15px;font-weight:500;line-height:1.2}
-textarea{width:100%;min-height:128px;resize:vertical;padding:15px 16px;border:1px solid var(--line);background:var(--paper);font-size:16px;line-height:1.65;outline:none;border-radius:2px;transition:border-color .2s,box-shadow .2s}
-textarea::placeholder{color:#a79d90}
-textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(168,136,78,.16)}
-.tf-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:7px}
-.sugg-lbl{font-size:12px;color:var(--muted);margin:16px 0 8px}
-.sugg{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -4px 16px;padding:0 4px 2px}
-.sugg::-webkit-scrollbar{display:none}
-.sugg button{flex-shrink:0;padding:9px 15px;border:1px solid var(--line);border-radius:999px;font-size:13px;color:#5d5348;background:var(--paper);transition:border-color .2s,background .2s}
-.sugg button:hover{border-color:var(--gold);background:#fbf5e8}
-.wish-head{display:flex;justify-content:space-between;align-items:baseline;margin:46px 0 14px;text-align:left}
-.wish-head h3{font-family:var(--serif);font-weight:500;font-size:26px;margin:0}
-.wish-head span{font-size:12.5px;color:var(--muted)}
-#wishes-container{display:grid;gap:12px}
-.wish{background:var(--paper);border:1px solid var(--line);padding:16px 18px;text-align:left;animation:fadeUp .6s var(--ease) both}
-.wish.mine{border-left:3px solid var(--gold)}
-.w-top{display:flex;gap:12px;align-items:center}
-.w-top .avatar{width:38px;height:38px;font-size:17px}
-.w-id{min-width:0;flex:1}
-.w-name{font-weight:500;font-size:15px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.w-name em{font-style:normal;font-size:11px;color:var(--gold-d);letter-spacing:.08em;margin-left:6px;text-transform:uppercase}
-.w-sub{font-size:12px;color:var(--muted);margin-top:1px}
-.badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;padding:4px 10px;border-radius:999px;border:1px solid;white-space:nowrap;flex-shrink:0}
-.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
-.badge.hadir{color:var(--ok);background:var(--ok-bg);border-color:#cfe0d2}
-.badge.tidak{color:var(--no);background:var(--no-bg);border-color:#ecd3ce}
-.badge.belum{color:var(--muted);background:#f3eee3;border-color:var(--line)}
-.w-msg{margin:12px 0 0;font-size:14.5px;line-height:1.75;color:#4a423a;white-space:pre-wrap;overflow-wrap:anywhere}
-.empty{padding:34px 10px;color:var(--muted);font-family:var(--serif);font-style:italic;font-size:19px;line-height:1.5;text-align:center}
-.more{margin-top:14px}
+    /* ---------- RSVP ---------- */
+    .guest-card { display: flex; align-items: center; gap: 14px; padding: 14px 0; margin: 22px 0 6px; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+    .avatar { position: relative; flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-family: var(--serif); font-size: 24px; background: var(--grey); color: var(--ink); }
+    .avatar .dot { position: absolute; right: -1px; bottom: -1px; width: 15px; height: 15px; border-radius: 50%; border: 2.5px solid var(--paper); background: var(--grey); }
+    .tan .avatar .dot { border-color: var(--tan); }
+    .avatar.st-yes, .dot.st-yes { background: var(--green); }
+    .avatar.st-no, .dot.st-no { background: var(--orange); }
+    .avatar.st-none, .dot.st-none { background: var(--grey); }
+    .avatar .dot.st-yes { background: #2E9A67; }
+    .avatar .dot.st-no { background: #D2663A; }
+    .avatar .dot.st-none { background: #8C8C8C; }
+    .guest-card .gname { font-weight: 600; font-size: 16px; line-height: 1.2; }
+    .guest-card .gsub { font-size: 13px; color: var(--muted); }
 
-/* ---------- Penutup ---------- */
-.closing{padding:64px 30px 130px;text-align:center;background:var(--ink);color:var(--ivory)}
-.closing p{margin:0}
-.closing .eyebrow{color:#cdb98a}
-.closing .thanks{font-family:var(--serif);font-style:italic;font-size:34px;margin:16px 0 0;color:#ecdfc3}
-.closing .small{font-size:13.5px;line-height:1.8;color:#b9afa0;max-width:300px;margin:18px auto 0}
-.closing .names{font-size:38px;color:var(--ivory);margin-top:26px}
-.closing .names em{color:#cdb98a}
+    fieldset { border: 0; padding: 0; margin: 18px 0 0; min-width: 0; }
+    legend { font-weight: 600; padding: 0; margin-bottom: 10px; }
+    .choices { display: grid; gap: 10px; }
+    .choice { position: relative; display: block; cursor: pointer; }
+    .choice input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+    .choice .face { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1.5px solid var(--ink); border-radius: 18px; background: transparent; transition: background .2s, transform .15s var(--ease); }
+    .choice:active .face { transform: scale(.985); }
+    .choice .ico { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--grey); flex: none; transition: background .2s; }
+    .choice .ico svg { width: 20px; height: 20px; }
+    .choice b { display: block; font-weight: 600; line-height: 1.25; }
+    .choice small { color: var(--muted); font-size: 13px; line-height: 1.3; display: block; }
+    .choice .radio { margin-left: auto; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--ink); display: grid; place-items: center; flex: none; }
+    .choice .radio::after { content: ''; width: 12px; height: 12px; border-radius: 50%; background: var(--ink); transform: scale(0); transition: transform .2s var(--ease); }
+    .choice input:checked + .face { background: #fff; }
+    .choice input:checked + .face .radio::after { transform: scale(1); }
+    .choice.yes input:checked + .face .ico { background: var(--green); }
+    .choice.no input:checked + .face .ico { background: var(--orange); }
+    .choice input:focus-visible + .face { outline: 2px solid var(--ink); outline-offset: 3px; }
+    .choice input:disabled + .face { opacity: .5; }
 
-/* ---------- Navigasi bawah & toast ---------- */
-.nav{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translate(-50%,160%);z-index:30;display:flex;background:rgba(255,253,249,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:999px;padding:5px;box-shadow:0 10px 30px rgba(60,40,10,.16);transition:transform .8s var(--ease)}
-.nav.show{transform:translate(-50%,0)}
-.nav a{padding:10px 14px;border-radius:999px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:background .25s,color .25s}
-.nav a.on{background:var(--ink);color:var(--ivory)}
-.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translate(-50%,16px);opacity:0;pointer-events:none;z-index:70;max-width:calc(100vw - 40px);background:var(--ink);color:var(--ivory);font-size:13.5px;padding:12px 20px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25);transition:opacity .35s,transform .45s var(--ease);text-align:center}
-.toast.show{opacity:1;transform:translate(-50%,0)}
-.toast.err{background:#7a463e}
+    .pax-wrap { margin-top: 20px; display: grid; grid-template-rows: 0fr; transition: grid-template-rows .35s var(--ease); }
+    .pax-wrap.open { grid-template-rows: 1fr; }
+    .pax-wrap > div { overflow: hidden; }
+    .pax-inner { padding-top: 2px; }
+    .stepper { display: flex; align-items: center; justify-content: space-between; border: 1.5px solid var(--ink); border-radius: 999px; padding: 6px; background: #fff; }
+    .stepper button { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--ink); color: var(--paper); font-size: 22px; line-height: 1; display: grid; place-items: center; transition: transform .15s var(--ease), opacity .2s; }
+    .stepper button:active { transform: scale(.92); }
+    .stepper button[disabled] { opacity: .25; cursor: not-allowed; }
+    .stepper .val { text-align: center; line-height: 1.1; }
+    .stepper .val b { font-family: var(--serif); font-weight: 400; font-size: 38px; display: block; }
+    .stepper .val span { font-size: 12px; color: var(--muted); }
+    .hint { font-size: 13px; color: var(--muted); margin: 8px 4px 0; }
+    .err { color: #A32A12; font-size: 13px; font-weight: 500; margin: 12px 4px 0; min-height: 0; }
+    #rsvp-submit { margin-top: 20px; }
 
-/* ---------- Muncul saat scroll ---------- */
-.rv{opacity:0;transform:translateY(20px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
-.rv.in{opacity:1;transform:none}
-.rv.d1{transition-delay:.12s}.rv.d2{transition-delay:.24s}.rv.d3{transition-delay:.36s}
+    .summary { margin-top: 22px; border: 1.5px solid var(--ink); border-radius: 22px; padding: 20px; background: #fff; }
+    .summary .chip-row { display: flex; align-items: center; gap: 10px; }
+    .summary h3 { margin: 12px 0 2px; }
+    .summary p { margin: 0; color: var(--muted); font-size: 14px; }
+    .summary .btn { margin-top: 16px; }
 
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important;transition-delay:0s!important}
-  html{scroll-behavior:auto}
-  .rv{opacity:1;transform:none}
-  .env-stage.open .letter{animation:none;transform:translateY(calc(var(--ew)*-.3));z-index:5}
-}
-</style>
+    /* ---------- Status badge ---------- */
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px 3px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; line-height: 1.4; white-space: nowrap; color: var(--ink); }
+    .badge svg { width: 12px; height: 12px; }
+    .badge.st-yes { background: var(--green); }
+    .badge.st-no { background: var(--orange); }
+    .badge.st-none { background: var(--grey); }
+
+    /* ---------- Envelope ticket ---------- */
+    .ticket { text-align: center; }
+    .ticket .display { color: var(--paper); }
+    .ticket .lead { color: rgba(234,234,234,.7); margin-left: auto; margin-right: auto; }
+    .stage { position: relative; width: min(100%, 320px); height: 470px; margin: 18px auto 0; overflow: hidden; cursor: pointer; background: none; border: 0; padding: 0; display: block; perspective: 1000px; }
+    .env { position: absolute; left: 0; right: 0; bottom: 0; height: 190px; }
+    .env-back { position: absolute; inset: 0; background: #9A7C5B; border-radius: 6px 6px 14px 14px; z-index: 1; }
+    .env-pocket { position: absolute; inset: 0; background: var(--tan); border-radius: 6px 6px 14px 14px; z-index: 3; clip-path: polygon(0 0, 50% 58%, 100% 0, 100% 100%, 0 100%); }
+    .env-flap { position: absolute; left: 0; right: 0; top: 0; height: 58%; background: #CDB293; clip-path: polygon(0 0, 100% 0, 50% 100%); transform-origin: top center; z-index: 4; transition: transform .7s var(--ease), background .3s .25s, z-index 0s .3s; }
+    .seal { position: absolute; left: 50%; top: calc(58% - 20px); width: 40px; height: 40px; margin-left: -20px; border-radius: 50%; background: var(--orange); z-index: 5; display: grid; place-items: center; box-shadow: 0 2px 0 rgba(0,0,0,.25); transition: opacity .3s, transform .4s var(--ease); }
+    .seal svg { width: 18px; height: 18px; }
+    .t-card {
+      position: absolute; z-index: 2; left: 50%; top: 305px; width: 242px; height: 340px; border-radius: 16px;
+      background: var(--paper); color: var(--ink); padding: 16px 16px 0; text-align: center;
+      transform: translate(-50%, 0); box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      transition: transform 1s var(--ease) .5s;
+    }
+    .t-card .t-top { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+    .t-qr { margin: 12px auto 8px; width: 168px; height: 168px; padding: 10px; background: #fff; border-radius: 14px; border: 1.5px solid var(--ink); display: grid; place-items: center; }
+    .t-qr img, .t-qr canvas { display: block; width: 146px !important; height: 146px !important; }
+    .t-name { font-family: var(--serif); font-size: 26px; line-height: 1.05; margin: 8px 0 2px; word-break: break-word; }
+    .t-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--muted); letter-spacing: .06em; word-break: break-all; }
+    .stage.open .env-flap { transform: rotateX(180deg); background: #B8996F; z-index: 1; }
+    .stage.open .seal { opacity: 0; transform: scale(.4); }
+    .stage.open .t-card { transform: translate(-50%, -285px); }
+    .stage .tap { position: absolute; z-index: 6; left: 50%; bottom: 16px; transform: translateX(-50%); font-size: 12px; font-weight: 600; color: var(--ink); background: var(--paper); border-radius: 999px; padding: 5px 12px; transition: opacity .3s; pointer-events: none; }
+    .stage.open .tap { opacity: 0; }
+    .ticket-status { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; background: rgba(234,234,234,.12); color: var(--paper); }
+    .ticket-status .pulse { width: 9px; height: 9px; border-radius: 50%; background: var(--yellow); animation: pulse 1.6s infinite; }
+    .ticket-status.ok { background: var(--green); color: var(--ink); }
+    .ticket-status.ok .pulse { background: var(--ink); animation: none; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(232,188,62,.6); } 70% { box-shadow: 0 0 0 9px rgba(232,188,62,0); } 100% { box-shadow: 0 0 0 0 rgba(232,188,62,0); } }
+    .ticket .actions { display: grid; gap: 10px; margin-top: 18px; }
+
+    /* ---------- Stats ---------- */
+    .stat-big { font-family: var(--serif); font-size: clamp(96px, 32vw, 140px); line-height: .9; letter-spacing: -.03em; margin: 6px 0 4px; font-variant-numeric: tabular-nums; }
+    .circles { display: flex; margin-top: 22px; }
+    .circles .mono { width: 64px; height: 64px; font-size: 32px; margin-left: -8px; }
+    .circles .mono:first-child { margin-left: 0; }
+    .circles .mono.c3 { background: var(--yellow); }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; margin-top: 26px; border-top: 1px solid var(--ink); }
+    .stat-grid > div { padding: 16px 0 6px; }
+    .stat-grid > div + div { border-left: 1px solid var(--ink); padding-left: 20px; }
+    .stat-grid b { font-family: var(--serif); font-weight: 400; font-size: 54px; line-height: 1; display: block; }
+    .stat-grid span { font-size: 14px; display: block; margin-top: 4px; }
+    .progress { margin-top: 22px; border-top: 1px solid var(--ink); padding-top: 18px; }
+    .progress .row { display: flex; align-items: baseline; justify-content: space-between; }
+    .progress .row b { font-family: var(--serif); font-weight: 400; font-size: 54px; line-height: 1; }
+    .bar { height: 8px; border-radius: 99px; background: rgba(11,11,11,.18); margin-top: 10px; overflow: hidden; }
+    .bar i { display: block; height: 100%; width: 0; background: var(--ink); border-radius: 99px; transition: width 1.2s var(--ease); }
+
+    /* ---------- Gift ---------- */
+    .gift-list { display: grid; gap: 12px; margin-top: 22px; }
+    .gift { border: 1.5px solid var(--ink); border-radius: 20px; padding: 16px 18px; background: #fff; }
+    .gift .bank { font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .gift .no { font-family: var(--serif); font-size: 38px; letter-spacing: .01em; line-height: 1.1; margin: 8px 0 0; word-break: break-all; }
+    .gift .an { font-size: 14px; color: var(--muted); margin: 0 0 14px; }
+    .copy-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--ink); background: transparent; font-weight: 600; font-size: 13px; transition: background .2s, color .2s; }
+    .copy-btn svg { width: 14px; height: 14px; }
+    .copy-btn.done { background: var(--green); }
+
+    /* ---------- Wishes ---------- */
+    .composer { margin-top: 22px; background: var(--paper); border-radius: 24px; padding: 16px; }
+    .composer .as { display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid rgba(11,11,11,.2); margin-bottom: 12px; }
+    .composer .as .avatar { width: 38px; height: 38px; font-size: 20px; }
+    .composer .as small { display: block; font-size: 12px; color: var(--muted); line-height: 1.2; }
+    .composer .as b { display: block; font-size: 15px; line-height: 1.2; }
+    .composer .as .badge { margin-left: auto; }
+    textarea { width: 100%; border: 0; background: transparent; resize: none; min-height: 96px; line-height: 1.5; font-size: 16px; padding: 2px; }
+    textarea:focus { outline: none; }
+    .composer:focus-within { box-shadow: 0 0 0 2px var(--ink); }
+    .quick { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 10px; margin: 0 -4px; scrollbar-width: none; }
+    .quick::-webkit-scrollbar { display: none; }
+    .quick button { flex: none; border: 1px solid var(--ink); background: transparent; border-radius: 999px; padding: 7px 13px; font-size: 13px; font-weight: 500; white-space: nowrap; min-height: 36px; transition: background .2s; }
+    .quick button:hover { background: #fff; }
+    .composer .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
+    .counter { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .counter.max { color: #A32A12; font-weight: 600; }
+    .composer .btn { width: auto; min-height: 46px; padding: 0 22px; }
+
+    .filters { display: flex; gap: 8px; margin: 26px 0 14px; flex-wrap: wrap; }
+    .filters button { border: 1.5px solid var(--ink); background: transparent; border-radius: 999px; padding: 6px 14px; font-weight: 600; font-size: 13px; min-height: 36px; display: inline-flex; align-items: center; gap: 7px; transition: background .2s, color .2s; }
+    .filters button i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+    .filters button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+    .filters button em { font-style: normal; opacity: .7; font-weight: 500; }
+    .wishes { display: grid; gap: 10px; }
+    .wish { background: var(--paper); border-radius: 22px; padding: 16px; display: grid; grid-template-columns: auto 1fr; gap: 12px; }
+    .wish.pop { animation: pop .6s var(--ease); }
+    @keyframes pop { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: none; } }
+    .wish .top { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+    .wish .who { font-weight: 600; font-size: 15px; line-height: 1.25; word-break: break-word; }
+    .wish .when { font-size: 12px; color: var(--muted); margin-left: auto; }
+    .wish .badge { margin-top: 2px; }
+    .wish p { margin: 8px 0 0; line-height: 1.5; word-break: break-word; white-space: pre-wrap; }
+    .wish.me { outline: 1.5px solid var(--ink); }
+    .empty { text-align: center; padding: 26px 10px; font-family: var(--serif); font-size: 26px; line-height: 1.15; }
+    .empty small { display: block; font-family: var(--sans); font-size: 14px; color: var(--muted); margin-top: 6px; }
+    #wish-more { margin-top: 14px; }
+    .skeleton { height: 92px; border-radius: 22px; background: linear-gradient(90deg, rgba(234,234,234,.45), rgba(234,234,234,.8), rgba(234,234,234,.45)); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* ---------- Footer ---------- */
+    .closing { text-align: center; padding: 56px 24px 44px; }
+    .closing .display { font-size: clamp(56px, 18vw, 76px); }
+    .closing p { color: rgba(234,234,234,.7); max-width: 34ch; margin: 16px auto 0; }
+    .closing .names { font-family: var(--serif); font-style: italic; font-size: 28px; color: var(--paper); margin-top: 22px; }
+
+    /* ---------- Toast ---------- */
+    .toast-host { position: fixed; z-index: 120; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(92vw, 400px); display: grid; gap: 8px; pointer-events: none; }
+    .toast { background: var(--ink); color: var(--paper); padding: 12px 18px; border-radius: 999px; font-weight: 500; font-size: 14px; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,.3); animation: toastIn .4s var(--ease); }
+    .toast.err { background: #A32A12; }
+    .toast.out { opacity: 0; transform: translateY(8px); transition: .3s; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+    /* ---------- Scroll reveal ---------- */
+    .rv { opacity: 0; transform: translateY(20px); transition: opacity .8s var(--ease), transform .8s var(--ease); }
+    .rv.in { opacity: 1; transform: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
+      .rv { opacity: 1; transform: none; }
+      .cover-art .draw { stroke-dashoffset: 0; }
+    }
+  </style>
 </head>
-<body>
-<div id="app">
+<body class="locked">
 
-  <!-- Memuat -->
-  <div id="loading" class="fullscreen">
-    <div class="loader-wrap"><div class="loader"></div><b>&amp;</b></div>
-    <p>Menyiapkan undangan…</p>
+<div class="app">
+
+  <!-- LOADING -->
+  <div id="loading" class="fullscreen" role="status">
+    <span class="tilde">~</span>
+    <p class="display it">Menyiapkan undangan…</p>
   </div>
 
-  <!-- Error -->
+  <!-- ERROR -->
   <div id="error-screen" class="fullscreen" hidden>
-    <div class="eyebrow">Mohon maaf</div>
-    <h2>Undangan tidak ditemukan</h2>
-    <p id="error-text" style="max-width:290px;line-height:1.7;letter-spacing:0;font-size:14px">Tautan undangan tidak valid atau kode belum terdaftar.</p>
-    <a href="/" class="btn ghost sm">Ke beranda</a>
+    <span class="tilde">~</span>
+    <h2 class="display">Undangan tidak ditemukan</h2>
+    <p id="error-text">Tautan undangan tidak valid atau belum terdaftar.</p>
+    <a href="/" class="btn light ghost" style="width:auto;color:var(--ink);border-color:var(--ink)">Kembali ke beranda</a>
   </div>
 
-  <!-- Konten utama -->
+  <!-- KONTEN -->
   <div id="main-content" hidden>
 
-    <!-- Sampul -->
-    <section id="cover" aria-label="Sampul undangan">
-      <div class="frame"></div>
-      <p class="eyebrow fade-in">Undangan Pernikahan</p>
-      <h1 id="cover-names" class="names fade-in" style="animation-delay:.15s"></h1>
-      <div class="cover-guest fade-in" style="animation-delay:.35s">
-        <p class="to">Kepada Yth. Bapak/Ibu/Saudara/i</p>
-        <h2 id="cover-guest-name">Tamu Undangan</h2>
-        <p class="pax">Undangan untuk <span id="cover-max-pax">2</span> orang</p>
-        <button class="btn" onclick="openInvitation()">Buka Undangan</button>
+    <!-- COVER -->
+    <section id="cover" class="cover" aria-label="Sampul undangan">
+      <div class="brand"><span id="cv-brand">Undangan Pernikahan</span>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="#0B0B0B"/><path d="M4.6 8.2l2.3 2.3 4.5-4.7" stroke="#BD9F7F" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <p class="cover-note">Mohon maaf bila ada kesalahan penulisan nama atau gelar.</p>
+
+      <div class="cover-art" aria-hidden="true">
+        <svg viewBox="0 0 220 170" fill="none" stroke="#0B0B0B" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+          <path class="draw" d="M72 40c-27 2-47 26-44 54s27 48 55 44 46-28 42-56-26-44-53-42z"/>
+          <path class="draw d2" d="M141 40c-26 3-44 27-40 55s28 46 56 41 45-29 39-57-28-42-55-39z"/>
+          <path class="draw d3" d="M60 26l11-14 12 14-12 14z"/>
+          <path class="draw d3" d="M96 160c11 4 32 5 50 0" stroke-width="4"/>
+        </svg>
+      </div>
+
+      <div class="cover-title">
+        <span class="eyebrow">The Wedding Of</span>
+        <h1 id="cv-title" class="display h1">Rudi &amp; Irul</h1>
+      </div>
+
+      <div class="cover-to">
+        <span class="tilde">~</span>
+        <small>Kepada Yth. Bapak/Ibu/Saudara/i</small>
+        <div id="cv-guest" class="cover-guest">Tamu Undangan</div>
+        <small id="cv-pax">Undangan untuk 2 orang</small>
+        <button class="btn" id="open-btn" type="button">
+          Buka Undangan
+          <svg class="arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12L12 4M5 4h7v7"/></svg>
+        </button>
+        <p class="note">Mohon maaf apabila ada kesalahan penulisan nama atau gelar.</p>
+      </div>
     </section>
 
     <main>
-      <!-- Hero -->
-      <header class="hero">
-        <p class="eyebrow rv">Kami akan menikah</p>
-        <h1 id="hero-names" class="names rv d1"></h1>
-        <div class="orn rv d2"><i></i></div>
-        <p id="hero-date" class="hero-date rv d2"></p>
-        <p id="hero-time" class="hero-time rv d3"></p>
-        <div class="scroll-cue" aria-hidden="true"></div>
-      </header>
-
-      <!-- Salam pembuka -->
-      <section class="sec couple">
-        <p class="bismillah rv">Bismillahirrahmanirrahim</p>
-        <p id="event-caption" class="lead rv d1">Dengan penuh syukur, kami mengundang Bapak/Ibu/Saudara/i untuk hadir dan memberikan doa restu di hari pernikahan kami.</p>
-        <div class="orn rv d2"><i></i></div>
-        <p class="eyebrow rv" style="margin-top:34px">Kedua Mempelai</p>
-        <h2 id="bride-groom-names" class="names rv d1"></h2>
-        <p class="lead rv d2" style="margin-top:12px">Putra dan putri tercinta dari keluarga besar kami.</p>
+      <!-- SALAM -->
+      <section class="block paper salam">
+        <div class="brand rv"><span class="bn">RayaRayu</span><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="#0B0B0B"/><path d="M4.6 8.2l2.3 2.3 4.5-4.7" stroke="#EAEAEA" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="tag">Walimatul ‘Ursy</span></div>
+        <span class="tilde rv" style="margin-top:42px">~</span>
+        <h2 class="quote rv">Bismillahirrahmanirrahim</h2>
+        <p class="cap rv" id="event-caption">Dengan penuh syukur, kami mengundang Bapak/Ibu/Saudara/i untuk hadir dan memberikan doa restu di hari bahagia kami.</p>
       </section>
 
-      <!-- Acara -->
-      <section id="acara" class="sec alt">
-        <p class="eyebrow rv">Acara</p>
-        <h2 class="title rv d1">Waktu &amp; Tempat</h2>
+      <!-- MEMPELAI -->
+      <section class="block tan couple">
+        <div class="brand rv"><span class="bn">RayaRayu</span><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="#0B0B0B"/><path d="M4.6 8.2l2.3 2.3 4.5-4.7" stroke="#BD9F7F" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="tag">Mempelai</span></div>
+        <div class="couple-circles rv" id="couple-circles" aria-hidden="true"></div>
+        <h2 class="display names rv" id="couple-names">Rudi &amp; Irul</h2>
+        <p class="rv">Putra &amp; putri tercinta dari keluarga besar kami.</p>
+      </section>
 
-        <div class="card event-card rv d2">
-          <span class="tag">Akad &amp; Resepsi</span>
-          <p id="event-date" class="event-date">-</p>
-          <p id="event-time" class="event-time"></p>
-          <p id="event-location" class="event-loc">-</p>
-          <div class="btn-row">
-            <a id="maps-btn" class="btn ghost sm" href="#" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
-              Buka Google Maps
-            </a>
-          </div>
-          <div style="text-align:center"><button id="btn-copy-loc" class="link-btn" type="button">Salin alamat</button></div>
-          <div class="cal" id="cal-box">
-            <p>Simpan tanggalnya</p>
-            <div class="btn-row">
-              <a id="gcal-btn" class="btn ghost sm" href="#" target="_blank" rel="noopener">Google Calendar</a>
-              <button id="ics-btn" class="btn ghost sm" type="button">Apple / Outlook</button>
-            </div>
-          </div>
+      <!-- ACARA -->
+      <section class="block sky" id="acara">
+        <div class="brand rv"><span class="bn">RayaRayu</span><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="#0B0B0B"/><path d="M4.6 8.2l2.3 2.3 4.5-4.7" stroke="#76B5C0" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h2 class="display h2 rv" style="margin-top:34px">Waktu &amp;<br><span class="it">Tempat</span></h2>
+        <div class="when-date rv" id="event-date">-</div>
+        <div class="when-meta rv">
+          <span class="pill">Akad &amp; Resepsi</span>
+          <span class="pill" id="event-time">-</span>
         </div>
+        <p class="where rv" id="event-location">-</p>
 
-        <div id="countdown" class="countdown rv d2" aria-label="Hitung mundur hari pernikahan">
-          <div class="cd"><b id="cd-days">0</b><span>Hari</span></div>
-          <div class="cd"><b id="cd-hours">0</b><span>Jam</span></div>
-          <div class="cd"><b id="cd-mins">0</b><span>Menit</span></div>
-          <div class="cd"><b id="cd-secs">0</b><span>Detik</span></div>
+        <div class="cd rv" id="countdown" aria-live="off" role="timer" aria-label="Hitung mundur menuju acara">
+          <div><b id="cd-days">0</b><span>Hari</span></div>
+          <div><b id="cd-hours">0</b><span>Jam</span></div>
+          <div><b id="cd-mins">0</b><span>Menit</span></div>
+          <div><b id="cd-secs">0</b><span>Detik</span></div>
         </div>
-        <p id="cd-done" class="cd-done" hidden></p>
+        <p id="cd-note" class="where" hidden style="font-family:var(--serif);font-size:30px;line-height:1.1"></p>
+
+        <div class="when-actions rv">
+          <a id="maps-btn" class="btn" href="#" target="_blank" rel="noopener">Buka di Google Maps
+            <svg class="arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12L12 4M5 4h7v7"/></svg></a>
+          <button id="cal-btn" class="btn ghost" type="button">Simpan ke Kalender</button>
+        </div>
       </section>
 
       <!-- RSVP -->
-      <section id="rsvp" class="sec">
-        <p class="eyebrow rv">RSVP</p>
-        <h2 class="title rv d1">Konfirmasi Kehadiran</h2>
-        <p class="lead rv d2">Mohon konfirmasi kehadiran Anda supaya kami bisa menyiapkan tempat duduk dan hidangan.</p>
+      <section class="block paper" id="rsvp">
+        <div class="brand rv"><span class="bn">RayaRayu</span><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="#0B0B0B"/><path d="M4.6 8.2l2.3 2.3 4.5-4.7" stroke="#EAEAEA" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="tag">RSVP</span></div>
+        <h2 class="display h2 rv" style="margin-top:34px">Konfirmasi<br><span class="it">Kehadiran</span></h2>
+        <p class="lead rv">Bantu kami menyiapkan tempat duduk dan konsumsi. Cukup satu menit.</p>
 
-        <div class="card rv d2" style="margin-top:28px">
-          <div class="who">
-            <div><small>Nama tamu</small><strong id="rsvp-guest-name">-</strong></div>
-            <div class="r"><small>Maksimal</small><strong><span id="rsvp-max-pax">2</span> orang</strong></div>
+        <div class="guest-card rv">
+          <div class="avatar st-none" id="rsvp-avatar"><span id="rsvp-initial">T</span><i class="dot st-none" id="rsvp-dot"></i></div>
+          <div>
+            <div class="gname" id="rsvp-guest-name">-</div>
+            <div class="gsub" id="rsvp-guest-sub">Undangan untuk maksimal 2 orang</div>
           </div>
+        </div>
 
-          <div id="rsvp-banner" class="banner" hidden></div>
+        <!-- Ringkasan jika sudah mengisi -->
+        <div id="rsvp-summary" class="summary" hidden>
+          <div class="chip-row"><span class="badge" id="sum-badge"></span></div>
+          <h3 class="display h3" id="sum-title"></h3>
+          <p id="sum-sub"></p>
+          <button class="btn ghost sm" id="rsvp-edit" type="button">Ubah konfirmasi</button>
+        </div>
 
-          <form id="rsvp-form" novalidate>
-            <fieldset class="choices" id="choices">
-              <legend class="sr">Apakah Anda akan hadir?</legend>
-              <label class="choice">
-                <input type="radio" name="status" value="hadir" />
-                <span class="box"><span class="dot"></span><span><b>Ya, saya akan hadir</b><small>Insya Allah, kami datang</small></span></span>
+        <form id="rsvp-form" novalidate>
+          <fieldset id="rsvp-choices">
+            <legend>Apakah Anda bisa hadir?</legend>
+            <div class="choices">
+              <label class="choice yes">
+                <input type="radio" name="attend" value="hadir">
+                <span class="face">
+                  <span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="#0B0B0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg></span>
+                  <span><b>Saya akan hadir</b><small>Tiket QR untuk check-in langsung dibuat</small></span>
+                  <span class="radio" aria-hidden="true"></span>
+                </span>
               </label>
-              <label class="choice">
-                <input type="radio" name="status" value="tidak_hadir" />
-                <span class="box"><span class="dot"></span><span><b>Maaf, saya tidak bisa hadir</b><small>Doa terbaik tetap kami harapkan</small></span></span>
+              <label class="choice no">
+                <input type="radio" name="attend" value="tidak_hadir">
+                <span class="face">
+                  <span class="ico"><svg viewBox="0 0 20 20" fill="none" stroke="#0B0B0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5l10 10M15 5L5 15"/></svg></span>
+                  <span><b>Maaf, saya belum bisa hadir</b><small>Tidak apa-apa, doa Anda tetap berarti</small></span>
+                  <span class="radio" aria-hidden="true"></span>
+                </span>
               </label>
-            </fieldset>
+            </div>
+          </fieldset>
 
-            <div id="pax-group" class="pax" hidden>
-              <p class="lbl">Berapa orang yang akan datang?</p>
+          <div class="pax-wrap" id="pax-wrap"><div><div class="pax-inner">
+            <fieldset style="margin-top:20px">
+              <legend id="pax-legend">Berapa orang yang akan datang?</legend>
               <div class="stepper">
                 <button type="button" id="pax-minus" aria-label="Kurangi jumlah orang">−</button>
-                <div class="val"><output id="pax-out" aria-live="polite">1</output><small id="pax-hint"></small></div>
+                <div class="val" aria-live="polite"><b id="pax-val">1</b><span id="pax-label">orang</span></div>
                 <button type="button" id="pax-plus" aria-label="Tambah jumlah orang">+</button>
               </div>
-            </div>
+              <p class="hint" id="pax-hint">Maksimal 2 orang, termasuk Anda.</p>
+            </fieldset>
+          </div></div></div>
 
-            <button type="submit" id="btn-submit" class="btn full" disabled>Kirim Konfirmasi</button>
-          </form>
-        </div>
+          <p class="err" id="rsvp-err" role="alert" hidden></p>
+          <button class="btn" id="rsvp-submit" type="submit">Kirim Konfirmasi</button>
+        </form>
+      </section>
 
-        <!-- Tiket QR dalam amplop -->
-        <div id="ticket-section" class="ticket" hidden>
-          <div class="orn"><i></i></div>
-          <p class="eyebrow" style="margin-top:22px">Tiket Masuk</p>
-          <h3>QR Check-in Anda</h3>
-          <p class="sub">Tunjukkan QR ini ke petugas di pintu masuk.</p>
+      <!-- TIKET (amplop) -->
+      <section class="block ink ticket on-dark" id="ticket-section" hidden>
+        <div class="brand"><span class="bn">RayaRayu</span><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="#EAEAEA"/><path d="M4.6 8.2l2.3 2.3 4.5-4.7" stroke="#0B0B0B" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="tag">Tiket Masuk</span></div>
+        <h2 class="display h2" style="margin-top:34px">Tiket <span class="it">Anda</span></h2>
+        <p class="lead">Tunjukkan QR ini ke petugas penerima tamu saat tiba di lokasi.</p>
 
-          <div id="env-stage" class="env-stage" role="button" tabindex="0" aria-label="Buka amplop tiket">
-            <p id="env-hint" class="env-hint">Ketuk amplop untuk membuka</p>
-            <div class="env">
-              <div class="env-back"></div>
-              <div class="letter">
-                <span class="l-eyebrow">Tiket Masuk</span>
-                <div class="qr-box"><div id="qrcode"></div></div>
-                <strong id="ticket-name" class="l-name"></strong>
-                <span id="ticket-token-label" class="l-code"></span>
-              </div>
-              <svg class="pocket" viewBox="0 0 320 224" preserveAspectRatio="none" aria-hidden="true">
-                <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f8f1e1"/><stop offset="1" stop-color="#eadfc6"/></linearGradient></defs>
-                <path d="M0 0 L160 123 L320 0 L320 224 L0 224Z" fill="url(#pg)"/>
-                <path d="M0 224 L150 118 M320 224 L170 118" fill="none" stroke="#d9c79c" stroke-opacity=".55" stroke-width="1" vector-effect="non-scaling-stroke"/>
-                <path d="M0 0 L160 123 L320 0" fill="none" stroke="#d3bf8f" stroke-width="1" vector-effect="non-scaling-stroke"/>
-              </svg>
-              <div class="env-flap"></div>
-              <div class="seal"><span>&amp;</span></div>
-            </div>
+        <button type="button" class="stage" id="stage" aria-expanded="false" aria-label="Amplop tiket. Ketuk untuk membuka atau menutup">
+          <div class="env">
+            <div class="env-back"></div>
+            <div class="env-flap"></div>
+            <div class="seal" aria-hidden="true"><svg viewBox="0 0 24 24" fill="#0B0B0B"><path d="M12 21s-7-4.4-9.3-8.6C1 9.1 2.700 5 6.400 5c2.200 0 3.700 1.300 4.600 2.900h2C13.900 6.300 15.400 5 17.600 5c3.700 0 5.400 4.100 3.700 7.400C19 16.600 12 21 12 21z"/></svg></div>
+            <div class="env-pocket"></div>
           </div>
+          <div class="t-card">
+            <div class="t-top"><span>Tiket Masuk</span><span id="t-pax">1 orang</span></div>
+            <div class="t-qr"><div id="qrcode"></div></div>
+            <div class="t-name" id="t-name">-</div>
+            <div class="t-code" id="ticket-token-label"></div>
+          </div>
+          <span class="tap">Ketuk amplop</span>
+        </button>
 
-          <p id="checkin-status-note" class="chip"></p>
-          <div><button id="btn-save-qr" class="btn ghost sm" type="button" hidden>Simpan QR sebagai gambar</button></div>
+        <div id="ticket-status" class="ticket-status" role="status"><span class="pulse"></span><span id="ticket-status-text">Belum check-in</span></div>
+        <div class="actions">
+          <button class="btn light sm" id="dl-ticket" type="button">Simpan Tiket sebagai Gambar</button>
         </div>
       </section>
 
-      <!-- Kado digital -->
-      <section id="hadiah" class="sec alt">
-        <p class="eyebrow rv">Kado Digital</p>
-        <h2 class="title rv d1">Tanda Kasih</h2>
-        <p class="lead rv d2">Kehadiran dan doa Anda sudah sangat berarti bagi kami. Jika ingin memberi tanda kasih, silakan lewat rekening berikut.</p>
-        <div class="card gift rv d2">
-          <div class="bank">Bank BCA</div>
-          <div class="no">1234567890</div>
-          <p class="an">a.n. Rudi &amp; Irul</p>
-          <button class="btn ghost sm" type="button" onclick="copyText('1234567890','Nomor rekening berhasil disalin')">Salin nomor rekening</button>
+      <!-- STATISTIK LIVE -->
+      <section class="block sky" id="stats" hidden>
+        <div class="brand"><span class="bn">RayaRayu</span><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="#0B0B0B"/><path d="M4.6 8.2l2.3 2.3 4.5-4.7" stroke="#76B5C0" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="tag">Update langsung</span></div>
+        <h2 class="display h2" style="margin-top:34px">Siapa saja<br><span class="it">yang hadir</span></h2>
+        <span class="tilde" style="margin-top:34px">~</span>
+        <div class="stat-big" id="st-pax">0</div>
+        <div>Orang sudah memastikan hadir</div>
+        <div class="circles" id="st-circles" aria-hidden="true"></div>
+        <div class="stat-grid">
+          <div><b id="st-yes">0</b><span>Undangan hadir</span></div>
+          <div><b id="st-no">0</b><span>Belum bisa hadir</span></div>
+        </div>
+        <div class="progress">
+          <div class="row"><b id="st-pct">0%</b><span id="st-resp" style="text-align:right;font-size:14px">sudah<br>merespons</span></div>
+          <div class="bar" aria-hidden="true"><i id="st-bar"></i></div>
         </div>
       </section>
 
-      <!-- Ucapan -->
-      <section id="ucapan" class="sec">
-        <p class="eyebrow rv">Buku Tamu</p>
-        <h2 class="title rv d1">Ucapan &amp; Doa</h2>
-        <p class="lead rv d2">Tulis pesan untuk kami. Ucapan Anda akan tampil di bawah ini.</p>
+      <!-- AMPLOP DIGITAL -->
+      <section class="block paper" id="gift">
+        <div class="brand rv"><span class="bn">RayaRayu</span><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="#0B0B0B"/><path d="M4.6 8.2l2.3 2.3 4.5-4.7" stroke="#EAEAEA" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="tag">Opsional</span></div>
+        <h2 class="display h2 rv" style="margin-top:34px">Tanda<br><span class="it">Kasih</span></h2>
+        <p class="lead rv">Kehadiran dan doa Anda sudah lebih dari cukup. Jika ingin berbagi kebahagiaan, Anda bisa mengirimnya lewat rekening berikut.</p>
+        <div class="gift-list" id="gift-list"></div>
+      </section>
 
-        <form id="wish-form" class="wish-form rv d2" novalidate>
+      <!-- UCAPAN & DOA -->
+      <section class="block tan" id="wishes-section">
+        <div class="brand rv"><span class="bn">RayaRayu</span><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="#0B0B0B"/><path d="M4.6 8.2l2.3 2.3 4.5-4.7" stroke="#BD9F7F" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="tag" id="wish-count-tag">Buku tamu</span></div>
+        <h2 class="display h2 rv" style="margin-top:34px">Ucapan<br><span class="it">&amp; Doa</span></h2>
+
+        <form id="wish-form" class="composer rv" novalidate>
           <div class="as">
-            <div class="avatar" id="wish-avatar">?</div>
-            <div><small>Mengirim sebagai</small><strong id="wish-as-name">-</strong></div>
+            <div class="avatar st-none" id="w-avatar"><span id="w-initial">T</span><i class="dot st-none" id="w-dot"></i></div>
+            <div><small>Mengirim sebagai</small><b id="w-name">-</b></div>
+            <span class="badge st-none" id="w-badge"></span>
           </div>
-          <label class="sr" for="wish-message">Ucapan dan doa</label>
-          <textarea id="wish-message" maxlength="300" placeholder="Tulis ucapan selamat dan doa untuk kedua mempelai…"></textarea>
-          <div class="tf-meta"><span>Tulis dengan sopan ya</span><span><span id="wish-count">0</span>/300</span></div>
-          <p class="sugg-lbl">Bingung mau nulis apa? Pilih salah satu:</p>
-          <div class="sugg" id="sugg"></div>
-          <button type="submit" id="btn-wish" class="btn full">Kirim Ucapan</button>
+          <label for="wish-message" class="sr" style="position:absolute;left:-9999px">Tulis ucapan dan doa</label>
+          <textarea id="wish-message" rows="3" maxlength="300" placeholder="Tulis ucapan dan doa untuk mempelai…"></textarea>
+          <div class="quick" id="quick" aria-label="Contoh ucapan"></div>
+          <div class="row">
+            <span class="counter" id="wish-counter">0/300</span>
+            <button type="submit" id="btn-wish" class="btn">Kirim Ucapan
+              <svg class="arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12L12 4M5 4h7v7"/></svg></button>
+          </div>
         </form>
 
-        <div class="wish-head">
-          <h3>Ucapan dari Tamu</h3>
-          <span id="wish-total"></span>
+        <div class="filters" id="filters" role="group" aria-label="Filter ucapan"></div>
+        <div class="wishes" id="wishes-container" aria-live="polite">
+          <div class="skeleton"></div><div class="skeleton"></div>
         </div>
-        <div id="wishes-container"></div>
-        <button id="btn-more" class="btn ghost full more" type="button" hidden>Lihat ucapan lainnya</button>
+        <button class="btn ghost" id="wish-more" type="button" hidden>Tampilkan lebih banyak</button>
       </section>
 
-      <!-- Penutup -->
-      <footer class="closing">
-        <p class="eyebrow">Terima kasih</p>
-        <p class="thanks">Sampai jumpa di hari bahagia kami</p>
-        <p class="small">Merupakan kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.</p>
-        <h2 id="footer-client-name" class="names"></h2>
-      </footer>
+      <!-- PENUTUP -->
+      <section class="block ink closing on-dark">
+        <span class="tilde">~</span>
+        <h2 class="display">Terima<br><span class="it">kasih</span></h2>
+        <p>Merupakan kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.</p>
+        <div class="names" id="footer-client-name">Rudi &amp; Irul</div>
+      </section>
     </main>
-
-    <nav id="nav" class="nav" aria-label="Navigasi cepat">
-      <a href="#acara" data-s="acara">Acara</a>
-      <a href="#rsvp" data-s="rsvp">RSVP</a>
-      <a href="#hadiah" data-s="hadiah">Kado</a>
-      <a href="#ucapan" data-s="ucapan">Ucapan</a>
-    </nav>
   </div>
 </div>
-<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<div class="toast-host" id="toast-host" aria-live="polite"></div>
 
 <script>
-  // ==========================================
-  // KONFIGURASI SUPABASE (tidak diubah)
-  // ==========================================
-  const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/* ==========================================================
+   KONFIGURASI
+   ========================================================== */
+const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  let guestData = null;
-  let eventDateObj = null;
-  let eventHasTZ = false;
-  let eventHasTime = false;
+// Daftar rekening amplop digital (silakan tambah / ubah). "atasNama" kosong = pakai nama mempelai.
+const GIFTS = [
+  { bank: "Bank BCA", nomor: "1234567890", atasNama: "" }
+];
 
-  // ---------- Helper tampilan ----------
-  const $ = id => document.getElementById(id);
-  function escapeHtml(s) {
-    return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
-  const initial = s => (String(s || '?').trim()[0] || '?').toUpperCase();
-  const pad = n => String(n).padStart(2, '0');
+const QUICK_WISHES = [
+  "Selamat menempuh hidup baru! Semoga sakinah, mawaddah, warahmah 🤍",
+  "Barakallahu lakuma wa baraka alaikuma wa jama’a bainakuma fi khair.",
+  "Semoga lancar sampai hari H dan bahagia selamanya!",
+  "Mohon maaf belum bisa hadir. Doa terbaik untuk kalian berdua 🤲"
+];
 
-  let toastTimer;
-  function toast(msg, type) {
-    const t = $('toast');
-    t.textContent = msg;
-    t.className = 'toast show' + (type === 'err' ? ' err' : '');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
-  }
+const MAX_WISH = 300;
+const WISH_PAGE = 6;
 
-  async function copyText(text, okMsg) {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast(okMsg || 'Berhasil disalin');
-    } catch (e) {
-      try {
-        const ta = document.createElement('textarea');
-        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-        toast(okMsg || 'Berhasil disalin');
-      } catch (e2) { toast('Gagal menyalin. Silakan salin manual.', 'err'); }
-    }
-  }
+/* ==========================================================
+   STATE & HELPER
+   ========================================================== */
+const $ = (id) => document.getElementById(id);
+const S = {
+  guest: null, guestId: null, eventId: null,
+  status: null, pax: 1, max: 2, checked: false, editing: false,
+  summary: null, wishes: [], filter: 'all', shown: WISH_PAGE, seen: new Set(), firstLoad: true,
+  eventDate: null, clientName: '', ticketReady: false, sending: false
+};
 
-  function namesHTML(name) {
-    const n = String(name || 'Mempelai').trim();
-    const parts = n.split(/\s*&\s*|\s+dan\s+/i).filter(Boolean);
-    if (parts.length === 2) return `<span>${escapeHtml(parts[0])}</span><em>&amp;</em><span>${escapeHtml(parts[1])}</span>`;
-    return `<span>${escapeHtml(n)}</span>`;
-  }
+const ICON = {
+  check: '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.500 6.300l2.400 2.400 4.600-5"/></svg>',
+  x: '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l6 6M9 3L3 9"/></svg>',
+  clock: '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.700" stroke-linecap="round"><circle cx="6" cy="6" r="4.500"/><path d="M6 3.600V6l1.600 1"/></svg>',
+  copy: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.700" stroke-linecap="round" stroke-linejoin="round"><rect x="5.500" y="5.500" width="8" height="8" rx="2"/><path d="M10.500 5.500V4A1.500 1.500 0 009 2.500H4A1.500 1.500 0 002.500 4v5A1.500 1.500 0 004 10.500h1.500"/></svg>'
+};
 
-  // ---------- Sanitasi token (tidak diubah) ----------
-  function cleanTokenString(str) {
-    if (!str) return '';
-    return String(str)
-      .trim()
-      .toLowerCase()
-      .replace(/[\u200B-\u200D\uFEFF]/g, '')
-      .replace(/[\u2010-\u2015\u2212]/g, '-');
-  }
+function cleanToken(str) {
+  if (!str) return '';
+  return String(str).trim().toLowerCase()
+    .replace(/[​-‍﻿]/g, '')
+    .replace(/[‐-―−]/g, '-');
+}
+function getToken() {
+  const q = new URLSearchParams(location.search).get('token');
+  if (q) return cleanToken(q);
+  const seg = location.pathname.split('/').filter(Boolean);
+  if (seg.length >= 2) return cleanToken(seg[seg.length - 1]);
+  if (seg.length === 1 && !seg[0].includes('.html')) return cleanToken(seg[0]);
+  return null;
+}
+const token = getToken();
 
-  // Mendapatkan token baik lewat ?token= maupun pathname /:slug/:token (tidak diubah)
-  function getInvitationToken() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const queryToken = urlParams.get('token');
-    if (queryToken) return cleanTokenString(queryToken);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = (s) => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+const initial = (s) => (String(s || '?').trim().match(/[A-Za-z0-9À-ɏ]/) || ['?'])[0].toUpperCase();
+const firstOf = (v) => Array.isArray(v) ? v[0] : v;
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
 
-    const pathSegments = window.location.pathname.split('/').filter(Boolean);
-    if (pathSegments.length >= 2) {
-      return cleanTokenString(pathSegments[pathSegments.length - 1]);
-    } else if (pathSegments.length === 1 && !pathSegments[0].includes('.html')) {
-      return cleanTokenString(pathSegments[0]);
-    }
+function toast(msg, type) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (type === 'err' ? ' err' : '');
+  el.textContent = msg;
+  $('toast-host').appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 320); }, 3200);
+}
 
-    return null;
-  }
+function relTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso).getTime();
+  if (isNaN(d)) return '';
+  const s = Math.max(1, Math.floor((Date.now() - d) / 1000));
+  if (s < 60) return 'Baru saja';
+  const m = Math.floor(s / 60); if (m < 60) return m + ' menit lalu';
+  const h = Math.floor(m / 60); if (h < 24) return h + ' jam lalu';
+  const dd = Math.floor(h / 24); if (dd < 7) return dd + ' hari lalu';
+  return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
-  const token = getInvitationToken();
+function statusMeta(s) {
+  if (s === 'hadir') return { key: 'hadir', cls: 'st-yes', label: 'Hadir', icon: ICON.check };
+  if (s === 'tidak_hadir') return { key: 'tidak', cls: 'st-no', label: 'Tidak Hadir', icon: ICON.x };
+  return { key: 'belum', cls: 'st-none', label: 'Belum Konfirmasi', icon: ICON.clock };
+}
+function badgeHTML(s) { const m = statusMeta(s); return `${m.icon}${m.label}`; }
 
-  // ---------- Memuat data (query tidak diubah) ----------
-  async function init() {
-    if (!token) {
-      showError("Tautan undangan tidak memiliki kode. Silakan periksa kembali tautan yang Anda terima.");
-      return;
-    }
+function countUp(el, to, dur = 1100, suffix = '') {
+  const from = parseInt(el.dataset.v || '0', 10) || 0;
+  el.dataset.v = to;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches || from === to) { el.textContent = to + suffix; return; }
+  const t0 = performance.now();
+  const tick = (t) => {
+    const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(from + (to - from) * e) + suffix;
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
 
-    // Panggil RPC get_invitation_details
-    const { data, error } = await supabaseClient.rpc('get_invitation_details', { p_token: token });
+/* ==========================================================
+   DATA (Supabase): RPC lebih dulu, query langsung sebagai cadangan
+   ========================================================== */
+async function fetchGuest() {
+  try {
+    const { data, error } = await sb.rpc('get_invitation_details', { p_token: token });
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!error && row) return row;
+  } catch (e) { /* lanjut ke cadangan */ }
+  return await fallbackFetchGuest();
+}
 
-    if (error || !data || data.length === 0) {
-      // Fallback direct query jika RPC get_invitation_details belum aktif
-      return await fallbackLoadDetails(token);
-    }
+async function fallbackFetchGuest() {
+  const { data: guests, error } = await sb.from('guests')
+    .select(`id, group_name, category, max_pax, invitation_token, event_id,
+             events ( title, event_date, location, caption, client_id, clients ( name ) )`)
+    .ilike('invitation_token', token).limit(1);
+  if (error || !guests || !guests.length) return null;
 
-    renderInvitation(data[0]);
-  }
+  const g = guests[0], ev = g.events || {};
+  const [rsvpRes, ticketRes] = await Promise.all([
+    sb.from('rsvps').select('status, pax_confirmed').eq('guest_id', g.id).limit(1),
+    sb.from('tickets').select('ticket_token, is_checked_in, checked_in_at').eq('guest_id', g.id).limit(1)
+  ]);
+  const rsvp = rsvpRes.data && rsvpRes.data[0];
+  const ticket = ticketRes.data && ticketRes.data[0];
+  return {
+    id: g.id, event_id: g.event_id,
+    group_name: g.group_name, category: g.category, max_pax: g.max_pax,
+    invitation_token: g.invitation_token,
+    event_title: ev.title || 'Pernikahan', event_date: ev.event_date,
+    event_location: ev.location, event_caption: ev.caption,
+    client_name: ev.clients ? ev.clients.name : 'Mempelai',
+    rsvp_status: rsvp ? rsvp.status : null,
+    pax_confirmed: rsvp ? rsvp.pax_confirmed : null,
+    ticket_token: ticket ? ticket.ticket_token : g.invitation_token,
+    is_checked_in: ticket ? ticket.is_checked_in : false
+  };
+}
 
-  // Fallback direct query jika RPC bermasalah
-  async function fallbackLoadDetails(cleanToken) {
-    try {
-      const { data: guests, error } = await supabaseClient
-        .from('guests')
-        .select(`
-          id, group_name, category, max_pax, invitation_token, event_id,
-          events ( title, event_date, location, caption, client_id, clients ( name ) )
-        `)
-        .ilike('invitation_token', cleanToken)
-        .limit(1);
+async function ensureIds(g) {
+  S.guestId = g.id || g.guest_id || null;
+  S.eventId = g.event_id || null;
+  if (S.guestId && S.eventId) return;
+  try {
+    const { data } = await sb.from('guests').select('id, event_id').ilike('invitation_token', token).limit(1);
+    if (data && data[0]) { S.guestId = S.guestId || data[0].id; S.eventId = S.eventId || data[0].event_id; }
+  } catch (e) {}
+}
 
-      if (error || !guests || guests.length === 0) {
-        showError("Undangan dengan kode '" + cleanToken + "' tidak ditemukan.");
-        return;
-      }
-
-      const g = guests[0];
-      const ev = g.events || {};
-      const clientName = ev.clients ? ev.clients.name : "Mempelai";
-
-      // Cek RSVP dan Tiket
-      const [rsvpRes, ticketRes] = await Promise.all([
-        supabaseClient.from('rsvps').select('status, pax_confirmed').eq('guest_id', g.id).limit(1),
-        supabaseClient.from('tickets').select('ticket_token, is_checked_in, checked_in_at').eq('guest_id', g.id).limit(1)
-      ]);
-
-      const rsvp = rsvpRes.data && rsvpRes.data[0];
-      const ticket = ticketRes.data && ticketRes.data[0];
-
-      const formatted = {
-        group_name: g.group_name,
-        category: g.category,
-        max_pax: g.max_pax,
-        invitation_token: g.invitation_token,
-        event_id: g.event_id,
-        event_title: ev.title || "Pernikahan",
-        event_date: ev.event_date,
-        event_location: ev.location,
-        event_caption: ev.caption,
-        client_name: clientName,
-        rsvp_status: rsvp ? rsvp.status : null,
-        pax_confirmed: rsvp ? rsvp.pax_confirmed : null,
-        ticket_token: ticket ? ticket.ticket_token : g.invitation_token,
-        is_checked_in: ticket ? ticket.is_checked_in : false
-      };
-
-      renderInvitation(formatted);
-    } catch (err) {
-      showError("Gagal terhubung ke server: " + err.message);
-    }
-  }
-
-  function showError(msg) {
-    $('loading').hidden = true;
-    $('error-text').innerText = msg;
-    $('error-screen').hidden = false;
-  }
-
-  // ---------- Tanggal & waktu ----------
-  function fmtEvent(opts) {
-    const o = Object.assign({}, opts);
-    if (eventHasTZ) o.timeZone = 'Asia/Jakarta';
-    return eventDateObj.toLocaleString('id-ID', o);
-  }
-
-  // ---------- Render undangan ----------
-  const maxPaxOf = () => Number(guestData && guestData.max_pax) || 2;
-
-  function renderInvitation(guest) {
-    guestData = guest;
-    const raw = guest.event_date ? String(guest.event_date) : '';
-    eventDateObj = raw ? new Date(raw) : null;
-    if (eventDateObj && isNaN(eventDateObj.getTime())) eventDateObj = null;
-    eventHasTime = /\d{2}:\d{2}/.test(raw);
-    eventHasTZ = /\d{2}:\d{2}.*([zZ]|[+-]\d{2}(:?\d{2})?)$/.test(raw.trim());
-
-    const coupleName = guest.client_name || guest.event_title || 'Mempelai';
-    document.title = guest.event_title || 'Undangan Pernikahan';
-
-    // Sampul & hero
-    $('cover-names').innerHTML = namesHTML(coupleName);
-    $('hero-names').innerHTML = namesHTML(coupleName);
-    $('bride-groom-names').innerHTML = namesHTML(coupleName);
-    $('footer-client-name').innerHTML = namesHTML(coupleName);
-    $('cover-guest-name').innerText = guest.group_name || 'Tamu Undangan';
-    $('cover-max-pax').innerText = maxPaxOf();
-    if (guest.event_caption) $('event-caption').innerText = guest.event_caption;
-
-    // Acara
-    if (eventDateObj) {
-      const dateLong = fmtEvent({ weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-      $('event-date').innerText = dateLong;
-      $('hero-date').innerText = fmtEvent({ day: 'numeric', month: 'long', year: 'numeric' });
-      if (eventHasTime) {
-        const t = fmtEvent({ hour: '2-digit', minute: '2-digit' });
-        $('event-time').innerText = 'Pukul ' + t + ' WIB';
-        $('hero-time').innerText = t + ' WIB';
-      }
-      setupCalendar();
-    } else {
-      $('hero-date').hidden = true; $('hero-time').hidden = true;
-      $('cal-box').hidden = true; $('countdown').hidden = true;
-    }
-    $('event-location').innerText = guest.event_location || '';
-    $('maps-btn').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(guest.event_location || '')}`;
-    if (!guest.event_location) { $('maps-btn').hidden = true; $('btn-copy-loc').hidden = true; }
-
-    // RSVP
-    $('rsvp-guest-name').innerText = guest.group_name;
-    $('rsvp-max-pax').innerText = maxPaxOf();
-    paxValue = Math.min(maxPaxOf(), Math.max(1, Number(guest.pax_confirmed) || maxPaxOf()));
-    updatePaxUI();
-
-    // Wish form
-    $('wish-avatar').innerText = initial(guest.group_name);
-    $('wish-as-name').innerText = guest.group_name || 'Tamu';
-    initWishForm();
-
-    // Status RSVP yang sudah tersimpan sebelumnya
-    if (guest.rsvp_status) {
-      const radio = document.querySelector(`input[name="status"][value="${guest.rsvp_status}"]`);
-      if (radio) radio.checked = true;
-      onChoiceChange();
-      if (guest.rsvp_status === 'hadir') {
-        // Generate QR code dengan token yang valid
-        const activeToken = cleanTokenString(guest.invitation_token || token);
-        renderQRCode(activeToken, guest.is_checked_in);
-      }
-    }
-    refreshRsvpBanner();
-
-    if (guest.is_checked_in) {
-      document.querySelectorAll('input[name="status"]').forEach(r => r.disabled = true);
-      $('pax-minus').disabled = true; $('pax-plus').disabled = true;
-      const b = $('btn-submit');
-      b.disabled = true; b.innerText = '✓ Sudah check-in di lokasi';
-    }
-
-    startCountdown();
-    loadWishes();
-
-    $('loading').hidden = true;
-    $('main-content').hidden = false;
-    document.documentElement.classList.add('locked');
-  }
-
-  function openInvitation() {
-    const cover = $('cover');
-    cover.classList.add('up');
-    document.documentElement.classList.remove('locked');
-    window.scrollTo(0, 0);
-    initReveal();
-    setTimeout(() => $('nav').classList.add('show'), 700);
-    setTimeout(() => { cover.hidden = true; }, 950);
-  }
-
-  // ---------- Animasi muncul saat scroll & navigasi ----------
-  let revealStarted = false;
-  function initReveal() {
-    if (revealStarted) return; revealStarted = true;
-    const els = document.querySelectorAll('.rv');
-    if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('in')); return; }
-    const io = new IntersectionObserver(es => es.forEach(e => {
-      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
-    }), { threshold: .12, rootMargin: '0px 0px -6% 0px' });
-    els.forEach(e => io.observe(e));
-  }
-  (function navSpy() {
-    const ids = ['acara', 'rsvp', 'hadiah', 'ucapan'];
-    let ticking = false;
-    window.addEventListener('scroll', () => {
-      if (ticking) return; ticking = true;
-      requestAnimationFrame(() => {
-        ticking = false;
-        let cur = null;
-        ids.forEach(id => { const el = $(id); if (el && el.getBoundingClientRect().top < window.innerHeight * .45) cur = id; });
-        document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('on', a.dataset.s === cur));
-      });
-    }, { passive: true });
-  })();
-
-  // ---------- RSVP ----------
-  let paxValue = 1;
-
-  function updatePaxUI() {
-    const max = maxPaxOf();
-    $('pax-out').value = paxValue; $('pax-out').textContent = paxValue;
-    $('pax-hint').textContent = 'dari maksimal ' + max + ' orang';
-    $('pax-minus').disabled = paxValue <= 1;
-    $('pax-plus').disabled = paxValue >= max;
-    if (max <= 1) $('pax-group').hidden = true;
-  }
-  $('pax-minus').addEventListener('click', () => { if (paxValue > 1) { paxValue--; updatePaxUI(); } });
-  $('pax-plus').addEventListener('click', () => { if (paxValue < maxPaxOf()) { paxValue++; updatePaxUI(); } });
-
-  function selectedStatus() {
-    const r = document.querySelector('input[name="status"]:checked');
-    return r ? r.value : '';
-  }
-
-  function onChoiceChange() {
-    const status = selectedStatus();
-    $('pax-group').hidden = !(status === 'hadir' && maxPaxOf() > 1);
-    if (status === 'hadir') updatePaxUI();
-    $('btn-submit').disabled = !status || !!(guestData && guestData.is_checked_in);
-    $('btn-submit').innerText = guestData && guestData.rsvp_status ? 'Perbarui Konfirmasi' : 'Kirim Konfirmasi';
-  }
-  document.querySelectorAll('input[name="status"]').forEach(r => r.addEventListener('change', onChoiceChange));
-
-  function refreshRsvpBanner() {
-    const b = $('rsvp-banner');
-    if (!guestData) return;
-    if (guestData.is_checked_in) {
-      b.className = 'banner ok'; b.hidden = false;
-      b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Anda sudah check-in di lokasi. Terima kasih sudah hadir!</span>';
-      return;
-    }
-    if (guestData.rsvp_status === 'hadir') {
-      const n = Number(guestData.pax_confirmed) || paxValue;
-      b.className = 'banner ok'; b.hidden = false;
-      b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Konfirmasi tersimpan: <b>hadir (' + n + ' orang)</b>. Anda bisa mengubahnya kapan saja sebelum hari acara.</span>';
-    } else if (guestData.rsvp_status === 'tidak_hadir') {
-      b.className = 'banner no'; b.hidden = false;
-      b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v5M12 16.2v.1"/></svg><span>Konfirmasi tersimpan: <b>tidak bisa hadir</b>. Terima kasih sudah memberi kabar. Anda tetap bisa mengirim doa di bawah.</span>';
-    } else {
-      b.hidden = true;
-    }
-  }
-
-  // Handle Submit RSVP (panggilan database tidak diubah)
-  $('rsvp-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const status = selectedStatus();
-    const pax = status === 'hadir' ? paxValue : 0;
-
-    if (!status) return toast("Silakan pilih dulu, hadir atau tidak.", 'err');
-
-    const btn = $('btn-submit');
-    btn.disabled = true;
-    btn.innerText = "Menyimpan…";
-
-    // 1. Coba RPC submit_rsvp
-    const { data, error } = await supabaseClient.rpc('submit_rsvp', {
-      p_invitation_token: token,
-      p_status: status,
-      p_pax: pax
+// Ringkasan RSVP seluruh tamu pada acara ini (dipakai untuk statistik + indikator status di tiap ucapan)
+async function loadSummary() {
+  if (!S.eventId) return;
+  try {
+    const { data, error } = await sb.from('guests')
+      .select('id, group_name, max_pax, rsvps ( status, pax_confirmed )')
+      .eq('event_id', S.eventId);
+    if (error || !data) return;
+    const byId = new Map(), byName = new Map();
+    let yes = 0, no = 0, pax = 0; const yesNames = [];
+    data.forEach(g => {
+      const r = firstOf(g.rsvps);
+      const st = r ? r.status : null;
+      byId.set(g.id, st); byName.set(norm(g.group_name), st);
+      if (st === 'hadir') { yes++; pax += (r.pax_confirmed || 1); yesNames.push(g.group_name); }
+      else if (st === 'tidak_hadir') no++;
     });
+    S.summary = { byId, byName, total: data.length, yes, no, pax, yesNames };
+    renderStats(); renderWishes();
+  } catch (e) { /* abaikan; indikator tetap tampil untuk tamu ini */ }
+}
 
-    if (error || !data || !data.success) {
-      // Fallback jika RPC gagal
-      const ok = await fallbackSubmitRsvp(status, pax);
-      if (!ok) { btn.disabled = false; btn.innerText = guestData.rsvp_status ? 'Perbarui Konfirmasi' : 'Kirim Konfirmasi'; return; }
+async function fetchWishes() {
+  let list = null;
+  try {
+    const r = await sb.rpc('get_event_wishes', { p_token: token });
+    if (!r.error && Array.isArray(r.data)) list = r.data;
+  } catch (e) {}
+  if (!list) {
+    let q = sb.from('wishes').select('*').order('created_at', { ascending: false }).limit(80);
+    if (S.eventId) q = q.eq('event_id', S.eventId);
+    const r = await q;
+    list = r.data || [];
+  }
+  list.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+  return list;
+}
+
+async function loadWishes() {
+  try { S.wishes = await fetchWishes(); } catch (e) { S.wishes = S.wishes || []; }
+  renderWishes();
+}
+const loadWishesSoon = debounce(loadWishes, 600);
+const loadSummarySoon = debounce(loadSummary, 800);
+
+/* ==========================================================
+   RENDER: UNDANGAN
+   ========================================================== */
+function splitNames(n) {
+  const p = String(n || '').split(/\s*(?:&|\bdan\b|\band\b)\s*/i).filter(Boolean);
+  return p.length >= 2 ? [p[0], p[1]] : [p[0] || 'Mempelai', ''];
+}
+
+function renderInvitation(g) {
+  S.guest = g;
+  S.eventDate = g.event_date ? new Date(g.event_date) : null;
+  S.clientName = g.client_name || 'Mempelai';
+  S.max = Math.max(1, parseInt(g.max_pax || 2, 10));
+  S.status = g.rsvp_status || null;
+  S.pax = g.pax_confirmed || (S.status === 'hadir' ? S.max : Math.min(S.max, 2));
+  if (S.pax < 1) S.pax = 1;
+  S.checked = !!g.is_checked_in;
+
+  document.title = `Undangan ${S.clientName}`;
+  document.querySelectorAll('.bn').forEach(e => e.textContent = S.clientName);
+
+  // Cover
+  $('cv-brand').textContent = 'Undangan Pernikahan';
+  $('cv-title').textContent = S.clientName;
+  $('cv-guest').textContent = g.group_name || 'Tamu Undangan';
+  $('cv-pax').textContent = `Undangan untuk ${S.max} orang`;
+
+  // Isi
+  const [n1, n2] = splitNames(S.clientName);
+  $('couple-names').textContent = S.clientName;
+  $('couple-circles').innerHTML = n2
+    ? `<div class="mono c1">${esc(initial(n1))}</div><div class="mono amp">&amp;</div><div class="mono c2">${esc(initial(n2))}</div>`
+    : `<div class="mono c1">${esc(initial(n1))}</div>`;
+  if (g.event_caption) $('event-caption').textContent = g.event_caption;
+  $('footer-client-name').textContent = S.clientName;
+
+  if (S.eventDate && !isNaN(S.eventDate)) {
+    const tz = 'Asia/Jakarta';
+    $('event-date').textContent = S.eventDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: tz });
+    $('event-time').textContent = 'Pukul ' + S.eventDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz }).replace(':', '.') + ' WIB';
+  } else {
+    $('event-date').textContent = 'Segera diumumkan';
+    $('event-time').hidden = true;
+    $('cal-btn').hidden = true;
+  }
+  $('event-location').textContent = g.event_location || '';
+  $('maps-btn').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(g.event_location || '')}`;
+
+  // RSVP: identitas
+  $('rsvp-guest-name').textContent = g.group_name || 'Tamu Undangan';
+  $('rsvp-guest-sub').textContent = S.max > 1 ? `Undangan untuk maksimal ${S.max} orang` : 'Undangan untuk 1 orang';
+  $('w-name').textContent = g.group_name || 'Tamu Undangan';
+  $('pax-hint').textContent = `Maksimal ${S.max} orang, termasuk Anda.`;
+
+  // Gift
+  renderGifts();
+  // Quick wishes
+  $('quick').innerHTML = QUICK_WISHES.map((t, i) => `<button type="button" data-i="${i}">${esc(t.length > 34 ? t.slice(0, 32) + '…' : t)}</button>`).join('');
+
+  applyRsvpUI();
+  startCountdown();
+
+  $('loading').hidden = true;
+  $('main-content').hidden = false;
+}
+
+function renderGifts() {
+  $('gift-list').innerHTML = GIFTS.map((g, i) => `
+    <div class="gift rv">
+      <div class="bank"><span>${esc(g.bank)}</span>
+        <button class="copy-btn" type="button" data-i="${i}">${ICON.copy}<span>Salin</span></button></div>
+      <div class="no">${esc(g.nomor)}</div>
+      <p class="an">a.n. ${esc(g.atasNama || S.clientName)}</p>
+    </div>`).join('');
+  observeReveals();
+}
+
+/* ==========================================================
+   COVER
+   ========================================================== */
+function openInvitation() {
+  const c = $('cover');
+  c.classList.add('gone');
+  document.body.classList.remove('locked');
+  setTimeout(() => { c.hidden = true; }, 950);
+  observeReveals();
+}
+
+/* ==========================================================
+   COUNTDOWN, KALENDER
+   ========================================================== */
+let cdTimer = null;
+function startCountdown() {
+  if (cdTimer) clearInterval(cdTimer);
+  const tick = () => {
+    if (!S.eventDate || isNaN(S.eventDate)) { $('countdown').hidden = true; return; }
+    const d = S.eventDate.getTime() - Date.now();
+    if (d <= 0) {
+      $('countdown').hidden = true; $('cd-note').hidden = false;
+      $('cd-note').textContent = (Date.now() - S.eventDate.getTime() < 864e5) ? 'Hari bahagia sedang berlangsung ✦' : 'Acara telah selesai. Terima kasih atas doanya ✦';
+      clearInterval(cdTimer); return;
     }
+    $('cd-days').textContent = Math.floor(d / 864e5);
+    $('cd-hours').textContent = Math.floor(d % 864e5 / 36e5);
+    $('cd-mins').textContent = Math.floor(d % 36e5 / 6e4);
+    $('cd-secs').textContent = Math.floor(d % 6e4 / 1e3);
+  };
+  tick(); cdTimer = setInterval(tick, 1000);
+}
 
-    guestData.rsvp_status = status;
-    guestData.pax_confirmed = pax;
-    btn.disabled = false;
-    btn.innerText = 'Perbarui Konfirmasi';
-    refreshRsvpBanner();
-    renderWishes(false);
+function saveToCalendar() {
+  if (!S.eventDate) return;
+  const fmt = (d) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const end = new Date(S.eventDate.getTime() + 3 * 36e5);
+  const t = (s) => String(s || '').replace(/([,;])/g, '\\$1').replace(/\n/g, '\\n');
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//RayaRayu//Undangan//ID', 'BEGIN:VEVENT',
+    `UID:${token}@rayarayu`, `DTSTAMP:${fmt(new Date())}`, `DTSTART:${fmt(S.eventDate)}`, `DTEND:${fmt(end)}`,
+    `SUMMARY:${t('Pernikahan ' + S.clientName)}`, `LOCATION:${t(S.guest.event_location)}`,
+    `DESCRIPTION:${t('Undangan pernikahan ' + S.clientName)}`,
+    'BEGIN:VALARM', 'TRIGGER:-P1D', 'ACTION:DISPLAY', 'DESCRIPTION:Besok hari bahagia', 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+  a.download = 'undangan-pernikahan.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('Acara disimpan ke kalender');
+}
 
+/* ==========================================================
+   RSVP
+   ========================================================== */
+function setChoice(v) {
+  document.querySelectorAll('input[name="attend"]').forEach(r => r.checked = (r.value === v));
+  $('pax-wrap').classList.toggle('open', v === 'hadir' && S.max > 1);
+  $('rsvp-submit').textContent = v === 'hadir' ? 'Konfirmasi Hadir' : v === 'tidak_hadir' ? 'Kirim Konfirmasi' : 'Kirim Konfirmasi';
+}
+function renderPax() {
+  $('pax-val').textContent = S.pax;
+  $('pax-minus').disabled = S.pax <= 1;
+  $('pax-plus').disabled = S.pax >= S.max;
+}
+
+// Menyatukan semua tampilan yang bergantung pada status RSVP tamu
+function applyRsvpUI() {
+  const m = statusMeta(S.status);
+  const name = S.guest.group_name || 'Tamu';
+  ['rsvp', 'w'].forEach(p => {
+    $(p + '-avatar').className = 'avatar ' + m.cls;
+    $(p + '-dot').className = 'dot ' + m.cls;
+    $(p + '-initial').textContent = initial(name);
+  });
+  $('w-badge').className = 'badge ' + m.cls;
+  $('w-badge').innerHTML = badgeHTML(S.status);
+
+  const answered = !!S.status && !S.editing;
+  $('rsvp-form').hidden = answered;
+  $('rsvp-summary').hidden = !answered;
+
+  if (answered) {
+    $('sum-badge').className = 'badge ' + m.cls;
+    $('sum-badge').innerHTML = badgeHTML(S.status);
+    if (S.status === 'hadir') {
+      $('sum-title').textContent = `Sampai jumpa, ${S.pax} orang akan hadir`;
+      $('sum-sub').textContent = 'Tiket QR Anda ada di bagian bawah. Simpan atau tunjukkan saat tiba.';
+    } else {
+      $('sum-title').textContent = 'Terima kasih sudah memberi kabar';
+      $('sum-sub').textContent = 'Anda tetap bisa mengirim ucapan dan doa di bawah.';
+    }
+    $('rsvp-edit').hidden = S.checked;
+    if (S.checked) $('sum-sub').textContent = 'Anda sudah check-in di lokasi. Selamat menikmati acara!';
+  } else {
+    setChoice(S.status || '');
+    renderPax();
+  }
+
+  // Tiket
+  if (S.status === 'hadir') showTicket(false); else { $('ticket-section').hidden = true; }
+  updateTicketStatus();
+  renderWishes();
+}
+
+async function submitRsvp(status, pax) {
+  try {
+    const { data, error } = await sb.rpc('submit_rsvp', { p_invitation_token: token, p_status: status, p_pax: pax });
+    if (!error && data && data.success) return true;
+  } catch (e) {}
+  // Cadangan: langsung ke tabel
+  try {
+    const gid = S.guestId;
+    if (!gid) return false;
+    const r1 = await sb.from('rsvps').upsert({ guest_id: gid, status, pax_confirmed: pax, updated_at: new Date().toISOString() }, { onConflict: 'guest_id' });
+    if (r1.error) return false;
     if (status === 'hadir') {
-      toast("Terima kasih! Kehadiran Anda sudah tersimpan.");
-      const activeToken = cleanTokenString(token);
-      renderQRCode(activeToken, false);
-      setTimeout(() => $('ticket-section').scrollIntoView({ behavior: 'smooth', block: 'center' }), 250);
-    } else {
-      toast("Terima kasih sudah memberi kabar.");
-      $('ticket-section').hidden = true;
+      await sb.from('tickets').upsert({ guest_id: gid, ticket_token: token, is_checked_in: false }, { onConflict: 'guest_id' });
     }
-  });
+    return true;
+  } catch (e) { return false; }
+}
 
-  // Fallback submit RSVP langsung ke tabel rsvps dan tickets (tidak diubah)
-  async function fallbackSubmitRsvp(status, pax) {
-    try {
-      const { data: gList } = await supabaseClient.from('guests').select('id, invitation_token').ilike('invitation_token', token).limit(1);
-      if (!gList || gList.length === 0) {
-        toast("Gagal menyimpan: data tamu tidak ditemukan.", 'err');
-        return false;
-      }
-      const gId = gList[0].id;
+/* ==========================================================
+   TIKET: amplop + QR
+   ========================================================== */
+function ticketCode() { return cleanToken(S.guest.invitation_token || token); }
 
-      // Upsert RSVP
-      await supabaseClient.from('rsvps').upsert({
-        guest_id: gId,
-        status: status,
-        pax_confirmed: pax,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'guest_id' });
+function buildQR() {
+  if (S.ticketReady) return;
+  const box = $('qrcode'); box.innerHTML = '';
+  try {
+    new QRCode(box, { text: ticketCode(), width: 146, height: 146, correctLevel: QRCode.CorrectLevel.H });
+    S.ticketReady = true;
+  } catch (e) { box.textContent = ticketCode(); }
+  $('ticket-token-label').textContent = 'Kode: ' + ticketCode();
+}
 
-      // Jika hadir, pastikan row di tabel tickets ada
-      if (status === 'hadir') {
-        await supabaseClient.from('tickets').upsert({
-          guest_id: gId,
-          ticket_token: token,
-          is_checked_in: false
-        }, { onConflict: 'guest_id' });
-      }
+let stageIO = null;
+function showTicket(animate) {
+  const sec = $('ticket-section');
+  const wasHidden = sec.hidden;
+  sec.hidden = false;
+  buildQR();
+  $('t-name').textContent = S.guest.group_name || 'Tamu Undangan';
+  $('t-pax').textContent = `${S.pax} orang`;
 
-      return true;
-    } catch (err) {
-      toast("Terjadi kesalahan saat menyimpan: " + err.message, 'err');
-      return false;
-    }
-  }
-
-  // ---------- Tiket QR & amplop ----------
-  const envStage = $('env-stage');
-  let envObserver = null, saveTimer = null;
-
-  function openEnvelope() {
-    if (envStage.classList.contains('open')) return;
-    envStage.classList.add('open');
-    envStage.setAttribute('aria-label', 'Ketuk untuk mengulang animasi amplop');
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => { $('btn-save-qr').hidden = false; }, 1900);
-  }
-  function replayEnvelope() {
-    envStage.classList.remove('open');
-    void envStage.offsetWidth;
-    setTimeout(openEnvelope, 450);
-  }
-  function resetEnvelope() {
-    envStage.classList.remove('open');
-    $('btn-save-qr').hidden = true;
-    envStage.setAttribute('aria-label', 'Buka amplop tiket');
-    if (envObserver) envObserver.disconnect();
+  const stage = $('stage');
+  if (animate) {
+    stage.classList.remove('open'); stage.setAttribute('aria-expanded', 'false');
+    setTimeout(() => sec.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+    setTimeout(() => setEnvelope(true), 1100);
+  } else if (wasHidden || !stageIO) {
+    // buka otomatis saat tiket terlihat di layar
+    if (stageIO) stageIO.disconnect();
     if ('IntersectionObserver' in window) {
-      envObserver = new IntersectionObserver(es => {
-        if (es.some(e => e.isIntersecting)) { setTimeout(openEnvelope, 650); envObserver.disconnect(); }
-      }, { threshold: .7 });
-      envObserver.observe(envStage);
-    }
+      stageIO = new IntersectionObserver((es) => {
+        if (es[0].isIntersecting) { setTimeout(() => setEnvelope(true), 450); stageIO.disconnect(); }
+      }, { threshold: .6 });
+      stageIO.observe(stage);
+    } else setEnvelope(true);
   }
-  envStage.addEventListener('click', () => envStage.classList.contains('open') ? replayEnvelope() : openEnvelope());
-  envStage.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); envStage.click(); }
-  });
+}
+function setEnvelope(open) {
+  const st = $('stage');
+  st.classList.toggle('open', open);
+  st.setAttribute('aria-expanded', String(open));
+}
 
-  function renderQRCode(ticketToken, isCheckedIn) {
-    if (!ticketToken) return;
+function updateTicketStatus() {
+  const el = $('ticket-status');
+  el.classList.toggle('ok', S.checked);
+  $('ticket-status-text').textContent = S.checked ? 'Sudah check-in di lokasi' : 'Belum check-in';
+  if (S.checked) el.querySelector('.pulse').style.animation = 'none';
+}
 
-    const ticketSection = $('ticket-section');
-    const qrContainer = $("qrcode");
-    const tokenLabel = $("ticket-token-label");
-    const statusNote = $("checkin-status-note");
+function onCheckedIn() {
+  if (S.checked) return;
+  S.checked = true; updateTicketStatus(); applyRsvpUI();
+  toast('Check-in berhasil. Selamat menikmati acara! 🎉');
+}
 
-    if (!qrContainer || !ticketSection) return;
+// Cek berkala apakah petugas sudah memindai QR
+setInterval(async () => {
+  if (S.status !== 'hadir' || S.checked || document.hidden || $('ticket-section').hidden) return;
+  try { const g = await fetchGuest(); if (g && g.is_checked_in) onCheckedIn(); } catch (e) {}
+}, 12000);
 
-    const wasHidden = ticketSection.hidden;
-    ticketSection.hidden = false;
-    qrContainer.innerHTML = '';
+async function downloadTicket() {
+  const qrEl = $('qrcode').querySelector('canvas') || $('qrcode').querySelector('img');
+  const W = 720, H = 980;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  try { await document.fonts.ready; } catch (e) {}
+  x.fillStyle = '#0B0B0B'; x.fillRect(0, 0, W, H);
+  x.fillStyle = '#EAEAEA';
+  x.beginPath(); x.roundRect ? x.roundRect(50, 50, W - 100, H - 100, 40) : x.rect(50, 50, W - 100, H - 100); x.fill();
+  x.fillStyle = '#0B0B0B'; x.textAlign = 'center';
+  x.font = '600 26px "Instrument Sans", sans-serif'; x.fillText('TIKET MASUK', W / 2, 135);
+  x.font = '64px "Instrument Serif", serif'; x.fillText(S.clientName, W / 2, 215);
+  x.fillStyle = '#fff'; x.beginPath(); x.roundRect ? x.roundRect(160, 270, 400, 400, 28) : x.rect(160, 270, 400, 400); x.fill();
+  x.strokeStyle = '#0B0B0B'; x.lineWidth = 3; x.stroke();
+  if (qrEl) x.drawImage(qrEl, 190, 300, 340, 340);
+  x.fillStyle = '#0B0B0B'; x.font = '60px "Instrument Serif", serif';
+  let nm = S.guest.group_name || 'Tamu'; while (x.measureText(nm).width > 560 && nm.length > 4) nm = nm.slice(0, -2);
+  x.fillText(nm === (S.guest.group_name || 'Tamu') ? nm : nm + '…', W / 2, 750);
+  x.font = '500 28px "Instrument Sans", sans-serif'; x.fillStyle = 'rgba(11,11,11,.7)';
+  x.fillText(`${S.pax} orang · ` + (S.eventDate ? S.eventDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' }) : ''), W / 2, 805);
+  x.font = '500 22px ui-monospace, Menlo, monospace'; x.fillText('Kode: ' + ticketCode(), W / 2, 870);
+  const a = document.createElement('a');
+  a.download = 'tiket-' + norm(S.guest.group_name || 'tamu').replace(/[^a-z0-9]+/g, '-') + '.png';
+  a.href = c.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove();
+  toast('Tiket tersimpan di galeri/unduhan Anda');
+}
 
-    const cleanToken = cleanTokenString(ticketToken);
-    tokenLabel.innerText = cleanToken;
-    $('ticket-name').innerText = (guestData && guestData.group_name) || '';
+/* ==========================================================
+   STATISTIK
+   ========================================================== */
+function renderStats() {
+  const s = S.summary; if (!s) return;
+  $('stats').hidden = false;
+  countUp($('st-pax'), s.pax, 1300);
+  countUp($('st-yes'), s.yes); countUp($('st-no'), s.no);
+  const responded = s.yes + s.no, pct = s.total ? Math.round(responded / s.total * 100) : 0;
+  countUp($('st-pct'), pct, 1200, '%');
+  $('st-bar').style.width = pct + '%';
+  const cols = ['', 'c3', ''];
+  $('st-circles').innerHTML = s.yesNames.slice(0, 3).map((n, i) => `<div class="mono ${['c1', 'c3', 'c2'][i]}">${esc(initial(n))}</div>`).join('') +
+    (s.yes > 3 ? `<div class="mono" style="background:var(--paper);font-family:var(--sans);font-size:15px;font-weight:600">+${s.yes - 3}</div>` : '');
+}
 
-    if (isCheckedIn) {
-      statusNote.className = 'chip ok';
-      statusNote.innerText = 'Sudah check-in di pintu masuk';
-    } else {
-      statusNote.className = 'chip';
-      statusNote.innerText = 'Belum check-in';
-    }
-
-    // Render QR Code baru
-    new QRCode(qrContainer, {
-      text: cleanToken,
-      width: 256,
-      height: 256,
-      correctLevel: QRCode.CorrectLevel.H
-    });
-
-    if (wasHidden) resetEnvelope();
+/* ==========================================================
+   UCAPAN & DOA
+   ========================================================== */
+function resolveStatus(w) {
+  if ((S.guestId && w.guest_id === S.guestId) || norm(w.guest_name) === norm(S.guest.group_name)) return S.status;
+  if (w.rsvp_status !== undefined && w.rsvp_status !== null) return w.rsvp_status;
+  if (S.summary) {
+    if (w.guest_id && S.summary.byId.has(w.guest_id)) return S.summary.byId.get(w.guest_id);
+    const k = norm(w.guest_name);
+    if (S.summary.byName.has(k)) return S.summary.byName.get(k);
   }
+  return null;
+}
 
-  $('btn-save-qr').addEventListener('click', () => {
-    const c = $('qrcode').querySelector('canvas');
-    if (!c) return toast('QR belum siap, coba lagi sebentar.', 'err');
-    const name = (guestData && guestData.group_name) || 'Tamu';
-    const code = cleanTokenString(token);
-    const W = 720, H = 880, cv = document.createElement('canvas');
-    cv.width = W; cv.height = H;
-    const x = cv.getContext('2d');
-    x.fillStyle = '#faf6ee'; x.fillRect(0, 0, W, H);
-    x.strokeStyle = '#d9c79c'; x.lineWidth = 2; x.strokeRect(24, 24, W - 48, H - 48);
-    x.textAlign = 'center';
-    x.fillStyle = '#a8884e'; x.font = '500 24px Jost, sans-serif'; x.fillText('TIKET MASUK', W / 2, 98);
-    x.fillStyle = '#fff'; x.fillRect(110, 130, 500, 500);
-    x.strokeStyle = '#e8dfcc'; x.strokeRect(110, 130, 500, 500);
-    x.imageSmoothingEnabled = false; x.drawImage(c, 134, 154, 452, 452);
-    let size = 48; x.fillStyle = '#2d2823';
-    do { x.font = `600 ${size}px "Cormorant Garamond", Georgia, serif`; size -= 2; } while (x.measureText(name).width > W - 120 && size > 20);
-    x.fillText(name, W / 2, 712);
-    x.fillStyle = '#7d7367'; x.font = '500 26px Jost, sans-serif'; x.fillText(code.toUpperCase(), W / 2, 764);
-    x.font = '400 22px Jost, sans-serif'; x.fillText('Tunjukkan QR ini ke petugas di pintu masuk', W / 2, 820);
-    cv.toBlob(b => {
-      if (!b) return toast('Gagal menyimpan gambar.', 'err');
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(b); a.download = 'tiket-' + code + '.png';
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-      toast('Gambar tiket tersimpan');
-    }, 'image/png');
-  });
+function renderWishes() {
+  if (!S.guest) return;
+  const box = $('wishes-container');
+  const all = S.wishes.map(w => ({ ...w, st: resolveStatus(w) }));
+  const cnt = { all: all.length, hadir: 0, tidak_hadir: 0, belum: 0 };
+  all.forEach(w => { if (w.st === 'hadir') cnt.hadir++; else if (w.st === 'tidak_hadir') cnt.tidak_hadir++; else cnt.belum++; });
+  $('wish-count-tag').textContent = all.length ? `${all.length} ucapan` : 'Buku tamu';
 
-  // ---------- Kalender ----------
-  function icsDate(d) {
-    return d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + 'T' + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z';
+  const F = [['all', 'Semua', null], ['hadir', 'Hadir', 'var(--green)'], ['tidak_hadir', 'Tidak Hadir', 'var(--orange)'], ['belum', 'Belum', 'var(--grey)']];
+  $('filters').innerHTML = F.map(([k, l, c]) =>
+    `<button type="button" data-f="${k}" aria-pressed="${S.filter === k}">${c ? `<i style="background:${c}"></i>` : ''}${l} <em>${cnt[k]}</em></button>`).join('');
+
+  const match = (w) => S.filter === 'all' || (S.filter === 'belum' ? (w.st !== 'hadir' && w.st !== 'tidak_hadir') : w.st === S.filter);
+  const list = all.filter(match);
+
+  if (!all.length) {
+    box.innerHTML = `<div class="empty">Belum ada ucapan<small>Jadilah yang pertama mengirim doa untuk mempelai.</small></div>`;
+    $('wish-more').hidden = true; return;
   }
-  function icsText(s) { return String(s || '').replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;'); }
-
-  function setupCalendar() {
-    const start = eventDateObj, end = new Date(start.getTime() + 3 * 3600 * 1000);
-    const title = guestData.event_title || ('Pernikahan ' + (guestData.client_name || ''));
-    const details = 'Undangan pernikahan ' + (guestData.client_name || '') + '. Mohon konfirmasi kehadiran lewat tautan undangan.';
-    $('gcal-btn').href = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
-      + '&text=' + encodeURIComponent(title)
-      + '&dates=' + icsDate(start) + '/' + icsDate(end)
-      + '&details=' + encodeURIComponent(details)
-      + '&location=' + encodeURIComponent(guestData.event_location || '');
-    $('ics-btn').addEventListener('click', () => {
-      const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//RayaRayu//Undangan//ID', 'BEGIN:VEVENT',
-        'UID:' + cleanTokenString(token) + '@rayarayu', 'DTSTAMP:' + icsDate(new Date()),
-        'DTSTART:' + icsDate(start), 'DTEND:' + icsDate(end),
-        'SUMMARY:' + icsText(title), 'LOCATION:' + icsText(guestData.event_location), 'DESCRIPTION:' + icsText(details),
-        'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
-      a.download = 'undangan-pernikahan.ics';
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-      toast('File kalender diunduh');
-    });
-  }
-  $('btn-copy-loc').addEventListener('click', () => copyText((guestData && guestData.event_location) || '', 'Alamat berhasil disalin'));
-
-  // ---------- Hitung mundur ----------
-  let cdTimer = null;
-  function startCountdown() {
-    clearInterval(cdTimer);
-    if (!eventDateObj) return;
-    const tick = () => {
-      const distance = eventDateObj.getTime() - Date.now();
-      if (distance < 0) {
-        $('countdown').hidden = true;
-        const d = $('cd-done'); d.hidden = false;
-        d.innerText = 'Hari bahagia telah tiba. Terima kasih atas doa dan kehadiran Anda.';
-        clearInterval(cdTimer);
-        return;
-      }
-      $('cd-days').innerText = Math.floor(distance / 86400000);
-      $('cd-hours').innerText = pad(Math.floor((distance % 86400000) / 3600000));
-      $('cd-mins').innerText = pad(Math.floor((distance % 3600000) / 60000));
-      $('cd-secs').innerText = pad(Math.floor((distance % 60000) / 1000));
-    };
-    tick();
-    cdTimer = setInterval(tick, 1000);
+  if (!list.length) {
+    box.innerHTML = `<div class="empty">Tidak ada ucapan di kategori ini</div>`;
+    $('wish-more').hidden = true; return;
   }
 
-  // ---------- Ucapan & doa ----------
-  const SUGGESTIONS = [
-    'Selamat menempuh hidup baru, semoga bahagia selalu.',
-    'Semoga jadi keluarga yang sakinah, mawaddah, warahmah.',
-    'Selamat ya! Semoga langgeng sampai tua.',
-    'Turut bahagia untuk kalian berdua. Semoga lancar sampai hari H.'
-  ];
-  const DRAFT_KEY = 'wish-draft:' + (token || '');
+  const slice = list.slice(0, S.shown);
+  box.innerHTML = slice.map(w => {
+    const m = statusMeta(w.st);
+    const key = w.id || (w.guest_name + w.created_at);
+    const isNew = !S.firstLoad && !S.seen.has(key);
+    const mine = norm(w.guest_name) === norm(S.guest.group_name);
+    return `<article class="wish ${isNew ? 'pop' : ''} ${mine ? 'me' : ''}">
+      <div class="avatar ${m.cls}" aria-hidden="true">${esc(initial(w.guest_name))}<i class="dot ${m.cls}"></i></div>
+      <div>
+        <div class="top"><span class="who">${esc(w.guest_name || 'Tamu')}</span><span class="when">${esc(relTime(w.created_at))}</span></div>
+        <span class="badge ${m.cls}" title="Status kehadiran">${badgeHTML(w.st)}</span>
+        <p>${esc(w.message)}</p>
+      </div></article>`;
+  }).join('');
+  all.forEach(w => S.seen.add(w.id || (w.guest_name + w.created_at)));
+  S.firstLoad = false;
 
-  function initWishForm() {
-    const ta = $('wish-message');
-    $('sugg').innerHTML = SUGGESTIONS.map((s, i) => `<button type="button" data-i="${i}">${escapeHtml(s.length > 34 ? s.slice(0, 32) + '…' : s)}</button>`).join('');
-    $('sugg').addEventListener('click', e => {
-      const b = e.target.closest('button'); if (!b) return;
-      ta.value = SUGGESTIONS[Number(b.dataset.i)]; updateCount(); ta.focus();
-    });
-    try { const d = localStorage.getItem(DRAFT_KEY); if (d) ta.value = d; } catch (e) {}
-    ta.addEventListener('input', () => {
-      updateCount();
-      try { ta.value ? localStorage.setItem(DRAFT_KEY, ta.value) : localStorage.removeItem(DRAFT_KEY); } catch (e) {}
-    });
-    updateCount();
+  const more = list.length - slice.length;
+  $('wish-more').hidden = more <= 0;
+  if (more > 0) $('wish-more').textContent = `Tampilkan ${Math.min(more, WISH_PAGE)} ucapan lagi`;
+}
+
+async function sendWish(msg) {
+  try {
+    const { data, error } = await sb.rpc('send_wish', { p_token: token, p_message: msg });
+    if (!error && data && data.success) return true;
+  } catch (e) {}
+  try {
+    if (!S.eventId) return false;
+    const row = { event_id: S.eventId, guest_name: S.guest.group_name, message: msg, created_at: new Date().toISOString() };
+    const r = await sb.from('wishes').insert(row);
+    return !r.error;
+  } catch (e) { return false; }
+}
+
+/* ==========================================================
+   EVENT LISTENER
+   ========================================================== */
+$('open-btn').addEventListener('click', openInvitation);
+$('cal-btn').addEventListener('click', saveToCalendar);
+$('stage').addEventListener('click', () => setEnvelope(!$('stage').classList.contains('open')));
+$('dl-ticket').addEventListener('click', downloadTicket);
+
+document.querySelectorAll('input[name="attend"]').forEach(r => r.addEventListener('change', () => {
+  $('rsvp-err').hidden = true;
+  setChoice(r.value);
+  if (r.value === 'hadir' && (!S.pax || S.pax < 1)) S.pax = S.max;
+  renderPax();
+}));
+$('pax-minus').addEventListener('click', () => { if (S.pax > 1) { S.pax--; renderPax(); } });
+$('pax-plus').addEventListener('click', () => { if (S.pax < S.max) { S.pax++; renderPax(); } });
+$('rsvp-edit').addEventListener('click', () => { S.editing = true; applyRsvpUI(); $('rsvp-form').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+
+$('rsvp-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const sel = document.querySelector('input[name="attend"]:checked');
+  const err = $('rsvp-err');
+  if (!sel) { err.textContent = 'Silakan pilih salah satu dulu ya.'; err.hidden = false; return; }
+  err.hidden = true;
+  const status = sel.value;
+  const pax = status === 'hadir' ? Math.min(S.max, Math.max(1, S.pax)) : 0;
+
+  const btn = $('rsvp-submit'); const label = btn.textContent;
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Menyimpan…';
+  const ok = await submitRsvp(status, pax);
+  btn.disabled = false; btn.textContent = label;
+
+  if (!ok) { err.textContent = 'Konfirmasi belum tersimpan. Periksa koneksi Anda lalu coba lagi.'; err.hidden = false; return; }
+
+  const firstTime = !S.status;
+  S.status = status; if (status === 'hadir') S.pax = pax; S.editing = false;
+  applyRsvpUI();
+  toast(status === 'hadir' ? 'Terima kasih! Kehadiran Anda sudah dikonfirmasi 🤍' : 'Terima kasih sudah memberi kabar 🤍');
+  if (status === 'hadir') showTicket(true);
+  else $('rsvp-summary').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  loadSummary();
+});
+
+$('quick').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  const ta = $('wish-message'); ta.value = QUICK_WISHES[+b.dataset.i]; ta.dispatchEvent(new Event('input')); ta.focus();
+});
+$('wish-message').addEventListener('input', (e) => {
+  const n = e.target.value.length;
+  $('wish-counter').textContent = `${n}/${MAX_WISH}`;
+  $('wish-counter').classList.toggle('max', n >= MAX_WISH);
+});
+$('wish-message').addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); $('wish-form').requestSubmit(); }
+});
+$('wish-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (S.sending) return;
+  const ta = $('wish-message'); const msg = ta.value.trim();
+  if (!msg) { toast('Tulis ucapan Anda dulu ya', 'err'); ta.focus(); return; }
+  S.sending = true;
+  const btn = $('btn-wish'); const html = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Mengirim…';
+  const ok = await sendWish(msg);
+  btn.disabled = false; btn.innerHTML = html; S.sending = false;
+  if (!ok) { toast('Ucapan belum terkirim. Coba lagi sebentar lagi.', 'err'); return; }
+  ta.value = ''; ta.dispatchEvent(new Event('input'));
+  S.filter = 'all';
+  await loadWishes();
+  toast('Ucapan Anda terkirim. Terima kasih! 🤍');
+});
+
+$('filters').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  S.filter = b.dataset.f; S.shown = WISH_PAGE; renderWishes();
+});
+$('wish-more').addEventListener('click', () => { S.shown += WISH_PAGE; renderWishes(); });
+
+$('gift-list').addEventListener('click', async (e) => {
+  const b = e.target.closest('.copy-btn'); if (!b) return;
+  const nomor = GIFTS[+b.dataset.i].nomor;
+  try { await navigator.clipboard.writeText(nomor); } catch (err) { prompt('Salin nomor rekening berikut:', nomor); return; }
+  b.classList.add('done'); b.querySelector('span').textContent = 'Tersalin';
+  toast('Nomor rekening disalin');
+  setTimeout(() => { b.classList.remove('done'); b.querySelector('span').textContent = 'Salin'; }, 2200);
+});
+
+/* ==========================================================
+   SCROLL REVEAL
+   ========================================================== */
+let revealIO = null;
+function observeReveals() {
+  const els = document.querySelectorAll('.rv:not(.in)');
+  if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('in')); return; }
+  if (!revealIO) revealIO = new IntersectionObserver((es) => es.forEach(en => {
+    if (en.isIntersecting) { en.target.classList.add('in'); revealIO.unobserve(en.target); }
+  }), { threshold: .12 });
+  els.forEach(e => revealIO.observe(e));
+}
+
+/* ==========================================================
+   REALTIME (butuh Realtime aktif di tabel wishes/rsvps/tickets; kalau tidak, abaikan saja)
+   ========================================================== */
+function startRealtime() {
+  try {
+    const ch = sb.channel('inv-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'wishes' }, loadWishesSoon)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'rsvps' }, () => { loadSummarySoon(); })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tickets' }, async () => {
+        if (S.status === 'hadir' && !S.checked) { const g = await fetchGuest(); if (g && g.is_checked_in) onCheckedIn(); }
+      })
+      .subscribe();
+  } catch (e) {}
+  // Cadangan bila realtime tidak aktif: segarkan ucapan tiap 45 detik
+  setInterval(() => { if (!document.hidden) loadWishes(); }, 45000);
+}
+
+/* ==========================================================
+   INIT
+   ========================================================== */
+function showError(msg) {
+  $('loading').hidden = true;
+  $('error-text').textContent = msg;
+  $('error-screen').hidden = false;
+}
+
+async function init() {
+  if (!token) return showError('Tautan undangan tidak memiliki kode. Silakan periksa kembali tautan yang Anda terima.');
+  try {
+    const g = await fetchGuest();
+    if (!g) return showError(`Undangan dengan kode “${token}” tidak ditemukan.`);
+    await ensureIds(g);
+    renderInvitation(g);
+    observeReveals();
+    loadWishes(); loadSummary(); startRealtime();
+  } catch (err) {
+    console.error(err); showError('Gagal terhubung ke server. Periksa koneksi internet Anda lalu muat ulang halaman.');
   }
-  function updateCount() { $('wish-count').innerText = $('wish-message').value.length; }
-
-  // Handle Kirim Ucapan (panggilan database tidak diubah)
-  $('wish-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const msg = $('wish-message').value.trim();
-    if (!msg) return toast('Tulis ucapan Anda dulu ya.', 'err');
-
-    const btn = $('btn-wish');
-    btn.disabled = true; btn.innerText = 'Mengirim…';
-
-    // Coba RPC send_wish
-    const { data, error } = await supabaseClient.rpc('send_wish', { p_token: token, p_message: msg });
-
-    let ok = false;
-    if (!error && data && data.success) {
-      ok = true;
-    } else {
-      // Fallback insert langsung ke tabel wishes
-      ok = await fallbackSendWish(msg);
-    }
-
-    if (ok) {
-      $('wish-message').value = ''; updateCount();
-      try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
-      wishShown = Math.max(wishShown, PAGE);
-      await loadWishes();
-      toast('Ucapan Anda sudah terkirim. Terima kasih!');
-      $('wishes-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-      toast('Maaf, ucapan belum terkirim. Coba lagi ya.', 'err');
-    }
-
-    btn.disabled = false; btn.innerText = 'Kirim Ucapan';
-  });
-
-  async function fallbackSendWish(msg) {
-    try {
-      const { data: gList } = await supabaseClient.from('guests').select('id, group_name, event_id').ilike('invitation_token', token).limit(1);
-      if (gList && gList.length > 0) {
-        const { error } = await supabaseClient.from('wishes').insert({
-          event_id: gList[0].event_id,
-          guest_name: gList[0].group_name,
-          message: msg,
-          created_at: new Date().toISOString()
-        });
-        return !error;
-      }
-      return false;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  const PAGE = 8;
-  let wishAll = [], wishShown = PAGE, statusMap = null;
-
-  async function loadWishes() {
-    // Coba via RPC
-    const { data, error } = await supabaseClient.rpc('get_event_wishes', { p_token: token });
-
-    let list = data;
-    if (error || !list) {
-      // Fallback query tabel wishes
-      const q = (cols) => {
-        let qb = supabaseClient.from('wishes').select(cols);
-        if (guestData && guestData.event_id) qb = qb.eq('event_id', guestData.event_id);
-        return qb.order('created_at', { ascending: false }).limit(60);
-      };
-      let res = await q('guest_name, message, created_at');
-      if (res.error) res = await q('guest_name, message');
-      list = res.data;
-    }
-
-    wishAll = Array.isArray(list) ? list : [];
-    if (wishAll.length && wishAll.every(w => w.created_at)) {
-      wishAll = wishAll.slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    }
-    if (wishAll.some(w => !hasDirectStatus(w))) await ensureStatusMap();
-    renderWishes(true);
-  }
-
-  // ----- Status kehadiran per ucapan -----
-  function normStatus(s) {
-    if (!s) return null;
-    s = String(s).toLowerCase().trim().replace(/[\s-]+/g, '_');
-    if (s === 'hadir' || s === 'attending' || s === 'yes') return 'hadir';
-    if (s === 'tidak_hadir' || s === 'tidak' || s === 'declined' || s === 'no') return 'tidak';
-    if (s === 'pending' || s === 'belum') return 'belum';
-    return null;
-  }
-  const nameKey = s => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
-  const directOf = w => normStatus(w.rsvp_status ?? w.status ?? w.attendance_status ?? w.attendance);
-  const hasDirectStatus = w => !!directOf(w);
-
-  async function ensureStatusMap() {
-    if (statusMap) return statusMap;
-    statusMap = new Map();
-    try {
-      const [g, r] = await Promise.all([
-        supabaseClient.from('guests').select('id, group_name'),
-        supabaseClient.from('rsvps').select('guest_id, status')
-      ]);
-      const rs = new Map((r.data || []).map(x => [x.guest_id, x.status]));
-      (g.data || []).forEach(x => statusMap.set(nameKey(x.group_name), rs.has(x.id) ? normStatus(rs.get(x.id)) : 'belum'));
-    } catch (e) { /* tanpa akses tabel, indikator hanya tampil bila datanya tersedia */ }
-    return statusMap;
-  }
-
-  function resolveStatus(w) {
-    const k = nameKey(w.guest_name);
-    if (guestData && k === nameKey(guestData.group_name)) return normStatus(guestData.rsvp_status) || 'belum';
-    return directOf(w) || (statusMap && statusMap.get(k)) || null;
-  }
-
-  function relTime(iso) {
-    if (!iso) return '';
-    const d = new Date(iso); if (isNaN(d)) return '';
-    const s = Math.floor((Date.now() - d.getTime()) / 1000);
-    if (s < 60) return 'Baru saja';
-    if (s < 3600) return Math.floor(s / 60) + ' menit lalu';
-    if (s < 86400) return Math.floor(s / 3600) + ' jam lalu';
-    if (s < 86400 * 7) return Math.floor(s / 86400) + ' hari lalu';
-    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-  }
-
-  const BADGE = { hadir: 'Hadir', tidak: 'Tidak hadir', belum: 'Belum konfirmasi' };
-
-  function renderWishes(resetCount) {
-    const container = $('wishes-container');
-    if (resetCount) wishShown = Math.max(PAGE, Math.min(wishShown, wishAll.length) || PAGE);
-    $('wish-total').innerText = wishAll.length ? wishAll.length + ' ucapan' : '';
-
-    if (!wishAll.length) {
-      container.innerHTML = '<div class="empty">Belum ada ucapan.<br>Jadilah yang pertama memberi doa.</div>';
-      $('btn-more').hidden = true;
-      return;
-    }
-
-    const myKey = guestData ? nameKey(guestData.group_name) : '';
-    container.innerHTML = wishAll.slice(0, wishShown).map((w, i) => {
-      const st = resolveStatus(w);
-      const mine = nameKey(w.guest_name) === myKey;
-      const sub = relTime(w.created_at);
-      return `<article class="wish${mine ? ' mine' : ''}" style="animation-delay:${Math.min(i, 7) * 60}ms">
-        <div class="w-top">
-          <div class="avatar">${escapeHtml(initial(w.guest_name))}</div>
-          <div class="w-id">
-            <div class="w-name">${escapeHtml(w.guest_name || 'Tamu')}${mine ? '<em>Anda</em>' : ''}</div>
-            ${sub ? `<div class="w-sub">${escapeHtml(sub)}</div>` : ''}
-          </div>
-          ${st ? `<span class="badge ${st}" title="Status kehadiran">${BADGE[st]}</span>` : ''}
-        </div>
-        <p class="w-msg">${escapeHtml(w.message)}</p>
-      </article>`;
-    }).join('');
-
-    const rest = wishAll.length - wishShown;
-    $('btn-more').hidden = rest <= 0;
-    if (rest > 0) $('btn-more').innerText = 'Lihat ' + Math.min(rest, PAGE) + ' ucapan lainnya';
-  }
-  $('btn-more').addEventListener('click', () => { wishShown += PAGE; renderWishes(false); });
-
-  window.addEventListener('DOMContentLoaded', init);
+}
+window.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
