@@ -532,6 +532,11 @@ html.lock{overflow:hidden}
 #scanner-overlay .sheet-actions{display:flex;flex-direction:column;gap:10px;margin-top:16px}
 #scanner-overlay .autobar{height:4px;border-radius:99px;background:var(--line);margin-top:14px;overflow:hidden}
 #scanner-overlay .autobar i{display:block;height:100%;width:100%;background:var(--green);transform-origin:left;animation:shrink 2.6s linear forwards}
+
+/* Perbaikan: popup hasil scan harus tampil di atas overlay scanner (z-index 70) */
+.backdrop{z-index:90}
+.sheet{z-index:91}
+.toast{z-index:100}
 </style>
 </head>
 <body>
@@ -869,7 +874,14 @@ function openSheet(html) {
   icons();
   $('backdrop').classList.add('open'); $('sheet').classList.add('open');
 }
-function closeSheet() { $('backdrop').classList.remove('open'); $('sheet').classList.remove('open'); }
+function closeSheet() {
+  $('backdrop').classList.remove('open'); $('sheet').classList.remove('open');
+  // Lepas kunci scanner bila popup ditutup lewat backdrop, geser ke bawah, atau tombol lain
+  if (typeof scannerProcessing !== 'undefined' && scannerProcessing) {
+    clearTimeout(scannerAutoTimer);
+    setTimeout(() => { scannerProcessing = false; }, 500);
+  }
+}
 
 async function checkSession() {
   applyTheme();
