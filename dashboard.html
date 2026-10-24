@@ -537,6 +537,53 @@ html.lock{overflow:hidden}
 .backdrop{z-index:90}
 .sheet{z-index:91}
 .toast{z-index:100}
+
+/* ===== Histori RSVP: waktu di atas label status + tombol tampilkan lebih banyak ===== */
+.hl .hmeta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.hl .when{font-family:'Geist Mono',monospace;font-size:11.5px;color:var(--sub);white-space:nowrap}
+.morebtn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:46px;margin-top:6px;border-radius:14px;background:var(--soft);color:var(--brand);font-weight:600;font-size:15px;text-align:center}
+.morebtn:active{transform:scale(.98)}
+
+/* ===== Kategori Tamu ===== */
+.addcat{width:36px;height:36px;border-radius:50%;background:var(--soft);color:var(--brand);display:grid;place-items:center;flex-shrink:0;transition:transform .3s var(--spring)}
+.addcat:active{transform:scale(.9)}
+.addcat svg{width:18px;height:18px}
+.cr .cinfo{flex:1;min-width:0}
+.cr .cinfo .row1{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.cr .pc{font-family:'Geist Mono',monospace;font-size:15px;font-weight:600;color:var(--brand)}
+.cbar{height:6px;border-radius:99px;background:var(--soft);margin:8px 0 6px;overflow:hidden}
+.cbar i{display:block;height:100%;border-radius:inherit;background:var(--brand)}
+.cr .chev{width:18px;height:18px;color:var(--sub);flex-shrink:0}
+
+/* ===== Scanner: perbaikan input token di layar HP ===== */
+#scanner-overlay .sbar{min-width:0}
+#scanner-overlay .sbar input{width:100%;min-width:0}
+#scanner-overlay .tokrow .sbar{min-width:0}
+#scanner-overlay .tokrow .btn{flex-shrink:0;white-space:nowrap}
+
+/* ===== Scanner: popup hasil scan & konfirmasi (sheet global) ===== */
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+@keyframes shrink{to{transform:scaleX(0)}}
+@keyframes ringout{from{box-shadow:0 0 0 0 var(--ringc,transparent)}to{box-shadow:0 0 0 24px transparent}}
+.sheet .res{text-align:center;padding:10px 6px 2px}
+.sheet .res-ico{width:76px;height:76px;border-radius:50%;margin:4px auto 16px;display:grid;place-items:center;animation:pop .55s var(--spring) both}
+.sheet .res-ico svg{width:34px;height:34px;stroke-width:2.2}
+.sheet .res-ico.ok{background:var(--green-bg);color:var(--green-ink);--ringc:rgba(18,183,106,.4);animation:pop .55s var(--spring) both,ringout 1.1s .25s ease-out}
+.sheet .res-ico.bad{background:var(--red-bg);color:var(--red-ink)}
+.sheet .res-ico.warn{background:var(--amber-bg);color:var(--amber-ink)}
+.sheet .res-ico.info,.sheet .res-ico.load{background:var(--soft);color:var(--brand)}
+.sheet .res h3{margin:0;font-size:24px;font-weight:800;letter-spacing:-.02em}
+.sheet .res p{margin:8px auto 0;max-width:300px;color:var(--sub);font-size:15px;line-height:1.5;overflow-wrap:anywhere}
+.sheet .spinner{width:34px;height:34px;border-radius:50%;border:3.5px solid var(--line);border-top-color:var(--brand);animation:spin .8s linear infinite}
+.sheet .sg{display:flex;align-items:center;gap:14px;margin-top:20px;padding:14px 16px;background:var(--card);border-radius:22px;box-shadow:var(--shadow);text-align:left}
+.sheet .sg .txt{flex:1;min-width:0}
+.sheet .sg .n{font-weight:700;font-size:18px;line-height:1.25;overflow-wrap:anywhere;color:var(--ink)}
+.sheet .sg .tags{margin-top:8px;flex-wrap:wrap}
+.sheet .codechip{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:6px 14px;border-radius:999px;background:var(--tag);color:var(--tag-ink);font-size:13px}
+.sheet .codechip b{font-family:'Geist Mono',monospace;font-weight:600;letter-spacing:.04em}
+.sheet .sheet-actions{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+.sheet .autobar{height:4px;border-radius:99px;background:var(--line);margin-top:18px;overflow:hidden}
+.sheet .autobar i{display:block;height:100%;width:100%;background:var(--green);transform-origin:left;animation:shrink linear forwards}
 </style>
 </head>
 <body>
@@ -600,7 +647,7 @@ html.lock{overflow:hidden}
         </div>
 
         <div class="card">
-          <div class="ch"><h3>Histori RSVP</h3><button class="link" onclick="switchTab('tamu')">Lihat semua <i data-lucide="circle-arrow-right"></i></button></div>
+          <div class="ch"><h3>Histori RSVP</h3><button class="link" onclick="showAllRecent()">Lihat semua <i data-lucide="circle-arrow-right"></i></button></div>
           <div id="recent-rsvp-list"></div>
         </div>
 
@@ -646,7 +693,7 @@ html.lock{overflow:hidden}
         </div>
 
         <div class="card">
-          <div class="ch"><h3>Top Kategori</h3><i data-lucide="users" style="color:var(--sub)"></i></div>
+          <div class="ch"><h3>Kategori Tamu</h3><button class="addcat" onclick="addCategory()" aria-label="Tambah kategori" title="Tambah kategori"><i data-lucide="plus"></i></button></div>
           <div id="cat-group"></div>
         </div>
       </div>
@@ -788,7 +835,7 @@ html.lock{overflow:hidden}
         <div class="card" style="margin-top:12px">
           <div class="lbl">Atau masukkan kode token tiket</div>
           <div class="tokrow">
-            <div class="sbar"><i data-lucide="ticket"></i><input type="text" id="scanner-manual-token-input" placeholder="Contoh: 115b0522" autocomplete="off" autocapitalize="none" spellcheck="false" onkeydown="if(event.key==='Enter')submitScannerTokenInput()" /></div>
+            <div class="sbar"><i data-lucide="ticket"></i><input type="text" id="scanner-manual-token-input" placeholder="Kode tiket" autocomplete="off" autocapitalize="none" spellcheck="false" onkeydown="if(event.key==='Enter')submitScannerTokenInput()" /></div>
             <button class="btn" onclick="submitScannerTokenInput()">Proses</button>
           </div>
         </div>
@@ -925,7 +972,7 @@ async function loadDashboard() {
   $('nav-container-wrap').classList.remove('hidden');
   const { data, error } = await supabaseClient.rpc('get_client_dashboard_data');
   if (error || !data || !data.success) return toast('Gagal memuat data. Silakan masuk lagi.', false);
-  globalData = data; renderUI();
+  globalData = data; renderUI(); loadActivity();
 }
 
 const guestBadge = g => {
@@ -936,6 +983,41 @@ const guestBadge = g => {
   return ['unsent', 'Unsent'];
 };
 const avatar = g => `<div class="av">${esc(initials(g.group_name))}</div>`;
+
+// ---- Waktu aktivitas tamu: ditambahkan, RSVP berubah, atau check-in (diambil yang paling baru) ----
+const toMs = v => { const t = v ? Date.parse(v) : NaN; return isNaN(t) ? null : t; };
+function activityOf(g, kind) {
+  const pick = {
+    created: [g.created_at],
+    rsvp: [g._rsvp_at, g.rsvp_updated_at, g.rsvp_at],
+    checkin: [g._checkin_at, g.checked_in_at],
+    edit: [g.updated_at],
+  };
+  const keys = kind ? pick[kind] : [...pick.created, ...pick.rsvp, ...pick.checkin, ...pick.edit];
+  const ts = keys.map(toMs).filter(t => t !== null);
+  return ts.length ? Math.max(...ts) : null;
+}
+const activityTime = g => activityOf(g);
+function fmtWhen(t) {
+  const d = new Date(t);
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) + ' · ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+}
+
+// Ambil waktu RSVP & check-in dari tabel (hanya membaca). Bila tidak bisa diakses, tampilan tetap jalan tanpa waktu tersebut.
+async function loadActivity() {
+  try {
+    const [r, t] = await Promise.all([
+      supabaseClient.from('rsvps').select('guest_id, updated_at'),
+      supabaseClient.from('tickets').select('guest_id, checked_in_at')
+    ]);
+    const rm = new Map((r.data || []).map(x => [x.guest_id, x.updated_at]));
+    const tm = new Map((t.data || []).map(x => [x.guest_id, x.checked_in_at]));
+    if (!rm.size && !tm.size) return;
+    globalData.guests.forEach(g => { g._rsvp_at = rm.get(g.id) || null; g._checkin_at = tm.get(g.id) || null; });
+    renderRecent(globalData.guests);
+    renderGuestList();
+  } catch (e) { /* abaikan: waktu aktivitas hanya pelengkap */ }
+}
 
 function renderUI() {
   const { client, event, stats, categories, guests } = globalData;
@@ -1071,17 +1153,30 @@ async function submitEditEvent(e) {
 
 function renderCategories(cats) {
   const box = $('cat-group');
-  if (!cats || !cats.length) { box.innerHTML = '<div class="empty">Belum ada data kategori.</div>'; return; }
+  if (!cats || !cats.length) { box.innerHTML = '<div class="empty">Belum ada kategori.<br>Tambahkan tamu pertama untuk membuat kategori.</div>'; return; }
   const iconFor = c => ({ Keluarga: 'house', Teman: 'heart', Tetangga: 'users', Kolega: 'briefcase' })[c] || 'tag';
-  box.innerHTML = cats.map((c, i) => `
-    <div class="cr">
+  box.innerHTML = [...cats].sort((a, b) => (b.total || 0) - (a.total || 0)).map(c => {
+    const total = c.total || 0, hadir = c.hadir || 0;
+    const pct = total ? Math.round(hadir / total * 100) : 0;
+    return `<div class="cr">
       <button class="go" data-cat="${esc(c.category)}">
         <span class="sq"><i data-lucide="${iconFor(c.category)}"></i></span>
-        <div style="min-width:0"><div class="n">${esc(c.category)}</div><div class="s">${c.hadir} hadir · ${c.total} undangan</div></div>
+        <div class="cinfo">
+          <div class="row1"><span class="n">${esc(c.category)}</span><span class="pc">${pct}%</span></div>
+          <div class="cbar"><i style="width:${pct}%"></i></div>
+          <div class="s">${hadir} dari ${total} undangan hadir</div>
+        </div>
+        <i data-lucide="chevron-right" class="chev"></i>
       </button>
-      <span class="c">${c.total}</span>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   icons();
+}
+function addCategory() {
+  openGuestSheet();
+  const sel = $('gs-cat'); if (!sel) return;
+  sel.value = '__custom__'; checkCustomCategory(sel);
+  setTimeout(() => { const i = $('gs-custom-cat'); if (i) i.focus(); }, 420);
 }
 $('cat-group').addEventListener('click', e => {
   const b = e.target.closest('[data-cat]'); if (!b) return;
@@ -1089,29 +1184,55 @@ $('cat-group').addEventListener('click', e => {
   switchTab('tamu');
 });
 
+const RECENT_STEP = 5, RECENT_MAX = 15;
+let recentShown = RECENT_STEP;
+
+function recentSorted(guests) {
+  const idx = new Map(guests.map((g, i) => [g.id, i]));
+  return [...guests].sort((a, b) => {
+    const ta = activityTime(a), tb = activityTime(b);
+    if (ta !== null && tb !== null && ta !== tb) return tb - ta;
+    if (ta !== null && tb === null) return -1;
+    if (ta === null && tb !== null) return 1;
+    return idx.get(a.id) - idx.get(b.id);
+  });
+}
+
 function renderRecent(guests) {
   const box = $('recent-rsvp-list');
-  const recent = guests.slice(0, 5);
-  if (!recent.length) { box.innerHTML = '<div class="empty">Belum ada tamu. Tambahkan lewat tab Tamu.</div>'; return; }
-  box.innerHTML = recent.map((g, i) => {
+  if (!guests.length) { box.innerHTML = '<div class="empty">Belum ada tamu. Tambahkan lewat tab Tamu.</div>'; return; }
+  const all = recentSorted(guests).slice(0, RECENT_MAX);
+  const shown = all.slice(0, recentShown);
+  box.innerHTML = shown.map(g => {
     const [k, txt] = guestBadge(g);
+    const t = activityTime(g);
     return `<div class="hl">
       <div class="av">${esc(initials(g.group_name))}<span class="bdg bdg-${k}"></span></div>
       <div class="txt"><div class="n">${esc(g.group_name)}</div><div class="s">${esc(g.category)} · ${g.max_pax} pax</div></div>
-      <span class="st st-${k}">${txt}</span></div>`;
-  }).join('');
+      <div class="hmeta">${t !== null ? `<span class="when">${esc(fmtWhen(t))}</span>` : ''}<span class="st st-${k}">${txt}</span></div></div>`;
+  }).join('') + (all.length > shown.length
+    ? `<button class="morebtn" onclick="showMoreRecent()">Lihat ${Math.min(RECENT_STEP, all.length - shown.length)} lagi <i data-lucide="chevron-down"></i></button>` : '');
+  icons();
+}
+function showMoreRecent() { recentShown = Math.min(RECENT_MAX, recentShown + RECENT_STEP); renderRecent(globalData.guests); }
+function showAllRecent() {
+  sortField = 'updated'; sortDir = 'desc'; activeFilter = 'all'; activeCategory = 'all';
+  const q = $('search-input'); if (q) q.value = '';
+  if (window.syncSortUI) window.syncSortUI();
+  renderCategorySelect();
+  switchTab('tamu');
 }
 
 function renderCategorySelect() {
   const cats = [...new Set(globalData.guests.map(g => g.category).filter(Boolean))];
   const sel = $('cat-select');
-  sel.innerHTML = ['all', ...cats].map(c => `<option value="${esc(c)}" ${c === activeCategory ? 'selected' : ''}>${c === 'all' ? 'Kategori' : esc(c)}</option>`).join('');
+  sel.innerHTML = ['all', ...cats].map(c => `<option value="${esc(c)}" ${c === activeCategory ? 'selected' : ''}>${c === 'all' ? 'Semua' : esc(c)}</option>`).join('');
 }
 function setCategory(c) { activeCategory = c; renderCategorySelect(); renderGuestList(); }
 
 function sortGuests(list) {
   const idx = new Map(globalData.guests.map((g, i) => [g.id, i]));
-  const ts = g => { const v = Date.parse(sortField === 'updated' ? (g.updated_at || g.created_at) : g.created_at); return isNaN(v) ? null : v; };
+  const ts = g => sortField === 'updated' ? activityTime(g) : toMs(g.created_at);
   const arr = [...list];
   arr.sort((a, b) => {
     let r;
@@ -1658,9 +1779,8 @@ function renderScannerManualList(guests) {
   }
   container.innerHTML = guests.slice(0, 80).map((g, i) => {
     const activeToken = g.invitation_token || g.ticket_token;
-    const c = COLORS[i % COLORS.length];
     return `<button class="gl" data-scanner-token="${esc(activeToken)}">
-      <div class="av" style="background:${c}22;color:${c}">${esc(initials(g.group_name))}</div>
+      <div class="av">${esc(initials(g.group_name))}</div>
       <div class="txt"><div class="n">${esc(g.group_name)}</div><div class="s">${esc(g.category || 'Umum')} · <span class="code">${esc(activeToken)}</span></div></div>
       <span class="st ${g.is_checked_in ? 'st-checked' : 'st-ready'}">${g.is_checked_in ? 'Checked' : 'Ready'}</span>
     </button>`;
@@ -1693,27 +1813,35 @@ document.addEventListener('click', e => {
   }
 });
 
+function scannerGuestCard(g, extraTag) {
+  const pax = g.pax_confirmed || g.max_pax || 1;
+  return `<div class="sg"><div class="av">${esc(initials(g.group_name))}</div>
+    <div class="txt"><div class="n">${esc(g.group_name || '-')}</div>
+      <div class="tags"><span class="tag">${esc(g.category || 'Umum')}</span><span class="tag">${pax} orang</span>${extraTag || ''}</div></div></div>`;
+}
+
 function selectScannerManualGuest(token) {
-  if (!token) return;
+  if (!token || scannerProcessing) return;
   const g = scannerGuests.find(x => (x.invitation_token || x.ticket_token) === token);
   scannerProcessing = true;
-  if (!g) { processScannerCheckIn(token); return; }
+  if (!g) { processScannerCheckIn(token, 'manual'); return; }
   if (g.is_checked_in) {
+    const full = globalData && globalData.guests ? globalData.guests.find(x => x.id === g.id) : null;
+    const t = full ? activityOf(full, 'checkin') : null;
     openSheet(`
-      <div class="res"><div class="res-ico warn"><i data-lucide="user-check"></i></div><h3>Sudah Check-in</h3><p>${esc(g.group_name)} sudah diverifikasi sebelumnya.</p></div>
-      <div class="sheet-actions"><button class="btn line" onclick="closeSheet();resumeScannerOverlay()">Tutup</button></div>`);
+      <div class="res"><div class="res-ico warn"><i data-lucide="user-check"></i></div><h3>Sudah Check-in</h3>
+        <p>${t !== null ? 'Tamu ini sudah masuk pada ' + esc(fmtWhen(t)) + '.' : 'Tamu ini sudah diverifikasi sebelumnya.'}</p></div>
+      ${scannerGuestCard(g)}
+      <div class="sheet-actions"><button class="btn line" onclick="resumeScannerOverlay()">Tutup</button></div>`);
     return;
   }
+  const rs = g.rsvp_status === 'hadir' ? 'RSVP hadir' : g.rsvp_status === 'tidak_hadir' ? 'RSVP absen' : 'Belum RSVP';
   openSheet(`
     <div class="res"><div class="res-ico info"><i data-lucide="user-round"></i></div><h3>Check-in tamu ini?</h3><p>Pastikan tamu sudah ada di depan Anda.</p></div>
-    <div class="detail">
-      <div class="row"><span>Nama</span><b>${esc(g.group_name)}</b></div>
-      <div class="row"><span>Kategori</span><b>${esc(g.category || 'Umum')}</b></div>
-      <div class="row"><span>Jumlah</span><b class="mono">${g.pax_confirmed || g.max_pax || 1} orang</b></div>
-    </div>
+    ${scannerGuestCard(g, `<span class="tag">${rs}</span>`)}
     <div class="sheet-actions">
-      <button class="btn" id="scanner-do-ci">Check-in sekarang</button>
-      <button class="btn line" onclick="closeSheet();resumeScannerOverlay()">Batal</button>
+      <button class="btn" id="scanner-do-ci">Check-in Sekarang</button>
+      <button class="btn line" onclick="resumeScannerOverlay()">Batal</button>
     </div>`);
   const doCiBtn = document.getElementById('scanner-do-ci');
   if (doCiBtn) doCiBtn.onclick = () => { doCiBtn.disabled = true; processScannerCheckIn(token, 'manual'); };
@@ -1723,6 +1851,7 @@ function submitScannerTokenInput() {
   const input = document.getElementById('scanner-manual-token-input');
   const token = input ? cleanTokenString(input.value) : '';
   if (!token) return toast("Masukkan kode token terlebih dahulu.", false);
+  if (scannerProcessing) return;
   if (input) input.value = '';
   scannerProcessing = true;
   processScannerCheckIn(token, 'manual');
@@ -1756,18 +1885,38 @@ async function onScannerScanSuccess(decodedText) {
   await processScannerCheckIn(extractedToken, 'scan');
 }
 
+const SCANNER_AUTO_MS = 3200;       // lama popup sukses tampil sebelum otomatis menutup
+const SCANNER_MIN_LOADING_MS = 450; // loading minimal agar tidak berkedip
+
+function showScannerLoading() {
+  clearTimeout(scannerAutoTimer);
+  openSheet(`<div class="res"><div class="res-ico load"><span class="spinner"></span></div><h3>Memeriksa tiket…</h3><p>Mohon tunggu sebentar</p></div>`);
+}
+
+function scannerFlash(ok) {
+  const f = document.getElementById('scanner-cam-flash'); if (!f) return;
+  f.classList.remove('ok', 'bad'); void f.offsetWidth; f.classList.add(ok ? 'ok' : 'bad');
+}
+
 async function processScannerCheckIn(ticketToken, source = 'scan') {
   const tokenClean = cleanTokenString(ticketToken);
-  const { data, error } = await supabaseClient.rpc('check_in_guest', { p_ticket_token: tokenClean });
+  showScannerLoading();
+  const t0 = Date.now();
+  let res;
+  try { res = await supabaseClient.rpc('check_in_guest', { p_ticket_token: tokenClean }); }
+  catch (e) { res = { data: null, error: e }; }
+  const wait = SCANNER_MIN_LOADING_MS - (Date.now() - t0);
+  if (wait > 0) await new Promise(r => setTimeout(r, wait));
+  const { data, error } = res;
 
-  if (error) {
+  if (error || !data) {
     return await fallbackScannerDirectCheckIn(tokenClean, source);
   }
 
   if (!data.success) {
-    showScannerModal(false, "Peringatan Tiket", `${data.message}\n(Kode terbaca: "${tokenClean}")`, data.guest || null, source);
+    showScannerModal(false, "Peringatan Tiket", data.message || 'Tiket tidak dapat diproses.', data.guest || null, source, tokenClean);
   } else {
-    showScannerModal(true, "Berhasil Check-in!", "Tamu terverifikasi resmi.", data.guest, source);
+    showScannerModal(true, "Berhasil Check-in", "Tamu siap dipersilakan masuk.", data.guest, source);
     fetchScannerGuests();
     loadDashboard();
   }
@@ -1782,7 +1931,7 @@ async function fallbackScannerDirectCheckIn(tokenClean, source = 'scan') {
       .limit(1);
 
     if (!guests || guests.length === 0) {
-      showScannerModal(false, "Tiket Tidak Ditemukan", `Kode token "${tokenClean}" tidak terdaftar di daftar undangan.`, null, source);
+      showScannerModal(false, "Tiket Tidak Ditemukan", 'Kode ini tidak terdaftar di daftar undangan.', null, source, tokenClean);
       return;
     }
 
@@ -1794,11 +1943,11 @@ async function fallbackScannerDirectCheckIn(tokenClean, source = 'scan') {
       .limit(1);
 
     if (tickets && tickets.length > 0 && tickets[0].is_checked_in) {
-      showScannerModal(false, "Sudah Pernah Check-in", `Tamu "${g.group_name}" sudah diverifikasi sebelumnya.`, {
+      showScannerModal(false, "Sudah Pernah Check-in", `${g.group_name} sudah diverifikasi sebelumnya.`, {
         group_name: g.group_name,
         category: g.category,
         max_pax: g.max_pax
-      }, source);
+      }, source, tokenClean);
       return;
     }
 
@@ -1808,7 +1957,7 @@ async function fallbackScannerDirectCheckIn(tokenClean, source = 'scan') {
       await supabaseClient.from('tickets').insert({ guest_id: g.id, ticket_token: g.invitation_token, is_checked_in: true, checked_in_at: new Date().toISOString() });
     }
 
-    showScannerModal(true, "Berhasil Check-in!", "Tamu terverifikasi resmi (Direct Mode).", {
+    showScannerModal(true, "Berhasil Check-in", "Tamu siap dipersilakan masuk.", {
       group_name: g.group_name,
       category: g.category,
       pax_confirmed: g.max_pax
@@ -1816,15 +1965,17 @@ async function fallbackScannerDirectCheckIn(tokenClean, source = 'scan') {
     fetchScannerGuests();
     loadDashboard();
   } catch (err) {
-    showScannerModal(false, "Kesalahan Check-in", err.message || "Gagal memproses tiket.", null, source);
+    showScannerModal(false, "Gagal Memproses", err.message || "Tiket tidak dapat diproses. Coba lagi.", null, source, tokenClean);
   }
 }
 
-function showScannerModal(isSuccess, title, subtitle, guest, source = 'scan') {
+function showScannerModal(isSuccess, title, subtitle, guest, source = 'scan', code = '') {
   const dup = !isSuccess && /sudah/i.test(title + ' ' + subtitle);
   const cls = isSuccess ? 'ok' : (dup ? 'warn' : 'bad');
   const ico = isSuccess ? 'check' : (dup ? 'user-check' : 'x');
-  
+  if (dup) title = 'Sudah Check-in';
+  else if (!isSuccess && title === 'Peringatan Tiket') title = 'Tiket Tidak Valid';
+
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const o = ctx.createOscillator(), g = ctx.createGain();
@@ -1834,23 +1985,23 @@ function showScannerModal(isSuccess, title, subtitle, guest, source = 'scan') {
     g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + d);
     o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + d);
   } catch (e) {}
+  scannerFlash(isSuccess);
+  if (navigator.vibrate) navigator.vibrate(isSuccess ? 80 : [120, 60, 120]);
 
   const pax = guest ? (guest.pax_confirmed || guest.max_pax || 1) : null;
   addScannerHistory({ ok: isSuccess, dup, name: guest?.group_name || '(tidak dikenal)', pax });
 
-  const detail = guest ? `
-    <div class="detail">
-      <div class="row"><span>Nama Tamu</span><b>${esc(guest.group_name || '-')}</b></div>
-      <div class="row"><span>Kategori</span><b>${esc(guest.category || 'Umum')}</b></div>
-      <div class="row"><span>Jumlah Pax</span><b class="mono">${pax} Orang</b></div>
-    </div>` : '';
+  const card = guest ? scannerGuestCard(guest) : '';
+  const codeChip = (!isSuccess && code) ? `<div style="text-align:center"><span class="codechip">Kode terbaca <b>${esc(code)}</b></span></div>` : '';
   const auto = isSuccess && source === 'scan';
+  const btnText = source === 'scan' ? (isSuccess ? 'Pindai Tiket Berikutnya' : 'Pindai Lagi') : 'Selesai';
   openSheet(`
     <div class="res"><div class="res-ico ${cls}"><i data-lucide="${ico}"></i></div><h3>${esc(title)}</h3><p>${esc(subtitle)}</p></div>
-    ${detail}
-    ${auto ? '<div class="autobar"><i></i></div>' : ''}
-    <div class="sheet-actions"><button class="btn" onclick="resumeScannerOverlay()">${source === 'scan' ? 'Pindai Tiket Berikutnya' : 'Selesai'}</button></div>`);
-  if (auto) scannerAutoTimer = setTimeout(resumeScannerOverlay, 2600);
+    ${card}
+    ${codeChip}
+    ${auto ? `<div class="autobar"><i style="animation-duration:${SCANNER_AUTO_MS}ms"></i></div>` : ''}
+    <div class="sheet-actions"><button class="btn" onclick="resumeScannerOverlay()">${btnText}</button></div>`);
+  if (auto) scannerAutoTimer = setTimeout(resumeScannerOverlay, SCANNER_AUTO_MS);
 }
 
 function resumeScannerOverlay() {
@@ -1946,7 +2097,7 @@ checkSession();
   };
   $('sort-field').addEventListener('change', e => { sortField = e.target.value; anim = true; renderGuestList(); });
   $('sort-dir').addEventListener('click', () => { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; syncSort(); anim = true; renderGuestList(); });
-  syncSort();
+  syncSort(); window.syncSortUI = syncSort;
   const toList = () => { const l = document.querySelector('#tab-tamu .listcard'); if (!l) return; const top = l.getBoundingClientRect().top + scrollY - head.offsetHeight - 8; if (scrollY > top) scrollTo({ top, behavior: 'smooth' }); };
   document.addEventListener('click', e => { const b = e.target.closest('#st-chips .chip'); if (!b) return; anim = true; activeFilter = b.dataset.f; renderGuestList(); toList(); });
   const _cat = setCategory;
