@@ -180,13 +180,15 @@ input, select, textarea { font-size: 16px !important; }
 .brandcard .sr b{font-family:'Geist Mono',monospace;font-size:22px;font-weight:600}
 
 /* Aksi */
-.tiles2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.tile{border-radius:24px;padding:18px;min-height:132px;display:flex;flex-direction:column;justify-content:space-between;font-family:'Geist',sans-serif;font-weight:700;font-size:20px;line-height:1.15;box-shadow:var(--shadow)}
+.tiles3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.tile{border-radius:24px;padding:16px 12px;min-height:132px;display:flex;flex-direction:column;justify-content:space-between;font-family:'Geist',sans-serif;font-weight:700;font-size:16px;line-height:1.15;box-shadow:var(--shadow)}
 .tile.w{background:var(--card);color:var(--brand)}
 .tile.g{background:var(--green);color:#fff}
-.tile .ico{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;align-self:flex-end}
+.tile.b{background:var(--brand);color:#fff}
+.tile .ico{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;align-self:flex-end}
 .tile.w .ico{background:var(--brand);color:#fff}
 .tile.g .ico{background:rgba(255,255,255,.22);color:#fff}
+.tile.b .ico{background:rgba(255,255,255,.22);color:#fff}
 
 /* Kategori */
 .cr{display:flex;align-items:center;gap:14px;padding:12px 0}
@@ -233,7 +235,6 @@ input, select, textarea { font-size: 16px !important; }
 .quota .qt b{font-family:'Geist Mono',monospace;font-size:24px;font-weight:600;color:var(--green-ink)}
 .bar{height:8px;background:var(--soft);border-radius:99px;margin-top:14px;overflow:hidden}
 .bar i{display:block;height:100%;width:0;background:var(--green);border-radius:99px;transition:width .6s}
-.tiles2 .tile.w.narrow{min-height:0}
 
 /* Form */
 .field{display:flex;align-items:center;gap:12px;padding:0 4px;min-height:54px;position:relative}
@@ -332,17 +333,6 @@ input, select, textarea { font-size: 16px !important; }
 .ci.on .tick::after{opacity:1}
 .ci.on .n{color:var(--sub)}
 
-#reader {
-  border-radius: 18px;
-  overflow: hidden;
-  border: 2px solid var(--line);
-  background: var(--card);
-}
-#reader video {
-  border-radius: 16px;
-  object-fit: cover;
-}
-
 .empty{padding:32px 8px;text-align:center;color:var(--sub);font-size:15px}
 
 /* ===== Lapisan UI ===== */
@@ -434,6 +424,114 @@ html.lock{overflow:hidden}
 .brandcard .ring{width:161px;height:161px}
 .brandcard .side .sr,.brandcard .side .sr:first-child{padding:10px 12px;font-size:13px;white-space:nowrap}
 .brandcard .side .sr b{font-size:19px}
+
+/* ===== Scanner Overlay & Styles (from scanner-3.html) ===== */
+#scanner-overlay{position:fixed;inset:0;z-index:70;background:var(--bg);overflow-y:auto;display:flex;justify-content:center}
+#scanner-overlay .topbar{display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top) + 22px) 20px 8px}
+#scanner-overlay .topbar h1{margin:0;font-size:32px;color:var(--brand);font-weight:800;letter-spacing:-.03em}
+#scanner-overlay .topbar p{margin:2px 0 0;color:var(--sub);font-size:14px;display:flex;align-items:center;gap:6px}
+#scanner-overlay .live{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.8s infinite}
+#scanner-overlay .top-actions{display:flex;gap:8px}
+#scanner-overlay .ib{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card);transition:transform .35s var(--spring),color .25s,border-color .25s}
+#scanner-overlay .ib:hover{border-color:var(--brand);color:var(--brand)}
+#scanner-overlay .ib:active{transform:scale(.92)}
+#scanner-overlay .ib svg{width:18px;height:18px}
+#scanner-overlay .ib.spin svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#scanner-overlay .page{padding:8px 16px calc(40px + env(safe-area-inset-bottom))}
+#scanner-overlay .page>*+*{margin-top:12px}
+#scanner-overlay .card{background:var(--card);border-radius:26px;padding:20px;box-shadow:var(--shadow)}
+#scanner-overlay .ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+#scanner-overlay .ch h3{margin:0;font-weight:700;font-size:19px}
+#scanner-overlay .link{color:var(--sub);font-size:14px}
+#scanner-overlay .brandcard{position:relative;overflow:hidden;isolation:isolate;color:#fff;background:radial-gradient(110% 80% at 100% 0%,#5b86ff 0%,transparent 58%),linear-gradient(155deg,#1a55e8 0%,#0a3dc2 55%,#072a8c 100%);box-shadow:0 22px 44px -16px rgba(10,61,194,.65),inset 0 1px 0 rgba(255,255,255,.25)}
+#scanner-overlay .brandcard::before{content:"";position:absolute;z-index:-1;top:-90px;right:-70px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.26),transparent 66%);animation:drift 10s ease-in-out infinite alternate}
+#scanner-overlay .brandcard .ch h3{color:#fff}
+#scanner-overlay .ringwrap{display:flex;align-items:center;gap:18px}
+#scanner-overlay .ring{position:relative;width:140px;height:140px;flex-shrink:0}
+#scanner-overlay .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+#scanner-overlay .ring circle{fill:none;stroke-width:12;stroke-linecap:round}
+#scanner-overlay .ring .bgc{stroke:rgba(255,255,255,.18)}
+#scanner-overlay .ring .fgc{stroke:#fff;transition:stroke-dashoffset 1.3s var(--ease);filter:drop-shadow(0 0 7px rgba(255,255,255,.6))}
+#scanner-overlay .ring .in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#scanner-overlay .ring .in small{font-size:13px;opacity:.85}
+#scanner-overlay .ring .in b{font-family:'Geist Mono',monospace;font-size:36px;font-weight:600;line-height:1.1}
+#scanner-overlay .brandcard .side{flex:1;display:flex;flex-direction:column;gap:8px}
+#scanner-overlay .brandcard .sr{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.1);font-size:14px}
+#scanner-overlay .brandcard .sr b{font-family:'Geist Mono',monospace;font-size:20px;font-weight:600}
+#scanner-overlay .card-switch{position:relative;display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;box-shadow:var(--shadow)}
+#scanner-overlay .card-switch button{position:relative;z-index:1;flex:1;text-align:center;padding:10px 0;border-radius:999px;font-size:14px;font-weight:600;color:var(--sub);transition:color .25s;display:flex;align-items:center;justify-content:center;gap:6px}
+#scanner-overlay .card-switch button.active{color:#fff}
+:root[data-dark="1"] #scanner-overlay .card-switch button.active{color:#0b0f1a}
+#scanner-overlay .cs-thumb{position:absolute;top:4px;bottom:4px;left:0;border-radius:999px;background:var(--brand);box-shadow:0 6px 16px rgba(10,61,194,.35);transition:transform .5s var(--spring),width .5s var(--spring)}
+#scanner-overlay .view{animation:viewIn .5s var(--ease) both}
+#scanner-overlay .cam{position:relative;width:100%;aspect-ratio:1/1;border-radius:22px;overflow:hidden;background:#05070d;border:1px solid var(--line)}
+#scanner-overlay #scanner-reader{position:absolute;inset:0;width:100%;height:100%;border:0!important}
+#scanner-overlay #scanner-reader video{object-fit:cover!important;width:100%!important;height:100%!important}
+#scanner-overlay #scanner-reader__scan_region{background:transparent!important}
+#scanner-overlay #scanner-reader__dashboard{display:none!important}
+#scanner-overlay .vf{position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;z-index:2}
+#scanner-overlay .vf-box{position:relative;width:62%;aspect-ratio:1/1}
+#scanner-overlay .vf-box i{position:absolute;width:30px;height:30px;border:4px solid #fff;filter:drop-shadow(0 0 6px rgba(0,0,0,.4))}
+#scanner-overlay .vf-box i:nth-child(1){top:0;left:0;border-right:0;border-bottom:0;border-top-left-radius:16px}
+#scanner-overlay .vf-box i:nth-child(2){top:0;right:0;border-left:0;border-bottom:0;border-top-right-radius:16px}
+#scanner-overlay .vf-box i:nth-child(3){bottom:0;left:0;border-right:0;border-top:0;border-bottom-left-radius:16px}
+#scanner-overlay .vf-box i:nth-child(4){bottom:0;right:0;border-left:0;border-top:0;border-bottom-right-radius:16px}
+#scanner-overlay .laser{position:absolute;left:6%;right:6%;height:2px;background:linear-gradient(90deg,transparent,#5b86ff,transparent);box-shadow:0 0 14px #5b86ff;animation:laser 2.2s infinite ease-in-out}
+#scanner-overlay .cam-flash{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0}
+#scanner-overlay .cam-flash.ok{background:rgba(18,183,106,.45);animation:flash .6s var(--ease)}
+#scanner-overlay .cam-flash.bad{background:rgba(229,72,77,.45);animation:flash .6s var(--ease)}
+@keyframes flash{0%{opacity:1}100%{opacity:0}}
+#scanner-overlay .cam-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+#scanner-overlay .cam-bar p{margin:0;color:var(--sub);font-size:14px;flex:1}
+#scanner-overlay .sbar{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:18px;height:54px;padding:0 16px;box-shadow:var(--shadow)}
+#scanner-overlay .sbar>svg{color:var(--sub);width:20px;height:20px;flex-shrink:0}
+#scanner-overlay .sbar input{flex:1;min-width:0;border:0;outline:none;color:var(--ink)}
+#scanner-overlay .sbar input::placeholder{color:var(--sub)}
+#scanner-overlay .chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:12px -16px 0;padding:0 16px}
+#scanner-overlay .chips::-webkit-scrollbar{display:none}
+#scanner-overlay .chip{flex-shrink:0;height:36px;padding:0 15px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--sub);font-size:14px;font-weight:600;white-space:nowrap;transition:all .25s}
+#scanner-overlay .chip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+:root[data-dark="1"] #scanner-overlay .chip.on{color:#0b0f1a}
+#scanner-overlay .listcard{background:var(--card);border-radius:26px;padding:4px 18px 8px;box-shadow:var(--shadow);max-height:420px;overflow-y:auto;scrollbar-width:none}
+#scanner-overlay .listcard::-webkit-scrollbar{display:none}
+#scanner-overlay .gl{display:flex;align-items:center;gap:12px;padding:14px 0;width:100%}
+#scanner-overlay .gl+.gl{border-top:1px solid var(--line)}
+#scanner-overlay .gl .txt{flex:1;min-width:0}
+#scanner-overlay .gl .n{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#scanner-overlay .gl .s{color:var(--sub);font-size:13px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#scanner-overlay .gl .s .code{font-family:'Geist Mono',monospace}
+#scanner-overlay .av{width:46px;height:46px;min-width:46px;border-radius:50%;background:var(--soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;font-family:'Geist Mono',monospace}
+#scanner-overlay .st{font-size:12px;padding:4px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0}
+#scanner-overlay .st::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+#scanner-overlay .st-ready{background:var(--green-bg);color:var(--green-ink)}
+#scanner-overlay .st-checked{background:var(--blue-bg);color:var(--brand)}
+#scanner-overlay .st-absen{background:var(--red-bg);color:var(--red-ink)}
+#scanner-overlay .st-warn{background:var(--amber-bg);color:var(--amber-ink)}
+#scanner-overlay .empty{padding:32px 8px;text-align:center;color:var(--sub);font-size:15px}
+#scanner-overlay .tokrow{display:flex;gap:10px}
+#scanner-overlay .tokrow .sbar{flex:1;height:50px;box-shadow:none;border:1px solid var(--line)}
+#scanner-overlay .tokrow input{font-family:'Geist Mono',monospace;text-transform:uppercase}
+#scanner-overlay .tokrow .btn{width:auto;height:50px;padding:0 20px;font-size:15px;border-radius:16px}
+#scanner-overlay .lbl{font-size:13px;color:var(--sub);margin-bottom:10px;font-weight:500}
+#scanner-overlay .res{text-align:center;padding:6px 4px 4px}
+#scanner-overlay .res-ico{width:72px;height:72px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;animation:pop .6s var(--spring)}
+#scanner-overlay .res-ico svg{width:34px;height:34px;stroke-width:2.2}
+#scanner-overlay .res-ico.ok{background:var(--green-bg);color:var(--green-ink)}
+#scanner-overlay .res-ico.bad{background:var(--red-bg);color:var(--red-ink)}
+#scanner-overlay .res-ico.warn{background:var(--amber-bg);color:var(--amber-ink)}
+#scanner-overlay .res-ico.info{background:var(--soft);color:var(--brand)}
+#scanner-overlay .res h3{margin:0;font-size:24px;font-weight:800;letter-spacing:-.02em}
+#scanner-overlay .res p{margin:6px 0 0;color:var(--sub);font-size:15px;white-space:pre-line;word-break:break-word}
+#scanner-overlay .detail{margin-top:16px;background:var(--card);border-radius:22px;padding:4px 18px;box-shadow:var(--shadow)}
+#scanner-overlay .detail .row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;font-size:15px}
+#scanner-overlay .detail .row+.row{border-top:1px solid var(--line)}
+#scanner-overlay .detail .row span{color:var(--sub)}
+#scanner-overlay .detail .row b{font-weight:600;text-align:right}
+#scanner-overlay .detail .row b.mono{font-family:'Geist Mono',monospace}
+#scanner-overlay .sheet-actions{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+#scanner-overlay .autobar{height:4px;border-radius:99px;background:var(--line);margin-top:14px;overflow:hidden}
+#scanner-overlay .autobar i{display:block;height:100%;width:100%;background:var(--green);transform-origin:left;animation:shrink 2.6s linear forwards}
 </style>
 </head>
 <body>
@@ -572,9 +670,11 @@ html.lock{overflow:hidden}
           <div id="guest-list-container"></div>
         </div>
 
-        <div class="tiles2">
+        <!-- 3 Action Buttons in Tab Tamu, Scanner on the far right -->
+        <div class="tiles3">
           <button class="tile w narrow" onclick="openGuestSheet()"><span class="ico" style="align-self:flex-start"><i data-lucide="plus"></i></span><span>Tambah<br>Tamu</span></button>
           <button class="tile g narrow" onclick="openPending()"><span class="ico" style="align-self:flex-start"><i data-lucide="message-circle"></i></span><span>Kirim<br>Undangan</span></button>
+          <button class="tile w narrow" onclick="openScannerOverlay()"><span class="ico" style="align-self:flex-start"><i data-lucide="scan-line"></i></span><span>Buka<br>Scanner</span></button>
         </div>
 
         <div class="card quota">
@@ -635,30 +735,81 @@ html.lock{overflow:hidden}
   </nav>
 </div>
 
-<!-- CHECK-IN MODAL FULLSCREEN DENGAN SCANNER QR -->
-<div class="checkin hidden" id="checkin" role="dialog" aria-modal="true" aria-label="Mode check-in">
-  <div class="ci-wrap">
-    <div class="ci-head">
-      <div><h1>Check-in</h1><p id="ci-count">0</p></div>
-      <button class="txt-btn" onclick="closeCheckin()">Selesai</button>
-    </div>
+<!-- SCANNER OVERLAY (from scanner-3.html) -->
+<div id="scanner-overlay" class="hidden">
+  <div style="width:100%;max-width:480px;position:relative;">
+    <header class="topbar">
+      <div>
+        <h1>Scanner</h1>
+        <p><span class="live"></span>Mode Operator Door</p>
+      </div>
+      <div class="top-actions">
+        <button class="ib" onclick="refreshScannerGuests()" id="scanner-btn-refresh" aria-label="Muat ulang data"><i data-lucide="refresh-cw"></i></button>
+        <button class="ib" onclick="closeScannerOverlay()" aria-label="Tutup Scanner"><i data-lucide="x"></i></button>
+      </div>
+    </header>
 
-    <!-- Pilihan Mode: Scan QR atau Cari Manual -->
-    <div class="card-switch" id="ci-mode-switch" style="margin-bottom: 14px; width: 100%; display: flex;">
-      <button class="active" style="flex:1;" onclick="switchCiMode('scan')">Scan QR</button>
-      <button style="flex:1;" onclick="switchCiMode('manual')">Cari Manual</button>
-    </div>
+    <div class="page">
+      <!-- Mode (Scan QR / Cari Manual) di atas Kotak Scanner -->
+      <div class="card-switch" id="scanner-mode-switch">
+        <button class="active" onclick="switchScannerMode('scan')"><i data-lucide="scan-line"></i>Scan QR</button>
+        <button onclick="switchScannerMode('manual')"><i data-lucide="search"></i>Cari Manual</button>
+      </div>
 
-    <!-- Tampilan Scanner Kamera -->
-    <div id="ci-scanner-view">
-      <div id="reader" style="width:100%; min-height:260px;"></div>
-      <p style="text-align:center; color:var(--sub); font-size:14px; margin-top:14px;">Arahkan kamera ke QR Code undangan tamu</p>
-    </div>
+      <!-- Scan -->
+      <div id="scanner-view-scan" class="view">
+        <div class="card" style="padding:14px">
+          <div class="cam">
+            <div id="scanner-reader"></div>
+            <div class="vf"><div class="vf-box"><i></i><i></i><i></i><i></i><div class="laser"></div></div></div>
+            <div class="cam-flash" id="scanner-cam-flash"></div>
+          </div>
+          <div class="cam-bar">
+            <p id="scanner-cam-hint">Arahkan kamera ke QR Code tiket tamu</p>
+            <button class="ib" onclick="switchScannerCamera()" aria-label="Ganti kamera"><i data-lucide="switch-camera"></i></button>
+          </div>
+        </div>
+      </div>
 
-    <!-- Tampilan Pencarian Manual -->
-    <div id="ci-manual-view" class="hidden">
-      <div class="sbar"><i data-lucide="search"></i><input type="search" id="ci-search" placeholder="Cari nama tamu…" oninput="renderCheckin()" /></div>
-      <div class="listcard" id="ci-list" style="margin-top:14px"></div>
+      <!-- Manual -->
+      <div id="scanner-view-manual" class="hidden view">
+        <div class="sbar"><i data-lucide="search"></i><input type="search" id="scanner-manual-search-input" placeholder="Ketik nama tamu atau kode…" oninput="filterScannerManualGuests()" /></div>
+        <div class="chips" id="scanner-manual-chips">
+          <button class="chip on" data-f="all">Semua</button>
+          <button class="chip" data-f="wait">Belum masuk</button>
+          <button class="chip" data-f="done">Sudah masuk</button>
+        </div>
+        <div class="listcard" id="scanner-manual-guest-list" style="margin-top:12px"><div class="empty">Memuat daftar tamu...</div></div>
+        <div class="card" style="margin-top:12px">
+          <div class="lbl">Atau masukkan kode token tiket</div>
+          <div class="tokrow">
+            <div class="sbar"><i data-lucide="ticket"></i><input type="text" id="scanner-manual-token-input" placeholder="Contoh: 115b0522" autocomplete="off" autocapitalize="none" spellcheck="false" onkeydown="if(event.key==='Enter')submitScannerTokenInput()" /></div>
+            <button class="btn" onclick="submitScannerTokenInput()">Proses</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistik (Card Biru) -->
+      <div class="card brandcard">
+        <div class="ch" style="margin-bottom:12px"><h3>Check-in</h3></div>
+        <div class="ringwrap">
+          <div class="ring">
+            <svg viewBox="0 0 100 100"><circle class="bgc" cx="50" cy="50" r="44"/><circle class="fgc" id="scanner-ring-fg" cx="50" cy="50" r="44" stroke-dasharray="276.46" stroke-dashoffset="276.46"/></svg>
+            <div class="in"><small>Masuk</small><b id="scanner-ring-num">0</b></div>
+          </div>
+          <div class="side">
+            <div class="sr"><span>Total grup</span><b id="scanner-st-total">0</b></div>
+            <div class="sr"><span>Belum masuk</span><b id="scanner-st-wait">0</b></div>
+            <div class="sr"><span>Orang masuk</span><b id="scanner-st-pax">0</b></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Riwayat -->
+      <div class="card">
+        <div class="ch"><h3>Riwayat Scan</h3><span class="link" id="scanner-hist-count">0 scan</span></div>
+        <div id="scanner-hist-list"><div class="empty">Belum ada scan di sesi ini.</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -679,7 +830,6 @@ let sortField = 'created';
 let sortDir = 'desc';
 let currentActiveTab = 'home';
 let currentCardViewMode = 'checkin';
-let currentCiMode = 'scan';
 let html5QrCode = null;
 
 const COLORS = ['#0a3dc2','#12b76a','#f5a524','#e5484d','#7c5cff','#0ea5e9','#ec4899'];
@@ -858,7 +1008,7 @@ function switchCardView(type) {
 
 function handleCardAction() {
   if (currentCardViewMode === 'checkin') {
-    openCheckin();
+    openScannerOverlay();
   } else {
     switchTab('tamu');
     activeFilter = 'hadir';
@@ -1044,7 +1194,7 @@ function switchTab(tab) {
 
 function handleFabClick() {
   if (currentActiveTab === 'home') {
-    openCheckin();
+    openScannerOverlay();
   } else if (currentActiveTab === 'tamu') {
     openGuestSheet();
   } else if (currentActiveTab === 'acara') {
@@ -1065,7 +1215,7 @@ function handleFabClick() {
         <div style="font-size:15px; color:var(--sub); display:flex; flex-direction:column; gap:14px; line-height:1.5; padding-top:12px;">
           <div><b>1. Tambah Tamu:</b> Gunakan tombol tambah tamu untuk memasukkan nama, kategori, nomor WA, dan kuota pax.</div>
           <div><b>2. Kirim Undangan WA:</b> Klik ikon WhatsApp pada daftar tamu untuk mengirim pesan otomatis yang dilengkapi tautan undangan unik.</div>
-          <div><b>3. Check-In Acara:</b> Gunakan tombol Scan QR di Home untuk memindai QR Code tamu saat hari H pernikahan.</div>
+          <div><b>3. Check-In Acara:</b> Gunakan tombol Scan QR di Home atau di Tab Tamu untuk memindai QR Code tamu saat hari H pernikahan.</div>
         </div>
       </div>
     `);
@@ -1341,159 +1491,400 @@ function openPending() {
       : '<div class="empty">Semua tamu sudah menjawab.</div>'}`);
 }
 
-/* ---------- Mode Check-in & QR Scanner Kamera ---------- */
-function switchCiMode(mode) {
-  currentCiMode = mode;
-  const btnScan = document.querySelector('#ci-mode-switch button:nth-child(1)');
-  const btnManual = document.querySelector('#ci-mode-switch button:nth-child(2)');
-  const viewScan = $('ci-scanner-view');
-  const viewManual = $('ci-manual-view');
+/* ---------- Scanner Overlay Integration (from scanner-3.html) ---------- */
+let html5ScannerInstance = null;
+let scannerProcessing = false;
+let scannerGuests = [];
+let scannerCurrentFacing = "environment";
+let scannerMode = 'scan';
+let scannerManualFilter = 'all';
+let scannerHistory = [];
+let scannerAutoTimer = null;
+let scannerLastToken = '', scannerLastTokenAt = 0;
 
-  if (mode === 'scan') {
-    btnScan.classList.add('active');
-    btnManual.classList.remove('active');
-    viewScan.classList.remove('hidden');
-    viewManual.classList.add('hidden');
-    startQrScanner();
+function placeScannerThumb() {
+  const sw = document.querySelector('#scanner-overlay #scanner-mode-switch');
+  const a = sw && sw.querySelector('button.active');
+  if (!a || !a.offsetWidth) return;
+  let t = sw.querySelector('.cs-thumb');
+  if (!t) {
+    t = document.createElement('i');
+    t.className = 'cs-thumb';
+    t.style.transition = 'none';
+    sw.append(t);
+    void t.offsetWidth;
+    t.style.transition = '';
+  }
+  t.style.width = a.offsetWidth + 'px';
+  t.style.transform = `translateX(${a.offsetLeft}px)`;
+}
+
+function switchScannerMode(m) {
+  scannerMode = m;
+  const bs = document.querySelectorAll('#scanner-overlay #scanner-mode-switch button');
+  if (bs.length >= 2) {
+    bs[0].classList.toggle('active', m === 'scan');
+    bs[1].classList.toggle('active', m === 'manual');
+  }
+  const vScan = document.getElementById('scanner-view-scan');
+  const vMan = document.getElementById('scanner-view-manual');
+  if (vScan) vScan.classList.toggle('hidden', m !== 'scan');
+  if (vMan) vMan.classList.toggle('hidden', m !== 'manual');
+  placeScannerThumb();
+  if (m === 'scan') {
+    restartScannerCamera();
   } else {
-    btnManual.classList.add('active');
-    btnScan.classList.remove('active');
-    viewManual.classList.remove('hidden');
-    viewScan.classList.add('hidden');
-    stopQrScanner();
-    renderCheckin();
+    stopScannerCamera();
+    filterScannerManualGuests();
   }
 }
 
-function startQrScanner() {
-  if (!html5QrCode) {
-    html5QrCode = new Html5Qrcode("reader");
+async function startScannerOverlay() {
+  const readerEl = document.getElementById('scanner-reader');
+  if (!readerEl) return;
+  if (!html5ScannerInstance) {
+    html5ScannerInstance = new Html5Qrcode("scanner-reader");
   }
-  if (!html5QrCode.isScanning) {
-    html5QrCode.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: { width: 220, height: 220 } },
-      async (decodedText) => {
-        handleScannedCode(decodedText);
-      },
-      (errorMessage) => {}
-    ).catch(err => {
-      console.error("Gagal memulai kamera scanner:", err);
-    });
+  const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+  try {
+    await html5ScannerInstance.start({ facingMode: "environment" }, config, onScannerScanSuccess);
+    scannerCurrentFacing = "environment";
+  } catch (err) {
+    try {
+      await html5ScannerInstance.start({ facingMode: "user" }, config, onScannerScanSuccess);
+      scannerCurrentFacing = "user";
+    } catch (e2) {
+      const hint = document.getElementById('scanner-cam-hint');
+      if (hint) hint.textContent = 'Kamera tidak aktif. Gunakan Cari Manual atau cek izin kamera.';
+    }
+  }
+  fetchScannerGuests();
+  placeScannerThumb();
+}
+
+async function stopScannerCamera() {
+  try {
+    if (html5ScannerInstance && html5ScannerInstance.isScanning) {
+      await html5ScannerInstance.stop();
+    }
+  } catch (e) {}
+}
+
+async function restartScannerCamera() {
+  await stopScannerCamera();
+  try {
+    if (!html5ScannerInstance) html5ScannerInstance = new Html5Qrcode("scanner-reader");
+    await html5ScannerInstance.start({ facingMode: scannerCurrentFacing }, { fps: 10, qrbox: { width: 220, height: 220 } }, onScannerScanSuccess);
+    const hint = document.getElementById('scanner-cam-hint');
+    if (hint) hint.textContent = 'Arahkan kamera ke QR Code tiket tamu';
+  } catch (err) {
+    try {
+      const other = scannerCurrentFacing === 'environment' ? 'user' : 'environment';
+      await html5ScannerInstance.start({ facingMode: other }, { fps: 10, qrbox: { width: 220, height: 220 } }, onScannerScanSuccess);
+      scannerCurrentFacing = other;
+    } catch (e2) {
+      const hint = document.getElementById('scanner-cam-hint');
+      if (hint) hint.textContent = 'Kamera tidak aktif. Gunakan Cari Manual atau cek izin kamera.';
+    }
   }
 }
 
-function stopQrScanner() {
-  if (html5QrCode && html5QrCode.isScanning) {
-    html5QrCode.stop().catch(err => console.log("Gagal menghentikan scanner", err));
-  }
+async function switchScannerCamera() {
+  scannerCurrentFacing = scannerCurrentFacing === 'environment' ? 'user' : 'environment';
+  await restartScannerCamera();
 }
 
-async function handleScannedCode(text) {
-  // Ambil token dari URL atau teks hasil scan
-  let token = text.trim();
-  if (token.includes('/')) {
-    const parts = token.split('/');
-    token = parts[parts.length - 1];
-  }
-
-  const guest = globalData.guests.find(g => g.invitation_token === token || g.id === text);
-  if (!guest) {
-    return toast('QR Code tidak valid / Tamu tidak ditemukan', false);
-  }
-
-  if (guest.is_checked_in) {
-    toast(`⚠️ "${guest.group_name}" sudah check-in sebelumnya!`, false);
+async function fetchScannerGuests() {
+  if (globalData && globalData.guests) {
+    scannerGuests = globalData.guests.map(g => ({
+      id: g.id,
+      group_name: g.group_name,
+      category: g.category || 'Umum',
+      max_pax: g.max_pax || 2,
+      invitation_token: g.invitation_token,
+      ticket_token: g.invitation_token,
+      is_checked_in: !!g.is_checked_in,
+      pax_confirmed: g.max_pax,
+      rsvp_status: g.rsvp_status || 'pending'
+    }));
+    updateScannerCountBadge();
+    filterScannerManualGuests();
     return;
   }
 
-  // Lakukan check-in otomatis
-  guest.busy = true;
-  const { data, error } = await supabaseClient.rpc('update_guest_by_client', {
-    p_guest_id: guest.id, 
-    p_group_name: guest.group_name, 
-    p_category: guest.category,
-    p_max_pax: guest.max_pax, 
-    p_phone: guest.phone || null, 
-    p_rsvp_status: 'hadir', 
-    p_is_checked_in: true,
-    p_is_sent: true
-  });
-  guest.busy = false;
-
-  if (error || !data || !data.success) {
-    return toast(data?.message || 'Gagal melakukan check-in.', false);
+  const { data: rpcData, error: rpcError } = await supabaseClient.rpc('get_scanner_guests');
+  if (!rpcError && rpcData && Array.isArray(rpcData)) {
+    scannerGuests = rpcData;
+    updateScannerCountBadge();
+    filterScannerManualGuests();
   }
-
-  guest.is_checked_in = true;
-  if (navigator.vibrate) navigator.vibrate(50);
-  toast(`✅ Berhasil Check-in: ${guest.group_name} (${guest.max_pax} pax)`);
-  
-  // Jeda sejenak agar tidak double-scan beruntun
-  stopQrScanner();
-  setTimeout(() => {
-    if (currentCiMode === 'scan') startQrScanner();
-  }, 2000);
-
-  loadDashboard();
 }
 
-const attending = () => globalData.guests.filter(g => g.rsvp_status === 'hadir' || g.is_checked_in);
-function openCheckin() {
-  currentCiMode = 'scan';
-  const btnScan = document.querySelector('#ci-mode-switch button:nth-child(1)');
-  const btnManual = document.querySelector('#ci-mode-switch button:nth-child(2)');
-  if (btnScan && btnManual) {
-    btnScan.classList.add('active');
-    btnManual.classList.remove('active');
+function updateScannerCountBadge() {
+  const total = scannerGuests.length;
+  const done = scannerGuests.filter(g => g.is_checked_in);
+  const pax = done.reduce((s, g) => s + (g.pax_confirmed || g.max_pax || 1), 0);
+  const ringNum = document.getElementById('scanner-ring-num');
+  const stTotal = document.getElementById('scanner-st-total');
+  const stWait = document.getElementById('scanner-st-wait');
+  const stPax = document.getElementById('scanner-st-pax');
+  const ringFg = document.getElementById('scanner-ring-fg');
+  
+  if (ringNum) ringNum.textContent = done.length;
+  if (stTotal) stTotal.textContent = total;
+  if (stWait) stWait.textContent = total - done.length;
+  if (stPax) stPax.textContent = pax;
+  if (ringFg) ringFg.style.strokeDashoffset = 276.46 * (1 - (total ? done.length / total : 0));
+}
+
+function renderScannerManualList(guests) {
+  const container = document.getElementById('scanner-manual-guest-list');
+  if (!container) return;
+  if (!guests || guests.length === 0) {
+    container.innerHTML = '<div class="empty">Tamu tidak ditemukan.</div>';
+    return;
   }
-  $('ci-scanner-view').classList.remove('hidden');
-  $('ci-manual-view').classList.add('hidden');
-  $('ci-search').value = '';
-  
-  $('checkin').classList.remove('hidden');
-  window.scrollTo(0, 0);
-  icons();
-  startQrScanner();
+  container.innerHTML = guests.slice(0, 80).map((g, i) => {
+    const activeToken = g.invitation_token || g.ticket_token;
+    const c = COLORS[i % COLORS.length];
+    return `<button class="gl" data-scanner-token="${esc(activeToken)}">
+      <div class="av" style="background:${c}22;color:${c}">${esc(initials(g.group_name))}</div>
+      <div class="txt"><div class="n">${esc(g.group_name)}</div><div class="s">${esc(g.category || 'Umum')} · <span class="code">${esc(activeToken)}</span></div></div>
+      <span class="st ${g.is_checked_in ? 'st-checked' : 'st-ready'}">${g.is_checked_in ? 'Checked' : 'Ready'}</span>
+    </button>`;
+  }).join('') + (guests.length > 80 ? `<div class="empty" style="padding:14px">+${guests.length - 80} lainnya, persempit pencarian.</div>` : '');
 }
 
-function closeCheckin() {
-  stopQrScanner();
-  $('checkin').classList.add('hidden');
-  loadDashboard();
+function filterScannerManualGuests() {
+  const searchInput = document.getElementById('scanner-manual-search-input');
+  const search = searchInput ? searchInput.value.toLowerCase() : '';
+  document.querySelectorAll('#scanner-manual-chips .chip').forEach(c => c.classList.toggle('on', c.dataset.f === scannerManualFilter));
+  let filtered = scannerGuests.filter(g =>
+    g.group_name.toLowerCase().includes(search) ||
+    (g.invitation_token && g.invitation_token.toLowerCase().includes(search)) ||
+    (g.ticket_token && g.ticket_token.toLowerCase().includes(search))
+  );
+  if (scannerManualFilter === 'wait') filtered = filtered.filter(g => !g.is_checked_in);
+  if (scannerManualFilter === 'done') filtered = filtered.filter(g => g.is_checked_in);
+  renderScannerManualList(filtered);
 }
 
-function renderCheckin() {
-  const q = $('ci-search').value.toLowerCase().trim();
-  const all = attending();
-  let list = all;
-  if (q) list = list.filter(g => g.group_name.toLowerCase().includes(q));
-  $('ci-count').textContent = `${all.filter(g => g.is_checked_in).length} dari ${all.length} grup sudah masuk`;
-  $('ci-list').innerHTML = list.length
-    ? list.map((g, i) => `<button class="gl ci ${g.is_checked_in ? 'on' : ''}" style="width:100%" data-ci="${esc(g.id)}">
-        <div class="main">${avatar(g, i)}<div><div class="n">${esc(g.group_name)}</div><div class="s" style="color:var(--sub);font-size:14px">${g.max_pax} pax · ${esc(g.category)}</div></div></div>
-        <span class="tick"></span></button>`).join('')
-    : '<div class="empty">Tidak ada tamu yang cocok.</div>';
-}
-
-$('ci-list').addEventListener('click', e => {
-  const b = e.target.closest('[data-ci]'); if (b) toggleCheckin(b.dataset.ci);
+document.addEventListener('click', e => {
+  const chip = e.target.closest('#scanner-manual-chips .chip');
+  if (chip) {
+    scannerManualFilter = chip.dataset.f;
+    filterScannerManualGuests();
+  }
+  const gl = e.target.closest('[data-scanner-token]');
+  if (gl) {
+    selectScannerManualGuest(gl.dataset.scannerToken);
+  }
 });
 
-async function toggleCheckin(id) {
-  const g = findGuest(id); if (!g || g.busy) return;
-  const next = !g.is_checked_in;
-  g.busy = true;
-  const { data, error } = await supabaseClient.rpc('update_guest_by_client', {
-    p_guest_id: g.id, p_group_name: g.group_name, p_category: g.category,
-    p_max_pax: g.max_pax, p_phone: g.phone || null, p_rsvp_status: next ? 'hadir' : (g.rsvp_status || 'hadir'), p_is_checked_in: next,
-    p_is_sent: true
-  });
-  g.busy = false;
-  if (error || !data || !data.success) return toast(data?.message || 'Gagal mengubah check-in.', false);
-  g.is_checked_in = next;
-  renderCheckin();
-  if (navigator.vibrate) navigator.vibrate(10);
+function selectScannerManualGuest(token) {
+  if (!token) return;
+  const g = scannerGuests.find(x => (x.invitation_token || x.ticket_token) === token);
+  scannerProcessing = true;
+  if (!g) { processScannerCheckIn(token); return; }
+  if (g.is_checked_in) {
+    openSheet(`
+      <div class="res"><div class="res-ico warn"><i data-lucide="user-check"></i></div><h3>Sudah Check-in</h3><p>${esc(g.group_name)} sudah diverifikasi sebelumnya.</p></div>
+      <div class="sheet-actions"><button class="btn line" onclick="closeSheet();resumeScannerOverlay()">Tutup</button></div>`);
+    return;
+  }
+  openSheet(`
+    <div class="res"><div class="res-ico info"><i data-lucide="user-round"></i></div><h3>Check-in tamu ini?</h3><p>Pastikan tamu sudah ada di depan Anda.</p></div>
+    <div class="detail">
+      <div class="row"><span>Nama</span><b>${esc(g.group_name)}</b></div>
+      <div class="row"><span>Kategori</span><b>${esc(g.category || 'Umum')}</b></div>
+      <div class="row"><span>Jumlah</span><b class="mono">${g.pax_confirmed || g.max_pax || 1} orang</b></div>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn" id="scanner-do-ci">Check-in sekarang</button>
+      <button class="btn line" onclick="closeSheet();resumeScannerOverlay()">Batal</button>
+    </div>`);
+  const doCiBtn = document.getElementById('scanner-do-ci');
+  if (doCiBtn) doCiBtn.onclick = () => { doCiBtn.disabled = true; processScannerCheckIn(token, 'manual'); };
+}
+
+function submitScannerTokenInput() {
+  const input = document.getElementById('scanner-manual-token-input');
+  const token = input ? cleanTokenString(input.value) : '';
+  if (!token) return toast("Masukkan kode token terlebih dahulu.", false);
+  if (input) input.value = '';
+  scannerProcessing = true;
+  processScannerCheckIn(token, 'manual');
+}
+
+function cleanTokenString(str) {
+  if (!str) return '';
+  return String(str).trim().toLowerCase().replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/[\u2010-\u2015\u2212]/g, '-');
+}
+
+async function onScannerScanSuccess(decodedText) {
+  if (scannerProcessing) return;
+  let rawText = String(decodedText).trim();
+  if (!rawText || rawText === "undefined") return;
+
+  let extractedToken = rawText;
+  if (rawText.includes('?token=')) {
+    extractedToken = rawText.split('?token=')[1].split('&')[0];
+  } else if (rawText.includes('/')) {
+    const parts = rawText.split('?')[0].split('/').filter(Boolean);
+    extractedToken = parts[parts.length - 1];
+  }
+  extractedToken = cleanTokenString(extractedToken);
+
+  const now = Date.now();
+  if (extractedToken === scannerLastToken && now - scannerLastTokenAt < 4000) return;
+  scannerLastToken = extractedToken; scannerLastTokenAt = now;
+
+  scannerProcessing = true;
+  if (navigator.vibrate) navigator.vibrate(100);
+  await processScannerCheckIn(extractedToken, 'scan');
+}
+
+async function processScannerCheckIn(ticketToken, source = 'scan') {
+  const tokenClean = cleanTokenString(ticketToken);
+  const { data, error } = await supabaseClient.rpc('check_in_guest', { p_ticket_token: tokenClean });
+
+  if (error) {
+    return await fallbackScannerDirectCheckIn(tokenClean, source);
+  }
+
+  if (!data.success) {
+    showScannerModal(false, "Peringatan Tiket", `${data.message}\n(Kode terbaca: "${tokenClean}")`, data.guest || null, source);
+  } else {
+    showScannerModal(true, "Berhasil Check-in!", "Tamu terverifikasi resmi.", data.guest, source);
+    fetchScannerGuests();
+    loadDashboard();
+  }
+}
+
+async function fallbackScannerDirectCheckIn(tokenClean, source = 'scan') {
+  try {
+    const { data: guests } = await supabaseClient
+      .from('guests')
+      .select('id, group_name, category, max_pax, invitation_token')
+      .ilike('invitation_token', tokenClean)
+      .limit(1);
+
+    if (!guests || guests.length === 0) {
+      showScannerModal(false, "Tiket Tidak Ditemukan", `Kode token "${tokenClean}" tidak terdaftar di daftar undangan.`, null, source);
+      return;
+    }
+
+    const g = guests[0];
+    const { data: tickets } = await supabaseClient
+      .from('tickets')
+      .select('*')
+      .eq('guest_id', g.id)
+      .limit(1);
+
+    if (tickets && tickets.length > 0 && tickets[0].is_checked_in) {
+      showScannerModal(false, "Sudah Pernah Check-in", `Tamu "${g.group_name}" sudah diverifikasi sebelumnya.`, {
+        group_name: g.group_name,
+        category: g.category,
+        max_pax: g.max_pax
+      }, source);
+      return;
+    }
+
+    if (tickets && tickets.length > 0) {
+      await supabaseClient.from('tickets').update({ is_checked_in: true, checked_in_at: new Date().toISOString() }).eq('id', tickets[0].id);
+    } else {
+      await supabaseClient.from('tickets').insert({ guest_id: g.id, ticket_token: g.invitation_token, is_checked_in: true, checked_in_at: new Date().toISOString() });
+    }
+
+    showScannerModal(true, "Berhasil Check-in!", "Tamu terverifikasi resmi (Direct Mode).", {
+      group_name: g.group_name,
+      category: g.category,
+      pax_confirmed: g.max_pax
+    }, source);
+    fetchScannerGuests();
+    loadDashboard();
+  } catch (err) {
+    showScannerModal(false, "Kesalahan Check-in", err.message || "Gagal memproses tiket.", null, source);
+  }
+}
+
+function showScannerModal(isSuccess, title, subtitle, guest, source = 'scan') {
+  const dup = !isSuccess && /sudah/i.test(title + ' ' + subtitle);
+  const cls = isSuccess ? 'ok' : (dup ? 'warn' : 'bad');
+  const ico = isSuccess ? 'check' : (dup ? 'user-check' : 'x');
+  
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = isSuccess ? 880 : 220;
+    const d = isSuccess ? .18 : .35;
+    g.gain.setValueAtTime(.15, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + d);
+    o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + d);
+  } catch (e) {}
+
+  const pax = guest ? (guest.pax_confirmed || guest.max_pax || 1) : null;
+  addScannerHistory({ ok: isSuccess, dup, name: guest?.group_name || '(tidak dikenal)', pax });
+
+  const detail = guest ? `
+    <div class="detail">
+      <div class="row"><span>Nama Tamu</span><b>${esc(guest.group_name || '-')}</b></div>
+      <div class="row"><span>Kategori</span><b>${esc(guest.category || 'Umum')}</b></div>
+      <div class="row"><span>Jumlah Pax</span><b class="mono">${pax} Orang</b></div>
+    </div>` : '';
+  const auto = isSuccess && source === 'scan';
+  openSheet(`
+    <div class="res"><div class="res-ico ${cls}"><i data-lucide="${ico}"></i></div><h3>${esc(title)}</h3><p>${esc(subtitle)}</p></div>
+    ${detail}
+    ${auto ? '<div class="autobar"><i></i></div>' : ''}
+    <div class="sheet-actions"><button class="btn" onclick="resumeScannerOverlay()">${source === 'scan' ? 'Pindai Tiket Berikutnya' : 'Selesai'}</button></div>`);
+  if (auto) scannerAutoTimer = setTimeout(resumeScannerOverlay, 2600);
+}
+
+function resumeScannerOverlay() {
+  clearTimeout(scannerAutoTimer);
+  closeSheet();
+  setTimeout(() => {
+    scannerProcessing = false;
+  }, 500);
+}
+
+function addScannerHistory(h) {
+  h.time = new Date();
+  scannerHistory.unshift(h); scannerHistory = scannerHistory.slice(0, 15);
+  const countEl = document.getElementById('scanner-hist-count');
+  const listEl = document.getElementById('scanner-hist-list');
+  if (countEl) countEl.textContent = scannerHistory.length + ' scan';
+  if (listEl) {
+    listEl.innerHTML = scannerHistory.map(x => {
+      const k = x.ok ? ['st-ready', 'Berhasil'] : x.dup ? ['st-warn', 'Duplikat'] : ['st-absen', 'Gagal'];
+      const tm = x.time.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      return `<div class="gl">
+        <div class="av">${esc(initials(x.name))}</div>
+        <div class="txt"><div class="n">${esc(x.name)}</div><div class="s">${x.pax ? x.pax + ' orang · ' : ''}<span class="code">${tm}</span></div></div>
+        <span class="st ${k[0]}">${k[1]}</span></div>`;
+    }).join('');
+  }
+}
+
+async function refreshScannerGuests() {
+  const b = document.getElementById('scanner-btn-refresh');
+  if (b) b.classList.add('spin');
+  await fetchScannerGuests();
+  if (b) b.classList.remove('spin');
+  toast('Data diperbarui');
+}
+
+function openScannerOverlay() {
+  const overlay = document.getElementById('scanner-overlay');
+  if (overlay) overlay.classList.remove('hidden');
+  startScannerOverlay();
+}
+
+function closeScannerOverlay() {
+  stopScannerCamera();
+  const overlay = document.getElementById('scanner-overlay');
+  if (overlay) overlay.classList.add('hidden');
   loadDashboard();
 }
 
@@ -1584,8 +1975,8 @@ checkSession();
     if (dn && y > 140) head.classList.add('away'); else if (up || y < 40) head.classList.remove('away');
     ly = y;
   }, { passive: true });
-  const lock = () => document.documentElement.classList.toggle('lock', $('sheet').classList.contains('open') || !$('checkin').classList.contains('hidden'));
-  const mo = new MutationObserver(lock); [$('sheet'), $('checkin')].forEach(el => mo.observe(el, { attributes: true, attributeFilter: ['class'] }));
+  const lock = () => document.documentElement.classList.toggle('lock', $('sheet').classList.contains('open') || !$('scanner-overlay').classList.contains('hidden'));
+  const mo = new MutationObserver(lock); [$('sheet'), $('scanner-overlay')].forEach(el => mo.observe(el, { attributes: true, attributeFilter: ['class'] }));
 
   const pw = $('password'), eye = $('pw-eye');
   eye.onclick = () => { const show = pw.type === 'password'; pw.type = show ? 'text' : 'password'; eye.setAttribute('aria-pressed', show); eye.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password'); eye.innerHTML = `<i data-lucide="${show ? 'eye-off' : 'eye'}"></i>`; icons(); pw.focus(); };
