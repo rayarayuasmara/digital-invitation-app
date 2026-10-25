@@ -60,7 +60,7 @@ input, select, textarea { font-size: 16px !important; }
 .card{background:var(--card);border-radius:24px;padding:20px;box-shadow:var(--shadow)}
 .ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .ch h3{margin:0;font-family:'Geist',sans-serif;font-weight:700;font-size:19px}
-.link{color:var(--sub);font-size:14px;display:flex;align-items:center;gap:6px}
+.link{color:var(--sub);font-size:14px;display:flex;align-items:center;gap:6px;cursor:pointer}
 .sub{color:var(--sub)}
 
 /* Hero */
@@ -550,8 +550,6 @@ html.lock{overflow:hidden}
 /* ===== Histori RSVP ===== */
 .hl .hmeta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
 .hl .when{font-family:'Geist Mono',monospace;font-size:11.5px;color:var(--sub);white-space:nowrap}
-.morebtn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:46px;margin-top:6px;border-radius:14px;background:var(--soft);color:var(--brand);font-weight:600;font-size:15px;text-align:center}
-.morebtn:active{transform:scale(.98)}
 
 /* ===== Kategori Tamu ===== */
 .addcat{width:36px;height:36px;border-radius:50%;background:var(--soft);color:var(--brand);display:grid;place-items:center;flex-shrink:0;transition:transform .3s var(--spring)}
@@ -615,11 +613,12 @@ html.lock{overflow:hidden}
 .wa-time{display:block;text-align:right;font-size:11px;opacity:.55;margin-top:2px}
 .wa-chip-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-left:6px;vertical-align:middle}
 
-/* Pagination Nav History */
+/* Pagination & Notification Badges */
 .hist-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
 .hist-nav button { padding: 6px 14px; border-radius: 999px; background: var(--soft); color: var(--brand); font-weight: 600; font-size: 13px; }
 .hist-nav button:disabled { opacity: 0.4; cursor: not-allowed; }
 .hist-nav span { font-size: 13px; color: var(--sub); }
+.notif-badge { background: var(--red-ink); color: #fff; font-size: 11.5px; padding: 3px 10px; border-radius: 999px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -682,12 +681,6 @@ html.lock{overflow:hidden}
           </div>
         </div>
 
-        <!-- SECTION WISHES / UCAPAN & DOA -->
-        <div class="card">
-          <div class="ch"><h3>Ucapan & Doa Tamu</h3><span class="link" id="wishes-count">0 pesan</span></div>
-          <div id="wishes-list"><div class="empty">Belum ada ucapan atau doa masuk.</div></div>
-        </div>
-
         <div class="card">
           <div class="ch"><h3>Histori RSVP</h3><button class="link" onclick="showAllRecent()">Lihat semua <i data-lucide="circle-arrow-right"></i></button></div>
           <div id="recent-rsvp-list"></div>
@@ -737,6 +730,15 @@ html.lock{overflow:hidden}
         <div class="card">
           <div class="ch"><h3>Kategori Tamu</h3><button class="addcat" onclick="addCategory()" aria-label="Tambah kategori" title="Tambah kategori"><i data-lucide="plus"></i></button></div>
           <div id="cat-group"></div>
+        </div>
+
+        <!-- SECTION WISHES / UCAPAN & DOA (Pindah ke paling bawah setelah Kategori Tamu) -->
+        <div class="card">
+          <div class="ch">
+            <h3>Ucapan & Doa</h3>
+            <div id="wishes-count-container"><span class="link">0 pesan</span></div>
+          </div>
+          <div id="wishes-list"><div class="empty">Belum ada ucapan atau doa masuk.</div></div>
         </div>
       </div>
     </div>
@@ -961,6 +963,12 @@ let currentActiveTab = 'home';
 let currentCardViewMode = 'checkin';
 let html5QrCode = null;
 
+// State untuk Ucapan & Doa
+let wishesData = [];
+let wishesPage = 1;
+const WISHES_PAGE_SIZE = 7;
+let lastReadWishCount = parseInt(localStorage.getItem('rr_last_read_wishes') || '0');
+
 const COLORS = ['#0a3dc2','#12b76a','#f5a524','#e5484d','#7c5cff','#0ea5e9','#ec4899'];
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1054,7 +1062,7 @@ async function loadDashboard() {
 const guestBadge = g => {
   if (g.is_checked_in) return ['checked', 'Checked-in'];
   if (g.rsvp_status === 'hadir') return ['hadir', 'Hadir'];
-  if (g.rsvp_status === 'tidak_hadir') return ['absen', 'Absen'];
+  if (g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen') return ['absen', 'Absen'];
   if (g.is_sent) return ['pending', 'Pending'];
   return ['unsent', 'Unsent'];
 };
@@ -1108,33 +1116,91 @@ async function loadWishes() {
       .order('created_at', { ascending: false });
     
     if (!error && data) {
-      renderWishes(data);
+      wishesData = data;
+      renderWishes();
     }
   } catch (e) {
     console.log('Wishes load error:', e);
   }
 }
 
-function renderWishes(wishes) {
+function renderWishes() {
   const box = $('wishes-list');
-  const countEl = $('wishes-count');
-  if (countEl) countEl.textContent = wishes.length + ' pesan';
-  if (!wishes || wishes.length === 0) {
+  const countContainer = $('wishes-count-container');
+  const totalWishes = wishesData.length;
+  const unreadCount = Math.max(0, totalWishes - lastReadWishCount);
+
+  // Tombol/indikator notifikasi di pojok kanan atas section
+  if (countContainer) {
+    if (unreadCount > 0) {
+      countContainer.innerHTML = `<span class="notif-badge" onclick="markWishesRead()"><i data-lucide="bell" style="width:13px;height:13px"></i>${unreadCount} baru</span>`;
+    } else {
+      countContainer.innerHTML = `<span class="link" onclick="markWishesRead()">${totalWishes} pesan</span>`;
+    }
+  }
+
+  if (!totalWishes) {
     box.innerHTML = '<div class="empty">Belum ada ucapan atau doa masuk.</div>';
+    icons();
     return;
   }
-  box.innerHTML = wishes.slice(0, 5).map(w => {
-    const timeStr = w.created_at ? fmtWhen(w.created_at) : '';
-    return `<div class="hl">
-      <div class="av">${esc(initials(w.name || 'Tamu'))}</div>
+
+  const totalPages = Math.ceil(totalWishes / WISHES_PAGE_SIZE) || 1;
+  if (wishesPage > totalPages) wishesPage = totalPages;
+  if (wishesPage < 1) wishesPage = 1;
+
+  const startIdx = (wishesPage - 1) * WISHES_PAGE_SIZE;
+  const pageItems = wishesData.slice(startIdx, startIdx + WISHES_PAGE_SIZE);
+
+  let html = '';
+  let lastDateStr = '';
+
+  pageItems.forEach(w => {
+    const d = w.created_at ? new Date(w.created_at) : new Date();
+    const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const timeStr = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+    // Divider tanggal ala chat WA jika tanggal berbeda
+    if (dateStr !== lastDateStr) {
+      html += `<div style="text-align:center;margin:14px 0 8px;"><span style="font-size:11.5px;background:var(--soft);color:var(--sub);padding:3px 12px;border-radius:999px;">${esc(dateStr)}</span></div>`;
+      lastDateStr = dateStr;
+    }
+
+    // Mencari nama undangan yang membuat pesan tersebut jika ada relasi
+    const guestName = w.name || 'Tamu Undangan';
+
+    html += `<div class="hl">
+      <div class="av">${esc(initials(guestName))}</div>
       <div class="txt">
-        <div class="n">${esc(w.name || 'Tamu')}</div>
+        <div class="n">${esc(guestName)}</div>
         <div class="s" style="white-space:normal;margin-top:4px;">${esc(w.message || '')}</div>
       </div>
       <div class="hmeta"><span class="when">${esc(timeStr)}</span></div>
     </div>`;
-  }).join('');
+  });
+
+  if (totalWishes > WISHES_PAGE_SIZE) {
+    html += `<div class="hist-nav">
+      <button onclick="changeWishesPage(-1)" ${wishesPage === 1 ? 'disabled' : ''}>Prev</button>
+      <span>Hal ${wishesPage} dari ${totalPages}</span>
+      <button onclick="changeWishesPage(1)" ${wishesPage === totalPages ? 'disabled' : ''}>Next</button>
+    </div>`;
+  }
+
+  box.innerHTML = html;
   icons();
+}
+
+function changeWishesPage(dir) {
+  wishesPage += dir;
+  renderWishes();
+}
+
+function markWishesRead() {
+  lastReadWishCount = wishesData.length;
+  localStorage.setItem('rr_last_read_wishes', lastReadWishCount);
+  renderWishes();
+  toast('Semua pesan ditandai telah dibaca');
 }
 
 function renderUI() {
@@ -1173,7 +1239,7 @@ function renderUI() {
 
   $('stat-kuota').textContent = Math.max(0, maxQuota - totalGuestsCount);
   
-  const countAbsen = guests.filter(g => g.rsvp_status === 'tidak_hadir').length;
+  const countAbsen = guests.filter(g => g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen').length;
   const countPending = guests.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent).length;
   const totalHadirPax = guests.filter(g => g.rsvp_status === 'hadir').reduce((sum, g) => sum + (g.max_pax || 0), 0);
 
@@ -1311,9 +1377,6 @@ $('cat-group').addEventListener('click', e => {
   switchTab('tamu');
 });
 
-const RECENT_PAGE_SIZE = 10;
-let recentCurrentPage = 1;
-
 function recentSorted(guests) {
   const idx = new Map(guests.map((g, i) => [g.id, i]));
   return [...guests].sort((a, b) => {
@@ -1325,18 +1388,12 @@ function recentSorted(guests) {
   });
 }
 
+// Histori RSVP: tanpa navigasi, tampilkan maks 7
 function renderRecent(guests) {
   const box = $('recent-rsvp-list');
   if (!guests.length) { box.innerHTML = '<div class="empty">Belum ada tamu. Tambahkan lewat tab Tamu.</div>'; return; }
-  const all = recentSorted(guests);
-  const totalPages = Math.ceil(all.length / RECENT_PAGE_SIZE) || 1;
-  if (recentCurrentPage > totalPages) recentCurrentPage = totalPages;
-  if (recentCurrentPage < 1) recentCurrentPage = 1;
-
-  const startIdx = (recentCurrentPage - 1) * RECENT_PAGE_SIZE;
-  const pageItems = all.slice(startIdx, startIdx + RECENT_PAGE_SIZE);
-
-  let html = pageItems.map(g => {
+  const all = recentSorted(guests).slice(0, 7);
+  box.innerHTML = all.map(g => {
     const [k, txt] = guestBadge(g);
     const t = activityTime(g);
     return `<div class="hl">
@@ -1344,24 +1401,7 @@ function renderRecent(guests) {
       <div class="txt"><div class="n">${esc(g.group_name)}</div><div class="s">${esc(g.category)} · ${g.max_pax} pax</div></div>
       <div class="hmeta">${t !== null ? `<span class="when">${esc(fmtWhen(t))}</span>` : ''}<span class="st st-${k}">${txt}</span></div></div>`;
   }).join('');
-
-  if (all.length > RECENT_PAGE_SIZE) {
-    html += `<div class="hist-nav">
-      <button onclick="changeRecentPage(-1)" ${recentCurrentPage === 1 ? 'disabled' : ''}>Prev</button>
-      <span>Hal ${recentCurrentPage} dari ${totalPages}</span>
-      <button onclick="changeRecentPage(1)" ${recentCurrentPage === totalPages ? 'disabled' : ''}>Next</button>
-    </div>`;
-  }
-
-  box.innerHTML = html;
   icons();
-}
-
-function changeRecentPage(dir) {
-  recentCurrentPage += dir;
-  if (globalData && globalData.guests) {
-    renderRecent(globalData.guests);
-  }
 }
 
 function showAllRecent() {
@@ -1411,7 +1451,7 @@ function renderGuestList() {
   } else if (activeFilter === 'hadir') {
     list = list.filter(g => g.rsvp_status === 'hadir' && !g.is_checked_in);
   } else if (activeFilter === 'tidak_hadir') {
-    list = list.filter(g => g.rsvp_status === 'tidak_hadir');
+    list = list.filter(g => g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen');
   } else if (activeFilter === 'pending') {
     list = list.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent);
   } else if (activeFilter === 'unsent') {
@@ -1579,7 +1619,6 @@ function updateWaDirty() {
 }
 
 function renderWaEditor() {
-  // Tanpa tombol tambah kategori, murni dari kategori tamu / data dasar
   $('wa-cats').innerHTML = waCats.map(c =>
     `<button type="button" class="chip ${c === waActive ? 'on' : ''}" role="tab" aria-selected="${c === waActive}" data-c="${esc(c)}">${esc(c)}${waHas(c) ? '<i class="wa-chip-dot"></i>' : ''}</button>`
   ).join('');
@@ -1788,9 +1827,9 @@ function openGuestSheet(id) {
   const cur = g ? (g.category || 'Umum') : cats[0];
   const currentType = g ? (g.invitation_type || 'digital') : 'digital';
 
-  const isSentChecked = g ? (g.is_sent || g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir' || g.is_checked_in) : (currentType === 'cetak');
+  const isSentChecked = g ? (g.is_sent || g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen' || g.is_checked_in) : (currentType === 'cetak');
   const isCheckinChecked = g ? g.is_checked_in : false;
-  const rsvpVal = g ? (g.invitation_type === 'cetak' ? 'hadir' : (g.rsvp_status || 'pending')) : (currentType === 'cetak' ? 'hadir' : 'pending');
+  const rsvpVal = g ? (g.invitation_type === 'cetak' ? 'hadir' : (g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen' ? 'absen' : (g.rsvp_status || 'pending'))) : (currentType === 'cetak' ? 'hadir' : 'pending');
 
   openSheet(`
     <div class="sheet-head"><button onclick="closeSheet()">Batal</button><h3>${g ? 'Edit tamu' : 'Tamu baru'}</h3><button id="gs-save">${g ? 'Simpan' : 'Tambah'}</button></div>
@@ -1827,7 +1866,7 @@ function openGuestSheet(id) {
       <div class="field"><label>RSVP</label><select id="gs-rsvp" onchange="onRsvpChange(this)">
         <option value="pending" ${rsvpVal === 'pending' ? 'selected' : ''}>Pending</option>
         <option value="hadir" ${rsvpVal === 'hadir' ? 'selected' : ''}>Hadir</option>
-        <option value="tidak_hadir" ${rsvpVal === 'tidak_hadir' ? 'selected' : ''}>Absen</option></select></div>
+        <option value="absen" ${rsvpVal === 'absen' ? 'selected' : ''}>Absen</option></select></div>
       <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Terkirim</label><span class="switch"><input type="checkbox" id="gs-sent" ${isSentChecked ? 'checked' : ''} onchange="onSentToggleChange(this)"><span></span></span></div>
       <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Check-In</label><span class="switch"><input type="checkbox" id="gs-checkin" ${isCheckinChecked ? 'checked' : ''} onchange="onCheckinToggleChange(this)"><span></span></span></div>` : ''}
     </div>`);
@@ -1847,7 +1886,7 @@ function onTypeChange(sel) {
 
 function onRsvpChange(sel) {
   const sentToggle = $('gs-sent');
-  if ((sel.value === 'hadir' || sel.value === 'tidak_hadir') && sentToggle) {
+  if ((sel.value === 'hadir' || sel.value === 'absen') && sentToggle) {
     sentToggle.checked = true;
   }
 }
@@ -2159,7 +2198,7 @@ function selectScannerManualGuest(token) {
       <div class="sheet-actions"><button class="btn line" onclick="resumeScannerOverlay()">Tutup</button></div>`);
     return;
   }
-  const rs = g.invitation_type === 'cetak' ? 'Tamu Cetak' : (g.rsvp_status === 'hadir' ? 'RSVP hadir' : g.rsvp_status === 'tidak_hadir' ? 'RSVP absen' : 'Belum RSVP');
+  const rs = g.invitation_type === 'cetak' ? 'Tamu Cetak' : (g.rsvp_status === 'hadir' ? 'RSVP hadir' : g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen' ? 'RSVP absen' : 'Belum RSVP');
   openSheet(`
     <div class="res"><div class="res-ico info"><i data-lucide="user-round"></i></div><h3>Check-in tamu ini?</h3><p>Pastikan tamu sudah ada di depan Anda.</p></div>
     ${scannerGuestCard(g, `<span class="tag">${rs}</span>`)}
