@@ -613,8 +613,13 @@ html.lock{overflow:hidden}
 .wa-bubble u{text-decoration:underline;color:#027eb5}
 :root[data-dark="1"] .wa-bubble u{color:#53bdeb}
 .wa-time{display:block;text-align:right;font-size:11px;opacity:.55;margin-top:2px}
-.wa-chip-add{border-style:dashed!important;color:var(--brand)!important}
 .wa-chip-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-left:6px;vertical-align:middle}
+
+/* Pagination Nav History */
+.hist-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.hist-nav button { padding: 6px 14px; border-radius: 999px; background: var(--soft); color: var(--brand); font-weight: 600; font-size: 13px; }
+.hist-nav button:disabled { opacity: 0.4; cursor: not-allowed; }
+.hist-nav span { font-size: 13px; color: var(--sub); }
 </style>
 </head>
 <body>
@@ -675,6 +680,12 @@ html.lock{overflow:hidden}
               <div class="lbl" style="font-size:17px">Pending <b class="num" id="stat-pending" style="font-size:24px;color:var(--ink)">0</b></div>
             </div>
           </div>
+        </div>
+
+        <!-- SECTION WISHES / UCAPAN & DOA -->
+        <div class="card">
+          <div class="ch"><h3>Ucapan & Doa Tamu</h3><span class="link" id="wishes-count">0 pesan</span></div>
+          <div id="wishes-list"><div class="empty">Belum ada ucapan atau doa masuk.</div></div>
         </div>
 
         <div class="card">
@@ -1037,7 +1048,7 @@ async function loadDashboard() {
   $('nav-container-wrap').classList.remove('hidden');
   const { data, error } = await supabaseClient.rpc('get_client_dashboard_data');
   if (error || !data || !data.success) return toast('Gagal memuat data. Silakan masuk lagi.', false);
-  globalData = data; renderUI(); loadActivity();
+  globalData = data; renderUI(); loadActivity(); loadWishes();
 }
 
 const guestBadge = g => {
@@ -1048,7 +1059,6 @@ const guestBadge = g => {
   return ['unsent', 'Unsent'];
 };
 
-// Avatar dengan ikon tipe undangan di sudut kanan bawah
 const avatar = g => {
   const isCetak = g.invitation_type === 'cetak';
   return `<div class="av">${esc(initials(g.group_name))}<span class="type-badge ${isCetak ? 'type-cetak' : 'type-digital'}" title="${isCetak ? 'Cetak' : 'Digital'}"><i data-lucide="${isCetak ? 'printer' : 'globe'}"></i></span></div>`;
@@ -1087,6 +1097,46 @@ async function loadActivity() {
   } catch (e) {}
 }
 
+async function loadWishes() {
+  try {
+    const eventId = globalData.event?.id;
+    if (!eventId) return;
+    const { data, error } = await supabaseClient
+      .from('wishes')
+      .select('*')
+      .eq('event_id', eventId)
+      .order('created_at', { ascending: false });
+    
+    if (!error && data) {
+      renderWishes(data);
+    }
+  } catch (e) {
+    console.log('Wishes load error:', e);
+  }
+}
+
+function renderWishes(wishes) {
+  const box = $('wishes-list');
+  const countEl = $('wishes-count');
+  if (countEl) countEl.textContent = wishes.length + ' pesan';
+  if (!wishes || wishes.length === 0) {
+    box.innerHTML = '<div class="empty">Belum ada ucapan atau doa masuk.</div>';
+    return;
+  }
+  box.innerHTML = wishes.slice(0, 5).map(w => {
+    const timeStr = w.created_at ? fmtWhen(w.created_at) : '';
+    return `<div class="hl">
+      <div class="av">${esc(initials(w.name || 'Tamu'))}</div>
+      <div class="txt">
+        <div class="n">${esc(w.name || 'Tamu')}</div>
+        <div class="s" style="white-space:normal;margin-top:4px;">${esc(w.message || '')}</div>
+      </div>
+      <div class="hmeta"><span class="when">${esc(timeStr)}</span></div>
+    </div>`;
+  }).join('');
+  icons();
+}
+
 function renderUI() {
   const { client, event, stats, categories, guests } = globalData;
   $('home-client-name').textContent = client.name;
@@ -1102,7 +1152,6 @@ function renderUI() {
   $('ev-location').value = event.location || '';
   $('ev-caption').value = event.caption || '';
 
-  // Template WA (tab Pesan WhatsApp)
   initWaDraft();
 
   const hadirGroupsCount = guests.filter(g => g.rsvp_status === 'hadir').length;
@@ -1262,8 +1311,8 @@ $('cat-group').addEventListener('click', e => {
   switchTab('tamu');
 });
 
-const RECENT_STEP = 5, RECENT_MAX = 15;
-let recentShown = RECENT_STEP;
+const RECENT_PAGE_SIZE = 10;
+let recentCurrentPage = 1;
 
 function recentSorted(guests) {
   const idx = new Map(guests.map((g, i) => [g.id, i]));
@@ -1279,20 +1328,42 @@ function recentSorted(guests) {
 function renderRecent(guests) {
   const box = $('recent-rsvp-list');
   if (!guests.length) { box.innerHTML = '<div class="empty">Belum ada tamu. Tambahkan lewat tab Tamu.</div>'; return; }
-  const all = recentSorted(guests).slice(0, RECENT_MAX);
-  const shown = all.slice(0, recentShown);
-  box.innerHTML = shown.map(g => {
+  const all = recentSorted(guests);
+  const totalPages = Math.ceil(all.length / RECENT_PAGE_SIZE) || 1;
+  if (recentCurrentPage > totalPages) recentCurrentPage = totalPages;
+  if (recentCurrentPage < 1) recentCurrentPage = 1;
+
+  const startIdx = (recentCurrentPage - 1) * RECENT_PAGE_SIZE;
+  const pageItems = all.slice(startIdx, startIdx + RECENT_PAGE_SIZE);
+
+  let html = pageItems.map(g => {
     const [k, txt] = guestBadge(g);
     const t = activityTime(g);
     return `<div class="hl">
       ${avatar(g)}
       <div class="txt"><div class="n">${esc(g.group_name)}</div><div class="s">${esc(g.category)} · ${g.max_pax} pax</div></div>
       <div class="hmeta">${t !== null ? `<span class="when">${esc(fmtWhen(t))}</span>` : ''}<span class="st st-${k}">${txt}</span></div></div>`;
-  }).join('') + (all.length > shown.length
-    ? `<button class="morebtn" onclick="showMoreRecent()">Lihat ${Math.min(RECENT_STEP, all.length - shown.length)} lagi <i data-lucide="chevron-down"></i></button>` : '');
+  }).join('');
+
+  if (all.length > RECENT_PAGE_SIZE) {
+    html += `<div class="hist-nav">
+      <button onclick="changeRecentPage(-1)" ${recentCurrentPage === 1 ? 'disabled' : ''}>Prev</button>
+      <span>Hal ${recentCurrentPage} dari ${totalPages}</span>
+      <button onclick="changeRecentPage(1)" ${recentCurrentPage === totalPages ? 'disabled' : ''}>Next</button>
+    </div>`;
+  }
+
+  box.innerHTML = html;
   icons();
 }
-function showMoreRecent() { recentShown = Math.min(RECENT_MAX, recentShown + RECENT_STEP); renderRecent(globalData.guests); }
+
+function changeRecentPage(dir) {
+  recentCurrentPage += dir;
+  if (globalData && globalData.guests) {
+    renderRecent(globalData.guests);
+  }
+}
+
 function showAllRecent() {
   sortField = 'updated'; sortDir = 'desc'; activeFilter = 'all'; activeCategory = 'all';
   const q = $('search-input'); if (q) q.value = '';
@@ -1440,7 +1511,6 @@ function handleFabClick() {
 const findGuest = id => globalData.guests.find(g => g.id === id);
 const guestLink = g => `${window.location.origin}/${globalData.client.slug}/${g.invitation_token}`;
 
-// Template WhatsApp otomatis berbasis kategori tamu
 const WA_DEFAULT = `Halo *{nama}*,\n\nKami mengundang Anda untuk menghadiri acara *{acara}*.\n\nSilakan kunjungi tautan berikut:\n{link}`;
 function waFill(tpl, g, link) {
   const ev = globalData.event || {};
@@ -1463,7 +1533,6 @@ const waText = g => {
   return waFill(tpl, g, guestLink(g));
 };
 
-/* ===== Tab Acara: sub-tab ===== */
 function switchAcaraSub(sub) {
   document.querySelectorAll('#acara-subtabs button').forEach(b => {
     const on = b.dataset.sub === sub; b.classList.toggle('on', on); b.setAttribute('aria-selected', on);
@@ -1473,7 +1542,6 @@ function switchAcaraSub(sub) {
   if (sub === 'wa') renderWaEditor();
 }
 
-/* ===== Template WhatsApp: preset, kategori, editor ===== */
 const WA_PRESETS = [
   { id: 'formal', name: 'Formal', hint: 'Resmi & sopan',
     text: `Assalamu'alaikum Wr. Wb.\n\nYth. Bapak/Ibu/Saudara/i *{nama}*,\n\nDengan memohon rahmat dan ridho Allah SWT, kami bermaksud mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara *{acara}* yang akan dilaksanakan pada:\n\n🗓 {tanggal}\n🕙 {waktu}\n📍 {lokasi}\n\nInformasi lengkap dan konfirmasi kehadiran dapat dilihat melalui tautan berikut:\n{link}\n\nMerupakan kehormatan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.\n\nWassalamu'alaikum Wr. Wb.` },
@@ -1482,7 +1550,6 @@ const WA_PRESETS = [
   { id: 'short', name: 'Singkat', hint: 'Satu paragraf',
     text: `Halo {nama}, kami mengundang Anda ke *{acara}* pada {tanggal}, {waktu}. Detail & konfirmasi kehadiran: {link}` }
 ];
-// Gaya bawaan yang disarankan per kategori (hanya untuk petunjuk)
 const WA_SUGGEST = { Keluarga: 'formal', Sesepuh: 'formal', Kolega: 'formal', Teman: 'casual', Sahabat: 'casual', Tetangga: 'short', Umum: 'short' };
 const WA_VARS = ['{nama}', '{link}', '{acara}', '{tanggal}', '{waktu}', '{lokasi}'];
 const WA_BASE_CATS = ['Umum', 'Keluarga', 'Teman', 'Kolega', 'Tetangga'];
@@ -1512,10 +1579,10 @@ function updateWaDirty() {
 }
 
 function renderWaEditor() {
-  // chip kategori
+  // Tanpa tombol tambah kategori, murni dari kategori tamu / data dasar
   $('wa-cats').innerHTML = waCats.map(c =>
     `<button type="button" class="chip ${c === waActive ? 'on' : ''}" role="tab" aria-selected="${c === waActive}" data-c="${esc(c)}">${esc(c)}${waHas(c) ? '<i class="wa-chip-dot"></i>' : ''}</button>`
-  ).join('') + `<button type="button" class="chip wa-chip-add" onclick="addWaCategory()">+ Kategori</button>`;
+  ).join('');
   $('wa-cats').querySelectorAll('[data-c]').forEach(b => b.onclick = () => { waActive = b.dataset.c; renderWaEditor(); });
 
   const n = waGuestCount(waActive);
@@ -1525,7 +1592,6 @@ function renderWaEditor() {
     ? 'Template khusus kategori ini aktif.'
     : (waActive === 'Umum' ? 'Belum ada template. Memakai pesan bawaan sistem.' : 'Belum ada template khusus, saat ini memakai template Umum.');
 
-  // gaya
   const cur = (waDraft[waActive] || '').trim();
   const matched = WA_PRESETS.find(p => p.text === cur);
   const sug = WA_SUGGEST[waActive];
@@ -1534,7 +1600,6 @@ function renderWaEditor() {
   ).join('');
   $('wa-styles').querySelectorAll('[data-p]').forEach(b => b.onclick = () => applyWaPreset(b.dataset.p));
 
-  // variabel
   $('wa-vars').innerHTML = WA_VARS.map(v => `<button type="button" data-v="${v}">${v}</button>`).join('');
   $('wa-vars').querySelectorAll('[data-v]').forEach(b => b.onclick = () => insertWaVar(b.dataset.v));
 
@@ -1561,7 +1626,6 @@ function insertWaVar(v) {
 function onWaInput() {
   waDraft[waActive] = $('wa-text').value;
   updateWaMeta(); updateWaDirty();
-  // sorot gaya yang cocok
   const cur = $('wa-text').value.trim();
   $('wa-styles').querySelectorAll('[data-p]').forEach(b => b.classList.toggle('on', (WA_PRESETS.find(p => p.id === b.dataset.p) || {}).text === cur));
   $('wa-reset').hidden = !cur;
@@ -1578,25 +1642,8 @@ function updateWaMeta() {
 }
 function resetWaCategory() {
   if (waActive === 'Umum') { waDraft['Umum'] = ''; }
-  else { delete waDraft[waActive]; if (!waGuestCount(waActive) && !WA_BASE_CATS.includes(waActive)) waCats = waCats.filter(c => c !== waActive), waActive = 'Umum'; }
+  else { delete waDraft[waActive]; waActive = 'Umum'; }
   renderWaEditor(); updateWaDirty();
-}
-function addWaCategory() {
-  openSheet(`
-    <div class="sheet-head"><button onclick="closeSheet()">Batal</button><h3>Kategori baru</h3><button id="wc-save">Tambah</button></div>
-    <div class="listcard"><div class="field"><label for="wc-name">Nama</label><input id="wc-name" type="text" maxlength="30" placeholder="Mis. Rekan Kantor" autocomplete="off"></div></div>
-    <div class="sub" style="font-size:13px;padding:10px 6px">Gunakan nama yang sama dengan kategori di data tamu agar template otomatis terpakai.</div>`);
-  setTimeout(() => $('wc-name')?.focus(), 300);
-  const go = () => {
-    const name = ($('wc-name').value || '').trim();
-    if (!name) return toast('Nama kategori wajib diisi', false);
-    const dup = waCats.find(c => c.toLowerCase() === name.toLowerCase());
-    if (dup) { waActive = dup; closeSheet(); renderWaEditor(); return toast('Kategori sudah ada, dipilih untuk Anda'); }
-    waCats.push(name); waActive = name; closeSheet(); renderWaEditor();
-    toast('Kategori ditambahkan. Pilih gaya pesan lalu simpan.');
-  };
-  $('wc-save').onclick = go;
-  $('wc-name').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); go(); } };
 }
 async function saveWaTemplates() {
   const out = {};
@@ -1819,8 +1866,6 @@ function onCheckinToggleChange(chk) {
   const rsvpSel = $('gs-rsvp');
   if (chk.checked) {
     if (sentToggle) sentToggle.checked = true;
-    if (rsvpSel) rsvpSel.value = 'hadir';
-  } else {
     if (rsvpSel) rsvpSel.value = 'hadir';
   }
 }
