@@ -209,14 +209,14 @@ input, select, textarea { font-size: 16px !important; }
 .cr .go{flex:1;min-width:0;display:flex;align-items:center;gap:14px}
 
 /* Tamu: search + filter */
-.sbar{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:18px;height:54px;padding:0 6px 0 16px;box-shadow:var(--shadow)}
+.sbar{display:flex;align-items:center;gap:6px;background:var(--card);border-radius:18px;height:54px;padding:0 6px 0 16px;box-shadow:var(--shadow)}
 .sbar>svg{color:var(--sub);width:20px;height:20px;flex-shrink:0}
 .sbar input{flex:1;min-width:0;border:0;outline:none;font-size:16px;color:var(--ink)}
 .sbar input::placeholder{color:var(--sub)}
 .vr{width:1px;height:24px;background:var(--line);flex-shrink:0}
-.fsel{position:relative;display:flex;align-items:center;gap:4px;padding:0 10px 0 6px;color:var(--sub);font-size:15px;height:100%;flex-shrink:0}
-.fsel select{appearance:none;-webkit-appearance:none;border:0;background:transparent;outline:none;color:var(--ink);font-size:15px;font-weight:500;padding:0 18px 0 0;cursor:pointer;max-width:90px}
-.fsel>svg{position:absolute;right:6px;pointer-events:none;width:16px;height:16px}
+.fsel{position:relative;display:flex;align-items:center;gap:2px;padding:0 6px 0 2px;color:var(--sub);font-size:13px;height:100%;flex-shrink:0}
+.fsel select{appearance:none;-webkit-appearance:none;border:0;background:transparent;outline:none;color:var(--ink);font-size:13px;font-weight:500;padding:0 14px 0 0;cursor:pointer;max-width:85px}
+.fsel>svg{position:absolute;right:2px;pointer-events:none;width:14px;height:14px}
 
 .listcard{background:var(--card);border-radius:24px;padding:4px 18px 8px;box-shadow:var(--shadow)}
 .tabs{display:flex;gap:18px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
@@ -732,7 +732,7 @@ html.lock{overflow:hidden}
           <div id="cat-group"></div>
         </div>
 
-        <!-- SECTION WISHES / UCAPAN & DOA (Pindah ke paling bawah setelah Kategori Tamu) -->
+        <!-- SECTION WISHES / UCAPAN & DOA -->
         <div class="card">
           <div class="ch">
             <h3>Ucapan & Doa</h3>
@@ -752,6 +752,8 @@ html.lock{overflow:hidden}
           <input type="search" id="search-input" placeholder="Cari nama tamu…" oninput="renderGuestList()" />
           <span class="vr"></span>
           <label class="fsel"><select id="cat-select" aria-label="Filter kategori" onchange="setCategory(this.value)"></select><i data-lucide="chevron-down"></i></label>
+          <span class="vr"></span>
+          <label class="fsel"><select id="session-select" aria-label="Filter sesi" onchange="setSessionFilter(this.value)"><option value="all">Sesi</option><option value="sesi_1">Sesi 1</option><option value="sesi_2">Sesi 2</option></select><i data-lucide="chevron-down"></i></label>
         </div>
 
         <div class="listcard">
@@ -796,6 +798,8 @@ html.lock{overflow:hidden}
           <div class="card" style="padding:4px 18px">
             <div class="field"><label for="ev-title">Judul</label><input type="text" id="ev-title" required /></div>
             <div class="field"><label for="ev-date">Waktu</label><input type="datetime-local" id="ev-date" required /></div>
+            <div class="field"><label for="ev-s1">Waktu Sesi 1</label><input type="text" id="ev-s1" placeholder="10.00 WIB" /></div>
+            <div class="field"><label for="ev-s2">Waktu Sesi 2</label><input type="text" id="ev-s2" placeholder="12.00 WIB" /></div>
           </div>
           <div class="card" style="padding:4px 18px"><div class="field col"><label for="ev-location">Lokasi</label><textarea id="ev-location" rows="2" required></textarea></div></div>
           <div class="card" style="padding:4px 18px"><div class="field col"><label for="ev-caption">Pesan pembuka</label><textarea id="ev-caption" rows="4" required></textarea></div>
@@ -957,6 +961,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let globalData = null;
 let activeFilter = 'all';
 let activeCategory = 'all';
+let activeSession = 'all';
 let sortField = 'created';
 let sortDir = 'desc';
 let currentActiveTab = 'home';
@@ -1130,7 +1135,6 @@ function renderWishes() {
   const totalWishes = wishesData.length;
   const unreadCount = Math.max(0, totalWishes - lastReadWishCount);
 
-  // Tombol/indikator notifikasi di pojok kanan atas section
   if (countContainer) {
     if (unreadCount > 0) {
       countContainer.innerHTML = `<span class="notif-badge" onclick="markWishesRead()"><i data-lucide="bell" style="width:13px;height:13px"></i>${unreadCount} baru</span>`;
@@ -1160,14 +1164,12 @@ function renderWishes() {
     const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     const timeStr = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
-    // Divider tanggal ala chat WA jika tanggal berbeda
     if (dateStr !== lastDateStr) {
       html += `<div style="text-align:center;margin:14px 0 8px;"><span style="font-size:11.5px;background:var(--soft);color:var(--sub);padding:3px 12px;border-radius:999px;">${esc(dateStr)}</span></div>`;
       lastDateStr = dateStr;
     }
 
-    // Mencari nama undangan yang membuat pesan tersebut jika ada relasi
-    const guestName = w.name || 'Tamu Undangan';
+    const guestName = w.guest_name || 'Tamu Undangan';
 
     html += `<div class="hl">
       <div class="av">${esc(initials(guestName))}</div>
@@ -1215,6 +1217,8 @@ function renderUI() {
   $('ev-loc-txt').textContent = event.location || '–';
   $('ev-title').value = event.title || '';
   $('ev-date').value = new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  $('ev-s1').value = event.session_1_time || '10.00 WIB';
+  $('ev-s2').value = event.session_2_time || '12.00 WIB';
   $('ev-location').value = event.location || '';
   $('ev-caption').value = event.caption || '';
 
@@ -1307,6 +1311,8 @@ async function submitEditEvent(e) {
   e.preventDefault();
   const title = $('ev-title').value.trim();
   const dateVal = $('ev-date').value;
+  const s1Time = $('ev-s1').value.trim();
+  const s2Time = $('ev-s2').value.trim();
   const location = $('ev-location').value.trim();
   const caption = $('ev-caption').value.trim();
   
@@ -1323,6 +1329,8 @@ async function submitEditEvent(e) {
       .update({
         title: title,
         event_date: new Date(dateVal).toISOString(),
+        session_1_time: s1Time,
+        session_2_time: s2Time,
         location: location,
         caption: caption
       })
@@ -1388,7 +1396,6 @@ function recentSorted(guests) {
   });
 }
 
-// Histori RSVP: tanpa navigasi, tampilkan maks 7
 function renderRecent(guests) {
   const box = $('recent-rsvp-list');
   if (!guests.length) { box.innerHTML = '<div class="empty">Belum ada tamu. Tambahkan lewat tab Tamu.</div>'; return; }
@@ -1396,17 +1403,19 @@ function renderRecent(guests) {
   box.innerHTML = all.map(g => {
     const [k, txt] = guestBadge(g);
     const t = activityTime(g);
+    const sessionLabel = g.session === 'sesi_2' ? 'Sesi 2' : 'Sesi 1';
     return `<div class="hl">
       ${avatar(g)}
-      <div class="txt"><div class="n">${esc(g.group_name)}</div><div class="s">${esc(g.category)} · ${g.max_pax} pax</div></div>
+      <div class="txt"><div class="n">${esc(g.group_name)}</div><div class="s">${esc(g.category)} · ${sessionLabel} · ${g.max_pax} pax</div></div>
       <div class="hmeta">${t !== null ? `<span class="when">${esc(fmtWhen(t))}</span>` : ''}<span class="st st-${k}">${txt}</span></div></div>`;
   }).join('');
   icons();
 }
 
 function showAllRecent() {
-  sortField = 'updated'; sortDir = 'desc'; activeFilter = 'all'; activeCategory = 'all';
+  sortField = 'updated'; sortDir = 'desc'; activeFilter = 'all'; activeCategory = 'all'; activeSession = 'all';
   const q = $('search-input'); if (q) q.value = '';
+  $('session-select').value = 'all';
   if (window.syncSortUI) window.syncSortUI();
   renderCategorySelect();
   switchTab('tamu');
@@ -1415,9 +1424,10 @@ function showAllRecent() {
 function renderCategorySelect() {
   const cats = [...new Set(globalData.guests.map(g => g.category).filter(Boolean))];
   const sel = $('cat-select');
-  sel.innerHTML = ['all', ...cats].map(c => `<option value="${esc(c)}" ${c === activeCategory ? 'selected' : ''}>${c === 'all' ? 'Semua' : esc(c)}</option>`).join('');
+  sel.innerHTML = ['all', ...cats].map(c => `<option value="${esc(c)}" ${c === activeCategory ? 'selected' : ''}>${c === 'all' ? 'Kategori' : esc(c)}</option>`).join('');
 }
 function setCategory(c) { activeCategory = c; renderCategorySelect(); renderGuestList(); }
+function setSessionFilter(s) { activeSession = s; renderGuestList(); }
 
 function sortGuests(list) {
   const idx = new Map(globalData.guests.map((g, i) => [g.id, i]));
@@ -1441,6 +1451,7 @@ function renderGuestList() {
   const q = $('search-input').value.toLowerCase().trim();
   if (q) list = list.filter(g => g.group_name.toLowerCase().includes(q));
   if (activeCategory !== 'all') list = list.filter(g => g.category === activeCategory);
+  if (activeSession !== 'all') list = list.filter(g => (g.session || 'sesi_1') === activeSession);
   
   if (activeFilter === 'digital') {
     list = list.filter(g => !g.invitation_type || g.invitation_type === 'digital');
@@ -1463,6 +1474,7 @@ function renderGuestList() {
   box.innerHTML = list.map((g) => {
     const [k, txt] = guestBadge(g);
     const isSentClass = g.is_sent ? 'sent' : '';
+    const sessionLabel = g.session === 'sesi_2' ? 'Sesi 2' : 'Sesi 1';
     return `<div class="gl" data-id="${esc(g.id)}">
       <button class="main" data-open style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;text-align:left">
         ${avatar(g)}
@@ -1470,6 +1482,7 @@ function renderGuestList() {
           <div class="n">${esc(g.group_name)}</div>
           <div class="tags">
             <span class="tag">${esc(g.category)}</span>
+            <span class="tag" style="background:var(--soft);color:var(--brand)">${sessionLabel}</span>
             <span class="st st-${k}">${txt}</span>
           </div>
         </div>
@@ -1539,7 +1552,7 @@ function handleFabClick() {
       <div class="sheet-head"><h3>Panduan Singkat</h3><button onclick="closeSheet()">Tutup</button></div>
       <div class="listcard" style="padding-bottom:16px;">
         <div style="font-size:15px; color:var(--sub); display:flex; flex-direction:column; gap:14px; line-height:1.5; padding-top:12px;">
-          <div><b>1. Tambah Tamu:</b> Pilih tipe undangan, masukkan nama, kategori, nomor WA, dan kuota pax.</div>
+          <div><b>1. Tambah Tamu:</b> Pilih tipe undangan, sesi, nama, kategori, nomor WA, dan kuota pax.</div>
           <div><b>2. Kirim Undangan WA:</b> Klik ikon WhatsApp untuk mengirim pesan otomatis sesuai template kategori.</div>
           <div><b>3. Check-In Acara:</b> Gunakan tombol Scan QR di Home atau Tab Tamu saat hari H pernikahan.</div>
         </div>
@@ -1551,20 +1564,24 @@ function handleFabClick() {
 const findGuest = id => globalData.guests.find(g => g.id === id);
 const guestLink = g => `${window.location.origin}/${globalData.client.slug}/${g.invitation_token}`;
 
-const WA_DEFAULT = `Halo *{nama}*,\n\nKami mengundang Anda untuk menghadiri acara *{acara}*.\n\nSilakan kunjungi tautan berikut:\n{link}`;
+const WA_DEFAULT = `Halo *{nama}*,\n\nKami mengundang Anda untuk menghadiri acara *{acara}* pada:\n\n🗓 {tanggal}\n🕙 {waktu}\n📍 {lokasi}\n\nSilakan kunjungi tautan berikut:\n{link}`;
 function waFill(tpl, g, link) {
   const ev = globalData.event || {};
   const d = ev.event_date ? new Date(ev.event_date) : null;
   const tz = 'Asia/Jakarta';
   const tanggal = d ? d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: tz }) : '';
-  const waktu = d ? d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz }).replace(':', '.') + ' WIB' : '';
+  
+  const guestSession = g.session || 'sesi_1';
+  const waktuSesi = guestSession === 'sesi_2' ? (ev.session_2_time || '12.00 WIB') : (ev.session_1_time || '10.00 WIB');
+
   return tpl
     .replace(/{nama}/g, g.group_name)
     .replace(/{link}/g, link)
     .replace(/{acara}/g, ev.title || '')
     .replace(/{tanggal}/g, tanggal)
-    .replace(/{waktu}/g, waktu)
-    .replace(/{lokasi}/g, ev.location || '');
+    .replace(/{waktu}/g, waktuSesi)
+    .replace(/{lokasi}/g, ev.location || '')
+    .replace(/{sesi}/g, guestSession === 'sesi_2' ? 'Sesi 2' : 'Sesi 1');
 }
 const waText = g => {
   const templates = globalData.event.wa_templates || {};
@@ -1584,14 +1601,14 @@ function switchAcaraSub(sub) {
 
 const WA_PRESETS = [
   { id: 'formal', name: 'Formal', hint: 'Resmi & sopan',
-    text: `Assalamu'alaikum Wr. Wb.\n\nYth. Bapak/Ibu/Saudara/i *{nama}*,\n\nDengan memohon rahmat dan ridho Allah SWT, kami bermaksud mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara *{acara}* yang akan dilaksanakan pada:\n\n🗓 {tanggal}\n🕙 {waktu}\n📍 {lokasi}\n\nInformasi lengkap dan konfirmasi kehadiran dapat dilihat melalui tautan berikut:\n{link}\n\nMerupakan kehormatan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.\n\nWassalamu'alaikum Wr. Wb.` },
+    text: `Assalamu'alaikum Wr. Wb.\n\nYth. Bapak/Ibu/Saudara/i *{nama}*,\n\nDengan memohon rahmat dan ridho Allah SWT, kami bermaksud mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara *{acara}* ({sesi}) yang akan dilaksanakan pada:\n\n🗓 {tanggal}\n🕙 {waktu}\n📍 {lokasi}\n\nInformasi lengkap dan konfirmasi kehadiran dapat dilihat melalui tautan berikut:\n{link}\n\nMerupakan kehormatan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.\n\nWassalamu'alaikum Wr. Wb.` },
   { id: 'casual', name: 'Santai', hint: 'Akrab & ramah',
-    text: `Halo {nama}! 👋\n\nKami mau ngundang kamu ke *{acara}* nih 🎉\n\n🗓 {tanggal}\n🕙 {waktu}\n📍 {lokasi}\n\nCek detail & konfirmasi hadir di sini ya:\n{link}\n\nDitunggu banget kehadirannya! 🤍` },
+    text: `Halo {nama}! 👋\n\nKami mau ngundang kamu ke *{acara}* ({sesi}) nih 🎉\n\n🗓 {tanggal}\n🕙 {waktu}\n📍 {lokasi}\n\nCek detail & konfirmasi hadir di sini ya:\n{link}\n\nDitunggu banget kehadirannya! 🤍` },
   { id: 'short', name: 'Singkat', hint: 'Satu paragraf',
-    text: `Halo {nama}, kami mengundang Anda ke *{acara}* pada {tanggal}, {waktu}. Detail & konfirmasi kehadiran: {link}` }
+    text: `Halo {nama}, kami mengundang Anda ke *{acara}* ({sesi}) pada {tanggal}, {waktu}. Detail & konfirmasi kehadiran: {link}` }
 ];
 const WA_SUGGEST = { Keluarga: 'formal', Sesepuh: 'formal', Kolega: 'formal', Teman: 'casual', Sahabat: 'casual', Tetangga: 'short', Umum: 'short' };
-const WA_VARS = ['{nama}', '{link}', '{acara}', '{tanggal}', '{waktu}', '{lokasi}'];
+const WA_VARS = ['{nama}', '{link}', '{acara}', '{tanggal}', '{waktu}', '{lokasi}', '{sesi}'];
 const WA_BASE_CATS = ['Umum', 'Keluarga', 'Teman', 'Kolega', 'Tetangga'];
 
 let waDraft = {}, waSaved = {}, waCats = [], waActive = 'Umum';
@@ -1672,7 +1689,7 @@ function onWaInput() {
 function updateWaMeta() {
   const t = $('wa-text').value;
   $('wa-count').textContent = t.length + ' karakter';
-  const sample = { group_name: 'Budi Santoso' };
+  const sample = { group_name: 'Budi Santoso', session: 'sesi_1' };
   const tpl = t.trim() || (waDraft['Umum'] || '').trim() || WA_DEFAULT;
   const html = esc(waFill(tpl, sample, `${location.origin}/${globalData.client.slug}/abc123`))
     .replace(/\*([^*\n]+)\*/g, '<b>$1</b>')
@@ -1727,7 +1744,8 @@ async function guestAction(a, g) {
         p_rsvp_status: g.rsvp_status,
         p_is_checked_in: g.is_checked_in,
         p_is_sent: true,
-        p_invitation_type: g.invitation_type || 'digital'
+        p_invitation_type: g.invitation_type || 'digital',
+        p_session: g.session || 'sesi_1'
       });
     } catch (err) {
       console.log('Update status terkirim:', err);
@@ -1773,7 +1791,8 @@ async function sendPendingWA(id) {
       p_rsvp_status: g.rsvp_status,
       p_is_checked_in: g.is_checked_in,
       p_is_sent: true,
-      p_invitation_type: g.invitation_type || 'digital'
+      p_invitation_type: g.invitation_type || 'digital',
+      p_session: g.session || 'sesi_1'
     });
   } catch (err) {
     console.log(err);
@@ -1826,6 +1845,7 @@ function openGuestSheet(id) {
   const cats = [...new Set([...defaultCats, ...existingCats])];
   const cur = g ? (g.category || 'Umum') : cats[0];
   const currentType = g ? (g.invitation_type || 'digital') : 'digital';
+  const currentSession = g ? (g.session || 'sesi_1') : 'sesi_1';
 
   const isSentChecked = g ? (g.is_sent || g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen' || g.is_checked_in) : (currentType === 'cetak');
   const isCheckinChecked = g ? g.is_checked_in : false;
@@ -1841,6 +1861,13 @@ function openGuestSheet(id) {
         <select id="gs-type" onchange="onTypeChange(this)">
           <option value="digital" ${currentType === 'digital' ? 'selected' : ''}>Digital</option>
           <option value="cetak" ${currentType === 'cetak' ? 'selected' : ''}>Cetak (Fisik)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Sesi Tamu</label>
+        <select id="gs-session">
+          <option value="sesi_1" ${currentSession === 'sesi_1' ? 'selected' : ''}>Sesi 1</option>
+          <option value="sesi_2" ${currentSession === 'sesi_2' ? 'selected' : ''}>Sesi 2</option>
         </select>
       </div>
       <div class="field">
@@ -1930,6 +1957,7 @@ async function saveGuest(g) {
   const name = $('gs-name').value.trim();
   const phone = $('gs-phone').value.trim();
   const invitationType = $('gs-type') ? $('gs-type').value : 'digital';
+  const sessionVal = $('gs-session') ? $('gs-session').value : 'sesi_1';
   let cat = $('gs-cat').value;
   if (cat === '__custom__') {
     cat = $('gs-custom-cat').value.trim();
@@ -1954,7 +1982,8 @@ async function saveGuest(g) {
       p_rsvp_status: rsvpVal, 
       p_is_checked_in: isCheckinVal,
       p_is_sent: isSentVal,
-      p_invitation_type: invitationType
+      p_invitation_type: invitationType,
+      p_session: sessionVal
     });
   } else {
     await supabaseClient.rpc('add_guest_by_client', { 
@@ -1962,7 +1991,8 @@ async function saveGuest(g) {
       p_category: cat, 
       p_max_pax: pax, 
       p_phone: phone,
-      p_invitation_type: invitationType
+      p_invitation_type: invitationType,
+      p_session: sessionVal
     });
   }
 
@@ -2100,7 +2130,8 @@ async function fetchScannerGuests() {
       is_checked_in: !!g.is_checked_in,
       pax_confirmed: g.max_pax,
       rsvp_status: g.rsvp_status || 'pending',
-      invitation_type: g.invitation_type || 'digital'
+      invitation_type: g.invitation_type || 'digital',
+      session: g.session || 'sesi_1'
     }));
     updateScannerCountBadge();
     filterScannerManualGuests();
@@ -2467,7 +2498,7 @@ checkSession();
   document.addEventListener('click', e => { const b = e.target.closest('#st-chips .chip'); if (!b) return; anim = true; activeFilter = b.dataset.f; renderGuestList(); toList(); });
   const _cat = setCategory;
   window.setCategory = function () { anim = true; _cat.apply(this, arguments); toList(); };
-  window.resetFilters = () => { activeFilter = 'all'; activeCategory = 'all'; $('search-input').value = ''; anim = true; renderCategorySelect(); renderGuestList(); };
+  window.resetFilters = () => { activeFilter = 'all'; activeCategory = 'all'; activeSession = 'all'; $('search-input').value = ''; $('session-select').value = 'all'; anim = true; renderCategorySelect(); renderGuestList(); };
 
   const _rg = renderGuestList;
   window.renderGuestList = function () {
