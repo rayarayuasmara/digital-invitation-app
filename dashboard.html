@@ -619,6 +619,35 @@ html.lock{overflow:hidden}
 .hist-nav button:disabled { opacity: 0.4; cursor: not-allowed; }
 .hist-nav span { font-size: 13px; color: var(--sub); }
 .notif-badge { background: var(--red-ink); color: #fff; font-size: 11.5px; padding: 3px 10px; border-radius: 999px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+
+/* ===== Ucapan & Doa: chat room ===== */
+:root{--nl:40%}:root[data-dark="1"]{--nl:72%}
+@keyframes wspin{to{transform:rotate(360deg)}}@keyframes wpop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}@keyframes wfresh{from{opacity:0;transform:translateY(-14px) scale(.97)}to{opacity:1;transform:none}}
+.wcard{padding:0;overflow:hidden}
+.whead{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.wico{width:42px;height:42px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;flex-shrink:0}
+.wtitle{flex:1;min-width:0}.wtitle h3{margin:0;font-size:18px;font-weight:700}.wtitle small{color:var(--sub);font-size:13px}
+.wbadge{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:600;background:var(--tag);color:var(--sub);flex-shrink:0}
+.wbadge svg{width:14px;height:14px}.wbadge.on{background:var(--red-ink);color:#fff;animation:wpop .5s var(--spring,cubic-bezier(.34,1.56,.64,1))}
+.wchat{max-height:600px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:4px 14px 14px;background:var(--bg);scrollbar-width:thin}
+.wdate{text-align:center;margin:14px 0 2px}.wdate span,.wdiv span{font-size:11.5px;background:var(--soft);color:var(--sub);padding:3px 12px;border-radius:999px}
+.wdiv{text-align:center;margin:12px 0 0}.wdiv span{background:var(--brand);color:#fff;font-weight:600}
+:root[data-dark="1"] .wdiv span{color:#0b0f1a}
+.wmsg{display:flex;gap:10px;align-items:flex-start;margin-top:10px;cursor:pointer}.wmsg.fresh{animation:wfresh .6s cubic-bezier(.32,.72,0,1) both}
+.cav{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font:600 12px 'Geist Mono',monospace;background:hsl(var(--h) 60% 50% / .16);color:hsl(var(--h) 60% var(--nl))}
+.wb{flex:1;min-width:0;display:flex;gap:10px;background:var(--card);border-radius:4px 18px 18px 18px;padding:10px 12px;box-shadow:var(--shadow);transition:background .9s,box-shadow .9s,transform .25s}.wmsg:active .wb{transform:scale(.985)}
+.wmsg.new .wb{background:var(--soft);box-shadow:inset 3px 0 0 var(--brand)}.wchat.read .wmsg.new .wb{background:var(--card);box-shadow:var(--shadow)}
+.wc{flex:1;min-width:0}.wn{font-weight:700;font-size:14px;color:hsl(var(--h) 60% var(--nl))}
+.wt{font-size:15px;line-height:1.45;margin-top:3px;white-space:pre-wrap;word-break:break-word}
+.wm{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.wm .when{font-size:11.5px;color:var(--sub);font-family:'Geist Mono',monospace}.wm .st{font-size:10.5px;padding:3px 8px;gap:5px}
+.wend{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--sub);font-size:12.5px;padding:16px 0 4px}
+.wspin{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:wspin .8s linear infinite}
+.wbanner{display:flex;align-items:center;gap:10px;width:100%;padding:13px 16px;border-radius:20px;background:var(--brand);color:#fff;font-size:15px;font-weight:500;box-shadow:0 14px 28px -12px rgba(10,61,194,.6);animation:wfresh .6s cubic-bezier(.32,.72,0,1) both}
+.wbanner span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wbanner b{background:rgba(255,255,255,.2);padding:4px 12px;border-radius:999px;font-size:13px}
+:root[data-dark="1"] .wbanner{color:#0b0f1a}:root[data-dark="1"] .wbanner b{background:rgba(0,0,0,.14)}
+.nbadge{position:absolute;top:3px;left:calc(50% + 4px);min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:var(--red-ink);color:#fff;font:700 10.5px/17px 'Geist Mono',monospace;text-align:center;box-shadow:0 0 0 2px var(--card);animation:wpop .4s cubic-bezier(.34,1.56,.64,1)}
+.wfull{padding:16px 0 8px;font-size:16px;line-height:1.55;white-space:pre-wrap;word-break:break-word}.wfoot{display:flex;align-items:center;gap:10px;color:var(--sub);font-size:13px;padding:0 0 14px}
 </style>
 </head>
 <body>
@@ -649,6 +678,7 @@ html.lock{overflow:hidden}
     <div id="tab-home">
       <header class="topbar"><h1>Home</h1><span class="logo">R</span></header>
       <div class="page">
+        <button class="wbanner hidden" id="wish-banner" onclick="focusWishes()"><i data-lucide="bell-ring"></i><span id="wb-text">Ucapan baru</span><b>Lihat</b></button>
         <div class="card hero">
           <div class="lbl"><p class="hi">Halo</p><i data-lucide="venus-and-mars"></i></div>
           <h2 id="home-client-name">Memuat…</h2>
@@ -732,13 +762,14 @@ html.lock{overflow:hidden}
           <div id="cat-group"></div>
         </div>
 
-        <!-- SECTION WISHES / UCAPAN & DOA -->
-        <div class="card">
-          <div class="ch">
-            <h3>Ucapan & Doa</h3>
-            <div id="wishes-count-container"><span class="link">0 pesan</span></div>
+        <!-- SECTION WISHES / UCAPAN & DOA (chat room) -->
+        <div class="card wcard" id="wish-card">
+          <div class="whead">
+            <span class="wico"><i data-lucide="messages-square"></i></span>
+            <div class="wtitle"><h3>Ucapan &amp; Doa</h3><small id="w-sub">Memuat…</small></div>
+            <button class="wbadge" id="w-badge" onclick="markWishesRead(true)" aria-label="Tandai semua dibaca"></button>
           </div>
-          <div id="wishes-list"><div class="empty">Belum ada ucapan atau doa masuk.</div></div>
+          <div class="wchat" id="wchat"><div class="empty">Memuat ucapan…</div></div>
         </div>
       </div>
     </div>
@@ -862,7 +893,7 @@ html.lock{overflow:hidden}
 <div class="nav-container-wrap hidden" id="nav-container-wrap">
   <nav class="tabbar" id="tabbar">
     <div class="pillnav">
-      <button id="nav-home" class="on" onclick="switchTab('home')"><i data-lucide="house"></i><span>Home</span></button>
+      <button id="nav-home" class="on" onclick="switchTab('home')"><i data-lucide="house"></i><span>Home</span><b class="nbadge hidden" id="nav-home-badge"></b></button>
       <button id="nav-tamu" onclick="switchTab('tamu')"><i data-lucide="users"></i><span>Tamu</span></button>
       <button id="nav-acara" onclick="switchTab('acara')"><i data-lucide="calendar-days"></i><span>Acara</span></button>
       <button id="nav-akun" onclick="switchTab('akun')"><i data-lucide="user"></i><span>Akun</span></button>
@@ -964,10 +995,9 @@ let currentCardViewMode = 'checkin';
 let html5QrCode = null;
 
 // State untuk Ucapan & Doa
-let wishesData = [];
-let wishesPage = 1;
-const WISHES_PAGE_SIZE = 7;
-let lastReadWishCount = parseInt(localStorage.getItem('rr_last_read_wishes') || '0');
+let wishesData = [], wishesTotal = 0, wishesDone = false, wishesBusy = false, wishInit = false;
+let wishSnap = null, wishUnread = 0, wishVisible = false, wishReadTimer = null;
+const WISH_FETCH = 10;
 
 const COLORS = ['#0a3dc2','#12b76a','#f5a524','#e5484d','#7c5cff','#0ea5e9','#ec4899'];
 const $ = id => document.getElementById(id);
@@ -1105,99 +1135,110 @@ async function loadActivity() {
   } catch (e) {}
 }
 
+/* ---------- Ucapan & Doa (chat room) ---------- */
+const normName = s => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+const hueOf = s => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) % 360; return h; };
+function wishGuest(w) {
+  const gs = globalData.guests || [];
+  if (w.guest_id) { const g = gs.find(x => x.id === w.guest_id); if (g) return g; }
+  const m = gs.filter(x => normName(x.group_name) === normName(w.guest_name));
+  return m.find(x => x.is_checked_in || x.rsvp_status) || m[0] || null;
+}
+async function loadWishSeen(eid) {
+  let s = 0;
+  try { const { data, error } = await supabaseClient.from('events').select('wishes_seen_at').eq('id', eid).maybeSingle(); if (!error && data && data.wishes_seen_at) s = Date.parse(data.wishes_seen_at); } catch (e) {}
+  wishSnap = Math.max(s, +localStorage.getItem('rr_wishes_seen') || 0) || null;
+}
 async function loadWishes() {
-  try {
-    const eventId = globalData.event?.id;
-    if (!eventId) return;
-    const { data, error } = await supabaseClient
-      .from('wishes')
-      .select('*')
-      .eq('event_id', eventId)
-      .order('created_at', { ascending: false });
-    
-    if (!error && data) {
-      wishesData = data;
-      renderWishes();
-    }
-  } catch (e) {
-    console.log('Wishes load error:', e);
-  }
+  const eid = globalData.event && globalData.event.id; if (!eid) return;
+  if (wishInit) { renderWishes(); return; }
+  wishInit = true;
+  await loadWishSeen(eid);
+  const q = () => supabaseClient.from('wishes').select('id', { count: 'exact', head: true }).eq('event_id', eid);
+  const [list, cnt, unr] = await Promise.all([
+    supabaseClient.from('wishes').select('*').eq('event_id', eid).order('created_at', { ascending: false }).range(0, WISH_FETCH - 1),
+    q(), wishSnap ? q().gt('created_at', new Date(wishSnap).toISOString()) : Promise.resolve(null)]);
+  if (list.error) { wishInit = false; $('wchat').innerHTML = '<div class="empty">Ucapan belum bisa dimuat.</div>'; return; }
+  wishesData = list.data || []; wishesTotal = cnt.count != null ? cnt.count : wishesData.length;
+  wishesDone = wishesData.length >= wishesTotal;
+  wishUnread = wishSnap ? ((unr && unr.count) || 0) : wishesTotal;
+  renderWishes(); watchWishes(eid);
 }
-
+async function loadMoreWishes() {
+  if (wishesBusy || wishesDone) return; wishesBusy = true;
+  const from = wishesData.length;
+  const { data, error } = await supabaseClient.from('wishes').select('*').eq('event_id', globalData.event.id).order('created_at', { ascending: false }).range(from, from + WISH_FETCH - 1);
+  wishesBusy = false; if (error) return;
+  const ids = new Set(wishesData.map(w => w.id)); (data || []).forEach(w => { if (!ids.has(w.id)) wishesData.push(w); });
+  wishesDone = !data || data.length < WISH_FETCH || wishesData.length >= wishesTotal;
+  renderWishes();
+}
+function renderWishBadges() {
+  const b = $('w-badge'); b.className = 'wbadge' + (wishUnread ? ' on' : '');
+  b.innerHTML = wishUnread ? `<i data-lucide="bell-ring"></i>${wishUnread} baru` : '<i data-lucide="check-check"></i>Terbaca';
+  const nb = $('nav-home-badge'); nb.textContent = wishUnread > 9 ? '9+' : wishUnread; nb.classList.toggle('hidden', !wishUnread);
+  $('wish-banner').classList.toggle('hidden', !wishUnread);
+  if (wishUnread) { const l = wishesData.find(w => !wishSnap || Date.parse(w.created_at) > wishSnap); $('wb-text').textContent = `${wishUnread} ucapan baru${l ? ' dari ' + l.guest_name + (wishUnread > 1 ? ' dan lainnya' : '') : ''}`; }
+}
 function renderWishes() {
-  const box = $('wishes-list');
-  const countContainer = $('wishes-count-container');
-  const totalWishes = wishesData.length;
-  const unreadCount = Math.max(0, totalWishes - lastReadWishCount);
-
-  if (countContainer) {
-    if (unreadCount > 0) {
-      countContainer.innerHTML = `<span class="notif-badge" onclick="markWishesRead()"><i data-lucide="bell" style="width:13px;height:13px"></i>${unreadCount} baru</span>`;
-    } else {
-      countContainer.innerHTML = `<span class="link" onclick="markWishesRead()">${totalWishes} pesan</span>`;
-    }
-  }
-
-  if (!totalWishes) {
-    box.innerHTML = '<div class="empty">Belum ada ucapan atau doa masuk.</div>';
-    icons();
-    return;
-  }
-
-  const totalPages = Math.ceil(totalWishes / WISHES_PAGE_SIZE) || 1;
-  if (wishesPage > totalPages) wishesPage = totalPages;
-  if (wishesPage < 1) wishesPage = 1;
-
-  const startIdx = (wishesPage - 1) * WISHES_PAGE_SIZE;
-  const pageItems = wishesData.slice(startIdx, startIdx + WISHES_PAGE_SIZE);
-
-  let html = '';
-  let lastDateStr = '';
-
-  pageItems.forEach(w => {
-    const d = w.created_at ? new Date(w.created_at) : new Date();
-    const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-    const timeStr = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-
-    if (dateStr !== lastDateStr) {
-      html += `<div style="text-align:center;margin:14px 0 8px;"><span style="font-size:11.5px;background:var(--soft);color:var(--sub);padding:3px 12px;border-radius:999px;">${esc(dateStr)}</span></div>`;
-      lastDateStr = dateStr;
-    }
-
-    const guestName = w.guest_name || 'Tamu Undangan';
-
-    html += `<div class="hl">
-      <div class="av">${esc(initials(guestName))}</div>
-      <div class="txt">
-        <div class="n">${esc(guestName)}</div>
-        <div class="s" style="white-space:normal;margin-top:4px;">${esc(w.message || '')}</div>
-      </div>
-      <div class="hmeta"><span class="when">${esc(timeStr)}</span></div>
-    </div>`;
+  const box = $('wchat'), st = box.scrollTop;
+  $('w-sub').textContent = wishesTotal ? `${wishesTotal} pesan` : 'Belum ada pesan';
+  renderWishBadges();
+  if (!wishesData.length) { box.innerHTML = '<div class="empty">Belum ada ucapan atau doa masuk.</div>'; icons(); return; }
+  let html = wishUnread ? `<div class="wdiv"><span>${wishUnread} pesan belum dibaca</span></div>` : '', last = '';
+  wishesData.forEach((w, i) => {
+    const d = new Date(w.created_at), day = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    if (day !== last) { html += `<div class="wdate"><span>${esc(day)}</span></div>`; last = day; }
+    const g = wishGuest(w), b = g ? guestBadge(g) : null, h = hueOf(w.guest_name);
+    const isNew = !wishSnap || Date.parse(w.created_at) > wishSnap;
+    html += `<div class="wmsg${isNew ? ' new' : ''}${w._fresh ? ' fresh' : ''}" data-i="${i}"><div class="cav" style="--h:${h}">${esc(initials(w.guest_name))}</div>
+      <div class="wb"><div class="wc"><div class="wn" style="--h:${h}">${esc(w.guest_name || 'Tamu')}</div><div class="wt">${esc(w.message)}</div></div>
+      <div class="wm"><span class="when">${esc(d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }))}</span>${b ? `<span class="st st-${b[0]}">${b[1]}</span>` : ''}</div></div></div>`;
+    w._fresh = false;
   });
-
-  if (totalWishes > WISHES_PAGE_SIZE) {
-    html += `<div class="hist-nav">
-      <button onclick="changeWishesPage(-1)" ${wishesPage === 1 ? 'disabled' : ''}>Prev</button>
-      <span>Hal ${wishesPage} dari ${totalPages}</span>
-      <button onclick="changeWishesPage(1)" ${wishesPage === totalPages ? 'disabled' : ''}>Next</button>
-    </div>`;
-  }
-
-  box.innerHTML = html;
-  icons();
+  html += wishesDone ? '<div class="wend">Semua ucapan sudah ditampilkan</div>' : '<div class="wend"><i class="wspin"></i>Memuat lainnya…</div>';
+  box.innerHTML = html; box.scrollTop = st; icons();
+  if (!wishesDone && box.scrollHeight <= box.clientHeight + 4) loadMoreWishes();
 }
-
-function changeWishesPage(dir) {
-  wishesPage += dir;
-  renderWishes();
+function addWishes(arr, live) {
+  const ids = new Set(wishesData.map(w => w.id)), fresh = arr.filter(w => w && !ids.has(w.id)); if (!fresh.length) return;
+  fresh.forEach(w => { w._fresh = true; });
+  wishesData = [...fresh, ...wishesData].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+  wishesTotal += fresh.length; wishUnread += fresh.length; $('wchat').classList.remove('read'); renderWishes();
+  if (live) { toast('Ucapan baru dari ' + (fresh[0].guest_name || 'tamu')); if (navigator.vibrate) navigator.vibrate(30); }
+  scheduleWishRead();
 }
-
-function markWishesRead() {
-  lastReadWishCount = wishesData.length;
-  localStorage.setItem('rr_last_read_wishes', lastReadWishCount);
-  renderWishes();
-  toast('Semua pesan ditandai telah dibaca');
+async function pollWishes() {
+  if (!wishInit || !globalData.event) return;
+  const newest = wishesData[0] ? wishesData[0].created_at : '1970-01-01T00:00:00Z';
+  const { data } = await supabaseClient.from('wishes').select('*').eq('event_id', globalData.event.id).gt('created_at', newest).order('created_at', { ascending: false });
+  if (data && data.length) addWishes(data, true);
+}
+function scheduleWishRead() { clearTimeout(wishReadTimer); if (wishVisible && wishUnread && !document.hidden) wishReadTimer = setTimeout(() => markWishesRead(false), 1800); }
+async function markWishesRead(manual) {
+  if (!wishUnread) { if (manual) toast('Semua ucapan sudah dibaca'); return; }
+  wishUnread = 0; const now = new Date().toISOString(); localStorage.setItem('rr_wishes_seen', Date.parse(now));
+  renderWishBadges(); icons(); setTimeout(() => $('wchat').classList.add('read'), 1200);
+  if (manual) toast('Semua ucapan ditandai dibaca');
+  try { await supabaseClient.from('events').update({ wishes_seen_at: now }).eq('id', globalData.event.id); } catch (e) {}
+}
+function focusWishes() { $('wish-card').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+function watchWishes(eid) {
+  new IntersectionObserver(es => { wishVisible = es[0].isIntersecting; scheduleWishRead(); }, { threshold: .6 }).observe($('wish-card'));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { pollWishes(); scheduleWishRead(); } });
+  setInterval(() => { if (!document.hidden) pollWishes(); }, 60000);
+  try { supabaseClient.channel('wishes-' + eid).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'wishes', filter: 'event_id=eq.' + eid }, p => addWishes([p.new], true)).subscribe(); } catch (e) {}
+}
+$('wchat').addEventListener('scroll', e => { const b = e.target; if (b.scrollTop + b.clientHeight >= b.scrollHeight - 140) loadMoreWishes(); }, { passive: true });
+$('wchat').addEventListener('click', e => { const m = e.target.closest('.wmsg'); if (m) openWish(+m.dataset.i); });
+function openWish(i) {
+  const w = wishesData[i]; if (!w) return; const g = wishGuest(w), b = g ? guestBadge(g) : null;
+  const phone = g && g.phone ? String(g.phone).replace(/\D/g, '').replace(/^0/, '62') : '';
+  openSheet(`<div class="sheet-head"><h3>${esc(w.guest_name)}</h3><button onclick="closeSheet()">Tutup</button></div>
+    <div class="listcard"><div class="wfull">${esc(w.message)}</div><div class="wfoot">${esc(fmtWhen(Date.parse(w.created_at)))}${b ? `<span class="st st-${b[0]}">${b[1]}</span>` : ''}</div>
+    <button class="act" id="w-copy"><i data-lucide="copy"></i>Salin ucapan</button>
+    ${phone ? `<a class="act" href="https://wa.me/${phone}?text=${encodeURIComponent('Terima kasih atas ucapan dan doanya, ' + w.guest_name + ' 🙏')}" target="_blank" rel="noopener"><i data-lucide="message-circle"></i>Balas lewat WhatsApp</a>` : ''}</div>`);
+  $('w-copy').onclick = () => navigator.clipboard.writeText(w.message).then(() => { toast('Ucapan disalin'); closeSheet(); }, () => toast('Gagal menyalin', false));
 }
 
 function renderUI() {
