@@ -648,6 +648,30 @@ html.lock{overflow:hidden}
 :root[data-dark="1"] .wbanner{color:#0b0f1a}:root[data-dark="1"] .wbanner b{background:rgba(0,0,0,.14)}
 .nbadge{position:absolute;top:3px;left:calc(50% + 4px);min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:var(--red-ink);color:#fff;font:700 10.5px/17px 'Geist Mono',monospace;text-align:center;box-shadow:0 0 0 2px var(--card);animation:wpop .4s cubic-bezier(.34,1.56,.64,1)}
 .wfull{padding:16px 0 8px;font-size:16px;line-height:1.55;white-space:pre-wrap;word-break:break-word}.wfoot{display:flex;align-items:center;gap:10px;color:var(--sub);font-size:13px;padding:0 0 14px}
+
+/* ===== Tahap 2: kartu Undangan & Kategori Tamu ===== */
+.und .utop{display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px}
+.und .kpi{margin:0;font-size:64px}
+.usisa{text-align:right}.usisa small{display:block;color:var(--sub);font-size:13px}.usisa b{font:600 28px 'Geist Mono',monospace;letter-spacing:-.02em}
+.uqbar{height:10px;border-radius:99px;background:var(--soft);margin:16px 0 8px;overflow:hidden}
+.uqbar i{display:block;height:100%;width:0;border-radius:inherit;background:var(--brand);transition:width 1.1s cubic-bezier(.32,.72,0,1),background .3s}
+.uqbar.warn i{background:var(--amber)}.uqbar.full i{background:#e5484d}
+.uqcap{display:flex;justify-content:space-between;color:var(--sub);font-size:13px}.uqcap b{font-family:'Geist Mono',monospace;font-weight:600;color:var(--ink)}
+.usplit{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.ut{border-radius:18px;background:var(--bg);padding:14px}
+.ut .uh{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--sub)}
+.ui{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff}.ui.d{background:var(--brand)}.ui.c{background:var(--amber-ink)}.ui svg{width:13px;height:13px}
+.ut b{display:block;font:600 30px 'Geist Mono',monospace;margin-top:10px;line-height:1}.ut small{display:block;color:var(--sub);font-size:12.5px;margin-top:4px}
+.ut .mini{height:4px;border-radius:99px;background:var(--line);margin-top:10px;overflow:hidden}.ut .mini i{display:block;height:100%;border-radius:inherit;transition:width 1s cubic-bezier(.32,.72,0,1)}
+.klegend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--sub);margin:-2px 0 4px}.klegend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.kr{display:flex;align-items:center;gap:12px;width:100%;padding:13px 0;text-align:left;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .2s}.kr+.kr{border-top:1px solid var(--line)}.kr:active{transform:scale(.985);opacity:.7}
+.kr .sq{width:46px;height:46px;border-radius:15px}
+.kinfo{flex:1;min-width:0}.kr1{display:flex;justify-content:space-between;align-items:baseline;gap:10px}.kr1 .n{font-weight:600;font-size:16.5px}.kshare{font:600 13.5px 'Geist Mono',monospace;color:var(--sub)}
+.ks{color:var(--sub);font-size:13px;margin-top:1px}
+.kbar{display:flex;gap:2px;height:7px;border-radius:99px;overflow:hidden;background:var(--soft);margin:9px 0 6px}.kbar i{display:block;min-width:4px}
+.kbar .h{background:var(--green)}.kbar .a{background:#e5484d}.kbar .p{background:var(--amber)}.kbar .u{background:var(--sub);opacity:.4}
+.kleg{font-size:12.5px;color:var(--sub)}
+.kmore{display:flex;justify-content:center;align-items:center;gap:6px;width:100%;padding:13px 0 2px;border-top:1px solid var(--line);color:var(--brand);font-weight:600;font-size:14px}
 </style>
 </head>
 <body>
@@ -689,25 +713,32 @@ html.lock{overflow:hidden}
           </div>
         </div>
 
-        <div class="grid2">
-          <div class="col">
-            <div class="card">
-              <div class="lbl">Total <i data-lucide="mail"></i></div>
-              <div class="kpi" id="stat-total">0</div>
-              <div class="sub" id="stat-total-breakdown" style="margin-top:4px;font-size:14px">Digital: 0 · Cetak: 0</div>
-              <div class="rowk"><span>Kuota sisa</span><b id="stat-kuota">0</b></div>
-            </div>
+        <div class="card und">
+          <div class="lbl">Total Undangan <i data-lucide="mail"></i></div>
+          <div class="utop">
+            <div class="kpi" id="stat-total">0</div>
+            <div class="usisa"><small>Sisa kuota</small><b id="stat-kuota">0</b></div>
           </div>
-          <div class="col">
-            <div class="card">
-              <div class="lbl">Hadir <i data-lucide="square-check"></i></div>
-              <div class="hadir-top"><span class="kpi sm" id="hero-hadir" style="margin:0">0</span><span class="pct" id="hero-pct-text">0%</span></div>
-              <div class="sub" style="font-size:14px;margin-top:8px" id="hero-hadir-text">Dari 0 undangan</div>
-              <div class="rowk"><span>Absen</span><b id="stat-absen">0</b></div>
-            </div>
-            <div class="card" style="padding:16px 20px">
-              <div class="lbl" style="font-size:17px">Pending <b class="num" id="stat-pending" style="font-size:24px;color:var(--ink)">0</b></div>
-            </div>
+          <div class="uqbar" id="uq-wrap"><i id="uq-bar"></i></div>
+          <div class="uqcap"><span id="uq-cap">0 dari 100 kuota terpakai</span><b id="uq-pct">0%</b></div>
+          <div class="usplit">
+            <div class="ut"><div class="uh"><span class="ui d"><i data-lucide="globe"></i></span>Digital</div><b id="stat-digital">0</b><small id="sh-digital">0% dari total</small><div class="mini"><i id="mb-digital" style="width:0;background:var(--brand)"></i></div></div>
+            <div class="ut"><div class="uh"><span class="ui c"><i data-lucide="printer"></i></span>Cetak</div><b id="stat-cetak">0</b><small id="sh-cetak">0% dari total</small><div class="mini"><i id="mb-cetak" style="width:0;background:var(--amber-ink)"></i></div></div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="lbl">Hadir <i data-lucide="square-check"></i></div>
+            <div class="hadir-top"><span class="kpi sm" id="hero-hadir" style="margin:0">0</span><span class="pct" id="hero-pct-text">0%</span></div>
+            <div class="sub" style="font-size:14px;margin-top:8px" id="hero-hadir-text">Dari 0 undangan</div>
+            <div class="rowk"><span>Absen</span><b id="stat-absen">0</b></div>
+          </div>
+          <div class="card">
+            <div class="lbl">Pending <i data-lucide="clock"></i></div>
+            <div class="hadir-top"><span class="kpi sm" id="stat-pending" style="margin:0">0</span></div>
+            <div class="sub" style="font-size:14px;margin-top:8px">Sudah dikirim, belum dijawab</div>
+            <div class="rowk"><span>Belum dikirim</span><b id="stat-unsent">0</b></div>
           </div>
         </div>
 
@@ -759,6 +790,7 @@ html.lock{overflow:hidden}
 
         <div class="card">
           <div class="ch"><h3>Kategori Tamu</h3><button class="addcat" onclick="addCategory()" aria-label="Tambah kategori" title="Tambah kategori"><i data-lucide="plus"></i></button></div>
+          <div class="klegend"><span><i style="background:var(--green)"></i>Hadir</span><span><i style="background:#e5484d"></i>Absen</span><span><i style="background:var(--amber)"></i>Menunggu</span><span><i style="background:var(--sub);opacity:.4"></i>Belum dikirim</span></div>
           <div id="cat-group"></div>
         </div>
 
@@ -1268,13 +1300,15 @@ function renderUI() {
 
   const maxQuota = stats.max_quota || 100;
   $('stat-total').textContent = totalGuestsCount;
-  
-  const totalDigital = guests.filter(g => !g.invitation_type || g.invitation_type === 'digital').length;
-  const totalCetak = guests.filter(g => g.invitation_type === 'cetak').length;
-  if ($('stat-total-breakdown')) {
-    $('stat-total-breakdown').textContent = `Digital: ${totalDigital} · Cetak: ${totalCetak}`;
-  }
-
+  const totalCetak = guests.filter(g => g.invitation_type === 'cetak').length, totalDigital = guests.length - totalCetak;
+  const share = n => guests.length ? Math.round(n / guests.length * 100) : 0;
+  $('stat-digital').textContent = totalDigital; $('stat-cetak').textContent = totalCetak;
+  $('sh-digital').textContent = share(totalDigital) + '% dari total'; $('sh-cetak').textContent = share(totalCetak) + '% dari total';
+  $('mb-digital').style.width = share(totalDigital) + '%'; $('mb-cetak').style.width = share(totalCetak) + '%';
+  const usedPct = Math.min(100, Math.round(totalGuestsCount / maxQuota * 100));
+  $('uq-bar').style.width = usedPct + '%'; $('uq-wrap').className = 'uqbar' + (totalGuestsCount >= maxQuota ? ' full' : usedPct >= 90 ? ' warn' : '');
+  $('uq-cap').textContent = totalGuestsCount >= maxQuota ? 'Kuota penuh' : usedPct >= 90 ? 'Kuota hampir habis' : `${totalGuestsCount} dari ${maxQuota} kuota terpakai`;
+  $('uq-pct').textContent = usedPct + '%';
   $('stat-kuota').textContent = Math.max(0, maxQuota - totalGuestsCount);
   
   const countAbsen = guests.filter(g => g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen').length;
@@ -1283,6 +1317,7 @@ function renderUI() {
 
   $('stat-absen').textContent = countAbsen;
   $('stat-pending').textContent = countPending;
+  $('stat-unsent').textContent = guests.filter(g => !g.is_sent).length;
 
   const att = guests.filter(g => g.rsvp_status === 'hadir' || g.is_checked_in);
   const checked = att.filter(g => g.is_checked_in).length;
@@ -1382,25 +1417,31 @@ async function submitEditEvent(e) {
   }
 }
 
-function renderCategories(cats) {
-  const box = $('cat-group');
-  if (!cats || !cats.length) { box.innerHTML = '<div class="empty">Belum ada kategori.<br>Tambahkan tamu pertama untuk membuat kategori.</div>'; return; }
-  const iconFor = c => ({ Keluarga: 'house', Teman: 'heart', Tetangga: 'users', Kolega: 'briefcase' })[c] || 'tag';
-  box.innerHTML = [...cats].sort((a, b) => (b.total || 0) - (a.total || 0)).map(c => {
-    const total = c.total || 0, hadir = c.hadir || 0;
-    const pct = total ? Math.round(hadir / total * 100) : 0;
-    return `<div class="cr">
-      <button class="go" data-cat="${esc(c.category)}">
-        <span class="sq"><i data-lucide="${iconFor(c.category)}"></i></span>
-        <div class="cinfo">
-          <div class="row1"><span class="n">${esc(c.category)}</span><span class="pc">${pct}%</span></div>
-          <div class="cbar"><i style="width:${pct}%"></i></div>
-          <div class="s">${hadir} dari ${total} undangan hadir</div>
-        </div>
-        <i data-lucide="chevron-right" class="chev"></i>
-      </button>
-    </div>`;
-  }).join('');
+let catExpanded = false;
+function renderCategories() {
+  const box = $('cat-group'), gs = (globalData && globalData.guests) || [];
+  if (!gs.length) { box.innerHTML = '<div class="empty">Belum ada kategori.<br>Tambahkan tamu pertama untuk membuat kategori.</div>'; return; }
+  const iconFor = c => ({ Keluarga: 'house', Teman: 'heart', Tetangga: 'users', Kolega: 'briefcase', VIP: 'crown', Umum: 'users' })[c] || 'tag';
+  const m = new Map();
+  gs.forEach(g => {
+    const k = g.category || 'Umum', c = m.get(k) || { name: k, total: 0, pax: 0, h: 0, a: 0, p: 0, u: 0 };
+    c.total++; c.pax += +g.max_pax || 0;
+    if (g.is_checked_in || g.rsvp_status === 'hadir') c.h++;
+    else if (g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen') c.a++;
+    else if (g.is_sent) c.p++; else c.u++;
+    m.set(k, c);
+  });
+  const all = [...m.values()].sort((a, b) => b.total - a.total), LIMIT = 4;
+  const rows = catExpanded ? all : all.slice(0, LIMIT);
+  box.innerHTML = rows.map(c => {
+    const seg = [['h', c.h, 'hadir'], ['a', c.a, 'absen'], ['p', c.p, 'menunggu'], ['u', c.u, 'belum dikirim']].filter(s => s[1]);
+    return `<button class="kr" data-cat="${esc(c.name)}"><span class="sq"><i data-lucide="${iconFor(c.name)}"></i></span>
+      <div class="kinfo"><div class="kr1"><span class="n">${esc(c.name)}</span><span class="kshare">${Math.round(c.total / gs.length * 100)}%</span></div>
+        <div class="ks">${c.total} undangan · ${c.pax} pax</div>
+        <div class="kbar">${seg.map(s => `<i class="${s[0]}" style="flex:${s[1]}"></i>`).join('')}</div>
+        <div class="kleg">${seg.map(s => s[1] + ' ' + s[2]).join(' · ')}</div></div>
+      <i data-lucide="chevron-right" class="chev"></i></button>`;
+  }).join('') + (all.length > LIMIT ? `<button class="kmore" onclick="catExpanded=!catExpanded;renderCategories()">${catExpanded ? 'Ringkas' : `Lihat semua kategori (${all.length})`}<i data-lucide="${catExpanded ? 'chevron-up' : 'chevron-down'}" style="width:16px;height:16px"></i></button>` : '');
   icons();
 }
 function addCategory() {
@@ -2461,7 +2502,7 @@ checkSession();
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let anim = false, first = true, ringsPlayed = false;
 
-  const NUMS = ['stat-total','stat-kuota','hero-hadir','hero-pct-text','stat-absen','stat-pending','ring-num','ci-att','ci-wait','ci-est','rsvp-ring-num','rsvp-est-pax','rsvp-stat-absen','rsvp-stat-pending','quota-used'];
+  const NUMS = ['stat-total','stat-kuota','stat-digital','stat-cetak','stat-unsent','hero-hadir','hero-pct-text','stat-absen','stat-pending','ring-num','ci-att','ci-wait','ci-est','rsvp-ring-num','rsvp-est-pax','rsvp-stat-absen','rsvp-stat-pending','quota-used'];
   function countUp(el) {
     const m = /^(\D*)(\d+)(\D*)$/.exec(el.textContent.trim()); if (!m) return;
     const to = +m[2], from = +(el.dataset.v || 0); el.dataset.v = to;
