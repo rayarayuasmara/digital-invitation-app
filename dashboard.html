@@ -129,7 +129,7 @@ input, select, textarea { font-size: 16px !important; }
 .bdg-unsent{background:var(--sub)}
 
 /* Status Pill Alami & Sejajar */
-.tags{display:flex;gap:4px;margin-top:6px;align-items:center;flex-wrap:nowrap}
+.tags{display:flex;gap:4px;margin-top:6px;align-items:center;flex-wrap:wrap}
 .tag{font-size:12px;padding:4px 11px;border-radius:999px;background:var(--tag);color:var(--tag-ink);white-space:nowrap}
 .st{font-size:12px;padding:4px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;letter-spacing:-0.01em;white-space:nowrap}
 .st::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
@@ -420,6 +420,30 @@ html.lock{overflow:hidden}
 .sheet .grab,.sheet .sheet-head{touch-action:none}
 .toast{transition:transform .6s var(--spring);background:var(--glass);color:var(--ink);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid var(--glass-line)}
 @media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
+
+/* ===== Multi-select filter & pagination (Tab Tamu) ===== */
+.mfrow{display:flex;gap:8px}
+.mfbtn{flex:1;min-width:0;height:38px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--ink);font-size:13.5px;font-weight:600;white-space:nowrap}
+.mfbtn span.l{overflow:hidden;text-overflow:ellipsis}
+.mfbtn svg{width:14px;height:14px;color:var(--sub);flex-shrink:0}
+.mfbtn.on{border-color:var(--brand);color:var(--brand);background:var(--soft)}
+.mfbtn .cnt{min-width:18px;height:18px;border-radius:99px;background:var(--brand);color:#fff;font-size:11px;display:grid;place-items:center;padding:0 5px}
+:root[data-dark="1"] .mfbtn .cnt{color:#0b0f1a}
+.sheet .listcard .act.mf-opt{color:var(--ink)}
+.mf-box{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--line);display:grid;place-items:center;flex-shrink:0;color:transparent}
+.mf-box svg{width:14px!important;height:14px!important}
+.mf-opt.on .mf-box{background:var(--brand);border-color:var(--brand);color:#fff}
+.mf-opt .mf-n{margin-left:auto;font-size:13px;color:var(--sub);font-family:'Geist Mono',monospace}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 0 4px;border-top:1px solid var(--line);margin-top:4px}
+.pager .pg-info{flex:1;text-align:center;font-size:13px;color:var(--sub);line-height:1.35}
+.pager .pg-info b{color:var(--ink)}
+.pager button{height:38px;padding:0 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--brand);font-weight:600;font-size:14px;display:flex;align-items:center;gap:4px}
+.pager button svg{width:16px;height:16px}
+.pager button:disabled{opacity:.4;pointer-events:none}
+.field.locked label{color:var(--sub)}
+.field .lock-note{font-size:11.5px;color:var(--sub);display:flex;align-items:center;gap:4px;padding-bottom:8px}
+.switch input:disabled+span{opacity:.55}
+.field select:disabled{color:var(--sub);opacity:1}
 
 /* ===== Revisi: sortir, hero, kartu check-in ===== */
 .hi{font-weight:400}
@@ -813,8 +837,6 @@ html.lock{overflow:hidden}
         <div class="sbar">
           <i data-lucide="search"></i>
           <input type="search" id="search-input" placeholder="Cari nama tamu…" oninput="renderGuestList()" />
-          <span class="vr"></span>
-          <label class="fsel"><select id="cat-select" aria-label="Filter kategori" onchange="setCategory(this.value)"></select><i data-lucide="chevron-down"></i></label>
         </div>
 
         <div class="listcard">
@@ -829,11 +851,11 @@ html.lock{overflow:hidden}
             <button data-f="checked_in">Check-in</button>
           </div>
           <div id="guest-list-container"></div>
+          <nav class="pager hidden" id="guest-pager" aria-label="Navigasi halaman tamu"></nav>
         </div>
 
-        <!-- 3 Action Buttons in Tab Tamu -->
-        <div class="tiles3">
-          <button class="tile w narrow" onclick="openGuestSheet()"><span class="ico" style="align-self:flex-start"><i data-lucide="plus"></i></span><span>Tambah<br>Tamu</span></button>
+        <!-- Aksi cepat (Tambah Tamu sudah tersedia lewat tombol + melayang, jadi tidak diduplikasi di sini) -->
+        <div class="tiles3" style="grid-template-columns:1fr 1fr">
           <button class="tile g narrow" onclick="openPending()"><span class="ico" style="align-self:flex-start"><i data-lucide="message-circle"></i></span><span>Kirim<br>Undangan</span></button>
           <button class="tile w narrow" onclick="openScannerOverlay()"><span class="ico" style="align-self:flex-start"><i data-lucide="scan-line"></i></span><span>Buka<br>Scanner</span></button>
         </div>
@@ -1019,7 +1041,14 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let globalData = null;
 let activeFilter = 'all';
-let activeCategory = 'all';
+// Filter multi-select (Set kosong = semua) + paginasi daftar tamu
+const MF = {
+  cat:     { label: 'Kategori', all: 'Kategori', set: new Set() },
+  type:    { label: 'Jenis Undangan', all: 'Jenis', set: new Set() },
+  session: { label: 'Sesi', all: 'Sesi', set: new Set() }
+};
+const GUEST_PAGE_SIZE = 25;
+let guestPage = 1, guestListSig = '';
 let sortField = 'created';
 let sortDir = 'desc';
 let currentActiveTab = 'home';
@@ -1483,19 +1512,63 @@ function renderRecent(guests) {
 }
 
 function showAllRecent() {
-  sortField = 'updated'; sortDir = 'desc'; activeFilter = 'all'; activeCategory = 'all';
+  sortField = 'updated'; sortDir = 'desc'; activeFilter = 'all';
+  Object.values(MF).forEach(m => m.set.clear());
   const q = $('search-input'); if (q) q.value = '';
   if (window.syncSortUI) window.syncSortUI();
   renderCategorySelect();
   switchTab('tamu');
 }
 
-function renderCategorySelect() {
-  const cats = [...new Set(globalData.guests.map(g => g.category).filter(Boolean))];
-  const sel = $('cat-select');
-  sel.innerHTML = ['all', ...cats].map(c => `<option value="${esc(c)}" ${c === activeCategory ? 'selected' : ''}>${c === 'all' ? 'Kategori' : esc(c)}</option>`).join('');
+/* ---------- Filter multi-select: Kategori / Jenis Undangan / Sesi ---------- */
+const guestSession = g => g.session || 'Sesi 1';
+const guestType = g => g.invitation_type === 'cetak' ? 'cetak' : 'digital';
+const MF_GET = { cat: g => g.category || 'Umum', type: guestType, session: guestSession };
+
+// Opsi sesi = nama sesi acara + sesi yang sudah terpakai tamu (mis. data lama)
+function sessionOptions(extra) {
+  const ev = (globalData && globalData.event) || {};
+  return [...new Set([ev.session_1_name || 'Sesi 1', ev.session_2_name || 'Sesi 2',
+    ...(globalData ? globalData.guests.map(guestSession) : []), extra].filter(Boolean))];
 }
-function setCategory(c) { activeCategory = c; renderCategorySelect(); renderGuestList(); }
+function mfOptions(k) {
+  const gs = globalData ? globalData.guests : [];
+  if (k === 'type') return [{ v: 'digital', l: 'Digital' }, { v: 'cetak', l: 'Cetak (Fisik)' }];
+  if (k === 'session') return sessionOptions().map(v => ({ v, l: v }));
+  return [...new Set(gs.map(MF_GET.cat))].sort((a, b) => a.localeCompare(b, 'id')).map(v => ({ v, l: v }));
+}
+function renderCategorySelect() {   // nama lama dipertahankan: memperbarui label tombol filter
+  Object.keys(MF).forEach(k => {
+    const b = document.querySelector(`.mfbtn[data-mf="${k}"]`); if (!b) return;
+    const n = MF[k].set.size;
+    b.classList.toggle('on', n > 0);
+    b.innerHTML = `<span class="l">${esc(MF[k].all)}</span>` + (n ? `<span class="cnt">${n}</span>` : '<i data-lucide="chevron-down"></i>');
+  });
+  icons();
+}
+function openMultiFilter(k) {
+  const m = MF[k], gs = globalData.guests;
+  const opts = mfOptions(k);
+  openSheet(`
+    <div class="sheet-head"><button id="mf-reset">Reset</button><h3>${esc(m.label)}</h3><button onclick="closeSheet()">Selesai</button></div>
+    <div class="listcard">${opts.length ? opts.map(o => `
+      <button class="act mf-opt ${m.set.has(o.v) ? 'on' : ''}" data-v="${esc(o.v)}">
+        <span class="mf-box"><i data-lucide="check"></i></span>${esc(o.l)}
+        <span class="mf-n">${gs.filter(g => MF_GET[k](g) === o.v).length}</span></button>`).join('') : '<div class="empty">Belum ada data.</div>'}</div>`);
+  $('sheet').querySelectorAll('.mf-opt').forEach(b => b.onclick = () => {
+    const v = b.dataset.v;
+    if (m.set.has(v)) m.set.delete(v); else m.set.add(v);
+    b.classList.toggle('on', m.set.has(v));
+    renderCategorySelect(); renderGuestList();
+  });
+  $('mf-reset').onclick = () => {
+    m.set.clear();
+    $('sheet').querySelectorAll('.mf-opt').forEach(b => b.classList.remove('on'));
+    renderCategorySelect(); renderGuestList();
+  };
+}
+// Dipakai kartu kategori di Home: tampilkan hanya kategori tersebut
+function setCategory(c) { MF.cat.set.clear(); if (c && c !== 'all') MF.cat.set.add(c); renderCategorySelect(); renderGuestList(); }
 
 function sortGuests(list) {
   const idx = new Map(globalData.guests.map((g, i) => [g.id, i]));
@@ -1512,14 +1585,14 @@ function sortGuests(list) {
 }
 
 function renderGuestList() {
-  const box = $('guest-list-container');
+  const box = $('guest-list-container'), pager = $('guest-pager');
   document.querySelectorAll('#filter-tabs button').forEach(b => b.classList.toggle('on', b.dataset.f === activeFilter));
 
   let list = sortGuests(globalData.guests);
   const q = $('search-input').value.toLowerCase().trim();
   if (q) list = list.filter(g => g.group_name.toLowerCase().includes(q));
-  if (activeCategory !== 'all') list = list.filter(g => g.category === activeCategory);
-  
+  Object.keys(MF).forEach(k => { if (MF[k].set.size) list = list.filter(g => MF[k].set.has(MF_GET[k](g))); });
+
   if (activeFilter === 'digital') {
     list = list.filter(g => !g.invitation_type || g.invitation_type === 'digital');
   } else if (activeFilter === 'cetak') {
@@ -1536,11 +1609,19 @@ function renderGuestList() {
     list = list.filter(g => !g.is_sent);
   }
 
-  if (!list.length) { box.innerHTML = '<div class="empty">Tidak ada tamu yang sesuai.</div>'; return; }
-  
-  box.innerHTML = list.map((g) => {
+  // Paginasi: kembali ke halaman 1 bila pencarian/filter/urutan berubah; jaga halaman tetap valid
+  const sig = JSON.stringify([q, activeFilter, sortField, sortDir, ...Object.keys(MF).map(k => [...MF[k].set].sort())]);
+  if (sig !== guestListSig) { guestListSig = sig; guestPage = 1; }
+  const total = list.length, pages = Math.max(1, Math.ceil(total / GUEST_PAGE_SIZE));
+  guestPage = Math.min(Math.max(1, guestPage), pages);
+
+  if (!total) { box.innerHTML = '<div class="empty">Tidak ada tamu yang sesuai.</div>'; pager.classList.add('hidden'); return; }
+
+  const start = (guestPage - 1) * GUEST_PAGE_SIZE;
+  box.innerHTML = list.slice(start, start + GUEST_PAGE_SIZE).map((g) => {
     const [k, txt] = guestBadge(g);
     const isSentClass = g.is_sent ? 'sent' : '';
+    const isCetak = g.invitation_type === 'cetak';
     return `<div class="gl" data-id="${esc(g.id)}">
       <button class="main" data-open style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;text-align:left">
         ${avatar(g)}
@@ -1548,18 +1629,33 @@ function renderGuestList() {
           <div class="n">${esc(g.group_name)}</div>
           <div class="tags">
             <span class="tag">${esc(g.category)}</span>
+            <span class="tag">${esc(guestSession(g))}</span>
             <span class="st st-${k}">${txt}</span>
           </div>
         </div>
       </button>
       <div class="gl-actions">
         <button class="ib" data-copy title="Salin tautan" aria-label="Salin tautan"><i data-lucide="link"></i></button>
-        <button class="ib ${isSentClass}" data-wa title="Kirim WhatsApp" aria-label="Kirim WhatsApp"><i data-lucide="message-circle"></i></button>
+        ${isCetak ? '' : `<button class="ib ${isSentClass}" data-wa title="Kirim WhatsApp" aria-label="Kirim WhatsApp"><i data-lucide="message-circle"></i></button>`}
       </div>
     </div>`;
   }).join('');
+
+  if (pages > 1) {
+    const end = Math.min(start + GUEST_PAGE_SIZE, total);
+    pager.innerHTML = `
+      <button data-pg="prev" ${guestPage <= 1 ? 'disabled' : ''} aria-label="Halaman sebelumnya"><i data-lucide="chevron-left"></i>Prev</button>
+      <div class="pg-info">Halaman <b>${guestPage}</b> dari <b>${pages}</b><br>${start + 1}–${end} dari ${total} tamu</div>
+      <button data-pg="next" ${guestPage >= pages ? 'disabled' : ''} aria-label="Halaman berikutnya">Next<i data-lucide="chevron-right"></i></button>`;
+    pager.classList.remove('hidden');
+  } else pager.classList.add('hidden');
   icons();
 }
+$('guest-pager').addEventListener('click', e => {
+  const b = e.target.closest('[data-pg]'); if (!b || b.disabled) return;
+  guestPage += b.dataset.pg === 'next' ? 1 : -1;
+  window.__pgScroll = true; renderGuestList();
+});
 
 $('guest-list-container').addEventListener('click', e => {
   const row = e.target.closest('.gl'); if (!row) return;
@@ -1784,7 +1880,7 @@ function openGuestActions(id) {
     <div class="sheet-head"><h3>${esc(g.group_name)}</h3><button onclick="closeSheet()">Tutup</button></div>
     <div class="listcard">
       <button class="act" data-a="copy"><i data-lucide="link"></i>Salin tautan undangan</button>
-      <button class="act" data-a="wa"><i data-lucide="message-circle"></i>Kirim lewat WhatsApp</button>
+      ${g.invitation_type === 'cetak' ? '' : '<button class="act" data-a="wa"><i data-lucide="message-circle"></i>Kirim lewat WhatsApp</button>'}
       <button class="act" data-a="edit"><i data-lucide="pencil"></i>Edit tamu</button>
       <button class="act danger" data-a="del"><i data-lucide="trash-2"></i>Hapus tamu</button>
     </div>`);
@@ -1796,21 +1892,8 @@ async function guestAction(a, g) {
     navigator.clipboard.writeText(guestLink(g)).then(() => toast('Tautan disalin'), () => toast('Gagal menyalin tautan', false));
     closeSheet();
   } else if (a === 'wa') {
-    try {
-      await supabaseClient.rpc('update_guest_by_client', {
-        p_guest_id: g.id,
-        p_group_name: g.group_name,
-        p_category: g.category,
-        p_max_pax: g.max_pax,
-        p_phone: g.phone || null,
-        p_rsvp_status: g.rsvp_status,
-        p_is_checked_in: g.is_checked_in,
-        p_is_sent: true,
-        p_invitation_type: g.invitation_type || 'digital'
-      });
-    } catch (err) {
-      console.log('Update status terkirim:', err);
-    }
+    if (g.invitation_type === 'cetak') return toast('Undangan cetak tidak dikirim lewat WhatsApp.', false);
+    await markGuestSent(g);
     
     const message = waText(g);
     
@@ -1840,23 +1923,16 @@ async function guestAction(a, g) {
   else if (a === 'del') confirmDelete(g);
 }
 
+async function markGuestSent(g) {
+  try {
+    const { data, error } = await supabaseClient.rpc('update_guest_sent_status', { p_guest_id: g.id, p_is_sent: true });
+    if (error || (data && data.success === false)) console.log('Update status terkirim:', error || data);
+  } catch (err) { console.log('Update status terkirim:', err); }
+}
+
 async function sendPendingWA(id) {
   const g = findGuest(id); if (!g) return;
-  try {
-    await supabaseClient.rpc('update_guest_by_client', {
-      p_guest_id: g.id,
-      p_group_name: g.group_name,
-      p_category: g.category,
-      p_max_pax: g.max_pax,
-      p_phone: g.phone || null,
-      p_rsvp_status: g.rsvp_status,
-      p_is_checked_in: g.is_checked_in,
-      p_is_sent: true,
-      p_invitation_type: g.invitation_type || 'digital'
-    });
-  } catch (err) {
-    console.log(err);
-  }
+  await markGuestSent(g);
   
   const message = waText(g);
   
@@ -1900,12 +1976,15 @@ function confirmDelete(g) {
 
 function openGuestSheet(id) {
   const g = id ? findGuest(id) : null;
+  window.__editGuest = g;
   const existingCats = [...new Set(globalData.guests.map(g => g.category).filter(Boolean))];
   const defaultCats = ['Keluarga', 'Teman', 'Tetangga', 'Kolega', 'Umum'];
   const cats = [...new Set([...defaultCats, ...existingCats])];
   const cur = g ? (g.category || 'Umum') : cats[0];
   const currentType = g ? (g.invitation_type || 'digital') : 'digital';
 
+  const sessions = sessionOptions(g ? guestSession(g) : '');
+  const curSession = g ? guestSession(g) : sessions[0];
   const isSentChecked = g ? (g.is_sent || g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen' || g.is_checked_in) : (currentType === 'cetak');
   const isCheckinChecked = g ? g.is_checked_in : false;
   const rsvpVal = g ? (g.invitation_type === 'cetak' ? 'hadir' : (g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen' ? 'absen' : (g.rsvp_status || 'pending'))) : (currentType === 'cetak' ? 'hadir' : 'pending');
@@ -1920,6 +1999,12 @@ function openGuestSheet(id) {
         <select id="gs-type" onchange="onTypeChange(this)">
           <option value="digital" ${currentType === 'digital' ? 'selected' : ''}>Digital</option>
           <option value="cetak" ${currentType === 'cetak' ? 'selected' : ''}>Cetak (Fisik)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Sesi</label>
+        <select id="gs-session">
+          ${sessions.map(x => `<option value="${esc(x)}" ${x === curSession ? 'selected' : ''}>${esc(x)}</option>`).join('')}
         </select>
       </div>
       <div class="field">
@@ -1942,50 +2027,29 @@ function openGuestSheet(id) {
         </div>
       </div>
       ${g ? `
-      <div class="field"><label>RSVP</label><select id="gs-rsvp" onchange="onRsvpChange(this)">
+      <div class="field locked"><label>RSVP</label><select id="gs-rsvp" disabled aria-disabled="true">
         <option value="pending" ${rsvpVal === 'pending' ? 'selected' : ''}>Pending</option>
         <option value="hadir" ${rsvpVal === 'hadir' ? 'selected' : ''}>Hadir</option>
-        <option value="absen" ${rsvpVal === 'absen' ? 'selected' : ''}>Absen</option></select></div>
-      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Terkirim</label><span class="switch"><input type="checkbox" id="gs-sent" ${isSentChecked ? 'checked' : ''} onchange="onSentToggleChange(this)"><span></span></span></div>
-      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Check-In</label><span class="switch"><input type="checkbox" id="gs-checkin" ${isCheckinChecked ? 'checked' : ''} onchange="onCheckinToggleChange(this)"><span></span></span></div>` : ''}
+        <option value="absen" ${rsvpVal === 'absen' ? 'selected' : ''}>Absen</option></select><i data-lucide="lock" style="width:15px;height:15px;color:var(--sub)"></i></div>
+      <div class="field locked"><label style="flex:1;width:auto;color:var(--sub)">Terkirim</label><span class="switch"><input type="checkbox" id="gs-sent" disabled aria-disabled="true" ${isSentChecked ? 'checked' : ''}><span></span></span><i data-lucide="lock" style="width:15px;height:15px;color:var(--sub)"></i></div>
+      <div class="lock-note">RSVP &amp; status terkirim diperbarui otomatis (tamu mengisi RSVP, atau tombol kirim WA) dan tidak bisa diubah manual.</div>
+      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Check-In</label><span class="switch"><input type="checkbox" id="gs-checkin" ${isCheckinChecked ? 'checked' : ''}><span></span></span></div>` : ''}
     </div>`);
   $('gs-save').onclick = () => saveGuest(g);
   if (!g) setTimeout(() => $('gs-name').focus(), 350);
 }
 
 function onTypeChange(sel) {
-  const isCetak = sel.value === 'cetak';
-  const rsvpEl = $('gs-rsvp');
-  const sentEl = $('gs-sent');
-  if (isCetak) {
-    if (rsvpEl) rsvpEl.value = 'hadir';
-    if (sentEl) sentEl.checked = true;
-  }
-}
-
-function onRsvpChange(sel) {
-  const sentToggle = $('gs-sent');
-  if ((sel.value === 'hadir' || sel.value === 'absen') && sentToggle) {
-    sentToggle.checked = true;
-  }
-}
-
-function onSentToggleChange(chk) {
-  const rsvpSel = $('gs-rsvp');
-  const checkinToggle = $('gs-checkin');
-  if (!chk.checked) {
-    if (rsvpSel) rsvpSel.value = 'pending';
-    if (checkinToggle) checkinToggle.checked = false;
-  }
-}
-
-function onCheckinToggleChange(chk) {
-  const sentToggle = $('gs-sent');
-  const rsvpSel = $('gs-rsvp');
-  if (chk.checked) {
-    if (sentToggle) sentToggle.checked = true;
-    if (rsvpSel) rsvpSel.value = 'hadir';
-  }
+  // Pratinjau efek otomatis dari server: Cetak => Hadir + Terkirim; kembali ke Digital => Pending + belum terkirim.
+  const rsvpEl = $('gs-rsvp'), sentEl = $('gs-sent');
+  if (!rsvpEl || !sentEl) return;
+  const orig = window.__editGuest;
+  const same = orig && (orig.invitation_type || 'digital') === sel.value;
+  if (same) {
+    rsvpEl.value = (orig.rsvp_status === 'tidak_hadir' || orig.rsvp_status === 'absen') ? 'absen' : (orig.rsvp_status || 'pending');
+    sentEl.checked = !!(orig.is_sent || orig.rsvp_status === 'hadir' || orig.rsvp_status === 'tidak_hadir' || orig.rsvp_status === 'absen' || orig.is_checked_in);
+  } else if (sel.value === 'cetak') { rsvpEl.value = 'hadir'; sentEl.checked = true; }
+  else { rsvpEl.value = 'pending'; sentEl.checked = false; }
 }
 
 function checkCustomCategory(select) {
@@ -2019,35 +2083,41 @@ async function saveGuest(g) {
   if (!name || isNaN(pax) || pax < 1) return toast('Isi nama dan kuota dengan benar.', false);
   const btn = $('gs-save'); btn.disabled = true;
   
-  if (g) {
-    const isSentVal = invitationType === 'cetak' ? true : ($('gs-sent') ? $('gs-sent').checked : g.is_sent);
-    const isCheckinVal = $('gs-checkin') ? $('gs-checkin').checked : g.is_checked_in;
-    const rsvpVal = invitationType === 'cetak' ? 'hadir' : ($('gs-rsvp') ? $('gs-rsvp').value : g.rsvp_status);
-
-    await supabaseClient.rpc('update_guest_by_client', { 
-      p_guest_id: g.id, 
-      p_group_name: name, 
-      p_category: cat, 
-      p_max_pax: pax, 
-      p_phone: phone,
-      p_rsvp_status: rsvpVal, 
-      p_is_checked_in: isCheckinVal,
-      p_is_sent: isSentVal,
-      p_invitation_type: invitationType
-    });
-  } else {
-    await supabaseClient.rpc('add_guest_by_client', { 
-      p_group_name: name, 
-      p_category: cat, 
-      p_max_pax: pax, 
-      p_phone: phone,
-      p_invitation_type: invitationType
-    });
-  }
+  const session = $('gs-session') ? $('gs-session').value : sessionOptions()[0];
+  let res;
+  try {
+    if (g) {
+      // RSVP & terkirim dikunci: nilai di bawah hanya pengisi parameter, server mengabaikannya.
+      res = await supabaseClient.rpc('update_guest_by_client', {
+        p_guest_id: g.id,
+        p_group_name: name,
+        p_category: cat,
+        p_max_pax: pax,
+        p_phone: phone,
+        p_rsvp_status: g.rsvp_status || 'pending',
+        p_is_checked_in: $('gs-checkin') ? $('gs-checkin').checked : g.is_checked_in,
+        p_is_sent: !!g.is_sent,
+        p_invitation_type: invitationType,
+        p_session: session
+      });
+    } else {
+      res = await supabaseClient.rpc('add_guest_by_client', {
+        p_group_name: name,
+        p_category: cat,
+        p_max_pax: pax,
+        p_phone: phone,
+        p_invitation_type: invitationType,
+        p_session: session
+      });
+    }
+  } catch (err) { res = { error: err }; }
 
   btn.disabled = false;
-  closeSheet(); 
-  toast(g ? 'Tamu diperbarui' : 'Tamu ditambahkan'); 
+  if (res.error || !res.data || res.data.success === false) {
+    return toast((res.data && res.data.message) || 'Gagal menyimpan tamu.', false);
+  }
+  closeSheet();
+  toast(g ? 'Tamu diperbarui' : 'Tamu ditambahkan');
   loadDashboard();
 }
 
@@ -2532,6 +2602,7 @@ checkSession();
   const sb = document.querySelector('#tab-tamu .sbar'); sb.before(head); head.append(sb);
   const STAT = [['all', 'Semua'], ['digital', 'Digital'], ['cetak', 'Cetak'], ['unsent', 'Belum dikirim'], ['pending', 'Menunggu'], ['hadir', 'Hadir'], ['checked_in', 'Check-in'], ['tidak_hadir', 'Absen']];
   const SORT_HTML = '<div class="sortpill" id="sort-pill"><label class="sp-sel"><select id="sort-field" aria-label="Urutkan berdasarkan"><option value="name">Nama</option><option value="updated">Diubah</option><option value="created">Dibuat</option></select></label><button type="button" id="sort-dir"></button></div>';
+  head.insertAdjacentHTML('beforeend', '<div class="mfrow" id="mf-row">' + Object.keys(MF).map(k => `<button type="button" class="mfbtn" data-mf="${k}" aria-haspopup="dialog"></button>`).join('') + '</div>');
   head.insertAdjacentHTML('beforeend', '<div class="chiprow"><div class="chips" id="st-chips">' + STAT.map(([k, l]) => `<button class="chip" data-f="${k}">${l}</button>`).join('') + '</div>' + SORT_HTML + '</div>');
   const syncSort = () => {
     $('sort-field').value = sortField;
@@ -2546,7 +2617,8 @@ checkSession();
   document.addEventListener('click', e => { const b = e.target.closest('#st-chips .chip'); if (!b) return; anim = true; activeFilter = b.dataset.f; renderGuestList(); toList(); });
   const _cat = setCategory;
   window.setCategory = function () { anim = true; _cat.apply(this, arguments); toList(); };
-  window.resetFilters = () => { activeFilter = 'all'; activeCategory = 'all'; $('search-input').value = ''; anim = true; renderCategorySelect(); renderGuestList(); };
+  document.addEventListener('click', e => { const b = e.target.closest('.mfbtn'); if (b) openMultiFilter(b.dataset.mf); });
+  window.resetFilters = () => { activeFilter = 'all'; Object.values(MF).forEach(m => m.set.clear()); $('search-input').value = ''; anim = true; renderCategorySelect(); renderGuestList(); };
 
   const _rg = renderGuestList;
   window.renderGuestList = function () {
@@ -2556,6 +2628,7 @@ checkSession();
     if (!items.length && globalData.guests.length) box.innerHTML = '<div class="empty"><b style="color:var(--ink)">Tidak ada tamu yang cocok</b><br><button class="reset" onclick="resetFilters()">Reset filter</button></div>';
     if (anim && !reduce) items.forEach((el, i) => { el.classList.add('in'); el.style.animationDelay = Math.min(i, 12) * 35 + 'ms'; });
     if (anim) document.querySelectorAll('#st-chips .chip.on').forEach(c => { const r = c.parentElement; r.scrollTo({ left: c.offsetLeft - (r.clientWidth - c.offsetWidth) / 2, behavior: 'smooth' }); });
+    if (window.__pgScroll) { window.__pgScroll = false; toList(); }
     anim = false;
   };
   const _ru = renderUI;
