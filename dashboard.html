@@ -659,12 +659,12 @@ html.lock{overflow:hidden}
 .wdiv{text-align:center;margin:12px 0 0}.wdiv span{background:var(--brand);color:#fff;font-weight:600}
 :root[data-dark="1"] .wdiv span{color:#0b0f1a}
 .wmsg{display:flex;gap:10px;align-items:flex-start;margin-top:10px;cursor:pointer}.wmsg.fresh{animation:wfresh .6s cubic-bezier(.32,.72,0,1) both}
-.cav{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font:600 12px 'Geist Mono',monospace;background:hsl(var(--h) 60% 50% / .16);color:hsl(var(--h) 60% var(--nl))}
-.wb{flex:1;min-width:0;display:flex;gap:10px;background:var(--card);border-radius:4px 18px 18px 18px;padding:10px 12px;box-shadow:var(--shadow);transition:background .9s,box-shadow .9s,transform .25s}.wmsg:active .wb{transform:scale(.985)}
+.cav{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font:600 12px 'Geist Mono',monospace;background:var(--soft);color:var(--brand)}
+.wb{flex:1;min-width:0;display:flex;flex-direction:column;align-items:stretch;gap:0;background:var(--card);border-radius:4px 18px 18px 18px;padding:10px 12px;box-shadow:var(--shadow);transition:background .9s,box-shadow .9s,transform .25s}.wmsg:active .wb{transform:scale(.985)}
 .wmsg.new .wb{background:var(--soft);box-shadow:inset 3px 0 0 var(--brand)}.wchat.read .wmsg.new .wb{background:var(--card);box-shadow:var(--shadow)}
-.wc{flex:1;min-width:0}.wn{font-weight:700;font-size:14px;color:hsl(var(--h) 60% var(--nl))}
+.wc{flex:1;min-width:0}.wn{font-weight:700;font-size:14px;color:var(--ink)}
 .wt{font-size:15px;line-height:1.45;margin-top:3px;white-space:pre-wrap;word-break:break-word}
-.wm{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.wm{display:flex;flex-direction:row;align-items:center;justify-content:flex-end;gap:6px;flex-shrink:0;margin-top:6px}
 .wm .when{font-size:11.5px;color:var(--sub);font-family:'Geist Mono',monospace}.wm .st{font-size:10.5px;padding:3px 8px;gap:5px}
 .wend{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--sub);font-size:12.5px;padding:16px 0 4px}
 .wspin{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:wspin .8s linear infinite}
@@ -697,6 +697,12 @@ html.lock{overflow:hidden}
 .kbar .h{background:var(--green)}.kbar .a{background:#e5484d}.kbar .p{background:var(--amber)}.kbar .u{background:var(--sub);opacity:.4}
 .kleg{font-size:12.5px;color:var(--sub)}
 .kmore{display:flex;justify-content:center;align-items:center;gap:6px;width:100%;padding:13px 0 2px;border-top:1px solid var(--line);color:var(--brand);font-weight:600;font-size:14px}
+
+/* ===== Ucapan & Doa: popup semua ===== */
+.wend.wmore{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:12px;color:var(--brand);font-weight:600;font-size:14px}
+.wend.wmore svg{width:15px;height:15px}
+.wsheet-head{position:sticky;top:-10px;z-index:8;background:var(--bg);margin:0 -16px 10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.wsheet-chat{max-height:calc(88vh - 150px);padding:4px 12px 10px;border-radius:20px}
 </style>
 </head>
 <body>
@@ -844,8 +850,6 @@ html.lock{overflow:hidden}
         <div class="listcard">
           <div class="tabs smooth-scroll" id="filter-tabs">
             <button class="on" data-f="all">Semua</button>
-            <button data-f="digital">Digital</button>
-            <button data-f="cetak">Cetak</button>
             <button data-f="unsent">Unsent</button>
             <button data-f="pending">Pending</button>
             <button data-f="hadir">Hadir</button>
@@ -1066,7 +1070,7 @@ let html5QrCode = null;
 // State untuk Ucapan & Doa
 let wishesData = [], wishesTotal = 0, wishesDone = false, wishesBusy = false, wishInit = false;
 let wishSnap = null, wishUnread = 0, wishVisible = false, wishReadTimer = null;
-const WISH_FETCH = 10;
+const WISH_FETCH = 10, WISH_PREVIEW = 5;
 
 const COLORS = ['#0a3dc2','#12b76a','#f5a524','#e5484d','#7c5cff','#0ea5e9','#ec4899'];
 const $ = id => document.getElementById(id);
@@ -1241,6 +1245,7 @@ async function loadMoreWishes() {
   const ids = new Set(wishesData.map(w => w.id)); (data || []).forEach(w => { if (!ids.has(w.id)) wishesData.push(w); });
   wishesDone = !data || data.length < WISH_FETCH || wishesData.length >= wishesTotal;
   renderWishes();
+  renderWishesSheet();
 }
 function renderWishBadges() {
   const b = $('w-badge'); b.className = 'wbadge' + (wishUnread ? ' on' : '');
@@ -1249,25 +1254,54 @@ function renderWishBadges() {
   $('wish-banner').classList.toggle('hidden', !wishUnread);
   if (wishUnread) { const l = wishesData.find(w => !wishSnap || Date.parse(w.created_at) > wishSnap); $('wb-text').textContent = `${wishUnread} ucapan baru${l ? ' dari ' + l.guest_name + (wishUnread > 1 ? ' dan lainnya' : '') : ''}`; }
 }
+function wishDayLabel(d) {
+  const now = new Date();
+  const day = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diff = Math.round((day(now) - day(d)) / 864e5);
+  if (diff <= 0) return 'Hari ini';
+  if (diff === 1) return 'Kemarin';
+  if (diff < 7) return `${diff} hari yang lalu`;
+  const sameYear = d.getFullYear() === now.getFullYear();
+  return d.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' }) + (sameYear ? '' : ' ' + d.getFullYear());
+}
+function wishListHTML(list, offset = 0) {
+  let html = wishUnread ? `<div class="wdiv"><span>${wishUnread} pesan belum dibaca</span></div>` : '', last = '';
+  list.forEach((w, j) => {
+    const d = new Date(w.created_at), key = d.toDateString();
+    if (key !== last) { html += `<div class="wdate"><span>${esc(wishDayLabel(d))}</span></div>`; last = key; }
+    const g = wishGuest(w), b = g ? guestBadge(g) : null;
+    const isNew = !wishSnap || Date.parse(w.created_at) > wishSnap;
+    html += `<div class="wmsg${isNew ? ' new' : ''}${w._fresh ? ' fresh' : ''}" data-i="${offset + j}"><div class="cav">${esc(initials(w.guest_name))}</div>
+      <div class="wb"><div class="wc"><div class="wn">${esc(w.guest_name || 'Tamu')}</div><div class="wt">${esc(w.message)}</div></div>
+      <div class="wm">${b ? `<span class="st st-${b[0]}">${b[1]}</span>` : ''}<span class="when">${esc(d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }))}</span></div></div></div>`;
+    w._fresh = false;
+  });
+  return html;
+}
 function renderWishes() {
   const box = $('wchat'), st = box.scrollTop;
   $('w-sub').textContent = wishesTotal ? `${wishesTotal} pesan` : 'Belum ada pesan';
   renderWishBadges();
   if (!wishesData.length) { box.innerHTML = '<div class="empty">Belum ada ucapan atau doa masuk.</div>'; icons(); return; }
-  let html = wishUnread ? `<div class="wdiv"><span>${wishUnread} pesan belum dibaca</span></div>` : '', last = '';
-  wishesData.forEach((w, i) => {
-    const d = new Date(w.created_at), day = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-    if (day !== last) { html += `<div class="wdate"><span>${esc(day)}</span></div>`; last = day; }
-    const g = wishGuest(w), b = g ? guestBadge(g) : null, h = hueOf(w.guest_name);
-    const isNew = !wishSnap || Date.parse(w.created_at) > wishSnap;
-    html += `<div class="wmsg${isNew ? ' new' : ''}${w._fresh ? ' fresh' : ''}" data-i="${i}"><div class="cav" style="--h:${h}">${esc(initials(w.guest_name))}</div>
-      <div class="wb"><div class="wc"><div class="wn" style="--h:${h}">${esc(w.guest_name || 'Tamu')}</div><div class="wt">${esc(w.message)}</div></div>
-      <div class="wm"><span class="when">${esc(d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }))}</span>${b ? `<span class="st st-${b[0]}">${b[1]}</span>` : ''}</div></div></div>`;
-    w._fresh = false;
-  });
-  html += wishesDone ? '<div class="wend">Semua ucapan sudah ditampilkan</div>' : '<div class="wend"><i class="wspin"></i>Memuat lainnya…</div>';
+  let html = wishListHTML(wishesData.slice(0, WISH_PREVIEW));
+  html += wishesTotal > WISH_PREVIEW
+    ? `<button type="button" class="wend wmore" onclick="openWishesSheet()">Lihat semua ${wishesTotal} ucapan <i data-lucide="chevron-right"></i></button>`
+    : '<div class="wend">Semua ucapan sudah ditampilkan</div>';
   box.innerHTML = html; box.scrollTop = st; icons();
+}
+function renderWishesSheet() {
+  const box = $('wchat-all'); if (!box) return;
+  const st = box.scrollTop;
+  box.innerHTML = wishListHTML(wishesData) + (wishesDone ? `<div class="wend">Semua ${wishesTotal} ucapan sudah ditampilkan</div>` : '<div class="wend"><i class="wspin"></i>Memuat lainnya…</div>');
+  box.scrollTop = st; icons();
   if (!wishesDone && box.scrollHeight <= box.clientHeight + 4) loadMoreWishes();
+}
+function openWishesSheet() {
+  openSheet(`<div class="sheet-head wsheet-head"><h3>Ucapan &amp; Doa</h3><button onclick="closeSheet()">Tutup</button></div>
+    <div class="wchat wsheet-chat" id="wchat-all"></div>`);
+  renderWishesSheet();
+  $('wchat-all').addEventListener('scroll', e => { const b = e.target; if (b.scrollTop + b.clientHeight >= b.scrollHeight - 120) loadMoreWishes(); }, { passive: true });
+  $('wchat-all').addEventListener('click', e => { const m = e.target.closest('.wmsg'); if (m) openWish(+m.dataset.i); });
 }
 function addWishes(arr, live) {
   const ids = new Set(wishesData.map(w => w.id)), fresh = arr.filter(w => w && !ids.has(w.id)); if (!fresh.length) return;
@@ -1298,7 +1332,6 @@ function watchWishes(eid) {
   setInterval(() => { if (!document.hidden) pollWishes(); }, 60000);
   try { supabaseClient.channel('wishes-' + eid).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'wishes', filter: 'event_id=eq.' + eid }, p => addWishes([p.new], true)).subscribe(); } catch (e) {}
 }
-$('wchat').addEventListener('scroll', e => { const b = e.target; if (b.scrollTop + b.clientHeight >= b.scrollHeight - 140) loadMoreWishes(); }, { passive: true });
 $('wchat').addEventListener('click', e => { const m = e.target.closest('.wmsg'); if (m) openWish(+m.dataset.i); });
 function openWish(i) {
   const w = wishesData[i]; if (!w) return; const g = wishGuest(w), b = g ? guestBadge(g) : null;
@@ -1657,7 +1690,6 @@ function renderGuestList() {
           <div class="n">${esc(g.group_name)}</div>
           <div class="tags">
             <span class="tag">${esc(g.category)}</span>
-            <span class="tag">${esc(guestSession(g))}</span>
             <span class="st st-${k}">${txt}</span>
           </div>
         </div>
@@ -2644,7 +2676,7 @@ checkSession();
 
   const head = document.createElement('div'); head.className = 'sticky-head';
   const sb = document.querySelector('#tab-tamu .sbar'); sb.before(head); head.append(sb);
-  const STAT = [['all', 'Semua'], ['digital', 'Digital'], ['cetak', 'Cetak'], ['unsent', 'Belum dikirim'], ['pending', 'Menunggu'], ['hadir', 'Hadir'], ['checked_in', 'Check-in'], ['tidak_hadir', 'Absen']];
+  const STAT = [['all', 'Semua'], ['unsent', 'Belum dikirim'], ['pending', 'Menunggu'], ['hadir', 'Hadir'], ['checked_in', 'Check-in'], ['tidak_hadir', 'Absen']];
   const SORT_HTML = '<div class="sortpill" id="sort-pill"><label class="sp-sel"><select id="sort-field" aria-label="Urutkan berdasarkan"><option value="name">Nama</option><option value="updated">Diubah</option><option value="created">Dibuat</option></select></label><button type="button" id="sort-dir"></button></div>';
   head.insertAdjacentHTML('beforeend', '<div class="chiprow"><div class="chips" id="st-chips">' + STAT.map(([k, l]) => `<button class="chip" data-f="${k}">${l}</button>`).join('') + '</div>' + SORT_HTML + '</div>');
   const syncSort = () => {
