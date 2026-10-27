@@ -363,10 +363,16 @@ input, select, textarea { font-size: 16px !important; }
 .tile.g{background:linear-gradient(150deg,#22d184,#0ea960)}
 .topbar h1{letter-spacing:-.03em}
 
-.sticky-head{position:sticky;top:0;z-index:20;margin:0 -16px;padding:calc(env(safe-area-inset-top) + 8px) 16px 10px;background:var(--bgs);-webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6);transition:transform .45s var(--ease)}
-.sticky-head.away{transform:translateY(-110%)}
+.sticky-head{position:sticky;top:0;z-index:20;margin:0 -18px;padding:12px 18px 10px;background:var(--card);border-radius:26px 26px 0 0}
+.listcard.gcard{padding-top:0}
 .sticky-head>*+*{margin-top:10px}
-.sticky-head .sbar{box-shadow:none;border:1px solid var(--line)}
+.sticky-head .sbar{box-shadow:none;border:1px solid var(--line);background:var(--bg)}
+.sticky-head .sortpill{background:var(--bg)}
+.sticky-head .chip{background:var(--bg)}
+.sticky-head .chiprow .chips{margin:0 0 0 -18px;padding:12px 18px 2px}
+.sticky-head::before,.sticky-head::after{content:"";position:absolute;top:0;width:26px;height:26px;pointer-events:none}
+.sticky-head::before{left:0;background:radial-gradient(circle at 26px 26px,transparent 25.5px,var(--bg) 26px)}
+.sticky-head::after{right:0;background:radial-gradient(circle at 0 26px,transparent 25.5px,var(--bg) 26px)}
 #filter-tabs{display:none!important}
 .chips{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;position:relative;margin:0 -16px;padding:12px 16px 2px;scroll-snap-type:x proximity;overscroll-behavior-x:contain;-webkit-mask-image:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 28px),transparent)}
 .chips::-webkit-scrollbar{display:none}
@@ -472,7 +478,10 @@ html.lock{overflow:hidden}
 #scanner-overlay .ib svg{width:18px;height:18px}
 #scanner-overlay .ib.spin svg{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+#scanner-overlay .sc-top{position:sticky;top:0;z-index:12;background:var(--bg);padding:0 16px 12px}
+#scanner-overlay .sc-top .topbar{padding:calc(env(safe-area-inset-top) + 18px) 4px 6px}
 #scanner-overlay .page{padding:8px 16px calc(40px + env(safe-area-inset-bottom))}
+#scanner-overlay .page .view{margin-top:12px}
 #scanner-overlay .page>*+*{margin-top:12px}
 #scanner-overlay .card{background:var(--card);border-radius:26px;padding:20px;box-shadow:var(--shadow)}
 #scanner-overlay .ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -654,7 +663,7 @@ html.lock{overflow:hidden}
 .wtitle{flex:1;min-width:0}.wtitle h3{margin:0;font-size:18px;font-weight:700}.wtitle small{color:var(--sub);font-size:13px}
 .wbadge{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:600;background:var(--tag);color:var(--sub);flex-shrink:0}
 .wbadge svg{width:14px;height:14px}.wbadge.on{background:var(--red-ink);color:#fff;animation:wpop .5s var(--spring,cubic-bezier(.34,1.56,.64,1))}
-.wchat{max-height:600px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:4px 14px 14px;background:var(--bg);scrollbar-width:thin}
+.wchat{overflow:visible;padding:4px 14px 12px;background:var(--bg)}
 .wdate{text-align:center;margin:14px 0 2px}.wdate span,.wdiv span{font-size:11.5px;background:var(--soft);color:var(--sub);padding:3px 12px;border-radius:999px}
 .wdiv{text-align:center;margin:12px 0 0}.wdiv span{background:var(--brand);color:#fff;font-weight:600}
 :root[data-dark="1"] .wdiv span{color:#0b0f1a}
@@ -662,10 +671,12 @@ html.lock{overflow:hidden}
 .cav{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font:600 12px 'Geist Mono',monospace;background:var(--soft);color:var(--brand)}
 .wb{flex:1;min-width:0;display:flex;flex-direction:column;align-items:stretch;gap:0;background:var(--card);border-radius:4px 18px 18px 18px;padding:10px 12px;box-shadow:var(--shadow);transition:background .9s,box-shadow .9s,transform .25s}.wmsg:active .wb{transform:scale(.985)}
 .wmsg.new .wb{background:var(--soft);box-shadow:inset 3px 0 0 var(--brand)}.wchat.read .wmsg.new .wb{background:var(--card);box-shadow:var(--shadow)}
-.wc{flex:1;min-width:0}.wn{font-weight:700;font-size:14px;color:var(--ink)}
+.wh{display:flex;align-items:center;gap:8px;min-width:0}
+.wn{flex:1;min-width:0;font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wmeta{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.wmeta .when{font-size:11.5px;color:var(--sub);font-family:'Geist Mono',monospace}
+.wmeta .st{font-size:10.5px;padding:3px 8px;gap:5px}
 .wt{font-size:15px;line-height:1.45;margin-top:3px;white-space:pre-wrap;word-break:break-word}
-.wm{display:flex;flex-direction:row;align-items:center;justify-content:flex-end;gap:6px;flex-shrink:0;margin-top:6px}
-.wm .when{font-size:11.5px;color:var(--sub);font-family:'Geist Mono',monospace}.wm .st{font-size:10.5px;padding:3px 8px;gap:5px}
 .wend{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--sub);font-size:12.5px;padding:16px 0 4px}
 .wspin{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:wspin .8s linear infinite}
 .wbanner{display:flex;align-items:center;gap:10px;width:100%;padding:13px 16px;border-radius:20px;background:var(--brand);color:#fff;font-size:15px;font-weight:500;box-shadow:0 14px 28px -12px rgba(10,61,194,.6);animation:wfresh .6s cubic-bezier(.32,.72,0,1) both}
@@ -675,19 +686,22 @@ html.lock{overflow:hidden}
 .wfull{padding:16px 0 8px;font-size:16px;line-height:1.55;white-space:pre-wrap;word-break:break-word}.wfoot{display:flex;align-items:center;gap:10px;color:var(--sub);font-size:13px;padding:0 0 14px}
 
 /* ===== Tahap 2: kartu Undangan & Kategori Tamu ===== */
-.und .utop{display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px}
-.und .kpi{margin:0;font-size:64px}
-.usisa{text-align:right}.usisa small{display:block;color:var(--sub);font-size:13px}.usisa b{font:600 28px 'Geist Mono',monospace;letter-spacing:-.02em}
+.und{padding:20px}
+.und .lbl{color:#fff}
+.und .lbl svg{opacity:.75}
+.und .ringwrap{margin-top:12px}
+.und .ring{width:150px;height:150px}
+.und .ring .in b{font-size:42px;letter-spacing:-.02em}
+.und .ring .in small{font-size:11px;text-transform:uppercase;letter-spacing:.08em;opacity:.85;margin-top:3px}
+.und .side{gap:8px}
+.und .side .sr small{font-family:'Geist Mono',monospace;font-size:11.5px;opacity:.72;margin-left:5px}
 .uqbar{height:10px;border-radius:99px;background:var(--soft);margin:16px 0 8px;overflow:hidden}
 .uqbar i{display:block;height:100%;width:0;border-radius:inherit;background:var(--brand);transition:width 1.1s cubic-bezier(.32,.72,0,1),background .3s}
-.uqbar.warn i{background:var(--amber)}.uqbar.full i{background:#e5484d}
 .uqcap{display:flex;justify-content:space-between;color:var(--sub);font-size:13px}.uqcap b{font-family:'Geist Mono',monospace;font-weight:600;color:var(--ink)}
-.usplit{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
-.ut{border-radius:18px;background:var(--bg);padding:14px}
-.ut .uh{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--sub)}
-.ui{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff}.ui.d{background:var(--brand)}.ui.c{background:var(--amber-ink)}.ui svg{width:13px;height:13px}
-.ut b{display:block;font:600 30px 'Geist Mono',monospace;margin-top:10px;line-height:1}.ut small{display:block;color:var(--sub);font-size:12.5px;margin-top:4px}
-.ut .mini{height:4px;border-radius:99px;background:var(--line);margin-top:10px;overflow:hidden}.ut .mini i{display:block;height:100%;border-radius:inherit;transition:width 1s cubic-bezier(.32,.72,0,1)}
+.und .uqbar{background:rgba(255,255,255,.22)}
+.und .uqbar i{background:#fff}
+.und .uqcap{color:rgba(255,255,255,.82);font-size:12.5px}
+.und .uqcap b{color:#fff}
 .klegend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--sub);margin:-2px 0 4px}.klegend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
 .kr{display:flex;align-items:center;gap:12px;width:100%;padding:13px 0;text-align:left;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .2s}.kr+.kr{border-top:1px solid var(--line)}.kr:active{transform:scale(.985);opacity:.7}
 .kr .sq{width:46px;height:46px;border-radius:15px}
@@ -697,12 +711,29 @@ html.lock{overflow:hidden}
 .kbar .h{background:var(--green)}.kbar .a{background:#e5484d}.kbar .p{background:var(--amber)}.kbar .u{background:var(--sub);opacity:.4}
 .kleg{font-size:12.5px;color:var(--sub)}
 .kmore{display:flex;justify-content:center;align-items:center;gap:6px;width:100%;padding:13px 0 2px;border-top:1px solid var(--line);color:var(--brand);font-weight:600;font-size:14px}
+.ksum{display:flex;align-items:center;gap:16px;padding:4px 0 10px}
+.kdonut{position:relative;width:132px;height:132px;flex-shrink:0}
+.kdonut svg{width:100%;height:100%;transform:rotate(-90deg)}
+.kdonut circle{fill:none;stroke-width:15}
+.kd-bg{stroke:var(--soft)}
+.kdc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.kdc b{font:600 32px 'Geist Mono',monospace;line-height:1;letter-spacing:-.02em}
+.kdc small{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--sub)}
+.kleg2{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.kl2{display:flex;align-items:center;gap:8px;min-width:0;font-size:13.5px}
+.kl2>i{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+.kl2 span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kl2 b{font:600 13px 'Geist Mono',monospace}
+.kl2 small{font:600 11.5px 'Geist Mono',monospace;color:var(--sub);width:34px;text-align:right}
 
 /* ===== Ucapan & Doa: popup semua ===== */
-.wend.wmore{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:12px;color:var(--brand);font-weight:600;font-size:14px}
-.wend.wmore svg{width:15px;height:15px}
+.wchat-foot{display:flex;justify-content:center;align-items:center;border-top:1px solid var(--line);margin-top:2px}
+.wchat-foot[hidden]{display:none}
+.wchat-foot button{display:flex;align-items:center;gap:6px;padding:14px 18px;font-size:14px;font-weight:600;color:var(--brand)}
+.wchat-foot button svg{width:15px;height:15px}
+.wchat-foot .note{padding:14px 18px;font-size:13px;color:var(--sub)}
 .wsheet-head{position:sticky;top:-10px;z-index:8;background:var(--bg);margin:0 -16px 10px;padding:12px 16px;border-bottom:1px solid var(--line)}
-.wsheet-chat{max-height:calc(88vh - 150px);padding:4px 12px 10px;border-radius:20px}
+.wsheet-chat{max-height:calc(88vh - 150px);padding:4px 12px 10px;border-radius:20px;overflow-y:auto;overscroll-behavior:contain}
 </style>
 </head>
 <body>
@@ -744,18 +775,21 @@ html.lock{overflow:hidden}
           </div>
         </div>
 
-        <div class="card und">
+        <div class="card brandcard und">
           <div class="lbl">Total Undangan <i data-lucide="mail"></i></div>
-          <div class="utop">
-            <div class="kpi" id="stat-total">0</div>
-            <div class="usisa"><small>Sisa kuota</small><b id="stat-kuota">0</b></div>
+          <div class="ringwrap">
+            <div class="ring">
+              <svg viewBox="0 0 100 100"><circle class="bgc" cx="50" cy="50" r="44"/><circle class="fgc" id="uq-ring" cx="50" cy="50" r="44" stroke-dasharray="276.46" stroke-dashoffset="276.46"/></svg>
+              <div class="in"><b id="stat-total">0</b><small>Undangan</small></div>
+            </div>
+            <div class="side">
+              <div class="sr"><span>Digital<small id="sh-digital">0%</small></span><b id="stat-digital">0</b></div>
+              <div class="sr"><span>Cetak<small id="sh-cetak">0%</small></span><b id="stat-cetak">0</b></div>
+              <div class="sr"><span>Sisa kuota</span><b id="stat-kuota">0</b></div>
+            </div>
           </div>
           <div class="uqbar" id="uq-wrap"><i id="uq-bar"></i></div>
           <div class="uqcap"><span id="uq-cap">0 dari 100 kuota terpakai</span><b id="uq-pct">0%</b></div>
-          <div class="usplit">
-            <div class="ut"><div class="uh"><span class="ui d"><i data-lucide="globe"></i></span>Digital</div><b id="stat-digital">0</b><small id="sh-digital">0% dari total</small><div class="mini"><i id="mb-digital" style="width:0;background:var(--brand)"></i></div></div>
-            <div class="ut"><div class="uh"><span class="ui c"><i data-lucide="printer"></i></span>Cetak</div><b id="stat-cetak">0</b><small id="sh-cetak">0% dari total</small><div class="mini"><i id="mb-cetak" style="width:0;background:var(--amber-ink)"></i></div></div>
-          </div>
         </div>
 
         <div class="grid2">
@@ -821,6 +855,7 @@ html.lock{overflow:hidden}
 
         <div class="card">
           <div class="ch"><h3>Kategori Tamu</h3><button class="addcat" onclick="addCategory()" aria-label="Tambah kategori" title="Tambah kategori"><i data-lucide="plus"></i></button></div>
+          <div id="cat-summary"></div>
           <div class="klegend"><span><i style="background:var(--green)"></i>Hadir</span><span><i style="background:#e5484d"></i>Absen</span><span><i style="background:var(--amber)"></i>Menunggu</span><span><i style="background:var(--sub);opacity:.4"></i>Belum dikirim</span></div>
           <div id="cat-group"></div>
         </div>
@@ -833,6 +868,7 @@ html.lock{overflow:hidden}
             <button class="wbadge" id="w-badge" onclick="markWishesRead(true)" aria-label="Tandai semua dibaca"></button>
           </div>
           <div class="wchat" id="wchat"><div class="empty">Memuat ucapan…</div></div>
+          <div class="wchat-foot" id="w-foot" hidden></div>
         </div>
       </div>
     </div>
@@ -847,7 +883,7 @@ html.lock{overflow:hidden}
           <button type="button" class="sfbtn" id="mf-open" aria-label="Filter kategori, jenis undangan, sesi" aria-haspopup="dialog"><i data-lucide="sliders-horizontal"></i><span class="cnt hidden" id="mf-cnt"></span></button>
         </div>
 
-        <div class="listcard">
+        <div class="listcard gcard">
           <div class="tabs smooth-scroll" id="filter-tabs">
             <button class="on" data-f="all">Semua</button>
             <button data-f="unsent">Unsent</button>
@@ -971,22 +1007,24 @@ html.lock{overflow:hidden}
 <!-- SCANNER OVERLAY -->
 <div id="scanner-overlay" class="hidden">
   <div style="width:100%;max-width:480px;position:relative;">
-    <header class="topbar">
-      <div>
-        <h1>Scanner</h1>
-        <p><span class="live"></span>Mode Operator Door</p>
-      </div>
-      <div class="top-actions">
-        <button class="ib" onclick="refreshScannerGuests()" id="scanner-btn-refresh" aria-label="Muat ulang data"><i data-lucide="refresh-cw"></i></button>
-        <button class="ib" onclick="closeScannerOverlay()" aria-label="Tutup Scanner"><i data-lucide="x"></i></button>
-      </div>
-    </header>
-
-    <div class="page">
+    <div class="sc-top">
+      <header class="topbar">
+        <div>
+          <h1>Scanner</h1>
+          <p><span class="live"></span>Mode Operator Door</p>
+        </div>
+        <div class="top-actions">
+          <button class="ib" onclick="refreshScannerGuests()" id="scanner-btn-refresh" aria-label="Muat ulang data"><i data-lucide="refresh-cw"></i></button>
+          <button class="ib" onclick="closeScannerOverlay()" aria-label="Tutup Scanner"><i data-lucide="x"></i></button>
+        </div>
+      </header>
       <div class="card-switch" id="scanner-mode-switch">
         <button class="active" onclick="switchScannerMode('scan')"><i data-lucide="scan-line"></i>Scan QR</button>
         <button onclick="switchScannerMode('manual')"><i data-lucide="search"></i>Cari Manual</button>
       </div>
+    </div>
+
+    <div class="page">
 
       <div id="scanner-view-scan" class="view">
         <div class="card" style="padding:14px">
@@ -1262,7 +1300,7 @@ function wishDayLabel(d) {
   if (diff === 1) return 'Kemarin';
   if (diff < 7) return `${diff} hari yang lalu`;
   const sameYear = d.getFullYear() === now.getFullYear();
-  return d.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' }) + (sameYear ? '' : ' ' + d.getFullYear());
+  return d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' }) + (sameYear ? '' : ' ' + d.getFullYear());
 }
 function wishListHTML(list, offset = 0) {
   let html = wishUnread ? `<div class="wdiv"><span>${wishUnread} pesan belum dibaca</span></div>` : '', last = '';
@@ -1272,8 +1310,8 @@ function wishListHTML(list, offset = 0) {
     const g = wishGuest(w), b = g ? guestBadge(g) : null;
     const isNew = !wishSnap || Date.parse(w.created_at) > wishSnap;
     html += `<div class="wmsg${isNew ? ' new' : ''}${w._fresh ? ' fresh' : ''}" data-i="${offset + j}"><div class="cav">${esc(initials(w.guest_name))}</div>
-      <div class="wb"><div class="wc"><div class="wn">${esc(w.guest_name || 'Tamu')}</div><div class="wt">${esc(w.message)}</div></div>
-      <div class="wm">${b ? `<span class="st st-${b[0]}">${b[1]}</span>` : ''}<span class="when">${esc(d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }))}</span></div></div></div>`;
+      <div class="wb"><div class="wh"><span class="wn">${esc(w.guest_name || 'Tamu')}</span><span class="wmeta">${b ? `<span class="st st-${b[0]}">${b[1]}</span>` : ''}<span class="when">${esc(d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }))}</span></span></div>
+      <div class="wt">${esc(w.message)}</div></div></div>`;
     w._fresh = false;
   });
   return html;
@@ -1282,12 +1320,16 @@ function renderWishes() {
   const box = $('wchat'), st = box.scrollTop;
   $('w-sub').textContent = wishesTotal ? `${wishesTotal} pesan` : 'Belum ada pesan';
   renderWishBadges();
-  if (!wishesData.length) { box.innerHTML = '<div class="empty">Belum ada ucapan atau doa masuk.</div>'; icons(); return; }
-  let html = wishListHTML(wishesData.slice(0, WISH_PREVIEW));
-  html += wishesTotal > WISH_PREVIEW
-    ? `<button type="button" class="wend wmore" onclick="openWishesSheet()">Lihat semua ${wishesTotal} ucapan <i data-lucide="chevron-right"></i></button>`
-    : '<div class="wend">Semua ucapan sudah ditampilkan</div>';
-  box.innerHTML = html; box.scrollTop = st; icons();
+  const foot = $('w-foot');
+  if (!wishesData.length) { box.innerHTML = '<div class="empty">Belum ada ucapan atau doa masuk.</div>'; if (foot) foot.hidden = true; icons(); return; }
+  box.innerHTML = wishListHTML(wishesData.slice(0, WISH_PREVIEW)); box.scrollTop = st;
+  if (foot) {
+    foot.hidden = false;
+    foot.innerHTML = wishesTotal > WISH_PREVIEW
+      ? `<button type="button" onclick="openWishesSheet()">Lihat semua ${wishesTotal} ucapan <i data-lucide="chevron-right"></i></button>`
+      : '<span class="note">Semua ucapan sudah ditampilkan</span>';
+  }
+  icons();
 }
 function renderWishesSheet() {
   const box = $('wchat-all'); if (!box) return;
@@ -1375,10 +1417,10 @@ function renderUI() {
   const totalCetak = guests.filter(g => g.invitation_type === 'cetak').length, totalDigital = guests.length - totalCetak;
   const share = n => guests.length ? Math.round(n / guests.length * 100) : 0;
   $('stat-digital').textContent = totalDigital; $('stat-cetak').textContent = totalCetak;
-  $('sh-digital').textContent = share(totalDigital) + '% dari total'; $('sh-cetak').textContent = share(totalCetak) + '% dari total';
-  $('mb-digital').style.width = share(totalDigital) + '%'; $('mb-cetak').style.width = share(totalCetak) + '%';
+  $('sh-digital').textContent = share(totalDigital) + '%'; $('sh-cetak').textContent = share(totalCetak) + '%';
   const usedPct = Math.min(100, Math.round(totalGuestsCount / maxQuota * 100));
   $('uq-bar').style.width = usedPct + '%'; $('uq-wrap').className = 'uqbar' + (totalGuestsCount >= maxQuota ? ' full' : usedPct >= 90 ? ' warn' : '');
+  $('uq-ring').style.strokeDashoffset = 276.46 * (1 - Math.min(1, totalGuestsCount / maxQuota));
   $('uq-cap').textContent = totalGuestsCount >= maxQuota ? 'Kuota penuh' : usedPct >= 90 ? 'Kuota hampir habis' : `${totalGuestsCount} dari ${maxQuota} kuota terpakai`;
   $('uq-pct').textContent = usedPct + '%';
   $('stat-kuota').textContent = Math.max(0, maxQuota - totalGuestsCount);
@@ -1505,7 +1547,8 @@ async function submitEditEvent(e) {
 let catExpanded = false;
 function renderCategories() {
   const box = $('cat-group'), gs = (globalData && globalData.guests) || [];
-  if (!gs.length) { box.innerHTML = '<div class="empty">Belum ada kategori.<br>Tambahkan tamu pertama untuk membuat kategori.</div>'; return; }
+  const sumBox = $('cat-summary');
+  if (!gs.length) { if (sumBox) sumBox.innerHTML = ''; box.innerHTML = '<div class="empty">Belum ada kategori.<br>Tambahkan tamu pertama untuk membuat kategori.</div>'; return; }
   const iconFor = c => ({ Keluarga: 'house', Teman: 'heart', Tetangga: 'users', Kolega: 'briefcase', VIP: 'crown', Umum: 'users' })[c] || 'tag';
   const m = new Map();
   gs.forEach(g => {
@@ -1518,11 +1561,24 @@ function renderCategories() {
   });
   const all = [...m.values()].sort((a, b) => b.total - a.total), LIMIT = 4;
   const rows = catExpanded ? all : all.slice(0, LIMIT);
+  if (sumBox) {
+    const C = 276.46; let acc = 0;
+    const segs = all.map((c, i) => {
+      const len = C * (c.total / gs.length);
+      const seg = `<circle cx="50" cy="50" r="44" stroke="${COLORS[i % COLORS.length]}" stroke-dasharray="${Math.max(0, len - 2).toFixed(2)} ${C}" stroke-dashoffset="${(-acc).toFixed(2)}"/>`;
+      acc += len; return seg;
+    }).join('');
+    sumBox.innerHTML = `<div class="ksum">
+      <div class="kdonut"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="kd-bg" cx="50" cy="50" r="44"/>${segs}</svg>
+        <div class="kdc"><b>${gs.length}</b><small>Tamu</small></div></div>
+      <div class="kleg2">${all.map((c, i) => `<div class="kl2"><i style="background:${COLORS[i % COLORS.length]}"></i><span>${esc(c.name)}</span><b>${c.total}</b><small>${Math.round(c.total / gs.length * 100)}%</small></div>`).join('')}</div>
+    </div>`;
+  }
   box.innerHTML = rows.map(c => {
     const seg = [['h', c.h, 'hadir'], ['a', c.a, 'absen'], ['p', c.p, 'menunggu'], ['u', c.u, 'belum dikirim']].filter(s => s[1]);
     return `<button class="kr" data-cat="${esc(c.name)}"><span class="sq"><i data-lucide="${iconFor(c.name)}"></i></span>
-      <div class="kinfo"><div class="kr1"><span class="n">${esc(c.name)}</span><span class="kshare">${Math.round(c.total / gs.length * 100)}%</span></div>
-        <div class="ks">${c.total} undangan · ${c.pax} pax</div>
+      <div class="kinfo"><div class="kr1"><span class="n">${esc(c.name)}</span><span class="kshare">${c.pax} pax</span></div>
+        <div class="ks">${c.total} undangan</div>
         <div class="kbar">${seg.map(s => `<i class="${s[0]}" style="flex:${s[1]}"></i>`).join('')}</div>
         <div class="kleg">${seg.map(s => s[1] + ' ' + s[2]).join(' · ')}</div></div>
       <i data-lucide="chevron-right" class="chev"></i></button>`;
@@ -2660,7 +2716,7 @@ checkSession();
   }
   function playRings() {
     if (reduce) return;
-    ['ring-fg', 'rsvp-ring-fg'].forEach(id => { const c = $(id), to = c.style.strokeDashoffset; c.style.transition = 'none'; c.style.strokeDashoffset = '276.46'; c.getBoundingClientRect(); c.style.transition = ''; c.style.strokeDashoffset = to; });
+    ['uq-ring', 'ring-fg', 'rsvp-ring-fg'].forEach(id => { const c = $(id), to = c.style.strokeDashoffset; c.style.transition = 'none'; c.style.strokeDashoffset = '276.46'; c.getBoundingClientRect(); c.style.transition = ''; c.style.strokeDashoffset = to; });
   }
   function enter(id) { const t = $(id); if (!t || reduce) return; t.classList.remove('tab-in'); void t.offsetWidth; t.classList.add('tab-in'); }
 
@@ -2675,7 +2731,8 @@ checkSession();
   const ro = new ResizeObserver(placeAll); ro.observe(document.querySelector('.pillnav')); ro.observe($('stat-switch'));
 
   const head = document.createElement('div'); head.className = 'sticky-head';
-  const sb = document.querySelector('#tab-tamu .sbar'); sb.before(head); head.append(sb);
+  const sb = document.querySelector('#tab-tamu .sbar'); head.append(sb);
+  const gcard = document.querySelector('#tab-tamu .listcard.gcard'); (gcard || sb.parentElement).prepend(head);
   const STAT = [['all', 'Semua'], ['unsent', 'Belum dikirim'], ['pending', 'Menunggu'], ['hadir', 'Hadir'], ['checked_in', 'Check-in'], ['tidak_hadir', 'Absen']];
   const SORT_HTML = '<div class="sortpill" id="sort-pill"><label class="sp-sel"><select id="sort-field" aria-label="Urutkan berdasarkan"><option value="name">Nama</option><option value="updated">Diubah</option><option value="created">Dibuat</option></select></label><button type="button" id="sort-dir"></button></div>';
   head.insertAdjacentHTML('beforeend', '<div class="chiprow"><div class="chips" id="st-chips">' + STAT.map(([k, l]) => `<button class="chip" data-f="${k}">${l}</button>`).join('') + '</div>' + SORT_HTML + '</div>');
@@ -2727,7 +2784,6 @@ checkSession();
   addEventListener('scroll', () => {
     const y = scrollY, w = $('nav-container-wrap'), dn = y > ly + 6, up = y < ly - 6;
     if (dn && y > 80) w.classList.add('min'); else if (up || y < 40) w.classList.remove('min');
-    if (dn && y > 140) head.classList.add('away'); else if (up || y < 40) head.classList.remove('away');
     ly = y;
   }, { passive: true });
   const lock = () => document.documentElement.classList.toggle('lock', $('sheet').classList.contains('open') || !$('scanner-overlay').classList.contains('hidden'));
