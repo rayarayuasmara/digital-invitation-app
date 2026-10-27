@@ -2056,29 +2056,45 @@ function openGuestSheet(id) {
         </div>
       </div>
       ${g ? `
-      <div class="field locked"><label>RSVP</label><span id="gs-rsvp-txt" class="ro-val"></span><i data-lucide="lock" style="width:15px;height:15px;color:var(--sub)"></i></div>
-      <div class="field locked"><label>Terkirim</label><span id="gs-sent-txt" class="ro-val"></span><i data-lucide="lock" style="width:15px;height:15px;color:var(--sub)"></i></div>
-      <div class="lock-note">RSVP &amp; status terkirim diperbarui otomatis (tamu mengisi RSVP, atau tombol kirim WA) dan tidak bisa diubah manual.</div>
-      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Check-In</label><span class="switch"><input type="checkbox" id="gs-checkin" ${isCheckinChecked ? 'checked' : ''}><span></span></span></div>` : ''}
+      <div class="field"><label>RSVP</label><select id="gs-rsvp" onchange="onRsvpChange(this)">
+        <option value="pending" ${rsvpVal === 'pending' ? 'selected' : ''}>Pending</option>
+        <option value="hadir" ${rsvpVal === 'hadir' ? 'selected' : ''}>Hadir</option>
+        <option value="absen" ${rsvpVal === 'absen' ? 'selected' : ''}>Absen</option></select></div>
+      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Terkirim</label><span class="switch"><input type="checkbox" id="gs-sent" ${isSentChecked ? 'checked' : ''} onchange="onSentToggleChange(this)"><span></span></span></div>
+      <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Check-In</label><span class="switch"><input type="checkbox" id="gs-checkin" ${isCheckinChecked ? 'checked' : ''} onchange="onCheckinToggleChange(this)"><span></span></span></div>` : ''}
     </div>`);
-  if (g) paintLocked(rsvpVal, !!isSentChecked);
   $('gs-save').onclick = () => saveGuest(g);
   if (!g) setTimeout(() => $('gs-name').focus(), 350);
 }
 
-const RSVP_TXT = { pending: 'Pending', hadir: 'Hadir', absen: 'Absen' };
-function paintLocked(rsvp, sent) {
-  const r = $('gs-rsvp-txt'), t = $('gs-sent-txt'); if (!r || !t) return;
-  r.textContent = RSVP_TXT[rsvp] || 'Pending'; t.textContent = sent ? 'Ya' : 'Belum';
-}
 function onTypeChange(sel) {
-  // Pratinjau efek otomatis dari server: Cetak => Hadir + Terkirim; kembali ke Digital => Pending + belum terkirim.
-  const orig = window.__editGuest; if (!orig) return;
-  if ((orig.invitation_type || 'digital') === sel.value) {
-    const st = (orig.rsvp_status === 'tidak_hadir' || orig.rsvp_status === 'absen') ? 'absen' : (orig.rsvp_status || 'pending');
-    paintLocked(st, !!(orig.is_sent || orig.rsvp_status === 'hadir' || orig.rsvp_status === 'tidak_hadir' || orig.rsvp_status === 'absen' || orig.is_checked_in));
-  } else if (sel.value === 'cetak') paintLocked('hadir', true);
-  else paintLocked('pending', false);
+  const isCetak = sel.value === 'cetak';
+  const rsvpEl = $('gs-rsvp'), sentEl = $('gs-sent');
+  if (isCetak) {            // Cetak otomatis Hadir + Terkirim
+    if (rsvpEl) rsvpEl.value = 'hadir';
+    if (sentEl) sentEl.checked = true;
+  }
+}
+
+function onRsvpChange(sel) {
+  const sentToggle = $('gs-sent');
+  if ((sel.value === 'hadir' || sel.value === 'absen') && sentToggle) sentToggle.checked = true;
+}
+
+function onSentToggleChange(chk) {
+  const rsvpSel = $('gs-rsvp'), checkinToggle = $('gs-checkin');
+  if (!chk.checked) {
+    if (rsvpSel) rsvpSel.value = 'pending';
+    if (checkinToggle) checkinToggle.checked = false;
+  }
+}
+
+function onCheckinToggleChange(chk) {
+  const sentToggle = $('gs-sent'), rsvpSel = $('gs-rsvp');
+  if (chk.checked) {
+    if (sentToggle) sentToggle.checked = true;
+    if (rsvpSel) rsvpSel.value = 'hadir';
+  }
 }
 
 function checkCustomCategory(select) {
@@ -2116,16 +2132,15 @@ async function saveGuest(g) {
   let res;
   try {
     if (g) {
-      // RSVP & terkirim dikunci: nilai di bawah hanya pengisi parameter, server mengabaikannya.
       res = await supabaseClient.rpc('update_guest_by_client', {
         p_guest_id: g.id,
         p_group_name: name,
         p_category: cat,
         p_max_pax: pax,
         p_phone: phone,
-        p_rsvp_status: g.rsvp_status || 'pending',
+        p_rsvp_status: invitationType === 'cetak' ? 'hadir' : ($('gs-rsvp') ? $('gs-rsvp').value : (g.rsvp_status || 'pending')),
         p_is_checked_in: $('gs-checkin') ? $('gs-checkin').checked : g.is_checked_in,
-        p_is_sent: !!g.is_sent,
+        p_is_sent: invitationType === 'cetak' ? true : ($('gs-sent') ? $('gs-sent').checked : !!g.is_sent),
         p_invitation_type: invitationType,
         p_session: session
       });
