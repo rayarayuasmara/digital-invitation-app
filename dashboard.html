@@ -422,13 +422,13 @@ html.lock{overflow:hidden}
 @media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
 
 /* ===== Multi-select filter & pagination (Tab Tamu) ===== */
-.mfrow{display:flex;gap:8px}
-.mfbtn{flex:1;min-width:0;height:38px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--ink);font-size:13.5px;font-weight:600;white-space:nowrap}
-.mfbtn span.l{overflow:hidden;text-overflow:ellipsis}
-.mfbtn svg{width:14px;height:14px;color:var(--sub);flex-shrink:0}
-.mfbtn.on{border-color:var(--brand);color:var(--brand);background:var(--soft)}
-.mfbtn .cnt{min-width:18px;height:18px;border-radius:99px;background:var(--brand);color:#fff;font-size:11px;display:grid;place-items:center;padding:0 5px}
-:root[data-dark="1"] .mfbtn .cnt{color:#0b0f1a}
+.sfbtn{position:relative;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;flex-shrink:0;background:var(--soft);color:var(--brand)}
+.sfbtn svg{width:20px;height:20px}
+.sfbtn.on{background:var(--brand);color:#fff}
+:root[data-dark="1"] .sfbtn.on{color:#0b0f1a}
+.sfbtn .cnt{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:99px;background:#e5484d;color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 5px;border:2px solid var(--card)}
+.mf-sec{padding:14px 0 4px;font-size:12.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--sub)}
+.mf-sec:first-child{padding-top:6px}
 .sheet .listcard .act.mf-opt{color:var(--ink)}
 .mf-box{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--line);display:grid;place-items:center;flex-shrink:0;color:transparent}
 .mf-box svg{width:14px!important;height:14px!important}
@@ -443,7 +443,8 @@ html.lock{overflow:hidden}
 .field.locked label{color:var(--sub)}
 .field .lock-note{font-size:11.5px;color:var(--sub);display:flex;align-items:center;gap:4px;padding-bottom:8px}
 .switch input:disabled+span{opacity:.55}
-.field select:disabled{color:var(--sub);opacity:1}
+.ses-row input:first-child{text-align:left;font-weight:600}.ses-row input:last-child{flex:0 0 40%;border-left:1px solid var(--line);padding-left:12px;text-align:left}
+.field .ro-val{flex:1;text-align:right;padding:14px 0;font-size:16px;color:var(--sub);user-select:none}
 
 /* ===== Revisi: sortir, hero, kartu check-in ===== */
 .hi{font-weight:400}
@@ -837,6 +838,7 @@ html.lock{overflow:hidden}
         <div class="sbar">
           <i data-lucide="search"></i>
           <input type="search" id="search-input" placeholder="Cari nama tamu…" oninput="renderGuestList()" />
+          <button type="button" class="sfbtn" id="mf-open" aria-label="Filter kategori, jenis undangan, sesi" aria-haspopup="dialog"><i data-lucide="sliders-horizontal"></i><span class="cnt hidden" id="mf-cnt"></span></button>
         </div>
 
         <div class="listcard">
@@ -880,7 +882,13 @@ html.lock{overflow:hidden}
         <form id="event-form" onsubmit="submitEditEvent(event)" class="subpane">
           <div class="card" style="padding:4px 18px">
             <div class="field"><label for="ev-title">Judul</label><input type="text" id="ev-title" required /></div>
-            <div class="field"><label for="ev-date">Waktu</label><input type="datetime-local" id="ev-date" required /></div>
+            <div class="field"><label for="ev-date">Tanggal</label><input type="date" id="ev-date" required /></div>
+          </div>
+          <div class="card" style="padding:4px 18px">
+            <div class="field col"><label>Sesi acara</label></div>
+            <div class="field ses-row"><input type="text" id="ev-s1-name" maxlength="40" placeholder="Nama sesi 1" aria-label="Nama sesi 1" required /><input type="text" id="ev-s1-time" maxlength="30" placeholder="10.00 WIB" aria-label="Jam sesi 1" required /></div>
+            <div class="field ses-row"><input type="text" id="ev-s2-name" maxlength="40" placeholder="Nama sesi 2" aria-label="Nama sesi 2" required /><input type="text" id="ev-s2-time" maxlength="30" placeholder="12.00 WIB" aria-label="Jam sesi 2" required /></div>
+            <div class="sub" style="font-size:12px;padding:0 4px 12px">Tamu dibagi ke 2 sesi ini. Jam sesi tampil di undangan dan pesan WhatsApp (<code>{waktu}</code>); nama sesi tersedia sebagai <code>{sesi}</code>. Mengganti nama sesi otomatis ikut mengubah sesi semua tamu.</div>
           </div>
           <div class="card" style="padding:4px 18px"><div class="field col"><label for="ev-location">Lokasi</label><textarea id="ev-location" rows="2" required></textarea></div></div>
           <div class="card" style="padding:4px 18px"><div class="field col"><label for="ev-caption">Pesan pembuka</label><textarea id="ev-caption" rows="4" required></textarea></div>
@@ -1313,7 +1321,9 @@ function renderUI() {
   $('ev-date-txt').innerHTML = esc(d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long' })) + '<br>' + d.getFullYear();
   $('ev-loc-txt').textContent = event.location || '–';
   $('ev-title').value = event.title || '';
-  $('ev-date').value = new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  $('ev-date').value = d.toLocaleDateString('sv-SE', { timeZone: 'Asia/Jakarta' });
+  $('ev-s1-name').value = event.session_1_name || 'Sesi 1'; $('ev-s1-time').value = event.session_1_time || '';
+  $('ev-s2-name').value = event.session_2_name || 'Sesi 2'; $('ev-s2-time').value = event.session_2_time || '';
   $('ev-location').value = event.location || '';
   $('ev-caption').value = event.caption || '';
 
@@ -1405,6 +1415,13 @@ function handleCardAction() {
   }
 }
 
+// Tanggal baru, jam-dalam-hari lama dipertahankan (jam acara kini diwakili sesi)
+function eventDateKeepTime(ymd) {
+  const old = globalData.event.event_date ? new Date(globalData.event.event_date) : null;
+  const hm = old && !isNaN(old) ? old.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Jakarta' }) : '00:00';
+  return new Date(`${ymd}T${hm}:00+07:00`).toISOString();
+}
+
 async function submitEditEvent(e) {
   e.preventDefault();
   const title = $('ev-title').value.trim();
@@ -1412,7 +1429,11 @@ async function submitEditEvent(e) {
   const location = $('ev-location').value.trim();
   const caption = $('ev-caption').value.trim();
   
-  if (!title || !dateVal) return toast('Judul dan waktu wajib diisi', false);
+  const s1n = $('ev-s1-name').value.trim(), s2n = $('ev-s2-name').value.trim();
+  const s1t = $('ev-s1-time').value.trim(), s2t = $('ev-s2-time').value.trim();
+  if (!title || !dateVal) return toast('Judul dan tanggal wajib diisi', false);
+  if (!s1n || !s2n || !s1t || !s2t) return toast('Nama dan jam kedua sesi wajib diisi', false);
+  if (s1n.toLowerCase() === s2n.toLowerCase()) return toast('Nama kedua sesi harus berbeda', false);
 
   const btn = $('btn-save-event');
   btn.disabled = true;
@@ -1424,7 +1445,9 @@ async function submitEditEvent(e) {
       .from('events')
       .update({
         title: title,
-        event_date: new Date(dateVal).toISOString(),
+        event_date: eventDateKeepTime(dateVal),
+        session_1_name: s1n, session_1_time: s1t,
+        session_2_name: s2n, session_2_time: s2t,
         location: location,
         caption: caption
       })
@@ -1521,48 +1544,53 @@ function showAllRecent() {
 }
 
 /* ---------- Filter multi-select: Kategori / Jenis Undangan / Sesi ---------- */
-const guestSession = g => g.session || 'Sesi 1';
+const guestSession = g => g.session || ((globalData && globalData.event && globalData.event.session_1_name) || 'Sesi 1');
 const guestType = g => g.invitation_type === 'cetak' ? 'cetak' : 'digital';
 const MF_GET = { cat: g => g.category || 'Umum', type: guestType, session: guestSession };
 
-// Opsi sesi = nama sesi acara + sesi yang sudah terpakai tamu (mis. data lama)
-function sessionOptions(extra) {
+// Sesi = tepat 2 sesi acara (nama & jam diatur di Acara > Profil Acara)
+function eventSessions() {
   const ev = (globalData && globalData.event) || {};
-  return [...new Set([ev.session_1_name || 'Sesi 1', ev.session_2_name || 'Sesi 2',
-    ...(globalData ? globalData.guests.map(guestSession) : []), extra].filter(Boolean))];
+  return [
+    { name: ev.session_1_name || 'Sesi 1', time: ev.session_1_time || '' },
+    { name: ev.session_2_name || 'Sesi 2', time: ev.session_2_time || '' }
+  ];
 }
+const sessionOptions = () => eventSessions().map(x => x.name);
+const sessionTime = g => { const ss = eventSessions(); return (ss.find(x => x.name === guestSession(g)) || ss[0]).time; };
+
 function mfOptions(k) {
   const gs = globalData ? globalData.guests : [];
   if (k === 'type') return [{ v: 'digital', l: 'Digital' }, { v: 'cetak', l: 'Cetak (Fisik)' }];
-  if (k === 'session') return sessionOptions().map(v => ({ v, l: v }));
+  if (k === 'session') return eventSessions().map(x => ({ v: x.name, l: x.time ? `${x.name} · ${x.time}` : x.name }));
   return [...new Set(gs.map(MF_GET.cat))].sort((a, b) => a.localeCompare(b, 'id')).map(v => ({ v, l: v }));
 }
-function renderCategorySelect() {   // nama lama dipertahankan: memperbarui label tombol filter
-  Object.keys(MF).forEach(k => {
-    const b = document.querySelector(`.mfbtn[data-mf="${k}"]`); if (!b) return;
-    const n = MF[k].set.size;
-    b.classList.toggle('on', n > 0);
-    b.innerHTML = `<span class="l">${esc(MF[k].all)}</span>` + (n ? `<span class="cnt">${n}</span>` : '<i data-lucide="chevron-down"></i>');
-  });
-  icons();
+function renderCategorySelect() {   // nama lama dipertahankan: memperbarui badge tombol filter
+  const n = Object.values(MF).reduce((t, m) => t + m.set.size, 0);
+  const btn = $('mf-open'), c = $('mf-cnt'); if (!btn) return;
+  btn.classList.toggle('on', n > 0);
+  c.textContent = n; c.classList.toggle('hidden', !n);
 }
-function openMultiFilter(k) {
-  const m = MF[k], gs = globalData.guests;
-  const opts = mfOptions(k);
-  openSheet(`
-    <div class="sheet-head"><button id="mf-reset">Reset</button><h3>${esc(m.label)}</h3><button onclick="closeSheet()">Selesai</button></div>
-    <div class="listcard">${opts.length ? opts.map(o => `
-      <button class="act mf-opt ${m.set.has(o.v) ? 'on' : ''}" data-v="${esc(o.v)}">
+function openFilterSheet() {
+  const gs = globalData.guests;
+  const sec = k => {
+    const opts = mfOptions(k);
+    return `<div class="mf-sec">${esc(MF[k].label)}</div>` + (opts.length ? opts.map(o => `
+      <button class="act mf-opt ${MF[k].set.has(o.v) ? 'on' : ''}" data-k="${k}" data-v="${esc(o.v)}">
         <span class="mf-box"><i data-lucide="check"></i></span>${esc(o.l)}
-        <span class="mf-n">${gs.filter(g => MF_GET[k](g) === o.v).length}</span></button>`).join('') : '<div class="empty">Belum ada data.</div>'}</div>`);
+        <span class="mf-n">${gs.filter(g => MF_GET[k](g) === o.v).length}</span></button>`).join('') : '<div class="empty" style="padding:10px">Belum ada data.</div>');
+  };
+  openSheet(`
+    <div class="sheet-head"><button id="mf-reset">Reset</button><h3>Filter</h3><button onclick="closeSheet()">Selesai</button></div>
+    <div class="listcard">${sec('cat')}${sec('type')}${sec('session')}</div>`);
   $('sheet').querySelectorAll('.mf-opt').forEach(b => b.onclick = () => {
-    const v = b.dataset.v;
-    if (m.set.has(v)) m.set.delete(v); else m.set.add(v);
-    b.classList.toggle('on', m.set.has(v));
+    const set = MF[b.dataset.k].set, v = b.dataset.v;
+    if (set.has(v)) set.delete(v); else set.add(v);
+    b.classList.toggle('on', set.has(v));
     renderCategorySelect(); renderGuestList();
   });
   $('mf-reset').onclick = () => {
-    m.set.clear();
+    Object.values(MF).forEach(m => m.set.clear());
     $('sheet').querySelectorAll('.mf-opt').forEach(b => b.classList.remove('on'));
     renderCategorySelect(); renderGuestList();
   };
@@ -1731,7 +1759,7 @@ function waFill(tpl, g, link) {
   const d = ev.event_date ? new Date(ev.event_date) : null;
   const tz = 'Asia/Jakarta';
   const tanggal = d ? d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: tz }) : '';
-  const waktuAcara = d ? d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: tz }) + ' WIB' : '';
+  const waktuAcara = sessionTime(g);
 
   return tpl
     .replace(/{nama}/g, g.group_name)
@@ -1739,6 +1767,7 @@ function waFill(tpl, g, link) {
     .replace(/{acara}/g, ev.title || '')
     .replace(/{tanggal}/g, tanggal)
     .replace(/{waktu}/g, waktuAcara)
+    .replace(/{sesi}/g, guestSession(g))
     .replace(/{lokasi}/g, ev.location || '');
 }
 const waText = g => {
@@ -1766,7 +1795,7 @@ const WA_PRESETS = [
     text: `Halo {nama}, kami mengundang Anda ke *{acara}* pada {tanggal}, {waktu}. Detail & konfirmasi kehadiran: {link}` }
 ];
 const WA_SUGGEST = { Keluarga: 'formal', Sesepuh: 'formal', Kolega: 'formal', Teman: 'casual', Sahabat: 'casual', Tetangga: 'short', Umum: 'short' };
-const WA_VARS = ['{nama}', '{link}', '{acara}', '{tanggal}', '{waktu}', '{lokasi}'];
+const WA_VARS = ['{nama}', '{link}', '{acara}', '{tanggal}', '{waktu}', '{sesi}', '{lokasi}'];
 const WA_BASE_CATS = ['Umum', 'Keluarga', 'Teman', 'Kolega', 'Tetangga'];
 
 let waDraft = {}, waSaved = {}, waCats = [], waActive = 'Umum';
@@ -1983,7 +2012,7 @@ function openGuestSheet(id) {
   const cur = g ? (g.category || 'Umum') : cats[0];
   const currentType = g ? (g.invitation_type || 'digital') : 'digital';
 
-  const sessions = sessionOptions(g ? guestSession(g) : '');
+  const sessions = sessionOptions();
   const curSession = g ? guestSession(g) : sessions[0];
   const isSentChecked = g ? (g.is_sent || g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen' || g.is_checked_in) : (currentType === 'cetak');
   const isCheckinChecked = g ? g.is_checked_in : false;
@@ -2027,29 +2056,29 @@ function openGuestSheet(id) {
         </div>
       </div>
       ${g ? `
-      <div class="field locked"><label>RSVP</label><select id="gs-rsvp" disabled aria-disabled="true">
-        <option value="pending" ${rsvpVal === 'pending' ? 'selected' : ''}>Pending</option>
-        <option value="hadir" ${rsvpVal === 'hadir' ? 'selected' : ''}>Hadir</option>
-        <option value="absen" ${rsvpVal === 'absen' ? 'selected' : ''}>Absen</option></select><i data-lucide="lock" style="width:15px;height:15px;color:var(--sub)"></i></div>
-      <div class="field locked"><label style="flex:1;width:auto;color:var(--sub)">Terkirim</label><span class="switch"><input type="checkbox" id="gs-sent" disabled aria-disabled="true" ${isSentChecked ? 'checked' : ''}><span></span></span><i data-lucide="lock" style="width:15px;height:15px;color:var(--sub)"></i></div>
+      <div class="field locked"><label>RSVP</label><span id="gs-rsvp-txt" class="ro-val"></span><i data-lucide="lock" style="width:15px;height:15px;color:var(--sub)"></i></div>
+      <div class="field locked"><label>Terkirim</label><span id="gs-sent-txt" class="ro-val"></span><i data-lucide="lock" style="width:15px;height:15px;color:var(--sub)"></i></div>
       <div class="lock-note">RSVP &amp; status terkirim diperbarui otomatis (tamu mengisi RSVP, atau tombol kirim WA) dan tidak bisa diubah manual.</div>
       <div class="field"><label style="flex:1;width:auto;color:var(--ink)">Check-In</label><span class="switch"><input type="checkbox" id="gs-checkin" ${isCheckinChecked ? 'checked' : ''}><span></span></span></div>` : ''}
     </div>`);
+  if (g) paintLocked(rsvpVal, !!isSentChecked);
   $('gs-save').onclick = () => saveGuest(g);
   if (!g) setTimeout(() => $('gs-name').focus(), 350);
 }
 
+const RSVP_TXT = { pending: 'Pending', hadir: 'Hadir', absen: 'Absen' };
+function paintLocked(rsvp, sent) {
+  const r = $('gs-rsvp-txt'), t = $('gs-sent-txt'); if (!r || !t) return;
+  r.textContent = RSVP_TXT[rsvp] || 'Pending'; t.textContent = sent ? 'Ya' : 'Belum';
+}
 function onTypeChange(sel) {
   // Pratinjau efek otomatis dari server: Cetak => Hadir + Terkirim; kembali ke Digital => Pending + belum terkirim.
-  const rsvpEl = $('gs-rsvp'), sentEl = $('gs-sent');
-  if (!rsvpEl || !sentEl) return;
-  const orig = window.__editGuest;
-  const same = orig && (orig.invitation_type || 'digital') === sel.value;
-  if (same) {
-    rsvpEl.value = (orig.rsvp_status === 'tidak_hadir' || orig.rsvp_status === 'absen') ? 'absen' : (orig.rsvp_status || 'pending');
-    sentEl.checked = !!(orig.is_sent || orig.rsvp_status === 'hadir' || orig.rsvp_status === 'tidak_hadir' || orig.rsvp_status === 'absen' || orig.is_checked_in);
-  } else if (sel.value === 'cetak') { rsvpEl.value = 'hadir'; sentEl.checked = true; }
-  else { rsvpEl.value = 'pending'; sentEl.checked = false; }
+  const orig = window.__editGuest; if (!orig) return;
+  if ((orig.invitation_type || 'digital') === sel.value) {
+    const st = (orig.rsvp_status === 'tidak_hadir' || orig.rsvp_status === 'absen') ? 'absen' : (orig.rsvp_status || 'pending');
+    paintLocked(st, !!(orig.is_sent || orig.rsvp_status === 'hadir' || orig.rsvp_status === 'tidak_hadir' || orig.rsvp_status === 'absen' || orig.is_checked_in));
+  } else if (sel.value === 'cetak') paintLocked('hadir', true);
+  else paintLocked('pending', false);
 }
 
 function checkCustomCategory(select) {
@@ -2602,7 +2631,6 @@ checkSession();
   const sb = document.querySelector('#tab-tamu .sbar'); sb.before(head); head.append(sb);
   const STAT = [['all', 'Semua'], ['digital', 'Digital'], ['cetak', 'Cetak'], ['unsent', 'Belum dikirim'], ['pending', 'Menunggu'], ['hadir', 'Hadir'], ['checked_in', 'Check-in'], ['tidak_hadir', 'Absen']];
   const SORT_HTML = '<div class="sortpill" id="sort-pill"><label class="sp-sel"><select id="sort-field" aria-label="Urutkan berdasarkan"><option value="name">Nama</option><option value="updated">Diubah</option><option value="created">Dibuat</option></select></label><button type="button" id="sort-dir"></button></div>';
-  head.insertAdjacentHTML('beforeend', '<div class="mfrow" id="mf-row">' + Object.keys(MF).map(k => `<button type="button" class="mfbtn" data-mf="${k}" aria-haspopup="dialog"></button>`).join('') + '</div>');
   head.insertAdjacentHTML('beforeend', '<div class="chiprow"><div class="chips" id="st-chips">' + STAT.map(([k, l]) => `<button class="chip" data-f="${k}">${l}</button>`).join('') + '</div>' + SORT_HTML + '</div>');
   const syncSort = () => {
     $('sort-field').value = sortField;
@@ -2617,7 +2645,7 @@ checkSession();
   document.addEventListener('click', e => { const b = e.target.closest('#st-chips .chip'); if (!b) return; anim = true; activeFilter = b.dataset.f; renderGuestList(); toList(); });
   const _cat = setCategory;
   window.setCategory = function () { anim = true; _cat.apply(this, arguments); toList(); };
-  document.addEventListener('click', e => { const b = e.target.closest('.mfbtn'); if (b) openMultiFilter(b.dataset.mf); });
+  $('mf-open').addEventListener('click', openFilterSheet);
   window.resetFilters = () => { activeFilter = 'all'; Object.values(MF).forEach(m => m.set.clear()); $('search-input').value = ''; anim = true; renderCategorySelect(); renderGuestList(); };
 
   const _rg = renderGuestList;

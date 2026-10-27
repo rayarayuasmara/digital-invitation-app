@@ -703,8 +703,8 @@ async function fetchGuest() {
 
 async function fallbackFetchGuest() {
   const { data: guests, error } = await sb.from('guests')
-    .select(`id, group_name, category, max_pax, invitation_token, event_id,
-             events ( title, event_date, location, caption, client_id, clients ( name ) )`)
+    .select(`id, group_name, category, max_pax, invitation_token, event_id, session,
+             events ( title, event_date, location, caption, client_id, session_1_name, session_1_time, session_2_name, session_2_time, clients ( name ) )`)
     .ilike('invitation_token', token).limit(1);
   if (error || !guests || !guests.length) return null;
 
@@ -721,6 +721,8 @@ async function fallbackFetchGuest() {
     invitation_token: g.invitation_token,
     event_title: ev.title || 'Pernikahan', event_date: ev.event_date,
     event_location: ev.location, event_caption: ev.caption,
+    session_name: g.session,
+    session_time: g.session === ev.session_2_name ? ev.session_2_time : ev.session_1_time,
     client_name: ev.clients ? ev.clients.name : 'Mempelai',
     rsvp_status: rsvp ? rsvp.status : null,
     pax_confirmed: rsvp ? rsvp.pax_confirmed : null,
@@ -795,6 +797,12 @@ function splitNames(n) {
 function renderInvitation(g) {
   S.guest = g;
   S.eventDate = g.event_date ? new Date(g.event_date) : null;
+  // Jam acara = jam sesi tamu (mis. "10.00 WIB"); tanggal tetap dari event_date
+  const tm = /(\d{1,2})[.:](\d{2})/.exec(g.session_time || '');
+  if (S.eventDate && !isNaN(S.eventDate) && tm && +tm[1] < 24 && +tm[2] < 60) {
+    const ymd = S.eventDate.toLocaleDateString('sv-SE', { timeZone: 'Asia/Jakarta' });
+    S.eventDate = new Date(`${ymd}T${tm[1].padStart(2, '0')}:${tm[2]}:00+07:00`);
+  }
   S.clientName = g.client_name || 'Mempelai';
   S.max = Math.max(1, parseInt(g.max_pax || 2, 10));
   S.status = g.rsvp_status || null;
@@ -823,7 +831,9 @@ function renderInvitation(g) {
   if (S.eventDate && !isNaN(S.eventDate)) {
     const tz = 'Asia/Jakarta';
     $('event-date').textContent = S.eventDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: tz });
-    $('event-time').textContent = 'Pukul ' + S.eventDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz }).replace(':', '.') + ' WIB';
+    $('event-time').textContent = g.session_time
+      ? (g.session_name ? g.session_name + ' · ' : '') + g.session_time
+      : 'Pukul ' + S.eventDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz }).replace(':', '.') + ' WIB';
   } else {
     $('event-date').textContent = 'Segera diumumkan';
     $('event-time').hidden = true;
