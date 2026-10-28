@@ -365,6 +365,7 @@ input, select, textarea { font-size: 16px !important; }
 
 .sticky-head{position:sticky;top:0;z-index:20;margin:0 -16px;padding:calc(env(safe-area-inset-top) + 12px) 16px 14px;background:none}
 .sticky-head>*+*{margin-top:12px}
+.sticky-head::before{content:"";position:absolute;left:0;right:0;top:0;bottom:-16px;z-index:-1;pointer-events:none;background:linear-gradient(to bottom,var(--bg) 0,var(--bg) 62%,transparent 100%)}
 .sticky-head .sbar{box-shadow:var(--shadow);border:1px solid var(--line);background:var(--card)}
 .sticky-head .sortpill,.sticky-head .chip{background:var(--card)}
 .sticky-head .chiprow .chips{margin:0 0 0 -16px;padding:2px 6px 2px 16px}
@@ -716,6 +717,8 @@ html.lock{overflow:hidden}
 .pcard .pun{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:13px;color:var(--sub)}
 .pcard .pun b{font:600 14px 'Geist Mono',monospace;color:var(--ink)}
 /* Kategori tamu: baris sederhana */
+#cat-gauge .gauge{max-width:250px;margin:14px auto 10px}
+#cat-gauge:empty{display:none}
 .kr{transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .2s}.kr:active{transform:scale(.985);opacity:.7}
 .kmore{display:flex;justify-content:center;align-items:center;gap:6px;width:100%;padding:13px 0 2px;border-top:1px solid var(--line);color:var(--brand);font-weight:600;font-size:14px}
 .kl2 b{font:600 13px 'Geist Mono',monospace}
@@ -775,9 +778,9 @@ html.lock{overflow:hidden}
             <div class="lbl">Total <i data-lucide="mail"></i></div>
             <div class="gauge" role="img" aria-label="Perbandingan undangan cetak, digital, dan sisa kuota">
               <svg viewBox="0 0 120 62" aria-hidden="true">
-                <path class="g3" id="ud-s3" pathLength="100" d="M10 60A50 50 0 0 1 110 60" stroke-dasharray="100 0"/>
-                <path class="g2" id="ud-s2" pathLength="100" d="M10 60A50 50 0 0 1 110 60" stroke-dasharray="0 100"/>
-                <path class="g1" id="ud-s1" pathLength="100" d="M10 60A50 50 0 0 1 110 60" stroke-dasharray="0 100"/>
+                <path class="g3" id="ud-s3" pathLength="100" d="M10 60A50 50 0 0 1 110 60"/>
+                <path class="g2" id="ud-s2" pathLength="100" d="M10 60A50 50 0 0 1 110 60" stroke-dasharray="0 200"/>
+                <path class="g1" id="ud-s1" pathLength="100" d="M10 60A50 50 0 0 1 110 60" stroke-dasharray="0 200"/>
               </svg>
               <div class="gin"><b id="stat-total">0</b><small>Undangan</small></div>
             </div>
@@ -849,6 +852,7 @@ html.lock{overflow:hidden}
 
         <div class="card">
           <div class="ch"><h3>Kategori Tamu</h3><button class="addcat" onclick="addCategory()" aria-label="Tambah kategori" title="Tambah kategori"><i data-lucide="plus"></i></button></div>
+          <div id="cat-gauge"></div>
           <div id="cat-group"></div>
         </div>
 
@@ -1417,7 +1421,7 @@ function renderUI() {
   const gl = [totalCetak, totalDigital, sisa].map(n => n / gsum * 100);
   let gstart = 0;
   ['ud-s1', 'ud-s2', 'ud-s3'].forEach((id, i) => {
-    const el = $(id); el.setAttribute('stroke-dasharray', `${gl[i]} ${100 - gl[i]}`); el.setAttribute('stroke-dashoffset', -gstart); gstart += gl[i];
+    const el = $(id); el.setAttribute('stroke-dasharray', `${gl[i]} 200`); el.setAttribute('stroke-dashoffset', -gstart); gstart += gl[i];
   });
   $('stat-total').textContent = totalGuestsCount;
   $('stat-cetak').textContent = totalCetak; $('stat-digital').textContent = totalDigital; $('stat-kuota').textContent = sisa;
@@ -1540,13 +1544,22 @@ async function submitEditEvent(e) {
 
 let catExpanded = false;
 function renderCategories() {
-  const box = $('cat-group'), gs = (globalData && globalData.guests) || [];
-  if (!gs.length) { box.innerHTML = '<div class="empty">Belum ada kategori.<br>Tambahkan tamu pertama untuk membuat kategori.</div>'; return; }
+  const box = $('cat-group'), gbox = $('cat-gauge'), gs = (globalData && globalData.guests) || [];
+  if (!gs.length) { gbox.innerHTML = ''; box.innerHTML = '<div class="empty">Belum ada kategori.<br>Tambahkan tamu pertama untuk membuat kategori.</div>'; return; }
   const m = new Map();
   gs.forEach(g => { const k = g.category || 'Umum'; m.set(k, (m.get(k) || 0) + 1); });
   const all = [...m].sort((a, b) => b[1] - a[1]), LIMIT = 4;
   const rows = catExpanded ? all : all.slice(0, LIMIT);
-  const tone = i => [1, .65, .4, .22][i] ?? .15;
+  // Gauge: 3 kategori terbesar + "lainnya"; rona sama dengan dot di daftar
+  const tone = i => [1, .65, .4, .18][Math.min(i, 3)];
+  const parts = all.slice(0, 3).map(c => c[1]), rest = all.slice(3).reduce((a, c) => a + c[1], 0);
+  if (rest) parts.push(rest);
+  let acc = 0;
+  const segs = parts.map((n, i) => {
+    const len = n / gs.length * 100, d = `<path pathLength="100" d="M10 60A50 50 0 0 1 110 60" style="stroke:var(--brand);opacity:${tone(i)}" stroke-dasharray="${len.toFixed(2)} 200" stroke-dashoffset="${(-acc).toFixed(2)}"/>`;
+    acc += len; return d;
+  }).join('');
+  gbox.innerHTML = `<div class="gauge" role="img" aria-label="Sebaran tamu per kategori"><svg viewBox="0 0 120 62" aria-hidden="true"><path class="g3" pathLength="100" d="M10 60A50 50 0 0 1 110 60"/>${segs}</svg><div class="gin"><b>${gs.length}</b><small>Tamu</small></div></div>`;
   box.innerHTML = rows.map(([name, n], i) => `<button class="kr drow" data-cat="${esc(name)}"><i class="dot" style="opacity:${tone(i)}"></i><span class="pc">${Math.round(n / gs.length * 100)}%</span><span class="nm">${esc(name)}</span><b>${n}</b></button>`).join('')
     + (all.length > LIMIT ? `<button class="kmore" onclick="catExpanded=!catExpanded;renderCategories()">${catExpanded ? 'Ringkas' : `Lihat semua kategori (${all.length})`}<i data-lucide="${catExpanded ? 'chevron-up' : 'chevron-down'}" style="width:16px;height:16px"></i></button>` : '');
   icons();
