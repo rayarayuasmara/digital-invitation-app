@@ -363,12 +363,16 @@ input, select, textarea { font-size: 16px !important; }
 .tile.g{background:linear-gradient(150deg,#22d184,#0ea960)}
 .topbar h1{letter-spacing:-.03em}
 
-.sticky-head{position:sticky;top:0;z-index:20;margin:0 -16px;padding:calc(env(safe-area-inset-top) + 12px) 16px 14px;background:none;transition:transform .45s var(--ease)}
-.sticky-head.away{transform:translateY(-110%)}
+.sticky-head{position:sticky;top:0;z-index:20;margin:0 -16px;padding:calc(env(safe-area-inset-top) + 12px) 16px 14px;background:none}
 .sticky-head>*+*{margin-top:12px}
-.sticky-head .sbar{box-shadow:var(--shadow);border:1px solid var(--line)}
-.sticky-head .chiprow .chips{padding-top:2px;padding-bottom:2px}
+.sticky-head .sbar{box-shadow:var(--shadow);border:1px solid var(--line);background:var(--card)}
+.sticky-head .sortpill,.sticky-head .chip{background:var(--card)}
+.sticky-head .chiprow .chips{margin:0 0 0 -16px;padding:2px 6px 2px 16px}
 .sticky-head .sortpill{margin-top:0}
+.listcard.gcard{background:transparent;box-shadow:none;padding:0;border-radius:0}
+#guest-list-container{background:var(--card);border-radius:26px;padding:4px 18px;box-shadow:var(--shadow);overflow:hidden}
+#guest-list-container:empty{display:none}
+.gcard .pager{border-top:0;margin-top:0;padding:14px 4px 0}
 #filter-tabs{display:none!important}
 .chips{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;position:relative;margin:0 -16px;padding:12px 16px 2px;scroll-snap-type:x proximity;overscroll-behavior-x:contain;-webkit-mask-image:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 28px),transparent)}
 .chips::-webkit-scrollbar{display:none}
@@ -474,7 +478,10 @@ html.lock{overflow:hidden}
 #scanner-overlay .ib svg{width:18px;height:18px}
 #scanner-overlay .ib.spin svg{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+#scanner-overlay .sc-top{position:sticky;top:0;z-index:12;background:var(--bg);padding:0 16px 12px}
+#scanner-overlay .sc-top .topbar{padding:calc(env(safe-area-inset-top) + 18px) 4px 6px}
 #scanner-overlay .page{padding:8px 16px calc(40px + env(safe-area-inset-bottom))}
+#scanner-overlay .page .view{margin-top:12px}
 #scanner-overlay .page>*+*{margin-top:12px}
 #scanner-overlay .card{background:var(--card);border-radius:26px;padding:20px;box-shadow:var(--shadow)}
 #scanner-overlay .ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -656,22 +663,20 @@ html.lock{overflow:hidden}
 .wtitle{flex:1;min-width:0}.wtitle h3{margin:0;font-size:18px;font-weight:700}.wtitle small{color:var(--sub);font-size:13px}
 .wbadge{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:600;background:var(--tag);color:var(--sub);flex-shrink:0}
 .wbadge svg{width:14px;height:14px}.wbadge.on{background:var(--red-ink);color:#fff;animation:wpop .5s var(--spring,cubic-bezier(.34,1.56,.64,1))}
-.wchat{padding:4px 14px 14px;background:var(--bg)}
+.wchat{overflow:visible;padding:4px 14px 12px;background:var(--bg)}
 .wdate{text-align:center;margin:14px 0 2px}.wdate span,.wdiv span{font-size:11.5px;background:var(--soft);color:var(--sub);padding:3px 12px;border-radius:999px}
 .wdiv{text-align:center;margin:12px 0 0}.wdiv span{background:var(--brand);color:#fff;font-weight:600}
 :root[data-dark="1"] .wdiv span{color:#0b0f1a}
 .wmsg{display:flex;gap:10px;align-items:flex-start;margin-top:10px;cursor:pointer}.wmsg.fresh{animation:wfresh .6s cubic-bezier(.32,.72,0,1) both}
 .cav{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font:600 12px 'Geist Mono',monospace;background:var(--soft);color:var(--brand)}
-.wb{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;background:var(--card);border-radius:4px 18px 18px 18px;padding:10px 12px;box-shadow:var(--shadow);transition:background .9s,box-shadow .9s,transform .25s}.wmsg:active .wb{transform:scale(.985)}
+.wb{flex:1;min-width:0;display:flex;flex-direction:column;align-items:stretch;gap:0;background:var(--card);border-radius:4px 18px 18px 18px;padding:10px 12px;box-shadow:var(--shadow);transition:background .9s,box-shadow .9s,transform .25s}.wmsg:active .wb{transform:scale(.985)}
 .wmsg.new .wb{background:var(--soft);box-shadow:inset 3px 0 0 var(--brand)}.wchat.read .wmsg.new .wb{background:var(--card);box-shadow:var(--shadow)}
-.wc{min-width:0}.wn{font-weight:700;font-size:14px;color:hsl(var(--h) 60% var(--nl))}
+.wh{display:flex;align-items:center;gap:8px;min-width:0}
+.wn{flex:1;min-width:0;font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wmeta{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.wmeta .when{font-size:11.5px;color:var(--sub);font-family:'Geist Mono',monospace}
+.wmeta .st{font-size:10.5px;padding:3px 8px;gap:5px}
 .wt{font-size:15px;line-height:1.45;margin-top:3px;white-space:pre-wrap;word-break:break-word}
-.wm{display:flex;flex-direction:row;align-items:center;justify-content:flex-end;gap:8px;flex-shrink:0}
-.wm .when{font-size:11.5px;color:var(--sub);font-family:'Geist Mono',monospace}.wm .st{font-size:10.5px;padding:3px 8px;gap:5px}
-.wallbtn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:14px;padding:12px;border-radius:16px;background:var(--soft);color:var(--brand);font-size:14.5px;font-weight:600;text-align:center;transition:transform .25s,opacity .2s}.wallbtn:active{transform:scale(.98);opacity:.75}.wallbtn svg{width:16px;height:16px}
-.sheet-head.sticky{position:sticky;top:0;z-index:5;margin:0 -16px 6px;padding:6px 20px 12px;background:var(--bg);border-bottom:1px solid var(--line)}
-.sheet-head .swt{min-width:0}.sheet-head .swt small{display:block;color:var(--sub);font-size:13px;margin-top:2px}
-.wall{padding-bottom:6px}
 .wend{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--sub);font-size:12.5px;padding:16px 0 4px}
 .wspin{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:wspin .8s linear infinite}
 .wbanner{display:flex;align-items:center;gap:10px;width:100%;padding:13px 16px;border-radius:20px;background:var(--brand);color:#fff;font-size:15px;font-weight:500;box-shadow:0 14px 28px -12px rgba(10,61,194,.6);animation:wfresh .6s cubic-bezier(.32,.72,0,1) both}
@@ -680,7 +685,7 @@ html.lock{overflow:hidden}
 .nbadge{position:absolute;top:3px;left:calc(50% + 4px);min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:var(--red-ink);color:#fff;font:700 10.5px/17px 'Geist Mono',monospace;text-align:center;box-shadow:0 0 0 2px var(--card);animation:wpop .4s cubic-bezier(.34,1.56,.64,1)}
 .wfull{padding:16px 0 8px;font-size:16px;line-height:1.55;white-space:pre-wrap;word-break:break-word}.wfoot{display:flex;align-items:center;gap:10px;color:var(--sub);font-size:13px;padding:0 0 14px}
 
-/* ===== Tahap 2: kartu Undangan & Kategori Tamu ===== */
+/* ===== Kartu Total, Hadir/Pending, Kategori ===== */
 /* Kartu Total (gauge) + Hadir / Pending */
 .hgrid{grid-template-columns:1.32fr 1fr;align-items:stretch}
 .hgrid>.card,.hcol>.card{padding:18px}
@@ -712,12 +717,18 @@ html.lock{overflow:hidden}
 .pcard .pun b{font:600 14px 'Geist Mono',monospace;color:var(--ink)}
 /* Kategori tamu: baris sederhana */
 .kr{transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .2s}.kr:active{transform:scale(.985);opacity:.7}
-/* Tab tamu */
-#guest-list-container{background:var(--card);border-radius:26px;padding:4px 18px;box-shadow:var(--shadow);overflow:hidden}
-#guest-list-container:empty{display:none}
-#tab-tamu .listcard{background:transparent;box-shadow:none;padding:0;border-radius:0}
-#tab-tamu .pager{border-top:0;margin-top:0;padding:14px 4px 0}
 .kmore{display:flex;justify-content:center;align-items:center;gap:6px;width:100%;padding:13px 0 2px;border-top:1px solid var(--line);color:var(--brand);font-weight:600;font-size:14px}
+.kl2 b{font:600 13px 'Geist Mono',monospace}
+.kl2 small{font:600 11.5px 'Geist Mono',monospace;color:var(--sub);width:34px;text-align:right}
+
+/* ===== Ucapan & Doa: popup semua ===== */
+.wchat-foot{display:flex;justify-content:center;align-items:center;border-top:1px solid var(--line);margin-top:2px}
+.wchat-foot[hidden]{display:none}
+.wchat-foot button{display:flex;align-items:center;gap:6px;padding:14px 18px;font-size:14px;font-weight:600;color:var(--brand)}
+.wchat-foot button svg{width:15px;height:15px}
+.wchat-foot .note{padding:14px 18px;font-size:13px;color:var(--sub)}
+.wsheet-head{position:sticky;top:-10px;z-index:8;background:var(--bg);margin:0 -16px 10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.wsheet-chat{max-height:calc(88vh - 150px);padding:4px 12px 10px;border-radius:20px;overflow-y:auto;overscroll-behavior:contain}
 </style>
 </head>
 <body>
@@ -849,6 +860,7 @@ html.lock{overflow:hidden}
             <button class="wbadge" id="w-badge" onclick="markWishesRead(true)" aria-label="Tandai semua dibaca"></button>
           </div>
           <div class="wchat" id="wchat"><div class="empty">Memuat ucapan…</div></div>
+          <div class="wchat-foot" id="w-foot" hidden></div>
         </div>
       </div>
     </div>
@@ -863,11 +875,9 @@ html.lock{overflow:hidden}
           <button type="button" class="sfbtn" id="mf-open" aria-label="Filter kategori, jenis undangan, sesi" aria-haspopup="dialog"><i data-lucide="sliders-horizontal"></i><span class="cnt hidden" id="mf-cnt"></span></button>
         </div>
 
-        <div class="listcard">
+        <div class="listcard gcard">
           <div class="tabs smooth-scroll" id="filter-tabs">
             <button class="on" data-f="all">Semua</button>
-            <button data-f="digital">Digital</button>
-            <button data-f="cetak">Cetak</button>
             <button data-f="unsent">Unsent</button>
             <button data-f="pending">Pending</button>
             <button data-f="hadir">Hadir</button>
@@ -989,22 +999,24 @@ html.lock{overflow:hidden}
 <!-- SCANNER OVERLAY -->
 <div id="scanner-overlay" class="hidden">
   <div style="width:100%;max-width:480px;position:relative;">
-    <header class="topbar">
-      <div>
-        <h1>Scanner</h1>
-        <p><span class="live"></span>Mode Operator Door</p>
-      </div>
-      <div class="top-actions">
-        <button class="ib" onclick="refreshScannerGuests()" id="scanner-btn-refresh" aria-label="Muat ulang data"><i data-lucide="refresh-cw"></i></button>
-        <button class="ib" onclick="closeScannerOverlay()" aria-label="Tutup Scanner"><i data-lucide="x"></i></button>
-      </div>
-    </header>
-
-    <div class="page">
+    <div class="sc-top">
+      <header class="topbar">
+        <div>
+          <h1>Scanner</h1>
+          <p><span class="live"></span>Mode Operator Door</p>
+        </div>
+        <div class="top-actions">
+          <button class="ib" onclick="refreshScannerGuests()" id="scanner-btn-refresh" aria-label="Muat ulang data"><i data-lucide="refresh-cw"></i></button>
+          <button class="ib" onclick="closeScannerOverlay()" aria-label="Tutup Scanner"><i data-lucide="x"></i></button>
+        </div>
+      </header>
       <div class="card-switch" id="scanner-mode-switch">
         <button class="active" onclick="switchScannerMode('scan')"><i data-lucide="scan-line"></i>Scan QR</button>
         <button onclick="switchScannerMode('manual')"><i data-lucide="search"></i>Cari Manual</button>
       </div>
+    </div>
+
+    <div class="page">
 
       <div id="scanner-view-scan" class="view">
         <div class="card" style="padding:14px">
@@ -1088,7 +1100,7 @@ let html5QrCode = null;
 // State untuk Ucapan & Doa
 let wishesData = [], wishesTotal = 0, wishesDone = false, wishesBusy = false, wishInit = false;
 let wishSnap = null, wishUnread = 0, wishVisible = false, wishReadTimer = null;
-const WISH_FETCH = 10;
+const WISH_FETCH = 10, WISH_PREVIEW = 5;
 
 const COLORS = ['#0a3dc2','#12b76a','#f5a524','#e5484d','#7c5cff','#0ea5e9','#ec4899'];
 const $ = id => document.getElementById(id);
@@ -1263,6 +1275,7 @@ async function loadMoreWishes() {
   const ids = new Set(wishesData.map(w => w.id)); (data || []).forEach(w => { if (!ids.has(w.id)) wishesData.push(w); });
   wishesDone = !data || data.length < WISH_FETCH || wishesData.length >= wishesTotal;
   renderWishes();
+  renderWishesSheet();
 }
 function renderWishBadges() {
   const b = $('w-badge'); b.className = 'wbadge' + (wishUnread ? ' on' : '');
@@ -1271,55 +1284,58 @@ function renderWishBadges() {
   $('wish-banner').classList.toggle('hidden', !wishUnread);
   if (wishUnread) { const l = wishesData.find(w => !wishSnap || Date.parse(w.created_at) > wishSnap); $('wb-text').textContent = `${wishUnread} ucapan baru${l ? ' dari ' + l.guest_name + (wishUnread > 1 ? ' dan lainnya' : '') : ''}`; }
 }
-const WISH_SHOW = 5;
-const DAY_FULL = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-const DAY_SHORT = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-const MON_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-// Hari ini / Kemarin / nama hari (<7 hari) / "Sel, 27 Okt" (lebih lama)
 function wishDayLabel(d) {
-  const t = new Date(), a = new Date(t.getFullYear(), t.getMonth(), t.getDate()), b = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const diff = Math.round((a - b) / 864e5);
+  const now = new Date();
+  const day = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diff = Math.round((day(now) - day(d)) / 864e5);
   if (diff <= 0) return 'Hari ini';
   if (diff === 1) return 'Kemarin';
-  if (diff < 7) return DAY_FULL[d.getDay()];
-  return `${DAY_SHORT[d.getDay()]}, ${d.getDate()} ${MON_SHORT[d.getMonth()]}` + (d.getFullYear() !== t.getFullYear() ? ' ' + d.getFullYear() : '');
+  if (diff < 7) return `${diff} hari yang lalu`;
+  const sameYear = d.getFullYear() === now.getFullYear();
+  return d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' }) + (sameYear ? '' : ' ' + d.getFullYear());
 }
-function wishListHTML(list) {
+function wishListHTML(list, offset = 0) {
   let html = wishUnread ? `<div class="wdiv"><span>${wishUnread} pesan belum dibaca</span></div>` : '', last = '';
-  list.forEach((w, i) => {
+  list.forEach((w, j) => {
     const d = new Date(w.created_at), key = d.toDateString();
     if (key !== last) { html += `<div class="wdate"><span>${esc(wishDayLabel(d))}</span></div>`; last = key; }
-    const g = wishGuest(w), b = g ? guestBadge(g) : null, h = hueOf(w.guest_name);
+    const g = wishGuest(w), b = g ? guestBadge(g) : null;
     const isNew = !wishSnap || Date.parse(w.created_at) > wishSnap;
-    html += `<div class="wmsg${isNew ? ' new' : ''}${w._fresh ? ' fresh' : ''}" data-i="${i}"><div class="cav">${esc(initials(w.guest_name))}</div>
-      <div class="wb"><div class="wc"><div class="wn" style="--h:${h}">${esc(w.guest_name || 'Tamu')}</div><div class="wt">${esc(w.message)}</div></div>
-      <div class="wm">${b ? `<span class="st st-${b[0]}">${b[1]}</span>` : ''}<span class="when">${esc(d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }))}</span></div></div></div>`;
+    html += `<div class="wmsg${isNew ? ' new' : ''}${w._fresh ? ' fresh' : ''}" data-i="${offset + j}"><div class="cav">${esc(initials(w.guest_name))}</div>
+      <div class="wb"><div class="wh"><span class="wn">${esc(w.guest_name || 'Tamu')}</span><span class="wmeta">${b ? `<span class="st st-${b[0]}">${b[1]}</span>` : ''}<span class="when">${esc(d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }))}</span></span></div>
+      <div class="wt">${esc(w.message)}</div></div></div>`;
+    w._fresh = false;
   });
   return html;
 }
 function renderWishes() {
-  const box = $('wchat');
+  const box = $('wchat'), st = box.scrollTop;
   $('w-sub').textContent = wishesTotal ? `${wishesTotal} pesan` : 'Belum ada pesan';
   renderWishBadges();
-  if (!wishesData.length) { box.innerHTML = '<div class="empty">Belum ada ucapan atau doa masuk.</div>'; icons(); renderWishAll(); return; }
-  let html = wishListHTML(wishesData.slice(0, WISH_SHOW));
-  if (wishesTotal > WISH_SHOW) html += `<button class="wallbtn" onclick="openAllWishes()">Lihat semua ${wishesTotal} pesan<i data-lucide="chevron-right"></i></button>`;
-  box.innerHTML = html; icons();
-  wishesData.forEach(w => { w._fresh = false; });
-  renderWishAll();
-}
-// Popup semua ucapan (header sticky, scroll = muat lebih banyak)
-function openAllWishes() {
-  openSheet(`<div class="sheet-head sticky"><div class="swt"><h3>Ucapan &amp; Doa</h3><small id="wall-sub"></small></div><button onclick="closeSheet()">Tutup</button></div><div class="wall" id="wall"></div>`);
-  renderWishAll();
-}
-function renderWishAll() {
-  const box = $('wall'), sh = $('sheet'); if (!box || !sh.classList.contains('open')) return;
-  $('wall-sub').textContent = wishesTotal ? `${wishesTotal} pesan` : 'Belum ada pesan';
-  box.innerHTML = (wishesData.length ? wishListHTML(wishesData) : '<div class="empty">Belum ada ucapan atau doa masuk.</div>')
-    + (!wishesData.length ? '' : wishesDone ? '<div class="wend">Semua ucapan sudah ditampilkan</div>' : '<div class="wend"><i class="wspin"></i>Memuat lainnya…</div>');
+  const foot = $('w-foot');
+  if (!wishesData.length) { box.innerHTML = '<div class="empty">Belum ada ucapan atau doa masuk.</div>'; if (foot) foot.hidden = true; icons(); return; }
+  box.innerHTML = wishListHTML(wishesData.slice(0, WISH_PREVIEW)); box.scrollTop = st;
+  if (foot) {
+    foot.hidden = false;
+    foot.innerHTML = wishesTotal > WISH_PREVIEW
+      ? `<button type="button" onclick="openWishesSheet()">Lihat semua ${wishesTotal} ucapan <i data-lucide="chevron-right"></i></button>`
+      : '<span class="note">Semua ucapan sudah ditampilkan</span>';
+  }
   icons();
-  if (!wishesDone && sh.scrollHeight <= sh.clientHeight + 4) loadMoreWishes();
+}
+function renderWishesSheet() {
+  const box = $('wchat-all'); if (!box) return;
+  const st = box.scrollTop;
+  box.innerHTML = wishListHTML(wishesData) + (wishesDone ? `<div class="wend">Semua ${wishesTotal} ucapan sudah ditampilkan</div>` : '<div class="wend"><i class="wspin"></i>Memuat lainnya…</div>');
+  box.scrollTop = st; icons();
+  if (!wishesDone && box.scrollHeight <= box.clientHeight + 4) loadMoreWishes();
+}
+function openWishesSheet() {
+  openSheet(`<div class="sheet-head wsheet-head"><h3>Ucapan &amp; Doa</h3><button onclick="closeSheet()">Tutup</button></div>
+    <div class="wchat wsheet-chat" id="wchat-all"></div>`);
+  renderWishesSheet();
+  $('wchat-all').addEventListener('scroll', e => { const b = e.target; if (b.scrollTop + b.clientHeight >= b.scrollHeight - 120) loadMoreWishes(); }, { passive: true });
+  $('wchat-all').addEventListener('click', e => { const m = e.target.closest('.wmsg'); if (m) openWish(+m.dataset.i); });
 }
 function addWishes(arr, live) {
   const ids = new Set(wishesData.map(w => w.id)), fresh = arr.filter(w => w && !ids.has(w.id)); if (!fresh.length) return;
@@ -1350,13 +1366,11 @@ function watchWishes(eid) {
   setInterval(() => { if (!document.hidden) pollWishes(); }, 60000);
   try { supabaseClient.channel('wishes-' + eid).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'wishes', filter: 'event_id=eq.' + eid }, p => addWishes([p.new], true)).subscribe(); } catch (e) {}
 }
-$('sheet').addEventListener('scroll', e => { const b = e.target; if ($('wall') && b.classList.contains('open') && b.scrollTop + b.clientHeight >= b.scrollHeight - 140) loadMoreWishes(); }, { passive: true });
 $('wchat').addEventListener('click', e => { const m = e.target.closest('.wmsg'); if (m) openWish(+m.dataset.i); });
-$('sheet').addEventListener('click', e => { const m = e.target.closest('#wall .wmsg'); if (m) openWish(+m.dataset.i, true); });
-function openWish(i, fromAll) {
+function openWish(i) {
   const w = wishesData[i]; if (!w) return; const g = wishGuest(w), b = g ? guestBadge(g) : null;
   const phone = g && g.phone ? String(g.phone).replace(/\D/g, '').replace(/^0/, '62') : '';
-  openSheet(`<div class="sheet-head"><h3>${esc(w.guest_name)}</h3>${fromAll ? '<button onclick="openAllWishes()">Kembali</button>' : '<button onclick="closeSheet()">Tutup</button>'}</div>
+  openSheet(`<div class="sheet-head"><h3>${esc(w.guest_name)}</h3><button onclick="closeSheet()">Tutup</button></div>
     <div class="listcard"><div class="wfull">${esc(w.message)}</div><div class="wfoot">${esc(fmtWhen(Date.parse(w.created_at)))}${b ? `<span class="st st-${b[0]}">${b[1]}</span>` : ''}</div>
     <button class="act" id="w-copy"><i data-lucide="copy"></i>Salin ucapan</button>
     ${phone ? `<a class="act" href="https://wa.me/${phone}?text=${encodeURIComponent('Terima kasih atas ucapan dan doanya, ' + w.guest_name + ' 🙏')}" target="_blank" rel="noopener"><i data-lucide="message-circle"></i>Balas lewat WhatsApp</a>` : ''}</div>`);
@@ -1698,7 +1712,6 @@ function renderGuestList() {
           <div class="n">${esc(g.group_name)}</div>
           <div class="tags">
             <span class="tag">${esc(g.category)}</span>
-            <span class="tag">${esc(guestSession(g))}</span>
             <span class="st st-${k}">${txt}</span>
           </div>
         </div>
@@ -2669,7 +2682,7 @@ checkSession();
   }
   function playRings() {
     if (reduce) return;
-    [['ring-fg', '276.46'], ['rsvp-ring-fg', '276.46']].forEach(([id, full]) => { const c = $(id), to = c.style.strokeDashoffset; c.style.transition = 'none'; c.style.strokeDashoffset = full; c.getBoundingClientRect(); c.style.transition = ''; c.style.strokeDashoffset = to; });
+    ['ring-fg', 'rsvp-ring-fg'].forEach(id => { const c = $(id), to = c.style.strokeDashoffset; c.style.transition = 'none'; c.style.strokeDashoffset = '276.46'; c.getBoundingClientRect(); c.style.transition = ''; c.style.strokeDashoffset = to; });
   }
   function enter(id) { const t = $(id); if (!t || reduce) return; t.classList.remove('tab-in'); void t.offsetWidth; t.classList.add('tab-in'); }
 
@@ -2684,8 +2697,9 @@ checkSession();
   const ro = new ResizeObserver(placeAll); ro.observe(document.querySelector('.pillnav')); ro.observe($('stat-switch'));
 
   const head = document.createElement('div'); head.className = 'sticky-head';
-  const sb = document.querySelector('#tab-tamu .sbar'); sb.before(head); head.append(sb);
-  const STAT = [['all', 'Semua'], ['digital', 'Digital'], ['cetak', 'Cetak'], ['unsent', 'Belum dikirim'], ['pending', 'Menunggu'], ['hadir', 'Hadir'], ['checked_in', 'Check-in'], ['tidak_hadir', 'Absen']];
+  const sb = document.querySelector('#tab-tamu .sbar'); head.append(sb);
+  const gcard = document.querySelector('#tab-tamu .listcard.gcard'); if (gcard) gcard.before(head); else document.querySelector('#tab-tamu .page').prepend(head);
+  const STAT = [['all', 'Semua'], ['unsent', 'Belum dikirim'], ['pending', 'Menunggu'], ['hadir', 'Hadir'], ['checked_in', 'Check-in'], ['tidak_hadir', 'Absen']];
   const SORT_HTML = '<div class="sortpill" id="sort-pill"><label class="sp-sel"><select id="sort-field" aria-label="Urutkan berdasarkan"><option value="name">Nama</option><option value="updated">Diubah</option><option value="created">Dibuat</option></select></label><button type="button" id="sort-dir"></button></div>';
   head.insertAdjacentHTML('beforeend', '<div class="chiprow"><div class="chips" id="st-chips">' + STAT.map(([k, l]) => `<button class="chip" data-f="${k}">${l}</button>`).join('') + '</div>' + SORT_HTML + '</div>');
   const syncSort = () => {
@@ -2736,7 +2750,6 @@ checkSession();
   addEventListener('scroll', () => {
     const y = scrollY, w = $('nav-container-wrap'), dn = y > ly + 6, up = y < ly - 6;
     if (dn && y > 80) w.classList.add('min'); else if (up || y < 40) w.classList.remove('min');
-    if (dn && y > 140) head.classList.add('away'); else if (up || y < 40) head.classList.remove('away');
     ly = y;
   }, { passive: true });
   const lock = () => document.documentElement.classList.toggle('lock', $('sheet').classList.contains('open') || !$('scanner-overlay').classList.contains('hidden'));
