@@ -759,6 +759,20 @@ html.lock{overflow:hidden}
         <p class="login-err" id="login-err" role="alert"></p>
         <button type="submit" id="btn-login" class="btn">Masuk</button>
       </form>
+
+      <form id="signup-form" class="hidden" onsubmit="signup(event)">
+        <div class="group">
+          <div class="field"><label for="su-name">Nama</label><input type="text" id="su-name" required placeholder="Nama Anda atau pasangan" autocomplete="name" /></div>
+          <div class="field"><label for="su-email">Email</label><input type="email" id="su-email" required placeholder="nama@email.com" autocomplete="username" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" /></div>
+          <div class="field"><label for="su-password">Password</label><input type="password" id="su-password" required minlength="8" placeholder="Minimal 8 karakter" autocomplete="new-password" /></div>
+        </div>
+        <p class="login-err" id="su-err" role="alert"></p>
+        <button type="submit" id="btn-signup" class="btn">Daftar</button>
+      </form>
+
+      <p style="margin:14px 0 0;text-align:center;font-size:14px">
+        <button type="button" id="auth-toggle" onclick="toggleAuthMode()" style="background:none;border:0;color:var(--brand);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">Belum punya akun? Daftar</button>
+      </p>
     </div>
   </section>
 
@@ -1210,6 +1224,57 @@ async function login(e) {
   }
   
   loadDashboard();
+}
+
+function toggleAuthMode() {
+  const toSignup = $('signup-form').classList.contains('hidden');
+  $('login-form').classList.toggle('hidden', toSignup);
+  $('signup-form').classList.toggle('hidden', !toSignup);
+  $('auth-toggle').textContent = toSignup ? 'Sudah punya akun? Masuk' : 'Belum punya akun? Daftar';
+  $('login-err').textContent = '';
+  $('su-err').textContent = '';
+  icons();
+}
+
+async function signup(e) {
+  e.preventDefault();
+  const btn = $('btn-signup');
+  const err = $('su-err');
+  const name = $('su-name').value.trim();
+  const email = $('su-email').value.trim();
+  const password = $('su-password').value;
+  err.textContent = '';
+
+  if (!name) { err.textContent = 'Nama wajib diisi.'; return; }
+  if (password.length < 8) { err.textContent = 'Password minimal 8 karakter.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Memproses…';
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password,
+    options: { data: { name } }
+  });
+  btn.disabled = false;
+  btn.textContent = 'Daftar';
+
+  if (error) {
+    let m = error.message;
+    if (/already registered|already exists|user already/i.test(m)) m = 'Email ini sudah terdaftar. Coba masuk.';
+    else if (/rate limit/i.test(m)) m = 'Terlalu banyak percobaan email. Coba lagi beberapa menit lagi.';
+    else if (/invalid/i.test(m) && /email/i.test(m)) m = 'Email ini tidak diterima. Gunakan email aktif yang lain.';
+    else if (/password/i.test(m)) m = 'Password terlalu lemah. Gunakan minimal 8 karakter.';
+    err.textContent = m;
+    return;
+  }
+
+  if (!data.session) {
+    err.textContent = 'Akun dibuat. Cek email untuk konfirmasi, lalu masuk.';
+    $('su-err').style.color = 'var(--sub)';
+    return;
+  }
+
+  await loadDashboard();
 }
 async function logout() { 
   localStorage.clear();

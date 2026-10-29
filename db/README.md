@@ -26,6 +26,7 @@ Jalankan **berurutan**. Jangan melompat.
 | 6 | `2026-10-29-p1-rotate-all-tokens.sql` | Ganti semua token (khusus data uji) |
 | 7 | `2026-10-29-p2-multi-event.sql` | Multi-acara per klien (catatan diff, bukan skrip) |
 | 8 | `2026-10-29-p2-create-event.sql` | Klien bisa buat acara sendiri + akun tanpa acara |
+| 9 | `2026-10-29-p3-signup.sql` | Pendaftaran klien mandiri (trigger `auth.users` -> `clients`) |
 
 ### Prasyarat tiap tahap
 
@@ -277,6 +278,24 @@ fungsi apa pun — hanya membuka kembali data ke publik.
   petugas 64 bit.
 - `get_scanner_guests` masih mengembalikan `invitation_token`, tapi hanya untuk
   pemilik acara yang login.
+
+### Pendaftaran klien
+
+Klien mendaftar sendiri lewat `dashboard.html`. Trigger `on_auth_user_created`
+membuat baris `public.clients` otomatis: nama dari metadata `name`, slug dari
+nama (huruf kecil, tanda hubung), ditambah `-2`, `-3`, ... kalau bentrok.
+
+Tiga hal di dashboard Supabase yang menentukan berhasil tidaknya pendaftaran:
+
+1. Auth -> Providers -> Email aktif.
+2. "Confirm email": kalau aktif, pendaftar harus klik tautan di email sebelum
+   bisa masuk. Kalau nonaktif, langsung masuk ke layar onboarding acara.
+3. SMTP. SMTP bawaan Supabase punya kuota kirim sangat kecil di plan gratis,
+   sehingga pendaftaran sering gagal dengan "email rate limit exceeded".
+   Pasang SMTP sendiri (Resend/Brevo punya tier gratis) di Auth -> SMTP Settings.
+
+Domain email juga divalidasi: `example.com` dan domain tanpa MX ditolak dengan
+"Email address ... is invalid".
 
 ### Banyak acara per klien
 
