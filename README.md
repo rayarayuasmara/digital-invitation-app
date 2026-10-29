@@ -21,6 +21,6 @@ Perubahan database (policy, RPC, index, token) dicatat di
   API; mengubahnya memutus halaman tanpa error build.
 - Jangan menambah policy `using (true)` untuk role `public` pada tabel mana pun.
 - `opencode.json` memuat token GitHub dan tidak masuk git.
-- Satu akun klien saat ini hanya mendukung **satu acara**. Lihat
-  [`db/README.md`](db/README.md) bagian "Satu akun klien = satu acara" sebelum
-  menerima klien dengan acara lebih dari satu.
+- Satu akun klien bisa punya lebih dari satu acara. Dashboard menyediakan
+  pemilih acara; lihat [`db/README.md`](db/README.md) bagian "Banyak acara per
+  klien".

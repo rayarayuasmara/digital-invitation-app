@@ -24,6 +24,7 @@ Jalankan **berurutan**. Jangan melompat.
 | 4 | `2026-10-29-p1-indexes-rls.sql` | Index + RLS `auth.uid()` jadi initplan |
 | 5 | `2026-10-29-p1-scanner-ticketless.sql` | Tamu tanpa tiket bisa check-in dari daftar |
 | 6 | `2026-10-29-p1-rotate-all-tokens.sql` | Ganti semua token (khusus data uji) |
+| 7 | `2026-10-29-p2-multi-event.sql` | Multi-acara per klien (catatan diff, bukan skrip) |
 
 ### Prasyarat tiap tahap
 
@@ -276,31 +277,26 @@ fungsi apa pun — hanya membuka kembali data ke publik.
 - `get_scanner_guests` masih mengembalikan `invitation_token`, tapi hanya untuk
   pemilik acara yang login.
 
-### Satu akun klien = satu acara
+### Banyak acara per klien
 
-Saat ini seluruh panel klien mengasumsikan **satu acara per akun**. Tidak ada
-pemilih acara di dashboard, dan enam fungsi mengambil acara pertama milik klien
-dengan `limit 1`:
+Sudah didukung sejak `2026-10-29-p2-multi-event.sql`. Lima fungsi menerima
+`p_event_id uuid default null`:
 
-| Fungsi | Akibat kalau klien punya 2 acara |
-|---|---|
-| `get_client_dashboard_data` | Dashboard hanya menampilkan satu acara, tanpa cara berpindah |
-| `list_client_guests` | Daftar tamu acara kedua tidak bisa dibuka |
-| `add_guest_by_client` | Tamu baru masuk ke acara yang kebetulan terambil — bisa acara yang salah |
-| `update_guest_by_client` | Penyuntingan bisa menyasar acara salah |
-| `check_in_guest` | Petugas acara kedua ditolak: "Akses ditolak" |
-| `get_scanner_guests` | Punya parameter `p_event_id`, tapi `null` berarti acara pertama |
+`get_client_dashboard_data`, `list_client_guests`, `add_guest_by_client`,
+`update_guest_by_client`, `check_in_guest`.
 
-`events_rotate_scanner_code` dan `scanner_*` sudah menerima id acara atau kode,
-jadi bagian scanner lebih siap daripada dashboard.
+- `p_event_id` kosong (`null`) = acara pertama milik klien. Ini menjaga
+  kompatibilitas pemanggil lama.
+- `p_event_id` diisi acara yang bukan milik pemanggil = ditolak
+  (`Unauthorized` / daftar kosong), bukan error 500.
+- Dashboard menampilkan pemilih acara di header Home kalau klien punya lebih
+  dari satu acara. Pilihan disimpan di `localStorage` dengan kunci
+  `rr_event_id`. Kalau acara itu sudah dihapus, dashboard otomatis kembali ke
+  acara pertama.
+- `delete_guest_by_client` dan `update_guest_sent_status` tidak butuh
+  `p_event_id`: keduanya dikunci lewat `guest_id` plus cek kepemilikan acara.
+- `get_scanner_guests` dan `events_rotate_scanner_code` sudah menerima
+  `p_event_id` sejak awal.
 
-**Sebelum menerima klien dengan lebih dari satu acara**, dua hal harus
-dikerjakan:
-
-1. Tambah parameter `p_event_id` ke enam fungsi di atas, dan tolak kalau acara
-   itu bukan milik pemanggil.
-2. Tambah pemilih acara di dashboard, lalu kirim id acara di setiap RPC.
-
-Selama belum, jadikan "satu akun satu acara" sebagai aturan bisnis yang
-disepakati, bukan asumsi diam-diam. Data sekarang: 1 klien (`rudi-irul`),
-1 acara.
+Tamu tidak bisa berpindah acara. Kalau perlu memindahkan, hapus lalu buat ulang
+di acara tujuan — token undangan ikut baru.
