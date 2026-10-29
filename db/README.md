@@ -266,3 +266,32 @@ fungsi apa pun — hanya membuka kembali data ke publik.
   petugas 64 bit.
 - `get_scanner_guests` masih mengembalikan `invitation_token`, tapi hanya untuk
   pemilik acara yang login.
+
+### Satu akun klien = satu acara
+
+Saat ini seluruh panel klien mengasumsikan **satu acara per akun**. Tidak ada
+pemilih acara di dashboard, dan enam fungsi mengambil acara pertama milik klien
+dengan `limit 1`:
+
+| Fungsi | Akibat kalau klien punya 2 acara |
+|---|---|
+| `get_client_dashboard_data` | Dashboard hanya menampilkan satu acara, tanpa cara berpindah |
+| `list_client_guests` | Daftar tamu acara kedua tidak bisa dibuka |
+| `add_guest_by_client` | Tamu baru masuk ke acara yang kebetulan terambil — bisa acara yang salah |
+| `update_guest_by_client` | Penyuntingan bisa menyasar acara salah |
+| `check_in_guest` | Petugas acara kedua ditolak: "Akses ditolak" |
+| `get_scanner_guests` | Punya parameter `p_event_id`, tapi `null` berarti acara pertama |
+
+`events_rotate_scanner_code` dan `scanner_*` sudah menerima id acara atau kode,
+jadi bagian scanner lebih siap daripada dashboard.
+
+**Sebelum menerima klien dengan lebih dari satu acara**, dua hal harus
+dikerjakan:
+
+1. Tambah parameter `p_event_id` ke enam fungsi di atas, dan tolak kalau acara
+   itu bukan milik pemanggil.
+2. Tambah pemilih acara di dashboard, lalu kirim id acara di setiap RPC.
+
+Selama belum, jadikan "satu akun satu acara" sebagai aturan bisnis yang
+disepakati, bukan asumsi diam-diam. Data sekarang: 1 klien (`rudi-irul`),
+1 acara.
