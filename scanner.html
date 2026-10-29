@@ -171,14 +171,41 @@ html.lock{overflow:hidden}
 .toast svg{width:16px;height:16px}
 .toast.show{transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
+
+/* Gerbang kode petugas */
+.gate{position:fixed;inset:0;z-index:90;background:var(--bg);display:grid;place-items:center;padding:24px}
+.gate[hidden]{display:none!important}
+.gate-card{width:100%;max-width:380px;background:var(--card);border-radius:26px;padding:28px 22px;box-shadow:var(--shadow);text-align:center}
+.gate-ic{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;margin:0 auto 14px;background:var(--blue-bg);color:var(--brand)}
+.gate-ic svg{width:26px;height:26px}
+.gate-card h1{margin:0 0 6px;font-size:22px;letter-spacing:-.02em}
+.gate-card p{margin:0 0 16px;color:var(--sub);font-size:14px;line-height:1.45}
+.gate-card input{width:100%;box-sizing:border-box;padding:14px 16px;border-radius:16px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:'Geist Mono',monospace;font-size:16px;text-align:center;letter-spacing:.04em}
+.gate-card input:focus{outline:2px solid var(--brand);outline-offset:1px}
+.gate-card .btn{width:100%;margin-top:12px}
+.gate-err{margin:12px 0 0;color:var(--red-ink);font-size:13px;min-height:18px}
+.gate-hint{margin:14px 0 0;font-size:12px;color:var(--sub)}
+.gl[disabled]{opacity:.55;cursor:default}
 </style>
 </head>
 <body>
-<div id="app">
+<div id="gate" class="gate">
+  <div class="gate-card">
+    <div class="gate-ic"><i data-lucide="key-round"></i></div>
+    <h1>Kode Petugas</h1>
+    <p>Masukkan kode akses acara. Minta kode ini ke pemilik undangan lewat menu Profil Acara.</p>
+    <input id="gate-code" type="text" inputmode="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="16 karakter" aria-label="Kode akses acara" />
+    <button class="btn" id="gate-btn">Masuk</button>
+    <p class="gate-err" id="gate-err" role="alert"></p>
+    <p class="gate-hint">Kode ini hanya membuka daftar tamu dan check-in. Tidak bisa mengubah data.</p>
+  </div>
+</div>
+
+<div id="app" class="hidden">
   <header class="topbar">
     <div>
       <h1>Scanner</h1>
-      <p><span class="live"></span>Mode Operator Door</p>
+      <p><span class="live"></span><span id="ev-name">Mode Operator Door</span></p>
     </div>
     <div class="top-actions">
       <button class="ib" onclick="refreshGuests()" id="btn-refresh" aria-label="Muat ulang data"><i data-lucide="refresh-cw"></i></button>
@@ -211,7 +238,7 @@ html.lock{overflow:hidden}
 
     <!-- Manual -->
     <div id="view-manual" class="hidden view">
-      <div class="sbar"><i data-lucide="search"></i><input type="search" id="manual-search-input" placeholder="Ketik nama tamu atau kode…" oninput="filterManualGuests()" /></div>
+      <div class="sbar"><i data-lucide="search"></i><input type="search" id="manual-search-input" placeholder="Ketik nama tamu…" oninput="filterManualGuests()" /></div>
       <div class="chips" id="manual-chips">
         <button class="chip on" data-f="all">Semua</button>
         <button class="chip" data-f="wait">Belum masuk</button>
@@ -275,6 +302,10 @@ html.lock{overflow:hidden}
   let sessionHistory = [];
   let autoTimer = null;
   let lastToken = '', lastTokenAt = 0;
+
+  const SCANNER_CODE_KEY = 'rr_scanner_code';
+  let scannerCode = (localStorage.getItem(SCANNER_CODE_KEY) || '').trim();
+  let scannerInfo = null;
 
   const mq = matchMedia('(prefers-color-scheme: dark)');
   function applyTheme() {
@@ -403,49 +434,15 @@ html.lock{overflow:hidden}
   }
 
   async function fetchRegisteredGuests() {
-    const { data: rpcData, error: rpcError } = await supabaseClient.rpc('get_scanner_guests');
-    if (!rpcError && rpcData && Array.isArray(rpcData)) {
-      allRegisteredGuests = rpcData;
-      updateGuestCountBadge();
-      filterManualGuests();
+    if (!scannerCode) return;
+    const { data, error } = await supabaseClient.rpc('scanner_list_guests', { p_code: scannerCode });
+    if (error || !data || !data.success) {
+      $('manual-guest-list').innerHTML = '<div class="empty">Gagal memuat daftar tamu. Kode akses mungkin sudah diganti pemilik acara.</div>';
       return;
     }
-
-    try {
-      const [guestsRes, ticketsRes, rsvpsRes] = await Promise.all([
-        supabaseClient.from('guests').select('id, group_name, category, max_pax, invitation_token').order('group_name', { ascending: true }),
-        supabaseClient.from('tickets').select('guest_id, ticket_token, is_checked_in'),
-        supabaseClient.from('rsvps').select('guest_id, status, pax_confirmed')
-      ]);
-
-      if (guestsRes.data) {
-        const ticketMap = new Map();
-        (ticketsRes.data || []).forEach(t => ticketMap.set(t.guest_id, t));
-        const rsvpMap = new Map();
-        (rsvpsRes.data || []).forEach(r => rsvpMap.set(r.guest_id, r));
-
-        allRegisteredGuests = guestsRes.data.map(g => {
-          const t = ticketMap.get(g.id);
-          const r = rsvpMap.get(g.id);
-          return {
-            id: g.id,
-            group_name: g.group_name,
-            category: g.category || 'Umum',
-            max_pax: g.max_pax || 2,
-            invitation_token: g.invitation_token,
-            ticket_token: t?.ticket_token || g.invitation_token,
-            is_checked_in: !!t?.is_checked_in,
-            pax_confirmed: r?.pax_confirmed || g.max_pax,
-            rsvp_status: r?.status || 'pending'
-          };
-        });
-
-        updateGuestCountBadge();
-        filterManualGuests();
-      }
-    } catch (err) {
-      $('manual-guest-list').innerHTML = '<div class="empty">Gagal memuat data tamu dari database.</div>';
-    }
+    allRegisteredGuests = data.guests || [];
+    updateGuestCountBadge();
+    filterManualGuests();
   }
 
   async function refreshGuests() {
@@ -472,23 +469,23 @@ html.lock{overflow:hidden}
       return;
     }
     container.innerHTML = guests.slice(0, 80).map((g, i) => {
-      const activeToken = g.invitation_token || g.ticket_token;
       const c = COLORS[i % COLORS.length];
-      return `<button class="gl" data-token="${esc(activeToken)}">
+      const pax = g.pax_confirmed || g.max_pax || 1;
+      const state = g.is_checked_in ? 'st-checked' : 'st-ready';
+      return `<button class="gl" data-ref="${esc(g.ref || '')}" ${g.ref ? '' : 'disabled'}>
         <div class="av" style="background:${c}22;color:${c}">${esc(initials(g.group_name))}</div>
-        <div class="txt"><div class="n">${esc(g.group_name)}</div><div class="s">${esc(g.category || 'Umum')} · <span class="code">${esc(activeToken)}</span></div></div>
-        <span class="st ${g.is_checked_in ? 'st-checked' : 'st-ready'}">${g.is_checked_in ? 'Checked' : 'Ready'}</span>
+        <div class="txt"><div class="n">${esc(g.group_name)}</div><div class="s">${esc(g.category || 'Umum')} · ${pax} orang</div></div>
+        <span class="st ${state}">${g.is_checked_in ? 'Checked' : 'Ready'}</span>
       </button>`;
     }).join('') + (guests.length > 80 ? `<div class="empty" style="padding:14px">+${guests.length - 80} lainnya, persempit pencarian.</div>` : '');
   }
 
   function filterManualGuests() {
-    const search = $('manual-search-input').value.toLowerCase();
+    const search = $('manual-search-input').value.toLowerCase().trim();
     document.querySelectorAll('#manual-chips .chip').forEach(c => c.classList.toggle('on', c.dataset.f === manualFilter));
     let filtered = allRegisteredGuests.filter(g =>
-      g.group_name.toLowerCase().includes(search) ||
-      (g.invitation_token && g.invitation_token.toLowerCase().includes(search)) ||
-      (g.ticket_token && g.ticket_token.toLowerCase().includes(search))
+      String(g.group_name || '').toLowerCase().includes(search) ||
+      String(g.category || '').toLowerCase().includes(search)
     );
     if (manualFilter === 'wait') filtered = filtered.filter(g => !g.is_checked_in);
     if (manualFilter === 'done') filtered = filtered.filter(g => g.is_checked_in);
@@ -499,14 +496,14 @@ html.lock{overflow:hidden}
     manualFilter = b.dataset.f; filterManualGuests();
   });
   $('manual-guest-list').addEventListener('click', e => {
-    const b = e.target.closest('[data-token]'); if (b) selectManualGuest(b.dataset.token);
+    const b = e.target.closest('[data-ref]'); if (b && b.dataset.ref) selectManualGuest(b.dataset.ref);
   });
 
-  function selectManualGuest(token) {
-    if (!token) return;
-    const g = allRegisteredGuests.find(x => (x.invitation_token || x.ticket_token) === token);
+  function selectManualGuest(ref) {
+    if (!ref) return;
+    const g = allRegisteredGuests.find(x => x.ref === ref);
     isProcessing = true;
-    if (!g) { processCheckIn(token); return; }
+    if (!g) { processCheckIn(ref); return; }
     if (g.is_checked_in) {
       openSheet(`
         <div class="res"><div class="res-ico warn"><i data-lucide="user-check"></i></div><h3>Sudah Check-in</h3><p>${esc(g.group_name)} sudah diverifikasi sebelumnya.</p></div>
@@ -524,7 +521,7 @@ html.lock{overflow:hidden}
         <button class="btn" id="do-ci">Check-in sekarang</button>
         <button class="btn line" onclick="closeSheet();resumeScanner()">Batal</button>
       </div>`);
-    $('do-ci').onclick = () => { $('do-ci').disabled = true; processCheckIn(token, 'manual'); };
+    $('do-ci').onclick = () => { $('do-ci').disabled = true; processCheckIn(ref, 'manual'); };
   }
 
   function submitManualTokenInput() {
@@ -560,66 +557,22 @@ html.lock{overflow:hidden}
     await processCheckIn(extractedToken, 'scan');
   }
 
-  async function processCheckIn(ticketToken, source = 'scan') {
-    const tokenClean = cleanTokenString(ticketToken);
+  async function processCheckIn(input, source = 'scan') {
+    if (!scannerCode) { showGate('Kode akses tidak ditemukan. Masukkan ulang.'); return; }
+    const tokenClean = cleanTokenString(input);
 
-    const { data, error } = await supabaseClient.rpc('check_in_guest', { p_ticket_token: tokenClean });
+    const { data, error } = await supabaseClient.rpc('scanner_check_in', { p_code: scannerCode, p_input: tokenClean });
 
-    if (error) {
-      return await fallbackDirectCheckIn(tokenClean, source);
+    if (error || !data) {
+      showModal(false, "Kesalahan Koneksi", error && error.message ? error.message : "Tidak dapat menghubungi server. Periksa sinyal lalu coba lagi.", null, source);
+      return;
     }
 
     if (!data.success) {
-      showModal(false, "Peringatan Tiket", `${data.message}\n(Kode terbaca: "${tokenClean}")`, data.guest || null, source);
+      showModal(false, data.already_checked_in ? "Sudah Pernah Check-in" : "Peringatan Tiket", data.message, data.guest || null, source);
     } else {
       showModal(true, "Berhasil Check-in!", "Tamu terverifikasi resmi.", data.guest, source);
       fetchRegisteredGuests();
-    }
-  }
-
-  async function fallbackDirectCheckIn(tokenClean, source = 'scan') {
-    try {
-      const { data: guests } = await supabaseClient
-        .from('guests')
-        .select('id, group_name, category, max_pax, invitation_token')
-        .ilike('invitation_token', tokenClean)
-        .limit(1);
-
-      if (!guests || guests.length === 0) {
-        showModal(false, "Tiket Tidak Ditemukan", `Kode token "${tokenClean}" tidak terdaftar di daftar undangan.`, null, source);
-        return;
-      }
-
-      const g = guests[0];
-      const { data: tickets } = await supabaseClient
-        .from('tickets')
-        .select('*')
-        .eq('guest_id', g.id)
-        .limit(1);
-
-      if (tickets && tickets.length > 0 && tickets[0].is_checked_in) {
-        showModal(false, "Sudah Pernah Check-in", `Tamu "${g.group_name}" sudah diverifikasi sebelumnya.`, {
-          group_name: g.group_name,
-          category: g.category,
-          max_pax: g.max_pax
-        }, source);
-        return;
-      }
-
-      if (tickets && tickets.length > 0) {
-        await supabaseClient.from('tickets').update({ is_checked_in: true, checked_in_at: new Date().toISOString() }).eq('id', tickets[0].id);
-      } else {
-        await supabaseClient.from('tickets').insert({ guest_id: g.id, ticket_token: g.invitation_token, is_checked_in: true, checked_in_at: new Date().toISOString() });
-      }
-
-      showModal(true, "Berhasil Check-in!", "Tamu terverifikasi resmi (Direct Mode).", {
-        group_name: g.group_name,
-        category: g.category,
-        pax_confirmed: g.max_pax
-      }, source);
-      fetchRegisteredGuests();
-    } catch (err) {
-      showModal(false, "Kesalahan Check-in", err.message || "Gagal memproses tiket.", null, source);
     }
   }
 
@@ -668,22 +621,85 @@ html.lock{overflow:hidden}
     }).join('');
   }
 
+  let appStarted = false;
+
+  function showGate(msg) {
+    $('gate').hidden = false;
+    $('app').classList.add('hidden');
+    $('gate-err').textContent = msg || '';
+    if (msg) $('gate-code').value = '';
+    icons();
+  }
+
+  function showApp() {
+    $('gate').hidden = true;
+    $('app').classList.remove('hidden');
+    $('ev-name').textContent = (scannerInfo && scannerInfo.event_title) ? scannerInfo.event_title : 'Mode Operator Door';
+    if (!appStarted) {
+      appStarted = true;
+      startScanner();
+    }
+    fetchRegisteredGuests();
+  }
+
+  async function tryEnterScanner(code, opts = {}) {
+    const remember = opts.remember !== false;
+    const clean = cleanTokenString(code);
+    if (!clean) { $('gate-err').textContent = 'Kode akses wajib diisi.'; return false; }
+
+    const { data, error } = await supabaseClient.rpc('scanner_event_info', { p_code: clean });
+    if (error || !data || !data.success) {
+      $('gate-err').textContent = 'Kode tidak valid atau sudah diganti pemilik acara.';
+      return false;
+    }
+
+    scannerCode = clean;
+    scannerInfo = data;
+    if (remember) localStorage.setItem(SCANNER_CODE_KEY, clean);
+    $('gate-code').value = '';
+    $('gate-err').textContent = '';
+    showApp();
+    return true;
+  }
+
+  function submitGate() {
+    const btn = $('gate-btn');
+    btn.disabled = true;
+    tryEnterScanner($('gate-code').value).finally(() => { btn.disabled = false; });
+  }
+
   function logout() {
     openSheet(`
-      <div class="res"><div class="res-ico warn"><i data-lucide="log-out"></i></div><h3>Keluar dari mode scanner?</h3></div>
+      <div class="res"><div class="res-ico warn"><i data-lucide="log-out"></i></div><h3>Keluar dari mode scanner?</h3><p>Kode akses akan dihapus dari perangkat ini.</p></div>
       <div class="sheet-actions">
         <button class="btn" style="background:var(--red);color:#fff" onclick="doLogout()">Keluar</button>
         <button class="btn line" onclick="closeSheet()">Batal</button>
       </div>`);
   }
   async function doLogout() {
-    await supabaseClient.auth.signOut();
+    localStorage.removeItem(SCANNER_CODE_KEY);
+    scannerCode = ''; scannerInfo = null;
+    try { await supabaseClient.auth.signOut(); } catch (e) {}
     window.location.href = "/";
   }
 
-  window.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('DOMContentLoaded', async () => {
     applyTheme(); icons(); placeThumb();
-    startScanner();
+    $('gate-btn').addEventListener('click', submitGate);
+    $('gate-code').addEventListener('keydown', e => { if (e.key === 'Enter') submitGate(); });
+
+    const urlCode = new URLSearchParams(location.search).get('code');
+    if (urlCode) {
+      history.replaceState(null, '', location.pathname);
+      if (await tryEnterScanner(urlCode)) return;
+    }
+
+    if (scannerCode) {
+      const ok = await tryEnterScanner(scannerCode, { remember: false });
+      if (!ok) { localStorage.removeItem(SCANNER_CODE_KEY); scannerCode = ''; showGate(''); }
+    } else {
+      showGate('');
+    }
   });
 </script>
 </body>

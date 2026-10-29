@@ -930,6 +930,18 @@ html.lock{overflow:hidden}
           <div class="card" style="padding:4px 18px"><div class="field col"><label for="ev-caption">Pesan pembuka</label><textarea id="ev-caption" rows="4" required></textarea></div>
             <div class="sub" style="font-size:12px;padding:0 4px 12px">Tampil di halaman undangan tamu, bukan di pesan WhatsApp.</div></div>
           <button type="submit" id="btn-save-event" class="btn">Simpan profil acara</button>
+
+          <div class="card" style="padding:16px 18px">
+            <div class="ch" style="margin-bottom:6px"><h3>Kode Petugas</h3></div>
+            <div class="sub" style="font-size:13px;margin-bottom:12px">Bagikan kode ini ke petugas pintu masuk. Petugas hanya bisa melihat daftar tamu dan check-in. Tidak bisa mengubah data, tidak bisa melihat nomor WhatsApp tamu.</div>
+            <div class="field"><label for="scanner-code">Kode aktif</label><input type="text" id="scanner-code" readonly placeholder="Belum dibuat" autocomplete="off" /></div>
+            <button type="button" class="btn" onclick="rotateScannerCode()">Buat / ganti kode</button>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+              <button type="button" class="btn line" style="font-size:15px" onclick="copyScannerCode()">Salin kode</button>
+              <button type="button" class="btn line" style="font-size:15px" onclick="copyScannerLink()">Salin tautan</button>
+            </div>
+            <div class="sub" style="font-size:12px;margin-top:10px">Mengganti kode langsung mematikan kode lama. Petugas perlu memasukkan kode baru.</div>
+          </div>
         </form>
 
         <!-- Sub-tab 2: Template WhatsApp -->
@@ -1397,6 +1409,7 @@ function renderUI() {
   $('ev-s2-name').value = event.session_2_name || 'Sesi 2'; $('ev-s2-time').value = event.session_2_time || '';
   $('ev-location').value = event.location || '';
   $('ev-caption').value = event.caption || '';
+  renderScannerCode(event);
 
   initWaDraft();
 
@@ -1493,6 +1506,38 @@ function eventDateKeepTime(ymd) {
   const old = globalData.event.event_date ? new Date(globalData.event.event_date) : null;
   const hm = old && !isNaN(old) ? old.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Jakarta' }) : '00:00';
   return new Date(`${ymd}T${hm}:00+07:00`).toISOString();
+}
+
+function renderScannerCode(ev) {
+  const el = $('scanner-code');
+  if (!el) return;
+  el.value = (ev && ev.scanner_code) ? ev.scanner_code : '';
+}
+
+async function rotateScannerCode() {
+  const { data, error } = await supabaseClient.rpc('events_rotate_scanner_code', { p_event_id: globalData.event.id });
+  if (error || !data || !data.success) {
+    toast((data && data.message) ? data.message : 'Gagal membuat kode petugas.', false);
+    return;
+  }
+  globalData.event.scanner_code = data.code;
+  renderScannerCode(globalData.event);
+  toast('Kode petugas baru dibuat');
+}
+
+async function copyScannerCode() {
+  const v = $('scanner-code').value.trim();
+  if (!v) { toast('Belum ada kode. Buat dulu.', false); return; }
+  try { await navigator.clipboard.writeText(v); toast('Kode disalin'); }
+  catch (e) { toast('Gagal menyalin. Salin manual dari kolom.', false); }
+}
+
+async function copyScannerLink() {
+  const v = $('scanner-code').value.trim();
+  if (!v) { toast('Belum ada kode. Buat dulu.', false); return; }
+  const url = location.origin + '/scanner?code=' + encodeURIComponent(v);
+  try { await navigator.clipboard.writeText(url); toast('Tautan scanner disalin'); }
+  catch (e) { toast('Gagal menyalin tautan.', false); }
 }
 
 async function submitEditEvent(e) {
@@ -2533,7 +2578,8 @@ async function processScannerCheckIn(ticketToken, source = 'scan') {
   const { data, error } = res;
 
   if (error || !data) {
-    return await fallbackScannerDirectCheckIn(tokenClean, source);
+    showScannerModal(false, "Kesalahan Koneksi", (error && error.message) ? error.message : 'Tidak dapat menghubungi server. Periksa sinyal lalu coba lagi.', null, source, tokenClean);
+    return;
   }
 
   if (!data.success) {
@@ -2542,55 +2588,6 @@ async function processScannerCheckIn(ticketToken, source = 'scan') {
     showScannerModal(true, "Berhasil Check-in", "Tamu siap dipersilakan masuk.", data.guest, source);
     fetchScannerGuests();
     loadDashboard();
-  }
-}
-
-async function fallbackScannerDirectCheckIn(tokenClean, source = 'scan') {
-  try {
-    const { data: guests } = await supabaseClient
-      .from('guests')
-      .select('id, group_name, category, max_pax, invitation_token, invitation_type')
-      .ilike('invitation_token', tokenClean)
-      .limit(1);
-
-    if (!guests || guests.length === 0) {
-      showScannerModal(false, "Tiket Tidak Ditemukan", 'Kode ini tidak terdaftar di daftar undangan.', null, source, tokenClean);
-      return;
-    }
-
-    const g = guests[0];
-    const { data: tickets } = await supabaseClient
-      .from('tickets')
-      .select('*')
-      .eq('guest_id', g.id)
-      .limit(1);
-
-    if (tickets && tickets.length > 0 && tickets[0].is_checked_in) {
-      showScannerModal(false, "Sudah Pernah Check-in", `${g.group_name} sudah diverifikasi sebelumnya.`, {
-        group_name: g.group_name,
-        category: g.category,
-        max_pax: g.max_pax,
-        invitation_type: g.invitation_type
-      }, source, tokenClean);
-      return;
-    }
-
-    if (tickets && tickets.length > 0) {
-      await supabaseClient.from('tickets').update({ is_checked_in: true, checked_in_at: new Date().toISOString() }).eq('id', tickets[0].id);
-    } else {
-      await supabaseClient.from('tickets').insert({ guest_id: g.id, ticket_token: g.invitation_token, is_checked_in: true, checked_in_at: new Date().toISOString() });
-    }
-
-    showScannerModal(true, "Berhasil Check-in", "Tamu siap dipersilakan masuk.", {
-      group_name: g.group_name,
-      category: g.category,
-      pax_confirmed: g.max_pax,
-      invitation_type: g.invitation_type
-    }, source);
-    fetchScannerGuests();
-    loadDashboard();
-  } catch (err) {
-    showScannerModal(false, "Gagal Memproses", err.message || "Tiket tidak dapat diproses. Coba lagi.", null, source, tokenClean);
   }
 }
 

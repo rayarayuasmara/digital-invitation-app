@@ -697,65 +697,26 @@ async function fetchGuest() {
     const { data, error } = await sb.rpc('get_invitation_details', { p_token: token });
     const row = Array.isArray(data) ? data[0] : data;
     if (!error && row) return row;
-  } catch (e) { /* lanjut ke cadangan */ }
-  return await fallbackFetchGuest();
-}
-
-async function fallbackFetchGuest() {
-  const { data: guests, error } = await sb.from('guests')
-    .select(`id, group_name, category, max_pax, invitation_token, event_id, session,
-             events ( title, event_date, location, caption, client_id, session_1_name, session_1_time, session_2_name, session_2_time, clients ( name ) )`)
-    .ilike('invitation_token', token).limit(1);
-  if (error || !guests || !guests.length) return null;
-
-  const g = guests[0], ev = g.events || {};
-  const [rsvpRes, ticketRes] = await Promise.all([
-    sb.from('rsvps').select('status, pax_confirmed').eq('guest_id', g.id).limit(1),
-    sb.from('tickets').select('ticket_token, is_checked_in, checked_in_at').eq('guest_id', g.id).limit(1)
-  ]);
-  const rsvp = rsvpRes.data && rsvpRes.data[0];
-  const ticket = ticketRes.data && ticketRes.data[0];
-  return {
-    id: g.id, event_id: g.event_id,
-    group_name: g.group_name, category: g.category, max_pax: g.max_pax,
-    invitation_token: g.invitation_token,
-    event_title: ev.title || 'Pernikahan', event_date: ev.event_date,
-    event_location: ev.location, event_caption: ev.caption,
-    session_name: g.session,
-    session_time: g.session === ev.session_2_name ? ev.session_2_time : ev.session_1_time,
-    client_name: ev.clients ? ev.clients.name : 'Mempelai',
-    rsvp_status: rsvp ? rsvp.status : null,
-    pax_confirmed: rsvp ? rsvp.pax_confirmed : null,
-    ticket_token: ticket ? ticket.ticket_token : g.invitation_token,
-    is_checked_in: ticket ? ticket.is_checked_in : false
-  };
+  } catch (e) { /* dibiarkan; tampilkan pesan tidak ditemukan */ }
+  return null;
 }
 
 async function ensureIds(g) {
-  S.guestId = g.id || g.guest_id || null;
+  S.guestId = g.guest_id || g.id || null;
   S.eventId = g.event_id || null;
-  if (S.guestId && S.eventId) return;
-  try {
-    const { data } = await sb.from('guests').select('id, event_id').ilike('invitation_token', token).limit(1);
-    if (data && data[0]) { S.guestId = S.guestId || data[0].id; S.eventId = S.eventId || data[0].event_id; }
-  } catch (e) {}
 }
 
 // Ringkasan RSVP seluruh tamu pada acara ini (dipakai untuk statistik + indikator status di tiap ucapan)
 async function loadSummary() {
-  if (!S.eventId) return;
   try {
-    const { data, error } = await sb.from('guests')
-      .select('id, group_name, max_pax, rsvps ( status, pax_confirmed )')
-      .eq('event_id', S.eventId);
+    const { data, error } = await sb.rpc('get_event_rsvp_summary', { p_token: token });
     if (error || !data) return;
     const byId = new Map(), byName = new Map();
     let yes = 0, no = 0, pax = 0; const yesNames = [];
-    data.forEach(g => {
-      const r = firstOf(g.rsvps);
-      const st = r ? r.status : null;
-      byId.set(g.id, st); byName.set(norm(g.group_name), st);
-      if (st === 'hadir') { yes++; pax += (r.pax_confirmed || 1); yesNames.push(g.group_name); }
+    data.forEach(row => {
+      const st = row.rsvp_status || null;
+      byName.set(norm(row.guest_name), st);
+      if (st === 'hadir') { yes++; pax += (row.pax_confirmed || 1); yesNames.push(row.guest_name); }
       else if (st === 'tidak_hadir') no++;
     });
     S.summary = { byId, byName, total: data.length, yes, no, pax, yesNames };
@@ -764,17 +725,11 @@ async function loadSummary() {
 }
 
 async function fetchWishes() {
-  let list = null;
+  let list = [];
   try {
     const r = await sb.rpc('get_event_wishes', { p_token: token });
     if (!r.error && Array.isArray(r.data)) list = r.data;
   } catch (e) {}
-  if (!list) {
-    let q = sb.from('wishes').select('*').order('created_at', { ascending: false }).limit(80);
-    if (S.eventId) q = q.eq('event_id', S.eventId);
-    const r = await q;
-    list = r.data || [];
-  }
   list.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
   return list;
 }
@@ -978,18 +933,7 @@ function applyRsvpUI() {
 async function submitRsvp(status, pax) {
   try {
     const { data, error } = await sb.rpc('submit_rsvp', { p_invitation_token: token, p_status: status, p_pax: pax });
-    if (!error && data && data.success) return true;
-  } catch (e) {}
-  // Cadangan: langsung ke tabel
-  try {
-    const gid = S.guestId;
-    if (!gid) return false;
-    const r1 = await sb.from('rsvps').upsert({ guest_id: gid, status, pax_confirmed: pax, updated_at: new Date().toISOString() }, { onConflict: 'guest_id' });
-    if (r1.error) return false;
-    if (status === 'hadir') {
-      await sb.from('tickets').upsert({ guest_id: gid, ticket_token: token, is_checked_in: false }, { onConflict: 'guest_id' });
-    }
-    return true;
+    return !error && !!data && data.success === true;
   } catch (e) { return false; }
 }
 
@@ -1164,13 +1108,7 @@ function renderWishes() {
 async function sendWish(msg) {
   try {
     const { data, error } = await sb.rpc('send_wish', { p_token: token, p_message: msg });
-    if (!error && data && data.success) return true;
-  } catch (e) {}
-  try {
-    if (!S.eventId) return false;
-    const row = { event_id: S.eventId, guest_name: S.guest.group_name, message: msg, created_at: new Date().toISOString() };
-    const r = await sb.from('wishes').insert(row);
-    return !r.error;
+    return !error && !!data && data.success === true;
   } catch (e) { return false; }
 }
 

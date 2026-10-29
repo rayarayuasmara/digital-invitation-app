@@ -1,0 +1,10 @@
+# OpenCode config contains a GitHub PAT — never commit it
+opencode.json
+opencode.json.bak
+opencode.jsonc
+.DS_Store
+node_modules/
+.opencode/
+
+# Snapshot rollback berisi policy/fungsi lama yang tidak aman — lokal saja
+db/backup/
