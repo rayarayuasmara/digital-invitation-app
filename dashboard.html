@@ -455,7 +455,7 @@ html.lock{overflow:hidden}
 
 /* ===== Revisi: sortir, hero, kartu check-in ===== */
 .hi{font-weight:400}
-.chiprow{display:flex;align-items:flex-start;gap:6px;margin-top:0}
+.chiprow{display:flex;align-items:flex-start;gap:6px;margin-top:8px}
 .chiprow .chips{flex:1;min-width:0;margin:0 0 0 -16px;padding:12px 6px 2px 16px}
 .sortpill{flex-shrink:0;margin-top:12px;height:36px;display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:0 3px 0 12px}
 .sortpill select{appearance:none;-webkit-appearance:none;border:0;background:transparent;outline:none;color:var(--ink);font-size:14px!important;font-weight:600;padding:0;cursor:pointer}
@@ -717,7 +717,7 @@ html.lock{overflow:hidden}
 .pcard .pun{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:13px;color:var(--sub)}
 .pcard .pun b{font:600 14px 'Geist Mono',monospace;color:var(--ink)}
 /* Kategori tamu: baris sederhana */
-#cat-gauge .gauge{max-width:250px;margin:14px auto 10px}
+#cat-gauge .gauge{max-width:250px;margin:14px auto 40px}
 #cat-gauge:empty{display:none}
 .kr{transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .2s}.kr:active{transform:scale(.985);opacity:.7}
 .kmore{display:flex;justify-content:center;align-items:center;gap:6px;width:100%;padding:13px 0 2px;border-top:1px solid var(--line);color:var(--brand);font-weight:600;font-size:14px}
@@ -2712,7 +2712,7 @@ checkSession();
   const head = document.createElement('div'); head.className = 'sticky-head';
   const sb = document.querySelector('#tab-tamu .sbar'); head.append(sb);
   const gcard = document.querySelector('#tab-tamu .listcard.gcard'); if (gcard) gcard.before(head); else document.querySelector('#tab-tamu .page').prepend(head);
-  const STAT = [['all', 'Semua'], ['unsent', 'Belum dikirim'], ['pending', 'Menunggu'], ['hadir', 'Hadir'], ['checked_in', 'Check-in'], ['tidak_hadir', 'Absen']];
+  const STAT = [['all', 'All'], ['unsent', 'Unsent'], ['pending', 'Pending'], ['hadir', 'Hadir'], ['checked_in', 'Check-in'], ['tidak_hadir', 'Absen']];
   const SORT_HTML = '<div class="sortpill" id="sort-pill"><label class="sp-sel"><select id="sort-field" aria-label="Urutkan berdasarkan"><option value="name">Nama</option><option value="updated">Diubah</option><option value="created">Dibuat</option></select></label><button type="button" id="sort-dir"></button></div>';
   head.insertAdjacentHTML('beforeend', '<div class="chiprow"><div class="chips" id="st-chips">' + STAT.map(([k, l]) => `<button class="chip" data-f="${k}">${l}</button>`).join('') + '</div>' + SORT_HTML + '</div>');
   const syncSort = () => {
