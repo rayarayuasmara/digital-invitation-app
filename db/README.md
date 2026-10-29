@@ -170,6 +170,15 @@ where t.guest_id = r.id and t.ticket_token = r.old_token;
 Belum ada tombol "perbarui tautan" di dashboard. Penggantian token hanya lewat
 SQL.
 
+### Reset data uji (bukan migrasi)
+
+`reset-test-data.sql` menghapus tamu, RSVP, tiket, dan ucapan untuk satu acara.
+Akun klien dan profil acara tetap. Kode petugas ikut dimatikan.
+
+Ubah `v_slug` di dalam file (`NULL` = semua acara), lalu jalankan sekali. File
+ini tidak masuk urutan migrasi dan tidak boleh dijalankan pada acara yang
+tautannya sudah dikirim ke tamu.
+
 ---
 
 ## 5. Verifikasi cepat
