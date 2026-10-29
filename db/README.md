@@ -25,6 +25,7 @@ Jalankan **berurutan**. Jangan melompat.
 | 5 | `2026-10-29-p1-scanner-ticketless.sql` | Tamu tanpa tiket bisa check-in dari daftar |
 | 6 | `2026-10-29-p1-rotate-all-tokens.sql` | Ganti semua token (khusus data uji) |
 | 7 | `2026-10-29-p2-multi-event.sql` | Multi-acara per klien (catatan diff, bukan skrip) |
+| 8 | `2026-10-29-p2-create-event.sql` | Klien bisa buat acara sendiri + akun tanpa acara |
 
 ### Prasyarat tiap tahap
 
@@ -83,7 +84,7 @@ Tidak ada yang bisa membaca tabel langsung.
 
 ### RPC pemilik acara (wajib login)
 
-`get_client_dashboard_data`, `list_client_guests`, `add_guest_by_client`,
+`create_event`, `get_client_dashboard_data`, `list_client_guests`, `add_guest_by_client`,
 `update_guest_by_client`, `update_guest_sent_status`, `delete_guest_by_client`,
 `get_scanner_guests`, `check_in_guest`, `process_check_in`,
 `events_rotate_scanner_code`.

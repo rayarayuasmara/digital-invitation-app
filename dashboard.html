@@ -765,6 +765,18 @@ html.lock{overflow:hidden}
   <!-- 2. DASHBOARD AREA -->
   <section id="dash" class="hidden">
 
+    <!-- ONBOARDING: akun belum punya acara -->
+    <div id="onboarding" class="hidden">
+      <header class="topbar"><h1>Mulai</h1><span class="logo">R</span></header>
+      <div class="page">
+        <div class="card">
+          <h2 style="margin:0 0 8px">Buat acara pertama</h2>
+          <p style="color:var(--sub);font-size:14px;margin:0 0 16px">Akun Anda belum punya acara. Isi detail acara untuk mulai mengelola tamu dan undangan.</p>
+          <button class="btn" onclick="openCreateEventSheet()">Buat acara</button>
+        </div>
+      </div>
+    </div>
+
     <!-- TAB HOME -->
     <div id="tab-home">
       <header class="topbar"><h1>Home</h1><div style="display:flex;align-items:center;gap:10px"><button class="ev-switch" id="ev-switch" onclick="openEventSwitcher()" hidden><span id="ev-switch-name">Acara</span><i data-lucide="chevrons-up-down"></i></button><span class="logo">R</span></div></header>
@@ -1214,20 +1226,25 @@ async function loadDashboard() {
   $('nav-container-wrap').classList.remove('hidden');
 
   // Acara aktif disimpan di perangkat. Kalau tidak ada, server memilih yang pertama.
-  let res = await supabaseClient.rpc('get_client_dashboard_data',
-    currentEventId ? { p_event_id: currentEventId } : {});
-  if (res.error || !res.data || !res.data.success) {
-    if (currentEventId) {
-      // Acara tersimpan sudah tidak ada atau bukan milik akun ini.
-      currentEventId = null;
-      localStorage.removeItem('rr_event_id');
-      res = await supabaseClient.rpc('get_client_dashboard_data');
-    }
-  }
-  const { data, error } = res;
-  if (error || !data || !data.success) return toast('Gagal memuat data. Silakan masuk lagi.', false);
+  const callDash = (id) => supabaseClient.rpc('get_client_dashboard_data', id ? { p_event_id: id } : {});
+  const usable = r => !r.error && !!r.data && r.data.success === true;
 
+  let res = await callDash(currentEventId);
+  if ((!usable(res) || !res.data.event) && currentEventId) {
+    // Acara tersimpan sudah tidak ada, atau bukan milik akun ini.
+    currentEventId = null;
+    localStorage.removeItem('rr_event_id');
+    res = await callDash(null);
+  }
+  if (!usable(res)) return toast('Gagal memuat data. Silakan masuk lagi.', false);
+
+  const data = res.data;
   globalData = data;
+
+  if (!data.event) { showOnboarding(); return; }
+  $('onboarding').classList.add('hidden');
+  document.querySelectorAll('#dash > div[id^="tab-"]').forEach(d => d.classList.remove('hidden'));
+
   currentEventId = data.event.id;
   localStorage.setItem('rr_event_id', currentEventId);
 
@@ -1248,14 +1265,14 @@ function renderEventSwitcher() {
   const btn = $('ev-switch');
   if (!btn) return;
   const list = (globalData && globalData.events) || [];
-  btn.hidden = list.length < 2;
+  btn.hidden = list.length < 1;
   $('ev-switch-name').textContent = (globalData && globalData.event && globalData.event.title) || 'Acara';
   icons();
 }
 
 function openEventSwitcher() {
   const list = (globalData && globalData.events) || [];
-  if (list.length < 2) return;
+  if (list.length < 1) return;
   const rows = list.map(e => {
     const on = e.id === currentEventId;
     const d = e.event_date ? new Date(e.event_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
@@ -1264,7 +1281,58 @@ function openEventSwitcher() {
       ${on ? '<i data-lucide="check"></i>' : ''}
     </button>`;
   }).join('');
-  openSheet(`<h3 style="margin:0 0 14px">Pilih acara</h3>${rows}`);
+  openSheet(`<h3 style="margin:0 0 14px">Pilih acara</h3>${rows}
+    <button class="btn line" style="margin-top:14px" onclick="openCreateEventSheet()">Buat acara baru</button>`);
+}
+
+function openCreateEventSheet() {
+  openSheet(`
+    <h3 style="margin:0 0 14px">Acara baru</h3>
+    <div class="field"><label for="ce-title">Judul</label><input id="ce-title" type="text" placeholder="The Wedding of ..." /></div>
+    <div class="field"><label for="ce-date">Tanggal</label><input id="ce-date" type="date" /></div>
+    <div class="field"><label for="ce-loc">Lokasi</label><input id="ce-loc" type="text" placeholder="Gedung / kota" /></div>
+    <div class="field ses-row"><input id="ce-s1n" type="text" placeholder="Nama sesi 1" value="Akad" /><input id="ce-s1t" type="text" placeholder="10.00 WIB" /></div>
+    <div class="field ses-row"><input id="ce-s2n" type="text" placeholder="Nama sesi 2" value="Resepsi" /><input id="ce-s2t" type="text" placeholder="12.00 WIB" /></div>
+    <p class="login-err" id="ce-err" role="alert"></p>
+    <button class="btn" id="ce-save" onclick="submitCreateEvent()">Buat acara</button>`);
+}
+
+async function submitCreateEvent() {
+  const btn = $('ce-save');
+  const err = $('ce-err');
+  const title = $('ce-title').value.trim();
+  const date = $('ce-date').value;
+  if (!title || !date) { err.textContent = 'Judul dan tanggal wajib diisi.'; return; }
+  btn.disabled = true;
+  err.textContent = '';
+  const { data, error } = await supabaseClient.rpc('create_event', {
+    p_title: title,
+    p_event_date: date,
+    p_location: $('ce-loc').value.trim(),
+    p_session_1_name: $('ce-s1n').value.trim(),
+    p_session_1_time: $('ce-s1t').value.trim(),
+    p_session_2_name: $('ce-s2n').value.trim(),
+    p_session_2_time: $('ce-s2t').value.trim()
+  });
+  btn.disabled = false;
+  if (error || !data || !data.success) {
+    err.textContent = (data && data.message) ? data.message : 'Gagal membuat acara.';
+    return;
+  }
+  currentEventId = data.event_id;
+  localStorage.setItem('rr_event_id', data.event_id);
+  closeSheet();
+  await loadDashboard();
+  toast('Acara dibuat');
+}
+
+function showOnboarding() {
+  $('onboarding').classList.remove('hidden');
+  document.querySelectorAll('#dash > div[id^="tab-"]').forEach(d => d.classList.add('hidden'));
+  $('nav-container-wrap').classList.add('hidden');
+  const sw = $('ev-switch');
+  if (sw) sw.hidden = true;
+  icons();
 }
 
 async function pickEvent(id) {
