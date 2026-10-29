@@ -739,6 +739,18 @@ html.lock{overflow:hidden}
 .wchat-foot .note{padding:14px 18px;font-size:13px;color:var(--sub)}
 .wsheet-head{position:sticky;top:-10px;z-index:8;background:var(--bg);margin:0 -16px 10px;padding:12px 16px;border-bottom:1px solid var(--line)}
 .wsheet-chat{max-height:calc(88vh - 150px);padding:4px 12px 10px;border-radius:20px;overflow-y:auto;overscroll-behavior:contain}
+    /* ---------- Kartu status paket ---------- */
+    .plan .prow2{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .plan .prow2 b{font-size:17px;font-weight:600;color:var(--brand)}
+    .plan .pbadge{font-size:11px;font-weight:600;padding:5px 11px;border-radius:999px;background:var(--tag);color:var(--tag-ink);white-space:nowrap}
+    .plan .pbadge.ok{background:var(--green-bg);color:var(--green-ink)}
+    .plan .pbadge.warn{background:var(--amber-bg);color:var(--amber-ink)}
+    .plan .pbadge.dead{background:var(--red-bg);color:var(--red-ink)}
+    .plan .pnote{font-size:12.5px;line-height:1.5;color:var(--sub);margin:10px 0 0}
+    .plan .pacts{display:flex;gap:8px;margin-top:14px}
+    .plan .pacts .btn{height:44px;border-radius:14px;font-size:14px;text-decoration:none}
+    .plan .pacts .btn.line{box-shadow:none;border:1px solid var(--line)}
+    .plan .pacts .btn[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -803,6 +815,21 @@ html.lock{overflow:hidden}
           <div class="meta">
             <div><small>Tanggal</small><b id="ev-date-txt">–</b></div>
             <div><small>Lokasi</small><b id="ev-loc-txt">–</b></div>
+          </div>
+        </div>
+
+        <div class="card plan" id="plan-card">
+          <div class="prow2">
+            <div>
+              <div class="lbl" style="margin-bottom:4px">Paket</div>
+              <b id="plan-name">Free</b>
+            </div>
+            <span class="pbadge" id="plan-status">Draf</span>
+          </div>
+          <p class="pnote" id="plan-expiry">Undangan belum diterbitkan. Tamu belum bisa membuka tautan.</p>
+          <div class="pacts">
+            <button class="btn" id="btn-publish" type="button" onclick="publishEvent()">Terbitkan undangan</button>
+            <a class="btn line" id="btn-upgrade" href="https://wa.me/6281234567890?text=Halo%20RayaRayu,%20saya%20ingin%20upgrade%20paket%20undangan" target="_blank" rel="noopener">Upgrade</a>
           </div>
         </div>
 
@@ -1593,6 +1620,65 @@ function openWish(i) {
   $('w-copy').onclick = () => navigator.clipboard.writeText(w.message).then(() => { toast('Ucapan disalin'); closeSheet(); }, () => toast('Gagal menyalin', false));
 }
 
+function formatTanggal(iso) {
+  const d = new Date(iso);
+  return isNaN(d) ? '–' : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+// Status paket hanya untuk tampilan. Penegakan tetap di server.
+function renderPlanCard(event, stats) {
+  const tier = (stats && stats.tier) || 'free';
+  const labels = { free: 'Free', silver: 'Silver', gold: 'Gold', pro: 'Pro' };
+  $('plan-name').textContent = labels[tier] || tier;
+
+  const badge = $('plan-status');
+  const note = $('plan-expiry');
+  const btnPublish = $('btn-publish');
+  badge.className = 'pbadge';
+
+  const exp = event.expires_at ? new Date(event.expires_at).getTime() : null;
+
+  if (!event.published_at) {
+    badge.textContent = 'Draf';
+    badge.classList.add('warn');
+    note.textContent = 'Undangan belum diterbitkan. Setelah diterbitkan, masa aktif paket mulai dihitung dan tautan bisa dibuka tamu.';
+    btnPublish.hidden = false;
+  } else if (exp && exp < Date.now()) {
+    badge.textContent = 'Kedaluwarsa';
+    badge.classList.add('dead');
+    note.textContent = 'Masa aktif berakhir ' + formatTanggal(event.expires_at) + '. Undangan masih bisa dibaca, tetapi RSVP dan ucapan ditutup.';
+    btnPublish.hidden = true;
+  } else {
+    badge.textContent = 'Aktif';
+    badge.classList.add('ok');
+    note.textContent = exp
+      ? 'Aktif sampai ' + formatTanggal(event.expires_at) + '. RSVP dan check-in tetap berjalan.'
+      : 'Aktif tanpa batas waktu (akun lama).';
+    btnPublish.hidden = true;
+  }
+}
+
+async function publishEvent() {
+  const btn = $('btn-publish');
+  btn.disabled = true;
+  btn.textContent = 'Menerbitkan…';
+  try {
+    const { data, error } = await supabaseClient.rpc('publish_event', { p_event_id: currentEventId });
+    if (error || !data || data.success === false) {
+      toast((data && data.message) || 'Gagal menerbitkan undangan.', false);
+      return;
+    }
+    toast('Undangan diterbitkan. Tautan sudah bisa dibagikan.');
+    await loadDashboard();
+  } catch (e) {
+    console.error(e);
+    toast('Gagal menerbitkan undangan. Coba lagi.', false);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Terbitkan undangan';
+  }
+}
+
 function renderUI() {
   const { client, event, stats, categories, guests } = globalData;
   $('home-client-name').textContent = client.name;
@@ -1610,6 +1696,7 @@ function renderUI() {
   $('ev-location').value = event.location || '';
   $('ev-caption').value = event.caption || '';
   renderScannerCode(event);
+  renderPlanCard(event, stats);
 
   initWaDraft();
 

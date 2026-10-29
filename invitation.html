@@ -330,6 +330,31 @@
       .rv { opacity: 1; transform: none; }
       .cover-art .draw { stroke-dashoffset: 0; }
     }
+    /* ---------- Badge paket & status masa aktif ---------- */
+    .rr-wm {
+      position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom));
+      transform: translateX(-50%); z-index: 60;
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 7px 14px; border-radius: 999px;
+      background: rgba(11, 11, 11, .84); color: var(--paper);
+      font-size: 11px; letter-spacing: .01em; text-decoration: none;
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    }
+    .rr-wm b { font-weight: 600; }
+    .rr-notice {
+      position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 440px; z-index: 70;
+      background: var(--yellow); color: var(--ink);
+      padding: 10px 44px 10px 18px; font-size: 12px; line-height: 1.45;
+    }
+    .rr-notice b { display: block; font-weight: 700; }
+    .rr-notice button {
+      position: absolute; top: 6px; right: 8px; border: 0; background: transparent;
+      font-size: 16px; line-height: 1; padding: 4px; color: var(--ink);
+    }
+    .is-expired #rsvp-form, .is-expired #wish-form { display: none !important; }
+    .rr-frozen { display: none; margin: 18px 0 0; font-size: 13px; color: var(--muted); }
+    .is-expired .rr-frozen { display: block; }
   </style>
 </head>
 <body class="locked">
@@ -450,6 +475,11 @@
           <p id="sum-sub"></p>
           <button class="btn ghost sm" id="rsvp-edit" type="button">Ubah konfirmasi</button>
         </div>
+
+        <p class="rr-frozen" id="rr-frozen">
+          Konfirmasi kehadiran sudah ditutup karena masa aktif undangan telah berakhir.
+          Tiket yang sudah Anda terima tetap berlaku untuk check-in di pintu masuk.
+        </p>
 
         <form id="rsvp-form" novalidate>
           <fieldset id="rsvp-choices">
@@ -581,6 +611,18 @@
         <div class="names" id="footer-client-name">Rudi &amp; Irul</div>
       </section>
     </main>
+
+    <!-- Badge paket Free; server yang menentukan lewat kolom watermark -->
+    <a id="rr-wm" class="rr-wm" href="/" target="_blank" rel="noopener" hidden>
+      Dibuat dengan <b>RayaRayu</b>
+    </a>
+
+    <!-- Banner masa aktif berakhir -->
+    <div id="rr-notice" class="rr-notice" role="status" hidden>
+      <b>Masa aktif undangan telah berakhir.</b>
+      <span>Isi undangan masih dapat dibaca. Hubungi pemilik undangan untuk memperpanjang.</span>
+      <button type="button" id="rr-notice-x" aria-label="Tutup pemberitahuan">&times;</button>
+    </div>
   </div>
 </div>
 
@@ -1238,19 +1280,38 @@ function showError(msg) {
   $('error-screen').hidden = false;
 }
 
+// Status paket ditentukan server (event_entitlements). Jangan percaya
+// nilai ini untuk penegakan — ini hanya tampilan.
+function applyEntitlements(g) {
+  if (g.watermark) $('rr-wm').hidden = false;
+
+  if (g.is_expired) {
+    document.body.classList.add('is-expired');
+    $('rr-notice').hidden = false;
+    // RSVP & ucapan dibekukan, tetapi tiket dan QR tetap hidup sampai H+30.
+    const submit = $('rsvp-submit'); if (submit) submit.disabled = true;
+    const edit = $('rsvp-edit'); if (edit) edit.disabled = true;
+  }
+}
+
 async function init() {
   if (!token) return showError('Tautan undangan tidak memiliki kode. Silakan periksa kembali tautan yang Anda terima.');
   try {
     const g = await fetchGuest();
     if (!g) return showError(`Undangan dengan kode “${token}” tidak ditemukan.`);
+    if (g.is_published === false) {
+      return showError('Undangan ini belum diterbitkan oleh pemiliknya. Silakan hubungi pemilik undangan.');
+    }
     await ensureIds(g);
     renderInvitation(g);
+    applyEntitlements(g);
     observeReveals();
     loadWishes(); loadSummary(); startRealtime();
   } catch (err) {
     console.error(err); showError('Gagal terhubung ke server. Periksa koneksi internet Anda lalu muat ulang halaman.');
   }
 }
+$('rr-notice-x').addEventListener('click', () => { $('rr-notice').hidden = true; });
 window.addEventListener('DOMContentLoaded', init);
 </script>
 </body>

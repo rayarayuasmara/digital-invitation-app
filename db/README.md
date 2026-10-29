@@ -28,6 +28,7 @@ Jalankan **berurutan**. Jangan melompat.
 | 8 | `2026-10-29-p2-create-event.sql` | Klien bisa buat acara sendiri + akun tanpa acara |
 | 9 | `2026-10-29-p3-signup.sql` | Pendaftaran klien mandiri (trigger `auth.users` -> `clients`) |
 | 10 | `2026-10-29-p3-quota.sql` | Kuota undangan per paket, ditegakkan di server |
+| 11 | `2026-10-30-p4-plans-mvp.sql` | Katalog paket, masa aktif, publish, watermark — **diterapkan 2026-10-30** |
 
 ### Prasyarat tiap tahap
 
