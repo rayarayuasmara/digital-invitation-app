@@ -27,6 +27,7 @@ Jalankan **berurutan**. Jangan melompat.
 | 7 | `2026-10-29-p2-multi-event.sql` | Multi-acara per klien (catatan diff, bukan skrip) |
 | 8 | `2026-10-29-p2-create-event.sql` | Klien bisa buat acara sendiri + akun tanpa acara |
 | 9 | `2026-10-29-p3-signup.sql` | Pendaftaran klien mandiri (trigger `auth.users` -> `clients`) |
+| 10 | `2026-10-29-p3-quota.sql` | Kuota undangan per paket, ditegakkan di server |
 
 ### Prasyarat tiap tahap
 
@@ -278,6 +279,30 @@ fungsi apa pun — hanya membuka kembali data ke publik.
   petugas 64 bit.
 - `get_scanner_guests` masih mengembalikan `invitation_token`, tapi hanya untuk
   pemilik acara yang login.
+
+### Paket dan kuota
+
+Batas disimpan di tabel `clients`, bukan di kode:
+
+| Kolom | Arti |
+|---|---|
+| `tier` | Nama paket (`free`, `pro`) — hanya label |
+| `guest_limit` | Jumlah undangan per acara |
+| `event_limit` | Jumlah acara per akun |
+
+Default untuk pendaftar baru: `free`, 30 undangan, 1 acara. Akun lama di-set
+`pro` (1000 undangan, 20 acara).
+
+Penegakan ada di server:
+
+- `add_guest_by_client` menolak kalau jumlah tamu acara sudah mencapai
+  `guest_limit`.
+- `create_event` menolak kalau jumlah acara sudah mencapai `event_limit`.
+- `get_client_dashboard_data` mengirim `stats.max_quota` dari `guest_limit`,
+  jadi kartu "Kuota Tamu" menampilkan batas sebenarnya.
+
+Kuota dihitung per acara. Menurunkan paket tidak menghapus tamu lama; hanya
+penambahan baru yang diblokir.
 
 ### Pendaftaran klien
 
