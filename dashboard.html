@@ -981,6 +981,12 @@ html.lock{overflow:hidden}
             <div class="field"><label for="ev-date">Tanggal</label><input type="date" id="ev-date" required /></div>
           </div>
           <div class="card" style="padding:4px 18px">
+            <div class="field"><label for="ev-couple">Nama mempelai</label><input type="text" id="ev-couple" maxlength="60" placeholder="Rudi &amp; Irul" required /></div>
+            <div class="sub" style="font-size:12px;padding:0 4px 10px">Tampil sebagai judul undangan. Untuk akun WO, isi nama mempelai, bukan nama WO.</div>
+            <div class="field"><label for="ev-slug">Slug tautan</label><input type="text" id="ev-slug" maxlength="40" placeholder="rudi-irul" autocapitalize="none" autocorrect="off" spellcheck="false" oninput="updateSlugHint()" /></div>
+            <div class="sub" style="font-size:12px;padding:0 4px 12px" id="ev-slug-hint">Hanya huruf kecil, angka, dan strip.</div>
+          </div>
+          <div class="card" style="padding:4px 18px">
             <div class="field col"><label>Sesi acara</label></div>
             <div class="field ses-row"><input type="text" id="ev-s1-name" maxlength="40" placeholder="Nama sesi 1" aria-label="Nama sesi 1" required /><input type="text" id="ev-s1-time" maxlength="30" placeholder="10.00 WIB" aria-label="Jam sesi 1" required /></div>
             <div class="field ses-row"><input type="text" id="ev-s2-name" maxlength="40" placeholder="Nama sesi 2" aria-label="Nama sesi 2" required /><input type="text" id="ev-s2-time" maxlength="30" placeholder="12.00 WIB" aria-label="Jam sesi 2" required /></div>
@@ -1387,6 +1393,8 @@ function openCreateEventSheet() {
   openSheet(`
     <h3 style="margin:0 0 14px">Acara baru</h3>
     <div class="field"><label for="ce-title">Judul</label><input id="ce-title" type="text" placeholder="The Wedding of ..." /></div>
+    <div class="field"><label for="ce-couple">Nama mempelai</label><input id="ce-couple" type="text" placeholder="Rudi &amp; Irul" /></div>
+    <div class="field"><label for="ce-slug">Slug tautan (opsional)</label><input id="ce-slug" type="text" placeholder="otomatis dari nama mempelai" autocapitalize="none" autocorrect="off" spellcheck="false" /></div>
     <div class="field"><label for="ce-date">Tanggal</label><input id="ce-date" type="date" /></div>
     <div class="field"><label for="ce-loc">Lokasi</label><input id="ce-loc" type="text" placeholder="Gedung / kota" /></div>
     <div class="field ses-row"><input id="ce-s1n" type="text" placeholder="Nama sesi 1" value="Akad" /><input id="ce-s1t" type="text" placeholder="10.00 WIB" /></div>
@@ -1400,7 +1408,11 @@ async function submitCreateEvent() {
   const err = $('ce-err');
   const title = $('ce-title').value.trim();
   const date = $('ce-date').value;
+  const couple = $('ce-couple').value.trim();
+  const slug = normalizeSlug($('ce-slug').value);
   if (!title || !date) { err.textContent = 'Judul dan tanggal wajib diisi.'; return; }
+  if (!couple) { err.textContent = 'Nama mempelai wajib diisi.'; return; }
+  if (slug && slug.length < 3) { err.textContent = 'Slug minimal 3 karakter.'; return; }
   btn.disabled = true;
   err.textContent = '';
   const { data, error } = await supabaseClient.rpc('create_event', {
@@ -1410,7 +1422,9 @@ async function submitCreateEvent() {
     p_session_1_name: $('ce-s1n').value.trim(),
     p_session_1_time: $('ce-s1t').value.trim(),
     p_session_2_name: $('ce-s2n').value.trim(),
-    p_session_2_time: $('ce-s2t').value.trim()
+    p_session_2_time: $('ce-s2t').value.trim(),
+    p_couple_name: couple,
+    p_slug: slug || null
   });
   btn.disabled = false;
   if (error || !data || !data.success) {
@@ -1689,13 +1703,17 @@ function renderUI() {
   const { client, event, stats, categories, guests } = globalData;
   $('home-client-name').textContent = client.name;
   $('account-name').textContent = client.name;
-  $('account-slug').textContent = '@' + client.slug;
+  $('account-slug').textContent = client.email || 'Email belum diisi';
   $('account-avatar').textContent = initials(client.name);
 
   const d = new Date(event.event_date);
   $('ev-date-txt').innerHTML = esc(d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long' })) + '<br>' + d.getFullYear();
   $('ev-loc-txt').textContent = event.location || '–';
   $('ev-title').value = event.title || '';
+  $('ev-couple').value = event.couple_name || client.name || '';
+  $('ev-slug').value = event.slug || '';
+  $('ev-slug').disabled = !!event.published_at;
+  updateSlugHint();
   $('ev-date').value = d.toLocaleDateString('sv-SE', { timeZone: 'Asia/Jakarta' });
   $('ev-s1-name').value = event.session_1_name || 'Sesi 1'; $('ev-s1-time').value = event.session_1_time || '';
   $('ev-s2-name').value = event.session_2_name || 'Sesi 2'; $('ev-s2-time').value = event.session_2_time || '';
@@ -1842,7 +1860,11 @@ async function submitEditEvent(e) {
   
   const s1n = $('ev-s1-name').value.trim(), s2n = $('ev-s2-name').value.trim();
   const s1t = $('ev-s1-time').value.trim(), s2t = $('ev-s2-time').value.trim();
+  const couple = $('ev-couple').value.trim();
+  const slug = normalizeSlug($('ev-slug').value);
   if (!title || !dateVal) return toast('Judul dan tanggal wajib diisi', false);
+  if (!couple) return toast('Nama mempelai wajib diisi', false);
+  if (!slug || slug.length < 3) return toast('Slug tautan minimal 3 karakter', false);
   if (!s1n || !s2n || !s1t || !s2t) return toast('Nama dan jam kedua sesi wajib diisi', false);
   if (s1n.toLowerCase() === s2n.toLowerCase()) return toast('Nama kedua sesi harus berbeda', false);
 
@@ -1856,6 +1878,8 @@ async function submitEditEvent(e) {
       .from('events')
       .update({
         title: title,
+        couple_name: couple,
+        slug: slug,
         event_date: eventDateKeepTime(dateVal),
         session_1_name: s1n, session_1_time: s1t,
         session_2_name: s2n, session_2_time: s2t,
@@ -2158,7 +2182,26 @@ function handleFabClick() {
 }
 
 const findGuest = id => globalData.guests.find(g => g.id === id);
-const guestLink = g => `${window.location.origin}/${globalData.client.slug}/${g.invitation_token}`;
+const eventSlug = () => (globalData && globalData.event && globalData.event.slug) || (globalData && globalData.client && globalData.client.slug) || '';
+const guestLink = g => `${window.location.origin}/${eventSlug()}/${g.invitation_token}`;
+
+function normalizeSlug(v) {
+  return String(v || '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40);
+}
+
+function updateSlugHint() {
+  const el = $('ev-slug'), hint = $('ev-slug-hint');
+  if (!el || !hint) return;
+  if (el.disabled) {
+    hint.textContent = 'Slug dikunci karena undangan sudah diterbitkan. Tautan: /' + el.value + '/<token>';
+    return;
+  }
+  const v = normalizeSlug(el.value);
+  hint.textContent = 'Tautan undangan: /' + (v || '...') + '/<token> — hanya huruf kecil, angka, dan strip.';
+}
 
 const WA_DEFAULT = `Halo *{nama}*,\n\nKami mengundang Anda untuk menghadiri acara *{acara}* pada:\n\n🗓 {tanggal}\n🕙 {waktu}\n📍 {lokasi}\n\nSilakan kunjungi tautan berikut:\n{link}`;
 function waFill(tpl, g, link) {
@@ -2285,7 +2328,7 @@ function updateWaMeta() {
   $('wa-count').textContent = t.length + ' karakter';
   const sample = { group_name: 'Budi Santoso' };
   const tpl = t.trim() || (waDraft['Umum'] || '').trim() || WA_DEFAULT;
-  const html = esc(waFill(tpl, sample, `${location.origin}/${globalData.client.slug}/abc123`))
+  const html = esc(waFill(tpl, sample, `${location.origin}/${eventSlug()}/abc123`))
     .replace(/\*([^*\n]+)\*/g, '<b>$1</b>')
     .replace(/(https?:\/\/[^\s<]+)/g, '<u>$1</u>');
   $('wa-preview').innerHTML = html;
