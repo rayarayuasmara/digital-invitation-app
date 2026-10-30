@@ -13,6 +13,10 @@
       "destination": "/scanner.html"
     },
     {
+      "source": "/pratinjau/:slug/:token",
+      "destination": "/invitation.html"
+    },
+    {
       "source": "/:slug/:token",
       "destination": "/invitation.html"
     }

@@ -355,6 +355,19 @@
     .is-expired #rsvp-form, .is-expired #wish-form { display: none !important; }
     .rr-frozen { display: none; margin: 18px 0 0; font-size: 13px; color: var(--muted); }
     .is-expired .rr-frozen { display: block; }
+    /* ---------- Mode pratinjau ---------- */
+    .rr-preview {
+      position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 440px; z-index: 80;
+      background: var(--ink); color: var(--paper);
+      padding: 9px 18px; font-size: 11.5px; line-height: 1.45; text-align: center;
+      letter-spacing: .01em;
+    }
+    .rr-preview b { font-weight: 600; }
+    .is-preview .cover-guest::after { content: " · pratinjau"; opacity: .6; }
+    .is-preview #rsvp-submit, .is-preview #pax-minus, .is-preview #pax-plus,
+    .is-preview #wish-form, .is-preview #rsvp-edit { opacity: .45; pointer-events: none; }
+    .is-preview #ticket-section { display: none !important; }
   </style>
 </head>
 <body class="locked">
@@ -612,6 +625,11 @@
       </section>
     </main>
 
+    <!-- Banner mode pratinjau -->
+    <div id="rr-preview" class="rr-preview" role="status" hidden>
+      <b>Mode pratinjau</b> — seperti yang dilihat tamu. RSVP dan ucapan dimatikan.
+    </div>
+
     <!-- Badge paket Free; server yang menentukan lewat kolom watermark -->
     <a id="rr-wm" class="rr-wm" href="/" target="_blank" rel="noopener" hidden>
       Dibuat dengan <b>RayaRayu</b>
@@ -684,6 +702,9 @@ function getToken() {
   return null;
 }
 const token = getToken();
+// Pratinjau memakai token acara (bukan token tamu) dan boleh dibuka tanpa login.
+const IS_PREVIEW = /^\/pratinjau(\/|$)/.test(location.pathname)
+  || new URLSearchParams(location.search).get('preview') === '1';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm = (s) => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
@@ -736,7 +757,9 @@ function countUp(el, to, dur = 1100, suffix = '') {
    ========================================================== */
 async function fetchGuest() {
   try {
-    const { data, error } = await sb.rpc('get_invitation_details', { p_token: token });
+    // Pratinjau: token acara, tamu palsu ("Nama Tamu"). Undangan: token tamu.
+    const rpc = IS_PREVIEW ? 'get_event_preview' : 'get_invitation_details';
+    const { data, error } = await sb.rpc(rpc, { p_token: token });
     const row = Array.isArray(data) ? data[0] : data;
     if (!error && row) return row;
   } catch (e) { /* dibiarkan; tampilkan pesan tidak ditemukan */ }
@@ -1294,19 +1317,34 @@ function applyEntitlements(g) {
   }
 }
 
+// Mode pratinjau: tampilkan seperti tamu lihat, tapi jangan izinkan aksi.
+function applyPreviewMode() {
+  document.body.classList.add('is-preview');
+  $('rr-preview').hidden = false;
+  $('ticket-section').hidden = true;
+  const submit = $('rsvp-submit'); if (submit) submit.disabled = true;
+  const edit = $('rsvp-edit'); if (edit) edit.disabled = true;
+}
+
 async function init() {
   if (!token) return showError('Tautan undangan tidak memiliki kode. Silakan periksa kembali tautan yang Anda terima.');
   try {
     const g = await fetchGuest();
-    if (!g) return showError(`Undangan dengan kode “${token}” tidak ditemukan.`);
-    if (g.is_published === false) {
+    if (!g) {
+      return showError(IS_PREVIEW
+        ? 'Tautan pratinjau tidak valid atau sudah diganti pemilik undangan.'
+        : `Undangan dengan kode “${token}” tidak ditemukan.`);
+    }
+    if (!IS_PREVIEW && g.is_published === false) {
       return showError('Undangan ini belum diterbitkan oleh pemiliknya. Silakan hubungi pemilik undangan.');
     }
     await ensureIds(g);
     renderInvitation(g);
     applyEntitlements(g);
+    if (IS_PREVIEW) applyPreviewMode();
     observeReveals();
-    loadWishes(); loadSummary(); startRealtime();
+    loadWishes(); loadSummary();
+    if (!IS_PREVIEW) startRealtime();
   } catch (err) {
     console.error(err); showError('Gagal terhubung ke server. Periksa koneksi internet Anda lalu muat ulang halaman.');
   }

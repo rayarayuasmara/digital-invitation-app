@@ -827,8 +827,11 @@ html.lock{overflow:hidden}
             <span class="pbadge" id="plan-status">Draf</span>
           </div>
           <p class="pnote" id="plan-expiry">Undangan belum diterbitkan. Tamu belum bisa membuka tautan.</p>
-          <div class="pacts">
+          <div class="pacts" id="publish-row">
             <button class="btn" id="btn-publish" type="button" onclick="publishEvent()">Terbitkan undangan</button>
+          </div>
+          <div class="pacts">
+            <a class="btn line" id="btn-preview" href="#" target="_blank" rel="noopener">Pratinjau</a>
             <a class="btn line" id="btn-upgrade" href="https://wa.me/6281234567890?text=Halo%20RayaRayu,%20saya%20ingin%20upgrade%20paket%20undangan" target="_blank" rel="noopener">Upgrade</a>
           </div>
         </div>
@@ -1653,28 +1656,31 @@ function renderPlanCard(event, stats) {
 
   const badge = $('plan-status');
   const note = $('plan-expiry');
-  const btnPublish = $('btn-publish');
   badge.className = 'pbadge';
 
   const exp = event.expires_at ? new Date(event.expires_at).getTime() : null;
+
+  // Pratinjau tersedia selama acara punya token, termasuk saat masih draf.
+  const pl = previewLink();
+  const pv = $('btn-preview');
+  if (pl) { pv.href = pl; pv.classList.remove('hidden'); } else { pv.classList.add('hidden'); }
+
+  $('publish-row').classList.toggle('hidden', !!event.published_at);
 
   if (!event.published_at) {
     badge.textContent = 'Draf';
     badge.classList.add('warn');
     note.textContent = 'Undangan belum diterbitkan. Setelah diterbitkan, masa aktif paket mulai dihitung dan tautan bisa dibuka tamu.';
-    btnPublish.hidden = false;
   } else if (exp && exp < Date.now()) {
     badge.textContent = 'Kedaluwarsa';
     badge.classList.add('dead');
     note.textContent = 'Masa aktif berakhir ' + formatTanggal(event.expires_at) + '. Undangan masih bisa dibaca, tetapi RSVP dan ucapan ditutup.';
-    btnPublish.hidden = true;
   } else {
     badge.textContent = 'Aktif';
     badge.classList.add('ok');
     note.textContent = exp
       ? 'Aktif sampai ' + formatTanggal(event.expires_at) + '. RSVP dan check-in tetap berjalan.'
       : 'Aktif tanpa batas waktu (akun lama).';
-    btnPublish.hidden = true;
   }
 }
 
@@ -2155,18 +2161,16 @@ function handleFabClick() {
   } else if (currentActiveTab === 'tamu') {
     openGuestSheet();
   } else if (currentActiveTab === 'acara') {
-    // Dulu tombol ini menyalin `<origin>/<slug>` — bukan route yang ada,
-    // jadi hasilnya 404. Tautan undangan selalu per tamu (butuh token).
-    openSheet(`
-      <div class="sheet-head"><h3>Tautan undangan</h3><button onclick="closeSheet()">Tutup</button></div>
-      <div class="listcard" style="padding:16px">
-        <p style="margin:0 0 14px;font-size:14px;color:var(--sub);line-height:1.55">
-          Setiap tamu punya tautan sendiri karena nama dan kuota pax-nya berbeda.
-          Buka tab <b>Tamu</b>, lalu tekan ikon tautan pada baris tamu yang ingin dibagikan.
-        </p>
-        <button class="btn" onclick="closeSheet(); switchTab('tamu')">Buka daftar tamu</button>
-      </div>
-    `);
+    // Tautan undangan selalu per tamu. Yang bisa dibagikan bebas adalah
+    // tautan pratinjau (token acara, nama tamu placeholder).
+    const preview = previewLink();
+    if (preview) {
+      navigator.clipboard.writeText(preview)
+        .then(() => toast('Tautan pratinjau disalin'))
+        .catch(() => toast('Gagal menyalin tautan', false));
+    } else {
+      toast('Tautan pratinjau belum siap. Muat ulang halaman.', false);
+    }
   } else if (currentActiveTab === 'akun') {
     openSheet(`
       <div class="sheet-head"><h3>Panduan Singkat</h3><button onclick="closeSheet()">Tutup</button></div>
@@ -2183,6 +2187,11 @@ function handleFabClick() {
 
 const findGuest = id => globalData.guests.find(g => g.id === id);
 const eventSlug = () => (globalData && globalData.event && globalData.event.slug) || (globalData && globalData.client && globalData.client.slug) || '';
+const previewLink = () => {
+  const ev = globalData && globalData.event;
+  if (!ev || !ev.preview_token) return null;
+  return `${window.location.origin}/pratinjau/${ev.slug || ''}/${ev.preview_token}`;
+};
 const guestLink = g => `${window.location.origin}/${eventSlug()}/${g.invitation_token}`;
 
 function normalizeSlug(v) {

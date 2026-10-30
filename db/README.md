@@ -30,6 +30,7 @@ Jalankan **berurutan**. Jangan melompat.
 | 10 | `2026-10-29-p3-quota.sql` | Kuota undangan per paket, ditegakkan di server |
 | 11 | `2026-10-30-p4-plans-mvp.sql` | Katalog paket, masa aktif, publish, watermark — **diterapkan 2026-10-30** |
 | 12 | `2026-10-30-p5-event-slug.sql` | Slug per acara, `couple_name`, kunci slug setelah terbit — **diterapkan 2026-10-30** |
+| 13 | `2026-10-30-p6-preview-token.sql` | Tautan pratinjau per acara (`preview_token`) — **diterapkan 2026-10-30** |
 
 ### Prasyarat tiap tahap
 
