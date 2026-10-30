@@ -1280,7 +1280,12 @@ async function signup(e) {
   const { data, error } = await supabaseClient.auth.signUp({
     email,
     password,
-    options: { data: { name } }
+    options: {
+      data: { name },
+      // Harus terdaftar di Supabase → Authentication → URL Configuration →
+      // Redirect URLs. Tanpa ini Supabase jatuh ke Site URL (dulu localhost).
+      emailRedirectTo: window.location.origin + '/dashboard'
+    }
   });
   btn.disabled = false;
   btn.textContent = 'Daftar';
@@ -1335,7 +1340,8 @@ async function loadDashboard() {
 
   if (!data.event) { showOnboarding(); return; }
   $('onboarding').classList.add('hidden');
-  document.querySelectorAll('#dash > div[id^="tab-"]').forEach(d => d.classList.remove('hidden'));
+  // Panel tab ditumpuk di DOM. Tanpa ini keempatnya ikut terlihat saat scroll.
+  switchTab(currentActiveTab || 'home');
 
   currentEventId = data.event.id;
   localStorage.setItem('rr_event_id', currentEventId);
@@ -2125,16 +2131,18 @@ function handleFabClick() {
   } else if (currentActiveTab === 'tamu') {
     openGuestSheet();
   } else if (currentActiveTab === 'acara') {
-    if (globalData && globalData.client) {
-      const eventLink = `${window.location.origin}/${globalData.client.slug}`;
-      navigator.clipboard.writeText(eventLink).then(() => {
-        toast('Tautan acara disalin!');
-      }, () => {
-        toast('Gagal menyalin tautan', false);
-      });
-    } else {
-      toast('Data acara belum siap', false);
-    }
+    // Dulu tombol ini menyalin `<origin>/<slug>` — bukan route yang ada,
+    // jadi hasilnya 404. Tautan undangan selalu per tamu (butuh token).
+    openSheet(`
+      <div class="sheet-head"><h3>Tautan undangan</h3><button onclick="closeSheet()">Tutup</button></div>
+      <div class="listcard" style="padding:16px">
+        <p style="margin:0 0 14px;font-size:14px;color:var(--sub);line-height:1.55">
+          Setiap tamu punya tautan sendiri karena nama dan kuota pax-nya berbeda.
+          Buka tab <b>Tamu</b>, lalu tekan ikon tautan pada baris tamu yang ingin dibagikan.
+        </p>
+        <button class="btn" onclick="closeSheet(); switchTab('tamu')">Buka daftar tamu</button>
+      </div>
+    `);
   } else if (currentActiveTab === 'akun') {
     openSheet(`
       <div class="sheet-head"><h3>Panduan Singkat</h3><button onclick="closeSheet()">Tutup</button></div>
