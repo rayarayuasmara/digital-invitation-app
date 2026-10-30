@@ -64,7 +64,11 @@ Masih placeholder `6281234567890` di:
 - [ ] Akun Free: kuota 30 tamu, badge RayaRayu muncul di undangan.
 - [ ] Akun Free: tombol Terbitkan mengisi masa aktif (60 hari / H+7).
 - [ ] Tambah tamu ke-31 ditolak dengan pesan upgrade.
-- [ ] Pratinjau belum ada — jangan bagikan tautan acara sebelum fitur ini jadi.
+- [ ] Tautan pratinjau `/pratinjau/<slug>/<token>` terbuka tanpa login,
+      menampilkan "Nama Tamu", dan RSVP-nya mati.
+- [ ] Pratinjau tetap bisa dibuka sebelum undangan diterbitkan.
+- [ ] Slug dikunci di form Acara setelah undangan terbit.
+- [ ] Daftar akun baru: isi nama mempelai → slug → tanggal → undangan jadi.
 
 ---
 

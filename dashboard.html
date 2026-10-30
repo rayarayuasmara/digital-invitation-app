@@ -776,6 +776,7 @@ html.lock{overflow:hidden}
         <div class="group">
           <div class="field"><label for="su-name">Nama</label><input type="text" id="su-name" required placeholder="Nama Anda atau pasangan" autocomplete="name" /></div>
           <div class="field"><label for="su-email">Email</label><input type="email" id="su-email" required placeholder="nama@email.com" autocomplete="username" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" /></div>
+          <div class="field"><label for="su-phone">No. WhatsApp <span style="font-weight:400;color:var(--sub)">(opsional)</span></label><input type="tel" id="su-phone" placeholder="08123456789" inputmode="tel" autocomplete="tel" /><div class="sub" style="font-size:11.5px;padding:4px 2px 0">Untuk bantuan dan pengingat acara. Tidak ditampilkan ke tamu.</div></div>
           <div class="field"><label for="su-password">Password</label><input type="password" id="su-password" required minlength="8" placeholder="Minimal 8 karakter" autocomplete="new-password" /></div>
         </div>
         <p class="login-err" id="su-err" role="alert"></p>
@@ -796,10 +797,33 @@ html.lock{overflow:hidden}
       <header class="topbar"><h1>Mulai</h1><span class="logo">R</span></header>
       <div class="page">
         <div class="card">
-          <h2 style="margin:0 0 8px">Buat acara pertama</h2>
-          <p style="color:var(--sub);font-size:14px;margin:0 0 16px">Akun Anda belum punya acara. Isi detail acara untuk mulai mengelola tamu dan undangan.</p>
-          <button class="btn" onclick="openCreateEventSheet()">Buat acara</button>
+          <div id="ob-step-1">
+            <h2 style="margin:0 0 6px">Siapa yang menikah?</h2>
+            <p class="sub" style="font-size:13px;margin:0 0 14px">Nama ini tampil sebagai judul undangan. Bisa diubah nanti.</p>
+            <div class="field"><label for="ob-couple">Nama mempelai</label><input type="text" id="ob-couple" maxlength="60" placeholder="Rudi &amp; Irul" oninput="obSyncSlug()" /></div>
+            <div class="field"><label for="ob-slug">Slug tautan</label><input type="text" id="ob-slug" maxlength="40" placeholder="rudi-irul" autocapitalize="none" autocorrect="off" spellcheck="false" oninput="obSetSlugTouched()" /></div>
+            <div class="sub" id="ob-slug-hint" style="font-size:12px;padding:0 4px 12px">Hanya huruf kecil, angka, dan strip.</div>
+            <button type="button" class="btn" onclick="obNext()">Lanjut</button>
+          </div>
+
+          <div id="ob-step-2" class="hidden">
+            <h2 style="margin:0 0 6px">Detail acara</h2>
+            <p class="sub" style="font-size:13px;margin:0 0 14px">Masih bisa diubah kapan saja di tab Acara.</p>
+            <div class="field"><label for="ob-date">Tanggal</label><input type="date" id="ob-date" /></div>
+            <div class="field"><label for="ob-loc">Lokasi</label><input type="text" id="ob-loc" placeholder="Gedung / kota" /></div>
+            <div class="field ses-row"><input type="text" id="ob-s1n" placeholder="Nama sesi 1" value="Akad" aria-label="Nama sesi 1" /><input type="text" id="ob-s1t" placeholder="10.00 WIB" aria-label="Jam sesi 1" /></div>
+            <div class="field ses-row"><input type="text" id="ob-s2n" placeholder="Nama sesi 2" value="Resepsi" aria-label="Nama sesi 2" /><input type="text" id="ob-s2t" placeholder="12.00 WIB" aria-label="Jam sesi 2" /></div>
+            <div style="display:flex;gap:8px;margin-top:14px">
+              <button type="button" class="btn line" onclick="obBack()">Kembali</button>
+              <button type="button" class="btn" id="ob-save" onclick="obSubmit()">Buat undangan</button>
+            </div>
+          </div>
+
+          <p class="login-err" id="ob-err" role="alert"></p>
         </div>
+        <p class="sub" style="text-align:center;font-size:12px;padding:4px 20px">
+          Setelah dibuat, kamu bisa melihat pratinjau undangan sebelum menerbitkannya.
+        </p>
       </div>
     </div>
 
@@ -832,7 +856,7 @@ html.lock{overflow:hidden}
           </div>
           <div class="pacts">
             <a class="btn line" id="btn-preview" href="#" target="_blank" rel="noopener">Pratinjau</a>
-            <a class="btn line" id="btn-upgrade" href="https://wa.me/6281234567890?text=Halo%20RayaRayu,%20saya%20ingin%20upgrade%20paket%20undangan" target="_blank" rel="noopener">Upgrade</a>
+            <a class="btn line" id="btn-upgrade" href="#" onclick="openUpgrade(); return false;">Upgrade</a>
           </div>
         </div>
 
@@ -1179,6 +1203,7 @@ let guestPage = 1, guestListSig = '';
 let sortField = 'created';
 let sortDir = 'desc';
 let currentActiveTab = 'home';
+let obSlugTouched = false;
 let currentCardViewMode = 'checkin';
 let html5QrCode = null;
 
@@ -1279,7 +1304,13 @@ async function signup(e) {
   const name = $('su-name').value.trim();
   const email = $('su-email').value.trim();
   const password = $('su-password').value;
+  const phone = normalizePhone($('su-phone').value);
   err.textContent = '';
+
+  if ($('su-phone').value.trim() && !phone) {
+    err.textContent = 'Nomor WhatsApp tidak valid. Contoh: 08123456789.';
+    return;
+  }
 
   if (!name) { err.textContent = 'Nama wajib diisi.'; return; }
   if (password.length < 8) { err.textContent = 'Password minimal 8 karakter.'; return; }
@@ -1290,7 +1321,7 @@ async function signup(e) {
     email,
     password,
     options: {
-      data: { name },
+      data: { name, phone: phone || null },
       // Harus terdaftar di Supabase → Authentication → URL Configuration →
       // Redirect URLs. Tanpa ini Supabase jatuh ke Site URL (dulu localhost).
       emailRedirectTo: window.location.origin + '/dashboard'
@@ -1443,6 +1474,13 @@ async function submitCreateEvent() {
 
 function showOnboarding() {
   $('onboarding').classList.remove('hidden');
+  obSlugTouched = false;
+  $('ob-step-1').classList.remove('hidden');
+  $('ob-step-2').classList.add('hidden');
+  $('ob-err').textContent = '';
+  $('ob-save').disabled = false;
+  $('ob-save').textContent = 'Buat undangan';
+  obSlugHint();
   document.querySelectorAll('#dash > div[id^="tab-"]').forEach(d => d.classList.add('hidden'));
   $('nav-container-wrap').classList.add('hidden');
   const sw = $('ev-switch');
@@ -2193,6 +2231,118 @@ const previewLink = () => {
   return `${window.location.origin}/pratinjau/${ev.slug || ''}/${ev.preview_token}`;
 };
 const guestLink = g => `${window.location.origin}/${eventSlug()}/${g.invitation_token}`;
+
+function normalizePhone(v) {
+  let d = String(v || '').replace(/[^0-9]/g, '');
+  if (!d) return '';
+  if (d.startsWith('0')) d = '62' + d.slice(1);
+  else if (d.startsWith('8')) d = '62' + d;
+  return /^62[0-9]{8,14}$/.test(d) ? d : '';
+}
+
+const WA_BUSINESS = '6281234567890';
+function upgradeWaUrl() {
+  const who = (globalData && globalData.client && globalData.client.name) || '';
+  const msg = `Halo RayaRayu, saya ${who} ingin upgrade paket undangan.`;
+  return `https://wa.me/${WA_BUSINESS}?text=${encodeURIComponent(msg)}`;
+}
+
+function obSyncSlug() {
+  if (!obSlugTouched) $('ob-slug').value = normalizeSlug($('ob-couple').value);
+  obSlugHint();
+}
+function obSetSlugTouched() {
+  obSlugTouched = true;
+  obSlugHint();
+}
+function obSlugHint() {
+  const v = normalizeSlug($('ob-slug').value);
+  $('ob-slug-hint').textContent = 'Tautan undangan: /' + (v || '...') + '/<token>';
+  return v;
+}
+function obNext() {
+  const err = $('ob-err');
+  const couple = $('ob-couple').value.trim();
+  const slug = normalizeSlug($('ob-slug').value);
+  if (!couple) { err.textContent = 'Nama mempelai wajib diisi.'; return; }
+  if (slug.length < 3) { err.textContent = 'Slug minimal 3 karakter (huruf kecil, angka, strip).'; return; }
+  err.textContent = '';
+  $('ob-step-1').classList.add('hidden');
+  $('ob-step-2').classList.remove('hidden');
+  window.scrollTo(0, 0);
+}
+function obBack() {
+  $('ob-err').textContent = '';
+  $('ob-step-2').classList.add('hidden');
+  $('ob-step-1').classList.remove('hidden');
+  window.scrollTo(0, 0);
+}
+
+async function obSubmit() {
+  const btn = $('ob-save'), err = $('ob-err');
+  const date = $('ob-date').value;
+  const couple = $('ob-couple').value.trim();
+  if (!date) { err.textContent = 'Tanggal acara wajib diisi.'; return; }
+  const title = 'The Wedding of ' + couple;
+  btn.disabled = true;
+  btn.textContent = 'Membuat…';
+  err.textContent = '';
+  try {
+    const { data, error } = await supabaseClient.rpc('create_event', {
+      p_title: title,
+      p_event_date: date,
+      p_location: $('ob-loc').value.trim(),
+      p_session_1_name: $('ob-s1n').value.trim() || 'Akad',
+      p_session_1_time: $('ob-s1t').value.trim() || null,
+      p_session_2_name: $('ob-s2n').value.trim() || 'Resepsi',
+      p_session_2_time: $('ob-s2t').value.trim() || null,
+      p_couple_name: couple,
+      p_slug: normalizeSlug($('ob-slug').value)
+    });
+    if (error || !data || data.success === false) {
+      err.textContent = (data && data.message) || 'Gagal membuat undangan. Coba lagi.';
+      return;
+    }
+    currentEventId = data.event_id;
+    localStorage.setItem('rr_event_id', data.event_id);
+    await loadDashboard();
+    toast('Undangan dibuat. Berikutnya: pratinjau lalu terbitkan.');
+  } catch (e) {
+    console.error(e);
+    err.textContent = 'Gagal membuat undangan. Coba lagi.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Buat undangan';
+  }
+}
+
+function openUpgrade() {
+  const phone = (globalData && globalData.client && globalData.client.phone) || '';
+  if (phone) { window.open(upgradeWaUrl(), '_blank'); return; }
+  openSheet(`
+    <div class="sheet-head"><h3>Nomor WhatsApp</h3><button onclick="closeSheet()">Tutup</button></div>
+    <div class="listcard" style="padding:16px">
+      <p style="margin:0 0 14px;font-size:14px;color:var(--sub);line-height:1.55">
+        Kami perlu nomor WhatsApp untuk membahas paket dan pembayaran.
+        Nomor ini tidak ditampilkan ke tamu.
+      </p>
+      <div class="field"><label for="up-phone">No. WhatsApp</label><input type="tel" id="up-phone" inputmode="tel" placeholder="08123456789" /></div>
+      <p class="login-err" id="up-err" role="alert"></p>
+      <button class="btn" onclick="saveUpgradePhone()">Simpan &amp; lanjut</button>
+    </div>`);
+}
+
+async function saveUpgradePhone() {
+  const phone = normalizePhone($('up-phone').value);
+  const err = $('up-err');
+  if (!phone) { err.textContent = 'Nomor WhatsApp tidak valid. Contoh: 08123456789.'; return; }
+  const { error } = await supabaseClient.from('clients').update({ phone }).eq('id', globalData.client.id);
+  if (error) { err.textContent = 'Gagal menyimpan nomor. Coba lagi.'; return; }
+  globalData.client.phone = phone;
+  closeSheet();
+  toast('Nomor WhatsApp disimpan');
+  window.open(upgradeWaUrl(), '_blank');
+}
 
 function normalizeSlug(v) {
   return String(v || '').toLowerCase()
