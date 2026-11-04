@@ -332,7 +332,7 @@ input, select, textarea { font-size: 16px !important; }
 #login .card{width:100%;max-width:420px;padding:28px}
 #login .logo{width:56px;height:56px;border-radius:16px;font-size:26px;margin-bottom:18px}
 #login h1{margin:0;font-family:'Geist',sans-serif;font-weight:800;font-size:30px;color:var(--brand)}
-#login p{color:var(--sub);margin:6px 0 22px;font-size:15px}
+#auth-sub{color:var(--sub);margin:6px 0 22px;font-size:15px}
 #login .group{border:1px solid var(--line);border-radius:18px;padding:0 4px;margin-bottom:16px}
 
 /* Check-in overlay & QR Scanner */
@@ -399,6 +399,10 @@ html.lock{overflow:hidden}
 .eye svg{width:20px;height:20px}
 .caps{margin:-4px 4px 12px;font-size:13px;color:var(--amber-ink)}
 .login-err{min-height:18px;margin:-4px 4px 12px;font-size:13px;color:var(--red-ink)}
+.auth-foot{margin:-4px 2px 14px;text-align:right}
+.authlink{background:none;border:0;padding:0;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--brand);cursor:pointer}
+.authlink.muted{color:var(--sub);font-weight:500}
+.authlink:hover{text-decoration:underline}
 .shake{animation:shake .45s var(--ease)}
 @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
 
@@ -761,12 +765,13 @@ html.lock{overflow:hidden}
     <div class="card">
       <div class="logo">R</div>
       <h1>RayaRayu</h1>
-      <p>Masuk untuk mengelola tamu dan detail acara Anda.</p>
+      <p id="auth-sub">Masuk untuk mengelola tamu dan detail acara Anda.</p>
       <form id="login-form" onsubmit="login(event)">
         <div class="group">
           <div class="field"><label for="email">Email</label><input type="email" id="email" required placeholder="nama@email.com" autocomplete="username" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" /></div>
           <div class="field"><label for="password">Password</label><input type="password" id="password" required placeholder="Wajib diisi" autocomplete="current-password" /><button type="button" class="eye" id="pw-eye" aria-label="Tampilkan password" aria-pressed="false"><i data-lucide="eye"></i></button></div>
         </div>
+        <p class="auth-foot"><button type="button" class="authlink" onclick="showAuthView('forgot')">Lupa password?</button></p>
         <p class="caps hidden" id="caps">Caps Lock sedang aktif</p>
         <p class="login-err" id="login-err" role="alert"></p>
         <button type="submit" id="btn-login" class="btn">Masuk</button>
@@ -783,8 +788,28 @@ html.lock{overflow:hidden}
         <button type="submit" id="btn-signup" class="btn">Daftar</button>
       </form>
 
-      <p style="margin:14px 0 0;text-align:center;font-size:14px">
-        <button type="button" id="auth-toggle" onclick="toggleAuthMode()" style="background:none;border:0;color:var(--brand);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">Belum punya akun? Daftar</button>
+      <form id="forgot-form" class="hidden" onsubmit="sendReset(event)">
+        <div class="group">
+          <div class="field"><label for="fg-email">Email</label><input type="email" id="fg-email" required placeholder="nama@email.com" autocomplete="username" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" /></div>
+        </div>
+        <p class="login-err" id="fg-err" role="alert"></p>
+        <button type="submit" id="btn-forgot" class="btn">Kirim tautan reset</button>
+        <p style="margin:14px 0 0;text-align:center;font-size:14px">
+          <button type="button" class="authlink muted" onclick="showAuthView('login')">Kembali ke masuk</button>
+        </p>
+      </form>
+
+      <form id="reset-form" class="hidden" onsubmit="saveNewPassword(event)">
+        <div class="group">
+          <div class="field"><label for="rs-password">Password baru</label><input type="password" id="rs-password" required minlength="8" placeholder="Minimal 8 karakter" autocomplete="new-password" /></div>
+          <div class="field"><label for="rs-password2">Ulangi password baru</label><input type="password" id="rs-password2" required minlength="8" placeholder="Ketik ulang" autocomplete="new-password" /></div>
+        </div>
+        <p class="login-err" id="rs-err" role="alert"></p>
+        <button type="submit" id="btn-reset" class="btn">Simpan password</button>
+      </form>
+
+      <p id="auth-switch" style="margin:14px 0 0;text-align:center;font-size:14px">
+        <button type="button" id="auth-toggle" data-next="signup" onclick="toggleAuthMode()" style="background:none;border:0;color:var(--brand);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">Belum punya akun? Daftar</button>
       </p>
     </div>
   </section>
@@ -1190,6 +1215,61 @@ const SUPABASE_URL = "https://awwraxmftlbekclwdrix.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_FirHDmsq1aDzQTPhQfyXjQ_x2f97MsJ";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ---------------------------------------------------------------
+// Rute auth: /login, /register, /reset-password semua menuju file
+// yang sama (lihat vercel.json). Satu file = tidak ada CSS/JS yang
+// terduplikasi; yang berbeda hanya URL dan form yang dibuka.
+// ---------------------------------------------------------------
+const AUTH_ROUTES = { '/login': 'login', '/register': 'signup', '/reset-password': 'reset' };
+const authPathView = () => AUTH_ROUTES[location.pathname.replace(/\/+$/, '')] || null;
+
+const AUTH_COPY = {
+  login:  { sub: 'Masuk untuk mengelola tamu dan detail acara Anda.',                    next: 'signup', switchLabel: 'Belum punya akun? Daftar', path: '/login' },
+  signup: { sub: 'Buat akun untuk mulai menyiapkan undangan.',                            next: 'login',  switchLabel: 'Sudah punya akun? Masuk',  path: '/register' },
+  forgot: { sub: 'Masukkan email akun. Kami kirim tautan untuk membuat password baru.',   next: null,     switchLabel: null,                     path: '/login' },
+  reset:  { sub: 'Buat password baru untuk akun Anda.',                                   next: null,     switchLabel: null,                     path: '/reset-password' }
+};
+const AUTH_FORM_OF = { login: 'login-form', signup: 'signup-form', forgot: 'forgot-form', reset: 'reset-form' };
+
+// URL hanya diubah lewat replaceState supaya tombol Back tidak
+// memantul antara /login dan /register.
+function setAuthPath(p) {
+  try { history.replaceState(null, '', p); } catch (_) { /* file:// atau origin aneh */ }
+}
+
+function showAuthView(view, opts) {
+  const v = AUTH_COPY[view] ? view : 'login';
+  const copy = AUTH_COPY[v];
+
+  Object.keys(AUTH_FORM_OF).forEach(k => {
+    const el = $(AUTH_FORM_OF[k]);
+    if (el) el.classList.toggle('hidden', k !== v);
+  });
+  $('login').classList.remove('hidden');
+  $('dash').classList.add('hidden');
+  $('auth-sub').textContent = copy.sub;
+
+  const sw = $('auth-switch');
+  if (copy.switchLabel) {
+    sw.classList.remove('hidden');
+    $('auth-toggle').textContent = copy.switchLabel;
+    $('auth-toggle').dataset.next = copy.next;
+  } else {
+    sw.classList.add('hidden');
+  }
+
+  if (!opts || opts.url !== false) setAuthPath(copy.path);
+
+  ['login-err', 'su-err', 'fg-err', 'rs-err'].forEach(id => {
+    const e = $(id);
+    if (e) { e.textContent = ''; e.style.color = ''; }
+  });
+
+  // Reset password tidak boleh autofill password lama.
+  if (v === 'reset') { $('rs-password').value = ''; $('rs-password2').value = ''; }
+  icons();
+}
+
 let globalData = null;
 let activeFilter = 'all';
 // Filter multi-select (Set kosong = semua) + paginasi daftar tamu
@@ -1259,8 +1339,34 @@ function closeSheet() {
 
 async function checkSession() {
   applyTheme();
+  const path = authPathView();
+
+  // Tampilkan form yang benar sebelum getSession() selesai, supaya
+  // membuka /register tidak berkedip menampilkan form masuk dulu.
+  if (path === 'login' || path === 'signup') showAuthView(path, { url: false });
+
   const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session) loadDashboard(); else icons();
+
+  if (session) {
+    // Tautan reset password membuat sesi sementara. Jangan langsung
+    // masuk dashboard — pengguna harus membuat password baru dulu.
+    if (path === 'reset') { showAuthView('reset', { url: false }); return; }
+    // Sudah masuk tapi membuka /login atau /register: rapikan URL-nya.
+    if (path) setAuthPath('/dashboard');
+    loadDashboard();
+    return;
+  }
+
+  showAuthView(path === 'reset' ? 'forgot' : (path || 'login'), { url: false });
+
+  // Tautan reset kedaluwarsa / sudah dipakai, atau /reset-password dibuka
+  // langsung tanpa token. Arahkan ke form "lupa password" dengan penjelasan.
+  if (path === 'reset') {
+    const e = $('fg-err');
+    e.style.color = 'var(--sub)';
+    e.textContent = 'Tautan reset tidak valid atau sudah kedaluwarsa. Minta tautan baru di sini.';
+  }
+  icons();
 }
 async function login(e) {
   e.preventDefault();
@@ -1283,18 +1389,79 @@ async function login(e) {
     loginFail(error.message);
     return toast('Login gagal. Periksa email dan password.', false);
   }
-  
+
+  setAuthPath('/dashboard');
   loadDashboard();
 }
 
 function toggleAuthMode() {
-  const toSignup = $('signup-form').classList.contains('hidden');
-  $('login-form').classList.toggle('hidden', toSignup);
-  $('signup-form').classList.toggle('hidden', !toSignup);
-  $('auth-toggle').textContent = toSignup ? 'Sudah punya akun? Masuk' : 'Belum punya akun? Daftar';
-  $('login-err').textContent = '';
-  $('su-err').textContent = '';
-  icons();
+  const next = $('auth-toggle').dataset.next || 'signup';
+  showAuthView(next);
+}
+
+// Selalu tampilkan pesan yang sama, terdaftar atau tidak — supaya
+// halaman ini tidak bisa dipakai menebak email mana yang punya akun.
+async function sendReset(e) {
+  e.preventDefault();
+  const btn = $('btn-forgot'), err = $('fg-err');
+  const email = $('fg-email').value.trim();
+  err.style.color = '';
+  err.textContent = '';
+
+  if (!email) { err.textContent = 'Email wajib diisi.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Mengirim…';
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+    // Harus terdaftar di Supabase → Authentication → URL Configuration →
+    // Redirect URLs. Kalau tidak, Supabase jatuh ke Site URL.
+    redirectTo: window.location.origin + '/reset-password'
+  });
+  btn.disabled = false;
+  btn.textContent = 'Kirim tautan reset';
+
+  if (error && /rate limit|too many/i.test(error.message)) {
+    err.textContent = 'Terlalu banyak permintaan. Coba lagi beberapa menit lagi.';
+    return;
+  }
+  if (error) {
+    console.error(error);
+    err.textContent = 'Gagal mengirim tautan. Coba lagi.';
+    return;
+  }
+
+  err.style.color = 'var(--sub)';
+  err.textContent = 'Kalau email itu terdaftar, tautan reset sudah dikirim. Cek kotak masuk dan folder spam.';
+}
+
+async function saveNewPassword(e) {
+  e.preventDefault();
+  const btn = $('btn-reset'), err = $('rs-err');
+  const p1 = $('rs-password').value;
+  const p2 = $('rs-password2').value;
+  err.style.color = '';
+  err.textContent = '';
+
+  if (p1.length < 8) { err.textContent = 'Password minimal 8 karakter.'; return; }
+  if (p1 !== p2) { err.textContent = 'Kedua password belum sama.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan…';
+  const { error } = await supabaseClient.auth.updateUser({ password: p1 });
+  btn.disabled = false;
+  btn.textContent = 'Simpan password';
+
+  if (error) {
+    err.textContent = /same|weak|password/i.test(error.message)
+      ? 'Password terlalu lemah atau sama dengan yang lama. Gunakan password lain.'
+      : 'Gagal menyimpan password. Minta tautan reset baru lalu coba lagi.';
+    return;
+  }
+
+  // Sesi hasil tautan reset sudah valid, jadi langsung masuk dashboard.
+  setAuthPath('/dashboard');
+  toast('Password diperbarui');
+  await loadDashboard();
 }
 
 async function signup(e) {
@@ -1346,12 +1513,14 @@ async function signup(e) {
     return;
   }
 
+  setAuthPath('/dashboard');
   await loadDashboard();
 }
 async function logout() { 
   localStorage.clear();
   sessionStorage.clear();
   supabaseClient.auth.signOut().catch(err => console.log('SignOut background error:', err));
+  setAuthPath('/login');
   location.reload(); 
 }
 
@@ -3268,7 +3437,7 @@ checkSession();
   eye.onclick = () => { const show = pw.type === 'password'; pw.type = show ? 'text' : 'password'; eye.setAttribute('aria-pressed', show); eye.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password'); eye.innerHTML = `<i data-lucide="${show ? 'eye-off' : 'eye'}"></i>`; icons(); pw.focus(); };
   pw.addEventListener('keyup', e => $('caps').classList.toggle('hidden', !(e.getModifierState && e.getModifierState('CapsLock'))));
   ['email', 'password'].forEach(id => $(id).addEventListener('input', () => { $('login-err').textContent = ''; }));
-  window.loginFail = m => { $('login-err').textContent = /invalid/i.test(m) ? 'Email atau password tidak cocok.' : m; const g = document.querySelector('#login .group'); g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake'); };
+  window.loginFail = m => { $('login-err').textContent = /invalid/i.test(m) ? 'Email atau password tidak cocok.' : m; const g = document.querySelector('#login-form .group'); g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake'); };
 
   const s = $('sheet'); let y0 = null, dy = 0;
   s.addEventListener('pointerdown', e => { if (e.target.closest('.grab, .sheet-head') && !e.target.closest('button')) { y0 = e.clientY; dy = 0; s.style.transition = 'none'; s.setPointerCapture(e.pointerId); } });

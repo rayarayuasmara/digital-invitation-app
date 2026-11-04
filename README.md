@@ -6,8 +6,12 @@ Undangan pernikahan digital RayaRayu. Empat halaman statis:
 |---|---|---|
 | `index.html` | `/` | Landing page |
 | `dashboard.html` | `/dashboard` | Panel klien (login) |
+| `dashboard.html` | `/login` | Form masuk |
+| `dashboard.html` | `/register` | Form daftar |
+| `dashboard.html` | `/reset-password` | Form password baru (dari email reset) |
 | `scanner.html` | `/scanner` | Check-in petugas (kode akses) |
 | `invitation.html` | `/{slug}/{token}` | Undangan tamu |
+| `invitation.html` | `/pratinjau/{slug}/{token}` | Pratinjau undangan |
 
 Tidak ada build step. Deploy lewat Vercel dari branch `main`, rewrite di
 `vercel.json`.

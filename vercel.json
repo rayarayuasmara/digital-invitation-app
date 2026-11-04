@@ -13,6 +13,18 @@
       "destination": "/scanner.html"
     },
     {
+      "source": "/login",
+      "destination": "/dashboard.html"
+    },
+    {
+      "source": "/register",
+      "destination": "/dashboard.html"
+    },
+    {
+      "source": "/reset-password",
+      "destination": "/dashboard.html"
+    },
+    {
       "source": "/pratinjau/:slug/:token",
       "destination": "/invitation.html"
     },

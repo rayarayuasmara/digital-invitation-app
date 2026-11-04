@@ -15,12 +15,18 @@ Hal-hal yang **tidak bisa dikerjakan dari kode** dan harus disetel manual.
 | Redirect URLs | `https://<domain-produksi>/**` |
 | Redirect URLs | `http://localhost:3000/**` (khusus development) |
 
-Kode di `dashboard.html` sudah mengirim `emailRedirectTo: <origin>/dashboard`.
+Kode di `dashboard.html` mengirim dua tujuan redirect:
+
+| Alur | `emailRedirectTo` |
+|---|---|
+| Konfirmasi pendaftaran | `<origin>/dashboard` |
+| Reset password | `<origin>/reset-password` |
+
 Supabase hanya memakai nilai itu kalau origin-nya ada di daftar Redirect URLs.
 Kalau tidak cocok, Supabase diam-diam jatuh ke Site URL.
 
 **Cek:** daftar akun uji baru → email konfirmasi harus menuju domain produksi,
-bukan localhost.
+bukan localhost. Lalu coba "Lupa password?" di `/login`.
 
 ---
 
@@ -60,7 +66,7 @@ Masih placeholder `6281234567890` di:
 - [ ] Buka undangan lama `/<slug>/<token>` — harus tampil normal.
 - [ ] Daftar akun baru → konfirmasi email menuju domain produksi.
 - [ ] Login → dashboard hanya menampilkan **Home**, tidak menembus tab lain saat scroll.
-- [ ] Tab Acara → tombol share menjelaskan tautan per tamu, tidak menyalin tautan mati.
+- [ ] Tab Acara → tombol share menyalin tautan pratinjau, bukan tautan mati.
 - [ ] Akun Free: kuota 30 tamu, badge RayaRayu muncul di undangan.
 - [ ] Akun Free: tombol Terbitkan mengisi masa aktif (60 hari / H+7).
 - [ ] Tambah tamu ke-31 ditolak dengan pesan upgrade.
@@ -69,6 +75,12 @@ Masih placeholder `6281234567890` di:
 - [ ] Pratinjau tetap bisa dibuka sebelum undangan diterbitkan.
 - [ ] Slug dikunci di form Acara setelah undangan terbit.
 - [ ] Daftar akun baru: isi nama mempelai → slug → tanggal → undangan jadi.
+- [ ] `/login` dan `/register` membuka form yang benar tanpa klik tambahan.
+- [ ] Sudah login lalu buka `/login` → langsung dilempar ke `/dashboard`.
+- [ ] "Lupa password?" → email masuk → tautan membuka `/reset-password` →
+      password baru tersimpan dan langsung masuk dashboard.
+- [ ] Tautan reset yang sudah dipakai/kedaluwarsa menampilkan pesan yang jelas,
+      bukan halaman kosong.
 
 ---
 
