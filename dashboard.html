@@ -764,6 +764,19 @@ html.lock{overflow:hidden}
     .plan .pacts .btn{height:44px;border-radius:14px;font-size:14px;text-decoration:none}
     .plan .pacts .btn.line{box-shadow:none;border:1px solid var(--line)}
     .plan .pacts .btn[hidden]{display:none}
+    /* ---------- Alur upgrade & pembayaran ---------- */
+    .planopt{display:block;width:100%;text-align:left;padding:16px;border:1px solid var(--line);border-radius:18px;background:var(--card);margin-top:10px}
+    .planopt:active{transform:scale(.99)}
+    .planopt .po-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+    .planopt .po-top b{font-size:17px}
+    .planopt .po-top span{font-weight:700;font-size:17px}
+    .planopt .po-sub{color:var(--sub);font-size:13px;margin-top:4px;line-height:1.45}
+    .paybox{border:1px solid var(--line);border-radius:18px;padding:4px 16px;margin-top:12px;background:var(--card)}
+    .payrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;font-size:15px}
+    .payrow+.payrow{border-top:1px solid var(--line)}
+    .payrow span{color:var(--sub);flex:0 0 auto}
+    .payrow b{font-family:'Geist Mono',monospace;font-weight:600;text-align:right;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+    .copybtn{font-size:13px;font-weight:600;color:var(--brand);flex:0 0 auto;padding:4px 2px}
 </style>
 </head>
 <body>
@@ -1132,6 +1145,14 @@ html.lock{overflow:hidden}
           <div class="field" role="button" tabindex="0" style="cursor:pointer" onclick="openEditPhone()" onkeydown="if(event.key==='Enter'||event.key===' ')openEditPhone()">
             <label>Nomor WhatsApp</label>
             <span class="ro-val" id="akun-phone">Belum diisi</span>
+            <i data-lucide="chevron-right" style="width:18px;height:18px;color:var(--sub)"></i>
+          </div>
+        </div>
+
+        <div class="card hidden" id="admin-orders-card" style="padding:4px 18px">
+          <div class="field" role="button" tabindex="0" style="cursor:pointer" onclick="openAdminOrders()" onkeydown="if(event.key==='Enter'||event.key===' ')openAdminOrders()">
+            <label>Pesanan masuk</label>
+            <span class="ro-val" id="admin-orders-count">—</span>
             <i data-lucide="chevron-right" style="width:18px;height:18px;color:var(--sub)"></i>
           </div>
         </div>
@@ -1582,6 +1603,7 @@ async function loadDashboard() {
 
   wishesData = []; wishesTotal = 0; wishesDone = false; wishInit = false; scannerGuests = [];
   await loadEventList();
+  await loadOrder();
   renderUI(); loadActivity(); loadWishes();
 }
 
@@ -1914,6 +1936,20 @@ function renderPlanCard(event, stats) {
       ? 'Aktif sampai ' + formatTanggal(event.expires_at) + '. RSVP dan check-in tetap berjalan.'
       : 'Aktif tanpa batas waktu.';
   }
+
+  // Ada pesanan terbuka: tampilkan statusnya, jangan biarkan pengguna
+  // membuat pesanan kedua tanpa sadar.
+  const up = $('btn-upgrade');
+  if (activeOrder) {
+    badge.textContent = activeOrder.status === 'waiting' ? 'Diverifikasi' : 'Belum bayar';
+    badge.className = 'pbadge warn';
+    note.textContent = activeOrder.status === 'waiting'
+      ? 'Bukti pembayaran ' + (activeOrder.order_code || '') + ' sedang kami periksa (maks. 1×24 jam).'
+      : 'Pesanan ' + (activeOrder.order_code || '') + ' menunggu pembayaran ' + rupiah(activeOrder.amount) + '.';
+    if (up) up.textContent = 'Lihat pesanan';
+  } else if (up) {
+    up.textContent = 'Upgrade';
+  }
 }
 
 async function publishEvent() {
@@ -1945,6 +1981,19 @@ function renderUI() {
   $('account-avatar').textContent = initials(client.name);
   const phEl = $('akun-phone');
   if (phEl) phEl.textContent = client.phone ? String(client.phone).replace(/^62/, '0') : 'Belum diisi';
+
+  const adminCard = $('admin-orders-card');
+  if (adminCard) {
+    const isAdmin = client.role === 'admin';
+    adminCard.classList.toggle('hidden', !isAdmin);
+    if (isAdmin) {
+      supabaseClient.rpc('admin_list_orders').then(({ data }) => {
+        const n = Array.isArray(data) ? data.length : 0;
+        const el = $('admin-orders-count');
+        if (el) el.textContent = n ? n + ' menunggu' : 'Tidak ada';
+      }).catch(() => {});
+    }
+  }
 
   const d = new Date(event.event_date);
   $('ev-date-txt').innerHTML = esc(d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long' })) + '<br>' + d.getFullYear();
@@ -2533,18 +2582,21 @@ async function obSubmit() {
 
 function openUpgrade() {
   const phone = (globalData && globalData.client && globalData.client.phone) || '';
-  if (phone) { window.open(upgradeWaUrl(), '_blank'); return; }
-  openSheet(`
-    <div class="sheet-head"><h3>Nomor WhatsApp</h3><button onclick="closeSheet()">Tutup</button></div>
-    <div class="listcard" style="padding:16px">
-      <p style="margin:0 0 14px;font-size:14px;color:var(--sub);line-height:1.55">
-        Kami perlu nomor WhatsApp untuk membahas paket dan pembayaran.
-        Nomor ini tidak ditampilkan ke tamu.
-      </p>
-      <div class="field"><label for="up-phone">No. WhatsApp</label><input type="tel" id="up-phone" inputmode="tel" placeholder="08123456789" /></div>
-      <p class="login-err" id="up-err" role="alert"></p>
-      <button class="btn" onclick="saveUpgradePhone()">Simpan &amp; lanjut</button>
-    </div>`);
+  if (!phone) {
+    openSheet(`
+      <div class="sheet-head"><h3>Nomor WhatsApp</h3><button onclick="closeSheet()">Tutup</button></div>
+      <div class="listcard" style="padding:16px">
+        <p style="margin:0 0 14px;font-size:15px;color:var(--sub);line-height:1.5">
+          Kami perlu nomor WhatsApp untuk konfirmasi pembayaran.
+          Nomor ini tidak ditampilkan ke tamu.
+        </p>
+        <div class="field"><label for="up-phone">No. WhatsApp</label><input type="tel" id="up-phone" inputmode="tel" placeholder="08123456789" /></div>
+        <p class="login-err" id="up-err" role="alert"></p>
+        <button class="btn" onclick="saveUpgradePhone()">Simpan &amp; lanjut</button>
+      </div>`);
+    return;
+  }
+  renderUpgradeSheet();
 }
 
 async function saveUpgradePhone() {
@@ -2554,9 +2606,230 @@ async function saveUpgradePhone() {
   const { error } = await supabaseClient.from('clients').update({ phone }).eq('id', globalData.client.id);
   if (error) { err.textContent = 'Gagal menyimpan nomor. Coba lagi.'; return; }
   globalData.client.phone = phone;
+  const el = $('akun-phone'); if (el) el.textContent = String(phone).replace(/^62/, '0');
   closeSheet();
   toast('Nomor WhatsApp disimpan');
-  window.open(upgradeWaUrl(), '_blank');
+  renderUpgradeSheet();
+}
+
+/* ---------- Pesanan & pembayaran ---------- */
+let activeOrder = null, activePayment = null;
+const rupiah = n => 'Rp' + Number(n || 0).toLocaleString('id-ID');
+
+async function loadOrder() {
+  activeOrder = null;
+  if (!currentEventId) return;
+  const { data } = await supabaseClient.from('orders')
+    .select('id,order_code,plan_code,amount,status,proof_url,created_at')
+    .eq('event_id', currentEventId)
+    .in('status', ['pending', 'waiting'])
+    .order('created_at', { ascending: false })
+    .limit(1);
+  activeOrder = (data && data[0]) || null;
+}
+
+async function loadPayment() {
+  if (activePayment) return activePayment;
+  const { data } = await supabaseClient.from('app_settings').select('value').eq('key', 'payment').maybeSingle();
+  activePayment = (data && data.value) || null;
+  return activePayment;
+}
+
+async function renderUpgradeSheet() {
+  openSheet(`
+    <div class="sheet-head"><h3>Upgrade paket</h3><button onclick="closeSheet()">Tutup</button></div>
+    <div class="listcard" style="padding:16px"><div class="empty">Memuat paket…</div></div>`);
+
+  await loadOrder();
+  if (activeOrder) { await loadPayment(); return renderOrderStep(activeOrder.status === 'waiting' ? 3 : 2); }
+
+  const { data: plans, error } = await supabaseClient.from('plans')
+    .select('code,name,price,limits,features')
+    .eq('is_active', true).gt('price', 0).order('sort_order');
+
+  if (error || !plans || !plans.length) {
+    openSheet(`<div class="sheet-head"><h3>Upgrade paket</h3><button onclick="closeSheet()">Tutup</button></div>
+      <div class="listcard" style="padding:16px"><div class="empty">Paket belum tersedia. Coba lagi nanti.</div></div>`);
+    return;
+  }
+
+  const tier = (globalData && globalData.stats && globalData.stats.tier) || 'free';
+  const order = { free: 0, silver: 1, gold: 2, pro: 3 };
+  const usable = plans.filter(p => (order[p.code] || 0) > (order[tier] || 0));
+
+  const items = usable.map(p => {
+    const l = p.limits || {}, f = p.features || {};
+    const bits = [
+      (l.guests ? l.guests + ' tamu' : null),
+      (l.active_days ? l.active_days + ' hari' : null),
+      (f.watermark === false ? 'tanpa watermark' : null),
+      (f.export && f.export !== 'none' ? 'ekspor ' + f.export : null)
+    ].filter(Boolean).join(' · ');
+    return `<button class="planopt" onclick="choosePlan('${esc(p.code)}')">
+      <div class="po-top"><b>${esc(p.name)}</b><span>${rupiah(p.price)}</span></div>
+      <div class="po-sub">${esc(bits)}</div>
+    </button>`;
+  }).join('');
+
+  openSheet(`
+    <div class="sheet-head"><h3>Upgrade paket</h3><button onclick="closeSheet()">Tutup</button></div>
+    <div class="listcard" style="padding:16px">
+      <p style="margin:0 0 4px;font-size:15px;color:var(--sub);line-height:1.5">
+        Bayar sekali untuk acara ini. Masa aktif dihitung saat paket diaktifkan.
+      </p>
+      ${items || '<div class="empty">Semua paket sudah aktif.</div>'}
+    </div>`);
+}
+
+async function choosePlan(code) {
+  openSheet(`<div class="sheet-head"><h3>Membuat pesanan…</h3><button onclick="closeSheet()">Tutup</button></div>
+    <div class="listcard" style="padding:16px"><div class="empty">Menyiapkan kode pembayaran…</div></div>`);
+  const { data, error } = await supabaseClient.rpc('create_order', {
+    p_event_id: currentEventId, p_plan_code: code
+  });
+  if (error || !data || data.success === false) {
+    toast((data && data.message) || 'Gagal membuat pesanan.', false);
+    return renderUpgradeSheet();
+  }
+  activeOrder = data.order;
+  activePayment = data.payment;
+  renderOrderStep(2);
+}
+
+function renderOrderStep(step) {
+  if (!activeOrder) return renderUpgradeSheet();
+
+  if (step === 3) {
+    openSheet(`
+      <div class="sheet-head"><h3>Menunggu verifikasi</h3><button onclick="closeSheet()">Tutup</button></div>
+      <div class="listcard" style="padding:16px">
+        <p style="margin:0 0 6px;font-size:15px;line-height:1.55">
+          Bukti pembayaran untuk pesanan <b>${esc(activeOrder.order_code || '')}</b> sudah kami terima.
+        </p>
+        <p style="margin:0;font-size:15px;color:var(--sub);line-height:1.55">
+          Kami cek maksimal 1×24 jam. Paket aktif otomatis setelah pembayaran cocok.
+        </p>
+      </div>
+      <button class="btn" onclick="closeSheet()">Mengerti</button>`);
+    return;
+  }
+
+  const pay = activePayment || {};
+  openSheet(`
+    <div class="sheet-head"><h3>Pembayaran</h3><button onclick="closeSheet()">Tutup</button></div>
+    <div class="listcard" style="padding:16px">
+      <div class="paybox" style="margin-top:0">
+        <div class="payrow"><span>Kode pesanan</span><b>${esc(activeOrder.order_code || '—')}</b>
+          <button class="copybtn" onclick="copyOrShow('${esc(activeOrder.order_code || '')}','Kode pesanan')">Salin</button></div>
+        <div class="payrow"><span>Jumlah</span><b>${rupiah(activeOrder.amount)}</b>
+          <button class="copybtn" onclick="copyOrShow('${Number(activeOrder.amount || 0)}','Nominal')">Salin</button></div>
+        <div class="payrow"><span>Bank</span><b>${esc(pay.bank || '—')}</b></div>
+        <div class="payrow"><span>Nomor rekening</span><b>${esc(pay.account || '—')}</b>
+          <button class="copybtn" onclick="copyOrShow('${esc(pay.account || '')}','Nomor rekening')">Salin</button></div>
+        <div class="payrow"><span>Atas nama</span><b>${esc(pay.holder || '—')}</b></div>
+      </div>
+      <p style="margin:12px 0 0;font-size:13px;color:var(--sub);line-height:1.5">${esc(pay.note || '')}</p>
+    </div>
+    <div class="listcard" style="padding:16px;margin-top:12px">
+      <p style="margin:0 0 10px;font-size:15px;line-height:1.5">
+        Sudah transfer? Unggah foto bukti — struk ATM atau tangkapan layar m-banking.
+      </p>
+      <input type="file" id="proof-file" accept="image/*" onchange="uploadProof(this)" hidden />
+      <button class="btn" onclick="document.getElementById('proof-file').click()">Unggah bukti transfer</button>
+      <button class="btn line" style="margin-top:8px" onclick="cancelOrder()">Batalkan pesanan</button>
+    </div>`);
+}
+
+async function uploadProof(input) {
+  const file = input.files && input.files[0];
+  if (!file || !activeOrder) return;
+  if (file.size > 5 * 1024 * 1024) { toast('Ukuran foto maksimal 5 MB.', false); input.value = ''; return; }
+
+  const ext = (String(file.name).split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+  const uid = (globalData && globalData.client && globalData.client.user_id) || 'anon';
+  const path = `${uid}/${activeOrder.id}-${Date.now()}.${ext}`;
+
+  toast('Mengunggah bukti…');
+  const { error: upErr } = await supabaseClient.storage.from('payment-proofs').upload(path, file, { upsert: true });
+  if (upErr) { toast('Gagal mengunggah. Coba lagi.', false); input.value = ''; return; }
+
+  const { data, error } = await supabaseClient.rpc('attach_order_proof', {
+    p_order_id: activeOrder.id, p_path: path
+  });
+  if (error || !data || data.success === false) {
+    toast((data && data.message) || 'Gagal menyimpan bukti.', false);
+    input.value = '';
+    return;
+  }
+  activeOrder.status = 'waiting';
+  activeOrder.proof_url = path;
+  toast('Bukti terkirim');
+  renderOrderStep(3);
+  renderPlanCard(globalData.event, globalData.stats || {});
+}
+
+async function cancelOrder() {
+  if (!activeOrder) return;
+  const { data, error } = await supabaseClient.rpc('cancel_order', { p_order_id: activeOrder.id });
+  if (error || !data || data.success === false) return toast('Gagal membatalkan pesanan.', false);
+  activeOrder = null;
+  closeSheet();
+  toast('Pesanan dibatalkan');
+  renderPlanCard(globalData.event, globalData.stats || {});
+}
+
+/* ---------- Admin: verifikasi pesanan ---------- */
+async function openAdminOrders() {
+  openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button onclick="closeSheet()">Tutup</button></div>
+    <div class="listcard" style="padding:16px"><div class="empty">Memuat…</div></div>`);
+  const { data, error } = await supabaseClient.rpc('admin_list_orders');
+  if (error || !Array.isArray(data)) {
+    openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button onclick="closeSheet()">Tutup</button></div>
+      <div class="listcard" style="padding:16px"><div class="empty">Gagal memuat pesanan.</div></div>`);
+    return;
+  }
+  if (!data.length) {
+    openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button onclick="closeSheet()">Tutup</button></div>
+      <div class="listcard" style="padding:16px"><div class="empty">Tidak ada pesanan menunggu.</div></div>`);
+    return;
+  }
+  const rows = data.map(o => `
+    <div style="padding:14px 0;border-top:1px solid var(--line)">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline">
+        <b style="font-size:16px">${esc(o.order_code || '—')}</b>
+        <span class="st ${o.status === 'waiting' ? 'st-pending' : 'st-unsent'}">${o.status === 'waiting' ? 'Bukti masuk' : 'Belum bayar'}</span>
+      </div>
+      <div class="sub" style="font-size:13px;margin-top:4px">${esc(o.client_name || '')} · ${esc(o.plan_code || '')} · ${rupiah(o.amount)}</div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        ${o.proof_url ? `<button class="copybtn" onclick="viewProof('${esc(o.proof_url)}')">Lihat bukti</button>` : ''}
+        <button class="copybtn" onclick="activateOrder('${esc(o.id)}')">Aktifkan</button>
+        <button class="copybtn" style="color:var(--red-ink)" onclick="rejectOrder('${esc(o.id)}')">Tolak</button>
+      </div>
+    </div>`).join('');
+  openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button onclick="closeSheet()">Tutup</button></div>
+    <div class="listcard" style="padding:0 16px">${rows}</div>`);
+}
+
+async function viewProof(path) {
+  const { data, error } = await supabaseClient.storage.from('payment-proofs').createSignedUrl(path, 600);
+  if (error || !data) return toast('Gagal membuka bukti.', false);
+  window.open(data.signedUrl, '_blank');
+}
+
+async function activateOrder(id) {
+  const { data, error } = await supabaseClient.rpc('admin_activate_order', { p_order_id: id });
+  if (error || !data || data.success === false) return toast((data && data.message) || 'Gagal mengaktifkan.', false);
+  toast('Paket diaktifkan');
+  closeSheet();
+  await loadOrder();
+  await loadDashboard();
+}
+
+async function rejectOrder(id) {
+  const { data, error } = await supabaseClient.rpc('admin_reject_order', { p_order_id: id, p_note: 'Bukti tidak valid' });
+  if (error || !data || data.success === false) return toast('Gagal menolak pesanan.', false);
+  toast('Pesanan ditolak');
+  openAdminOrders();
 }
 
 /* ---------- Akun: keamanan ---------- */
