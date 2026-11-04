@@ -17,6 +17,10 @@
   --brand:#0a3dc2; --soft:#e8edfb; --green:#12b76a; --green-bg:#dcf7ea; --green-ink:#0b8a57;
   --red-bg:#fde4e5; --red-ink:#c62d33; --amber-bg:#fdf0d5; --amber-ink:#a86a00; --blue-bg:#dbe5ff; --tag:#eef0f5; --tag-ink:#4a5263;
   --shadow:0 1px 2px rgba(12,24,60,.05), 0 8px 24px rgba(12,24,60,.04);
+  /* Skala tipografi: 8 langkah, bukan 24. */
+  --fs-caption:11px; --fs-footnote:12px; --fs-subhead:13px; --fs-body:15px;
+  --fs-headline:17px; --fs-title:20px; --fs-large:28px; --fs-display:40px;
+  --lh-body:1.45; --lh-tight:1.12;
 }
 :root[data-dark="1"]{
   --bg:#0b0f1a; --card:#151b2b; --ink:#f2f5ff; --sub:#97a0b5; --line:#242c40; --soft:#1d2a4f; --brand:#6d8bff;
@@ -55,7 +59,7 @@ input, select, textarea { font-size: 16px !important; }
 
 /* Header */
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top) + 22px) 20px 8px}
-.topbar h1{margin:0;font-size:32px;color:var(--brand);font-family:'Geist',sans-serif;font-weight:800}
+.topbar h1{margin:0;font-size:var(--fs-large);color:var(--ink);font-family:'Geist',sans-serif;font-weight:800}
 .logo{width:40px;height:40px;border-radius:12px;background:var(--brand);color:#fff;display:grid;place-items:center;font-family:'Geist',sans-serif;font-weight:800;font-size:19px}
 .ev-switch{display:flex;align-items:center;gap:6px;max-width:60vw;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--brand);font-family:inherit;font-size:12px;font-weight:600}
 .ev-switch span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -65,42 +69,44 @@ input, select, textarea { font-size: 16px !important; }
 .ev-opt small{display:block;color:var(--sub);font-size:12px;margin-top:3px}
 .ev-opt.on{border-color:var(--brand);box-shadow:0 0 0 2px var(--soft)}
 
-.page{padding:8px 16px calc(140px + env(safe-area-inset-bottom))}
-.page>*+*{margin-top:12px}
+.page{padding:8px 20px calc(140px + env(safe-area-inset-bottom))}
+.page>*+*{margin-top:16px}
+/* Jarak lebih lebar saat ganti kelompok informasi, bukan sekadar ganti kartu. */
+.page>.sec-break{margin-top:28px}
 .card{background:var(--card);border-radius:24px;padding:20px;box-shadow:var(--shadow)}
 .ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.ch h3{margin:0;font-family:'Geist',sans-serif;font-weight:700;font-size:19px}
-.link{color:var(--sub);font-size:14px;display:flex;align-items:center;gap:6px;cursor:pointer}
+.ch h3{margin:0;font-family:'Geist',sans-serif;font-weight:700;font-size:var(--fs-title)}
+.link{color:var(--sub);font-size:var(--fs-body);display:flex;align-items:center;gap:6px;cursor:pointer}
 .sub{color:var(--sub)}
 
 /* Hero */
-.hi{color:var(--sub);font-size:18px;margin:0}
-.hero h2{margin:2px 0 0;color:var(--brand);font-size:44px;line-height:1.02;font-family:'Geist',sans-serif;font-weight:800}
+.hi{color:var(--sub);font-size:var(--fs-headline);margin:0}
+.hero h2{margin:2px 0 0;color:var(--ink);font-size:var(--fs-display);line-height:1.05;letter-spacing:-.02em;font-family:'Geist',sans-serif;font-weight:800}
 .hr{height:1px;background:var(--line);margin:18px 0}
 .meta{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.meta small{color:var(--sub);font-size:14px;display:block}
-.meta b{display:block;font-weight:500;font-size:17px;line-height:1.3;margin-top:4px}
+.meta small{color:var(--sub);font-size:var(--fs-subhead);display:block}
+.meta b{display:block;font-weight:500;font-size:var(--fs-headline);line-height:1.35;margin-top:4px}
 
 /* Grid stat */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .col{display:flex;flex-direction:column;gap:12px}
 .col>.card{flex:1}
-.kpi{font-family:'Geist Mono',monospace;font-weight:600;font-size:58px;color:var(--brand);line-height:1;letter-spacing:-.02em;margin-top:18px}
-.kpi.sm{font-size:40px}
-.lbl{font-size:16px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.kpi{font-family:'Geist Mono',monospace;font-weight:600;font-size:var(--fs-display);color:var(--ink);line-height:1;letter-spacing:-.02em;margin-top:18px}
+.kpi.sm{font-size:var(--fs-display)}
+.lbl{font-size:var(--fs-headline);font-weight:600;display:flex;justify-content:space-between;align-items:center}
 .lbl svg{width:20px;height:20px;color:var(--sub)}
-.pct{border:1px solid var(--line);border-radius:12px;padding:3px 10px;font-size:14px;color:var(--sub);font-family:'Geist Mono',monospace}
-.rowk{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:15px;color:var(--sub)}
-.rowk b{font-family:'Geist Mono',monospace;font-size:22px;font-weight:600;color:var(--ink)}
+.pct{border:1px solid var(--line);border-radius:12px;padding:3px 10px;font-size:var(--fs-footnote);color:var(--sub);font-family:'Geist Mono',monospace}
+.rowk{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:var(--fs-body);color:var(--sub)}
+.rowk b{font-family:'Geist Mono',monospace;font-size:var(--fs-title);font-weight:600;color:var(--ink)}
 .hadir-top{display:flex;align-items:flex-end;gap:10px;margin-top:14px}
 
 /* Histori */
 .hl{display:flex;gap:14px;align-items:center;padding:12px 0}
 .hl+.hl{border-top:1px solid var(--line)}
 .hl .txt{flex:1;min-width:0}
-.hl .n{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hl .s{color:var(--sub);font-size:14px;margin-top:2px}
-.hl .st{font-size:13px;white-space:nowrap}
+.hl .n{font-weight:600;font-size:var(--fs-headline);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hl .s{color:var(--sub);font-size:var(--fs-subhead);margin-top:2px}
+.hl .st{font-size:var(--fs-caption);white-space:nowrap}
 
 /* Avatar Lingkaran Sempurna & Badge Tipe */
 .av {
@@ -140,8 +146,8 @@ input, select, textarea { font-size: 16px !important; }
 
 /* Status Pill Alami & Sejajar */
 .tags{display:flex;gap:4px;margin-top:6px;align-items:center;flex-wrap:wrap}
-.tag{font-size:12px;padding:4px 11px;border-radius:999px;background:var(--tag);color:var(--tag-ink);white-space:nowrap}
-.st{font-size:12px;padding:4px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;letter-spacing:-0.01em;white-space:nowrap}
+.tag{font-size:var(--fs-caption);padding:4px 11px;border-radius:999px;background:var(--tag);color:var(--tag-ink);white-space:nowrap}
+.st{font-size:var(--fs-caption);padding:4px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;letter-spacing:-0.01em;white-space:nowrap}
 .st::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
 .st.st-hadir{background:var(--green-bg);color:var(--green-ink)}
 .st.st-absen{background:var(--red-bg);color:var(--red-ink)}
@@ -150,10 +156,10 @@ input, select, textarea { font-size: 16px !important; }
 .st.st-unsent{background:var(--tag);color:var(--tag-ink)}
 
 /* Tombol Ikon Bundar Tipis */
-.ib{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card);transition:all .15s}
+.ib{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card);transition:all .15s}
 @media (hover:hover) and (pointer:fine){.ib:hover{border-color:var(--brand);color:var(--brand)}}
 .ib.sent{background:var(--green-bg);border-color:var(--green);color:var(--green-ink)}
-.ib svg{width:15px;height:15px}
+.ib svg{width:18px;height:18px}
 
 /* Check-in brand card & Switch */
 .brandcard{background:var(--brand);color:#fff}
@@ -233,8 +239,8 @@ input, select, textarea { font-size: 16px !important; }
 .tabs::-webkit-scrollbar{display:none}
 .tabs button{padding:14px 0 13px;color:var(--sub);font-weight:500;font-size:16px;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;flex-shrink:0}
 .tabs button.on{color:var(--brand);border-bottom-color:var(--brand);font-weight:600}
-.sort{display:flex;justify-content:flex-end;gap:14px;padding:12px 0 2px;font-size:14px;color:var(--sub)}
-.sort button{padding:2px 0}
+.sort{display:flex;justify-content:flex-end;gap:14px;padding:8px 0 2px;font-size:var(--fs-subhead);color:var(--sub)}
+.sort button{padding:10px 2px}
 .sort button.on{color:var(--brand);font-weight:600}
 
 /* List Item Tamu */
@@ -258,7 +264,7 @@ input, select, textarea { font-size: 16px !important; }
 /* Form */
 .field{display:flex;align-items:center;gap:12px;padding:0 4px;min-height:54px;position:relative}
 .field+.field{border-top:1px solid var(--line)}
-.field label{width:110px;flex-shrink:0;font-size:15px;color:var(--sub)}
+.field label{flex:0 0 auto;max-width:48%;font-size:var(--fs-body);color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .field input,.field select,.field textarea{flex:1;min-width:0;border:0;background:transparent;outline:none;font-size:16px;padding:14px 0;text-align:right;color:var(--ink)}
 .field select{appearance:none;-webkit-appearance:none}
 .field textarea{resize:none;text-align:left}
@@ -278,7 +284,7 @@ input, select, textarea { font-size: 16px !important; }
 
 /* Stepper Pax */
 .stepper{display:flex;align-items:center;gap:12px;margin-left:auto}
-.stepper button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-weight:600;font-size:18px;color:var(--brand)}
+.stepper button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-weight:600;font-size:var(--fs-title);color:var(--brand)}
 .stepper span{font-family:'Geist Mono',monospace;font-size:18px;font-weight:600;min-width:24px;text-align:center}
 
 /* Container floating nav */
@@ -316,8 +322,8 @@ input, select, textarea { font-size: 16px !important; }
 .sheet.open{transform:translate(-50%,0)}
 .grab{width:40px;height:5px;border-radius:99px;background:var(--line);margin:0 auto 14px}
 .sheet-head{display:flex;justify-content:space-between;align-items:center;margin:0 4px 14px}
-.sheet-head h3{margin:0;font-family:'Geist',sans-serif;font-weight:800;font-size:22px}
-.sheet-head button{color:var(--brand);font-weight:600;font-size:15px;padding:6px}
+.sheet-head h3{margin:0;font-family:'Geist',sans-serif;font-weight:800;font-size:var(--fs-title)}
+.sheet-head button{color:var(--brand);font-weight:600;font-size:var(--fs-body);min-height:44px;display:inline-flex;align-items:center;padding:0 4px}
 .sheet .listcard{padding:0 18px}
 .sheet .listcard .act{display:flex;align-items:center;gap:12px;width:100%;padding:16px 0;font-size:16px;color:var(--brand);font-weight:500}
 .sheet .listcard .act+.act{border-top:1px solid var(--line)}
@@ -443,7 +449,7 @@ html.lock{overflow:hidden}
 @media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
 
 /* ===== Multi-select filter & pagination (Tab Tamu) ===== */
-.sfbtn{position:relative;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;flex-shrink:0;background:var(--soft);color:var(--brand)}
+.sfbtn{position:relative;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex-shrink:0;background:var(--soft);color:var(--brand)}
 .sfbtn svg{width:20px;height:20px}
 .sfbtn.on{background:var(--brand);color:#fff}
 :root[data-dark="1"] .sfbtn.on{color:#0b0f1a}
@@ -483,11 +489,11 @@ html.lock{overflow:hidden}
 /* ===== Scanner Overlay & Styles ===== */
 #scanner-overlay{position:fixed;inset:0;z-index:70;background:var(--bg);overflow-y:auto;display:flex;justify-content:center}
 #scanner-overlay .topbar{display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top) + 22px) 20px 8px}
-#scanner-overlay .topbar h1{margin:0;font-size:32px;color:var(--brand);font-weight:800;letter-spacing:-.03em}
+#scanner-overlay .topbar h1{margin:0;font-size:var(--fs-large);color:var(--ink);font-weight:800;letter-spacing:-.03em}
 #scanner-overlay .topbar p{margin:2px 0 0;color:var(--sub);font-size:14px;display:flex;align-items:center;gap:6px}
 #scanner-overlay .live{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.8s infinite}
 #scanner-overlay .top-actions{display:flex;gap:8px}
-#scanner-overlay .ib{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card);transition:transform .35s var(--spring),color .25s,border-color .25s}
+#scanner-overlay .ib{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card);transition:transform .35s var(--spring),color .25s,border-color .25s}
 @media (hover:hover) and (pointer:fine){#scanner-overlay .ib:hover{border-color:var(--brand);color:var(--brand)}}
 #scanner-overlay .ib:active{transform:scale(.92)}
 #scanner-overlay .ib svg{width:18px;height:18px}
@@ -601,7 +607,7 @@ html.lock{overflow:hidden}
 .hl .when{font-family:'Geist Mono',monospace;font-size:11.5px;color:var(--sub);white-space:nowrap}
 
 /* ===== Kategori Tamu ===== */
-.addcat{width:36px;height:36px;border-radius:50%;background:var(--soft);color:var(--brand);display:grid;place-items:center;flex-shrink:0;transition:transform .3s var(--spring)}
+.addcat{width:44px;height:44px;border-radius:50%;background:var(--soft);color:var(--brand);display:grid;place-items:center;flex-shrink:0;transition:transform .3s var(--spring)}
 .addcat:active{transform:scale(.9)}
 .addcat svg{width:18px;height:18px}
 .cr .cinfo{flex:1;min-width:0}
@@ -711,15 +717,15 @@ html.lock{overflow:hidden}
 .gauge path{fill:none;stroke-width:14;stroke-linecap:butt;transition:stroke-dasharray .9s var(--ease),stroke-dashoffset .9s var(--ease)}
 .gauge .g1{stroke:var(--brand)}.gauge .g2{stroke:var(--brand);opacity:.45}.gauge .g3{stroke:var(--soft)}
 .gin{position:absolute;left:0;right:0;bottom:-16px;text-align:center}
-.gin b{display:block;font:600 40px/1 'Geist Mono',monospace;letter-spacing:-.02em;color:var(--brand)}
-.gin small{display:block;margin-top:4px;font-size:14px;color:var(--sub)}
+.gin b{display:block;font:600 var(--fs-display)/1 'Geist Mono',monospace;letter-spacing:-.02em;color:var(--ink)}
+.gin small{display:block;margin-top:4px;font-size:var(--fs-subhead);color:var(--sub)}
 .drows{margin-top:auto;padding-top:10px}
-.drow{display:flex;align-items:center;gap:8px;width:100%;padding:12px 0;border-top:1px solid var(--line);font-size:15px;text-align:left}
+.drow{display:flex;align-items:center;gap:8px;width:100%;padding:12px 0;border-top:1px solid var(--line);font-size:var(--fs-body);text-align:left}
 .drow .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;background:var(--brand)}
 .drow .dot.c2{opacity:.45}.drow .dot.c3{background:var(--soft);box-shadow:inset 0 0 0 1px var(--line)}
-.drow .pc{color:var(--sub);font-size:14px;min-width:36px}
+.drow .pc{color:var(--sub);font-size:var(--fs-footnote);min-width:36px}
 .drow .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.drow b{font:600 16px 'Geist Mono',monospace;color:var(--ink)}
+.drow b{font:600 var(--fs-headline) 'Geist Mono',monospace;color:var(--ink)}
 .hcol{display:flex;flex-direction:column;gap:12px;min-width:0}
 .hcol .hadir{flex:1;display:flex;flex-direction:column}
 .hcol .hadir .hadir-top{flex-wrap:wrap;gap:8px 10px}
@@ -857,7 +863,7 @@ html.lock{overflow:hidden}
 
     <!-- TAB HOME -->
     <div id="tab-home">
-      <header class="topbar"><h1>Home</h1><div style="display:flex;align-items:center;gap:10px"><button class="ev-switch" id="ev-switch" onclick="openEventSwitcher()" hidden><span id="ev-switch-name">Acara</span><i data-lucide="chevrons-up-down"></i></button><span class="logo">R</span></div></header>
+      <header class="topbar"><h1>Beranda</h1><div style="display:flex;align-items:center;gap:10px"><button class="ev-switch" id="ev-switch" onclick="openEventSwitcher()" hidden><span id="ev-switch-name">Acara</span><i data-lucide="chevrons-up-down"></i></button><span class="logo">R</span></div></header>
       <div class="page">
         <button class="wbanner hidden" id="wish-banner" onclick="focusWishes()"><i data-lucide="bell-ring"></i><span id="wb-text">Ucapan baru</span><b>Lihat</b></button>
         <div class="card hero">
@@ -891,7 +897,7 @@ html.lock{overflow:hidden}
         <div class="grid2 hgrid">
           <div class="card und">
             <div class="lbl">Total <i data-lucide="mail"></i></div>
-            <div class="gauge" role="img" aria-label="Perbandingan undangan cetak, digital, dan sisa kuota">
+            <div class="gauge" role="img" aria-label="Perbandingan undangan cetak dan digital">
               <svg viewBox="0 0 120 62" aria-hidden="true">
                 <path class="g3" id="ud-s3" pathLength="100" d="M10 60A50 50 0 0 1 110 60"/>
                 <path class="g2" id="ud-s2" pathLength="100" d="M10 60A50 50 0 0 1 110 60" stroke-dasharray="0 200"/>
@@ -902,7 +908,6 @@ html.lock{overflow:hidden}
             <div class="drows">
               <div class="drow"><i class="dot c1"></i><span class="pc" id="pc-cetak">0%</span><span class="nm">Cetak</span><b id="stat-cetak">0</b></div>
               <div class="drow"><i class="dot c2"></i><span class="pc" id="pc-digital">0%</span><span class="nm">Digital</span><b id="stat-digital">0</b></div>
-              <div class="drow"><i class="dot c3"></i><span class="pc" id="pc-sisa">0%</span><span class="nm">Sisa Kuota</span><b id="stat-kuota">0</b></div>
             </div>
           </div>
           <div class="hcol">
@@ -913,15 +918,10 @@ html.lock{overflow:hidden}
               <div class="rowk"><span>Absen</span><b id="stat-absen">0</b></div>
             </div>
             <div class="card pcard">
-              <div class="prow"><span class="pt">Pending</span><b id="stat-pending">0</b></div>
+              <div class="prow"><span class="pt">Belum RSVP</span><b id="stat-pending">0</b></div>
               <div class="pun"><span>Belum dikirim</span><b id="stat-unsent">0</b></div>
             </div>
           </div>
-        </div>
-
-        <div class="card">
-          <div class="ch"><h3>Histori RSVP</h3><button class="link" onclick="showAllRecent()">Lihat semua <i data-lucide="circle-arrow-right"></i></button></div>
-          <div id="recent-rsvp-list"></div>
         </div>
 
         <!-- CARD BIRU STATISTIK -->
@@ -959,16 +959,15 @@ html.lock{overflow:hidden}
               <div class="side">
                 <div class="sr"><span>Est. Tamu</span><b id="rsvp-est-pax">0</b></div>
                 <div class="sr"><span>Absen</span><b id="rsvp-stat-absen">0</b></div>
-                <div class="sr"><span>Pending</span><b id="rsvp-stat-pending">0</b></div>
+                <div class="sr"><span>Belum RSVP</span><b id="rsvp-stat-pending">0</b></div>
               </div>
             </div>
           </div>
         </div>
 
         <div class="card">
-          <div class="ch"><h3>Kategori Tamu</h3><button class="addcat" onclick="addCategory()" aria-label="Tambah kategori" title="Tambah kategori"><i data-lucide="plus"></i></button></div>
-          <div id="cat-gauge"></div>
-          <div id="cat-group"></div>
+          <div class="ch"><h3>Riwayat RSVP</h3><button class="link" onclick="showAllRecent()">Lihat semua <i data-lucide="circle-arrow-right"></i></button></div>
+          <div id="recent-rsvp-list"></div>
         </div>
 
         <!-- SECTION WISHES / UCAPAN & DOA (chat room) -->
@@ -1017,6 +1016,12 @@ html.lock{overflow:hidden}
           <div class="qt"><span style="font-weight:600">Kuota Tamu</span><b><span id="quota-used">0</span>/<span id="quota-max">100</span></b></div>
           <div class="bar"><i id="quota-bar"></i></div>
         </div>
+
+        <div class="card">
+          <div class="ch"><h3>Kategori Tamu</h3><button class="addcat" onclick="addCategory()" aria-label="Tambah kategori" title="Tambah kategori"><i data-lucide="plus"></i></button></div>
+          <div id="cat-gauge"></div>
+          <div id="cat-group"></div>
+        </div>
       </div>
     </div>
 
@@ -1027,6 +1032,7 @@ html.lock{overflow:hidden}
         <div class="tabs" id="acara-subtabs" role="tablist" style="padding:0 4px">
           <button class="on" role="tab" aria-selected="true" data-sub="profil" onclick="switchAcaraSub('profil')">Profil Acara</button>
           <button role="tab" aria-selected="false" data-sub="wa" onclick="switchAcaraSub('wa')">Pesan WhatsApp<i class="dotmark" id="wa-dirty" hidden></i></button>
+          <button role="tab" aria-selected="false" data-sub="petugas" onclick="switchAcaraSub('petugas')">Petugas</button>
         </div>
 
         <!-- Sub-tab 1: Profil acara -->
@@ -1051,7 +1057,10 @@ html.lock{overflow:hidden}
           <div class="card" style="padding:4px 18px"><div class="field col"><label for="ev-caption">Pesan pembuka</label><textarea id="ev-caption" rows="4" required></textarea></div>
             <div class="sub" style="font-size:12px;padding:0 4px 12px">Tampil di halaman undangan tamu, bukan di pesan WhatsApp.</div></div>
           <button type="submit" id="btn-save-event" class="btn">Simpan profil acara</button>
+        </form>
 
+        <!-- Sub-tab 3: Petugas -->
+        <div id="petugas-pane" class="subpane hidden">
           <div class="card" style="padding:16px 18px">
             <div class="ch" style="margin-bottom:6px"><h3>Kode Petugas</h3></div>
             <div class="sub" style="font-size:13px;margin-bottom:12px">Bagikan kode ini ke petugas pintu masuk. Petugas hanya bisa melihat daftar tamu dan check-in. Tidak bisa mengubah data, tidak bisa melihat nomor WhatsApp tamu.</div>
@@ -1063,7 +1072,7 @@ html.lock{overflow:hidden}
             </div>
             <div class="sub" style="font-size:12px;margin-top:10px">Mengganti kode langsung mematikan kode lama. Petugas perlu memasukkan kode baru.</div>
           </div>
-        </form>
+        </div>
 
         <!-- Sub-tab 2: Template WhatsApp -->
         <div id="wa-pane" class="subpane hidden">
@@ -1114,7 +1123,20 @@ html.lock{overflow:hidden}
           </div>
         </div>
 
-        <button class="btn line" onclick="logout()">Keluar dari Akun</button>
+        <div class="card" style="padding:4px 18px">
+          <div class="field" role="button" tabindex="0" style="cursor:pointer" onclick="openChangePassword()" onkeydown="if(event.key==='Enter'||event.key===' ')openChangePassword()">
+            <label>Password</label>
+            <span class="ro-val">••••••••</span>
+            <i data-lucide="chevron-right" style="width:18px;height:18px;color:var(--sub)"></i>
+          </div>
+          <div class="field" role="button" tabindex="0" style="cursor:pointer" onclick="openEditPhone()" onkeydown="if(event.key==='Enter'||event.key===' ')openEditPhone()">
+            <label>Nomor WhatsApp</label>
+            <span class="ro-val" id="akun-phone">Belum diisi</span>
+            <i data-lucide="chevron-right" style="width:18px;height:18px;color:var(--sub)"></i>
+          </div>
+        </div>
+
+        <button class="btn line" style="color:var(--red-ink)" onclick="logout()">Keluar dari Akun</button>
       </div>
     </div>
   </section>
@@ -1124,7 +1146,7 @@ html.lock{overflow:hidden}
 <div class="nav-container-wrap hidden" id="nav-container-wrap">
   <nav class="tabbar" id="tabbar">
     <div class="pillnav">
-      <button id="nav-home" class="on" onclick="switchTab('home')"><i data-lucide="house"></i><span>Home</span><b class="nbadge hidden" id="nav-home-badge"></b></button>
+      <button id="nav-home" class="on" onclick="switchTab('home')"><i data-lucide="house"></i><span>Beranda</span><b class="nbadge hidden" id="nav-home-badge"></b></button>
       <button id="nav-tamu" onclick="switchTab('tamu')"><i data-lucide="users"></i><span>Tamu</span></button>
       <button id="nav-acara" onclick="switchTab('acara')"><i data-lucide="calendar-days"></i><span>Acara</span></button>
       <button id="nav-akun" onclick="switchTab('akun')"><i data-lucide="user"></i><span>Akun</span></button>
@@ -1293,7 +1315,7 @@ let html5QrCode = null;
 // State untuk Ucapan & Doa
 let wishesData = [], wishesTotal = 0, wishesDone = false, wishesBusy = false, wishInit = false;
 let wishSnap = null, wishUnread = 0, wishVisible = false, wishReadTimer = null;
-const WISH_FETCH = 10, WISH_PREVIEW = 5;
+const WISH_FETCH = 10, WISH_PREVIEW = 3;
 
 const COLORS = ['#0a3dc2','#12b76a','#f5a524','#e5484d','#7c5cff','#0ea5e9','#ec4899'];
 const $ = id => document.getElementById(id);
@@ -1669,11 +1691,11 @@ async function pickEvent(id) {
 }
 
 const guestBadge = g => {
-  if (g.is_checked_in) return ['checked', 'Checked-in'];
+  if (g.is_checked_in) return ['checked', 'Sudah masuk'];
   if (g.rsvp_status === 'hadir') return ['hadir', 'Hadir'];
   if (g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen') return ['absen', 'Absen'];
-  if (g.is_sent) return ['pending', 'Pending'];
-  return ['unsent', 'Unsent'];
+  if (g.is_sent) return ['pending', 'Belum RSVP'];
+  return ['unsent', 'Belum dikirim'];
 };
 
 const avatar = g => {
@@ -1890,7 +1912,7 @@ function renderPlanCard(event, stats) {
     badge.classList.add('ok');
     note.textContent = exp
       ? 'Aktif sampai ' + formatTanggal(event.expires_at) + '. RSVP dan check-in tetap berjalan.'
-      : 'Aktif tanpa batas waktu (akun lama).';
+      : 'Aktif tanpa batas waktu.';
   }
 }
 
@@ -1921,6 +1943,8 @@ function renderUI() {
   $('account-name').textContent = client.name;
   $('account-slug').textContent = client.email || 'Email belum diisi';
   $('account-avatar').textContent = initials(client.name);
+  const phEl = $('akun-phone');
+  if (phEl) phEl.textContent = client.phone ? String(client.phone).replace(/^62/, '0') : 'Belum diisi';
 
   const d = new Date(event.event_date);
   $('ev-date-txt').innerHTML = esc(d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long' })) + '<br>' + d.getFullYear();
@@ -1955,17 +1979,17 @@ function renderUI() {
   $('hero-hadir').textContent = hadirGroupsCount;
   $('hero-est-pax').textContent = totalHadirPax;
 
-  // Gauge setengah lingkaran: Cetak, Digital, Sisa kuota (basis = kuota)
-  const sisa = Math.max(0, maxQuota - totalGuestsCount);
-  const gsum = (totalCetak + totalDigital + sisa) || 1;
-  const gl = [totalCetak, totalDigital, sisa].map(n => n / gsum * 100);
+  // Gauge setengah lingkaran: komposisi cetak vs digital (basis = total tamu,
+  // bukan kuota — kuota punya kartunya sendiri di tab Tamu).
+  const gsum = (totalCetak + totalDigital) || 1;
+  const gl = [totalCetak, totalDigital].map(n => n / gsum * 100);
   let gstart = 0;
-  ['ud-s1', 'ud-s2', 'ud-s3'].forEach((id, i) => {
-    const el = $(id); el.setAttribute('stroke-dasharray', `${gl[i]} 200`); el.setAttribute('stroke-dashoffset', -gstart); gstart += gl[i];
+  [['ud-s1', gl[0]], ['ud-s2', gl[1]], ['ud-s3', 0]].forEach(([id, v]) => {
+    const el = $(id); el.setAttribute('stroke-dasharray', `${v} 200`); el.setAttribute('stroke-dashoffset', -gstart); gstart += v;
   });
   $('stat-total').textContent = totalGuestsCount;
-  $('stat-cetak').textContent = totalCetak; $('stat-digital').textContent = totalDigital; $('stat-kuota').textContent = sisa;
-  $('pc-cetak').textContent = Math.round(gl[0]) + '%'; $('pc-digital').textContent = Math.round(gl[1]) + '%'; $('pc-sisa').textContent = Math.round(gl[2]) + '%';
+  $('stat-cetak').textContent = totalCetak; $('stat-digital').textContent = totalDigital;
+  $('pc-cetak').textContent = Math.round(gl[0]) + '%'; $('pc-digital').textContent = Math.round(gl[1]) + '%';
 
   $('stat-absen').textContent = countAbsen;
   $('stat-pending').textContent = countPending;
@@ -2535,6 +2559,65 @@ async function saveUpgradePhone() {
   window.open(upgradeWaUrl(), '_blank');
 }
 
+/* ---------- Akun: keamanan ---------- */
+function openChangePassword() {
+  openSheet(`
+    <div class="sheet-head"><h3>Ganti password</h3><button onclick="closeSheet()">Batal</button></div>
+    <div class="listcard" style="padding:0 18px">
+      <div class="field"><label for="cp-new">Password baru</label><input type="password" id="cp-new" minlength="8" placeholder="Minimal 8 karakter" autocomplete="new-password" /></div>
+      <div class="field"><label for="cp-again">Ulangi</label><input type="password" id="cp-again" minlength="8" placeholder="Ketik ulang" autocomplete="new-password" /></div>
+    </div>
+    <p class="login-err" id="cp-err" role="alert" style="padding:0 4px"></p>
+    <button class="btn" id="cp-save" onclick="savePasswordSheet()">Simpan password</button>
+  `);
+}
+
+async function savePasswordSheet() {
+  const btn = $('cp-save'), err = $('cp-err');
+  const p1 = $('cp-new').value, p2 = $('cp-again').value;
+  err.textContent = '';
+  if (p1.length < 8) { err.textContent = 'Password minimal 8 karakter.'; return; }
+  if (p1 !== p2) { err.textContent = 'Kedua password belum sama.'; return; }
+  btn.disabled = true; btn.textContent = 'Menyimpan…';
+  const { error } = await supabaseClient.auth.updateUser({ password: p1 });
+  btn.disabled = false; btn.textContent = 'Simpan password';
+  if (error) {
+    err.textContent = /same|weak|password/i.test(error.message)
+      ? 'Password terlalu lemah atau sama dengan yang lama.'
+      : 'Gagal menyimpan password. Coba lagi.';
+    return;
+  }
+  closeSheet();
+  toast('Password diperbarui');
+}
+
+function openEditPhone() {
+  const phone = (globalData && globalData.client && globalData.client.phone) || '';
+  openSheet(`
+    <div class="sheet-head"><h3>Nomor WhatsApp</h3><button onclick="closeSheet()">Batal</button></div>
+    <div class="listcard" style="padding:0 18px">
+      <div class="field"><label for="ph-input">Nomor</label><input type="tel" id="ph-input" inputmode="tel" placeholder="08123456789" value="${esc(phone)}" /></div>
+    </div>
+    <p class="sub" style="font-size:13px;padding:4px 4px 10px">Dipakai untuk bantuan dan saat upgrade paket. Tidak ditampilkan ke tamu.</p>
+    <p class="login-err" id="ph-err" role="alert" style="padding:0 4px"></p>
+    <button class="btn" onclick="savePhoneSheet()">Simpan</button>
+  `);
+}
+
+async function savePhoneSheet() {
+  const err = $('ph-err');
+  const raw = $('ph-input').value.trim();
+  const phone = normalizePhone(raw);
+  err.textContent = '';
+  if (raw && !phone) { err.textContent = 'Nomor WhatsApp tidak valid. Contoh: 08123456789.'; return; }
+  const { error } = await supabaseClient.from('clients').update({ phone: phone || null }).eq('id', globalData.client.id);
+  if (error) { err.textContent = 'Gagal menyimpan nomor. Coba lagi.'; return; }
+  globalData.client.phone = phone || null;
+  $('akun-phone').textContent = phone || 'Belum diisi';
+  closeSheet();
+  toast(phone ? 'Nomor WhatsApp disimpan' : 'Nomor WhatsApp dihapus');
+}
+
 function normalizeSlug(v) {
   return String(v || '').toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
@@ -2583,6 +2666,7 @@ function switchAcaraSub(sub) {
   });
   $('event-form').classList.toggle('hidden', sub !== 'profil');
   $('wa-pane').classList.toggle('hidden', sub !== 'wa');
+  $('petugas-pane').classList.toggle('hidden', sub !== 'petugas');
   if (sub === 'wa') renderWaEditor();
 }
 
@@ -3397,7 +3481,7 @@ checkSession();
   const head = document.createElement('div'); head.className = 'sticky-head';
   const sb = document.querySelector('#tab-tamu .sbar'); head.append(sb);
   const gcard = document.querySelector('#tab-tamu .listcard.gcard'); if (gcard) gcard.before(head); else document.querySelector('#tab-tamu .page').prepend(head);
-  const STAT = [['all', 'All'], ['unsent', 'Unsent'], ['pending', 'Pending'], ['hadir', 'Hadir'], ['checked_in', 'Check-in'], ['tidak_hadir', 'Absen']];
+  const STAT = [['all', 'Semua'], ['unsent', 'Belum dikirim'], ['pending', 'Belum RSVP'], ['hadir', 'Hadir'], ['checked_in', 'Sudah masuk'], ['tidak_hadir', 'Absen']];
   const SORT_HTML = '<div class="sortpill" id="sort-pill"><label class="sp-sel"><select id="sort-field" aria-label="Urutkan berdasarkan"><option value="name">Nama</option><option value="updated">Diubah</option><option value="created">Dibuat</option></select></label><button type="button" id="sort-dir"></button></div>';
   head.insertAdjacentHTML('beforeend', '<div class="chiprow"><div class="chips" id="st-chips">' + STAT.map(([k, l]) => `<button class="chip" data-f="${k}">${l}</button>`).join('') + '</div>' + SORT_HTML + '</div>');
   const syncSort = () => {
