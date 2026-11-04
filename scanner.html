@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
 <meta name="theme-color" content="#f4f5f8" id="meta-theme" />
 <title>Scanner Check-in - RayaRayu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -30,9 +30,11 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:'Geist',Inter,-a
 button,input,select,textarea{font:inherit;color:inherit}
 button{background:none;border:0;padding:0;cursor:pointer;text-align:left}
 input{background:transparent}
+button,a,[role="button"]{touch-action:manipulation}
+button,[role="button"]{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,select,textarea{font-size:16px!important}
 .hidden{display:none!important}
-#app{width:100%;max-width:480px;min-height:100vh;position:relative}
+#app{width:100%;max-width:480px;min-height:100vh;min-height:100dvh;position:relative}
 svg.lucide{width:1.15em;height:1.15em;stroke-width:1.8}
 html.lock{overflow:hidden}
 
@@ -43,7 +45,7 @@ html.lock{overflow:hidden}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(18,183,106,.6)}70%{box-shadow:0 0 0 8px rgba(18,183,106,0)}100%{box-shadow:0 0 0 0 rgba(18,183,106,0)}}
 .top-actions{display:flex;gap:8px}
 .ib{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card);transition:transform .35s var(--spring),color .25s,border-color .25s}
-.ib:hover{border-color:var(--brand);color:var(--brand)}
+@media (hover:hover) and (pointer:fine){.ib:hover{border-color:var(--brand);color:var(--brand)}}
 .ib:active{transform:scale(.92)}
 .ib svg{width:18px;height:18px}
 .ib.spin svg{animation:spin .8s linear infinite}

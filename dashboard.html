@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
 <meta name="theme-color" content="#f4f5f8" id="meta-theme" />
 <title>Dashboard Klien - RayaRayu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -24,13 +24,16 @@
   --shadow:none;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{background:var(--bg)}
+html{background:var(--bg);overscroll-behavior-y:contain}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:'Geist',Inter,-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;display:flex;justify-content:center}
 button,input,select,textarea{font:inherit;color:inherit}
 button{background:none;border:0;padding:0;cursor:pointer;text-align:left}
 input{background:transparent}
+/* Kontrol tidak boleh ikut ter-highlight atau tersorot saat disentuh. */
+button,a,[role="button"]{touch-action:manipulation}
+button,[role="button"]{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .hidden{display:none!important}
-#app{width:100%;max-width:480px;min-height:100vh;position:relative}
+#app{width:100%;max-width:480px;min-height:100vh;min-height:100dvh;position:relative}
 svg.lucide{width:1.15em;height:1.15em;stroke-width:1.8}
 .display{font-family:'Geist',sans-serif;font-weight:800;letter-spacing:-.02em}
 .num{font-family:'Geist Mono',monospace;font-weight:600;letter-spacing:-.01em}
@@ -148,7 +151,7 @@ input, select, textarea { font-size: 16px !important; }
 
 /* Tombol Ikon Bundar Tipis */
 .ib{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card);transition:all .15s}
-.ib:hover{border-color:var(--brand);color:var(--brand)}
+@media (hover:hover) and (pointer:fine){.ib:hover{border-color:var(--brand);color:var(--brand)}}
 .ib.sent{background:var(--green-bg);border-color:var(--green);color:var(--green-ink)}
 .ib svg{width:15px;height:15px}
 
@@ -328,7 +331,7 @@ input, select, textarea { font-size: 16px !important; }
 .toast.show{transform:translate(-50%,0)}
 
 /* Login */
-#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+#login{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
 #login .card{width:100%;max-width:420px;padding:28px}
 #login .logo{width:56px;height:56px;border-radius:16px;font-size:26px;margin-bottom:18px}
 #login h1{margin:0;font-family:'Geist',sans-serif;font-weight:800;font-size:30px;color:var(--brand)}
@@ -402,7 +405,7 @@ html.lock{overflow:hidden}
 .auth-foot{margin:-4px 2px 14px;text-align:right}
 .authlink{background:none;border:0;padding:0;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--brand);cursor:pointer}
 .authlink.muted{color:var(--sub);font-weight:500}
-.authlink:hover{text-decoration:underline}
+@media (hover:hover) and (pointer:fine){.authlink:hover{text-decoration:underline}}
 .shake{animation:shake .45s var(--ease)}
 @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
 
@@ -485,7 +488,7 @@ html.lock{overflow:hidden}
 #scanner-overlay .live{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.8s infinite}
 #scanner-overlay .top-actions{display:flex;gap:8px}
 #scanner-overlay .ib{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card);transition:transform .35s var(--spring),color .25s,border-color .25s}
-#scanner-overlay .ib:hover{border-color:var(--brand);color:var(--brand)}
+@media (hover:hover) and (pointer:fine){#scanner-overlay .ib:hover{border-color:var(--brand);color:var(--brand)}}
 #scanner-overlay .ib:active{transform:scale(.92)}
 #scanner-overlay .ib svg{width:18px;height:18px}
 #scanner-overlay .ib.spin svg{animation:spin .8s linear infinite}
@@ -2404,8 +2407,8 @@ function copyOrShow(text, label = 'Tautan pratinjau', okMsg) {
   const fallback = () => {
     const long = String(text).length > 80 || String(text).includes('\n');
     const field = long
-      ? `<textarea id="copy-manual" readonly rows="6" style="width:100%;font-family:inherit;font-size:13px;line-height:1.5;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink);resize:none" onclick="this.select()">${esc(text)}</textarea>`
-      : `<input type="text" id="copy-manual" readonly value="${esc(text)}" style="width:100%;font-family:inherit;font-size:13px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink)" onclick="this.select()" />`;
+      ? `<textarea id="copy-manual" readonly rows="6" style="width:100%;font-family:inherit;font-size:16px;line-height:1.5;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink);resize:none" onclick="this.select()">${esc(text)}</textarea>`
+      : `<input type="text" id="copy-manual" readonly value="${esc(text)}" style="width:100%;font-family:inherit;font-size:16px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink)" onclick="this.select()" />`;
     openSheet(`
       <div class="sheet-head"><h3>${esc(label)}</h3><button onclick="closeSheet()">Tutup</button></div>
       <div class="listcard" style="padding:16px">
@@ -3456,10 +3459,10 @@ checkSession();
   ['email', 'password'].forEach(id => $(id).addEventListener('input', () => { $('login-err').textContent = ''; }));
   window.loginFail = m => { $('login-err').textContent = /invalid/i.test(m) ? 'Email atau password tidak cocok.' : m; const g = document.querySelector('#login-form .group'); g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake'); };
 
-  const s = $('sheet'); let y0 = null, dy = 0;
-  s.addEventListener('pointerdown', e => { if (e.target.closest('.grab, .sheet-head') && !e.target.closest('button')) { y0 = e.clientY; dy = 0; s.style.transition = 'none'; s.setPointerCapture(e.pointerId); } });
-  s.addEventListener('pointermove', e => { if (y0 === null) return; dy = Math.max(0, e.clientY - y0); s.style.transform = `translate(-50%,${dy}px)`; });
-  const end = () => { if (y0 === null) return; s.style.transition = ''; s.style.transform = ''; if (dy > 110) closeSheet(); y0 = null; };
+  const s = $('sheet'); let y0 = null, dy = 0, lastY = 0, lastT = 0, vy = 0;
+  s.addEventListener('pointerdown', e => { if (e.target.closest('.grab, .sheet-head') && !e.target.closest('button')) { y0 = e.clientY; dy = 0; vy = 0; lastY = e.clientY; lastT = performance.now(); s.style.transition = 'none'; s.setPointerCapture(e.pointerId); } });
+  s.addEventListener('pointermove', e => { if (y0 === null) return; const now = performance.now(), dt = now - lastT; if (dt > 0) { vy = (e.clientY - lastY) / dt * 1000; lastY = e.clientY; lastT = now; } dy = Math.max(0, e.clientY - y0); s.style.transform = `translate(-50%,${dy}px)`; });
+  const end = () => { if (y0 === null) return; s.style.transition = ''; s.style.transform = ''; if (dy > 110 || vy > 650) closeSheet(); y0 = null; vy = 0; };
   s.addEventListener('pointerup', end); s.addEventListener('pointercancel', end);
 } catch (err) { console.warn('dashboard-ui:', err); } })();
 </script>
