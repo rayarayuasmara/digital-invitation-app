@@ -364,6 +364,9 @@
       letter-spacing: .01em;
     }
     .rr-preview b { font-weight: 600; }
+    .is-preview .app { padding-top: var(--rr-preview-h, 44px); }
+    /* Sampul diposisikan fixed, jadi padding .app tidak menggesernya. */
+    .is-preview #cover { top: var(--rr-preview-h, 44px); height: calc(100dvh - var(--rr-preview-h, 44px)); }
     .is-preview .cover-guest::after { content: " · pratinjau"; opacity: .6; }
     .is-preview #rsvp-submit, .is-preview #pax-minus, .is-preview #pax-plus,
     .is-preview #wish-form, .is-preview #rsvp-edit { opacity: .45; pointer-events: none; }
@@ -1321,6 +1324,17 @@ function applyEntitlements(g) {
 function applyPreviewMode() {
   document.body.classList.add('is-preview');
   $('rr-preview').hidden = false;
+  // Banner-nya fixed, jadi dorong isi undangan setinggi banner supaya
+  // label "Undangan Pernikahan" di atas sampul tidak tertutup.
+  // ResizeObserver dipakai karena tinggi banner berubah saat font selesai
+  // dimuat atau saat teks membungkus di layar sempit.
+  const rp = $('rr-preview');
+  const syncBanner = () => {
+    document.documentElement.style.setProperty('--rr-preview-h', rp.offsetHeight + 'px');
+  };
+  syncBanner();
+  if (window.ResizeObserver) new ResizeObserver(syncBanner).observe(rp);
+  else addEventListener('resize', syncBanner);
   $('ticket-section').hidden = true;
   const submit = $('rsvp-submit'); if (submit) submit.disabled = true;
   const edit = $('rsvp-edit'); if (edit) edit.disabled = true;

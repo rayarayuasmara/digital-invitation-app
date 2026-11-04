@@ -871,16 +871,16 @@ html.lock{overflow:hidden}
           <div class="prow2">
             <div>
               <div class="lbl" style="margin-bottom:4px">Paket</div>
-              <b id="plan-name">Free</b>
+              <b id="plan-name">…</b>
             </div>
-            <span class="pbadge" id="plan-status">Draf</span>
+            <span class="pbadge" id="plan-status">Memuat</span>
           </div>
-          <p class="pnote" id="plan-expiry">Undangan belum diterbitkan. Tamu belum bisa membuka tautan.</p>
+          <p class="pnote" id="plan-expiry">Memuat data paket…</p>
           <div class="pacts" id="publish-row">
             <button class="btn" id="btn-publish" type="button" onclick="publishEvent()">Terbitkan undangan</button>
           </div>
           <div class="pacts">
-            <a class="btn line" id="btn-preview" href="#" target="_blank" rel="noopener">Pratinjau</a>
+            <a class="btn line hidden" id="btn-preview" href="#" target="_blank" rel="noopener">Pratinjau</a>
             <a class="btn line" id="btn-upgrade" href="#" onclick="openUpgrade(); return false;">Upgrade</a>
           </div>
         </div>
@@ -2371,13 +2371,8 @@ function handleFabClick() {
     // Tautan undangan selalu per tamu. Yang bisa dibagikan bebas adalah
     // tautan pratinjau (token acara, nama tamu placeholder).
     const preview = previewLink();
-    if (preview) {
-      navigator.clipboard.writeText(preview)
-        .then(() => toast('Tautan pratinjau disalin'))
-        .catch(() => toast('Gagal menyalin tautan', false));
-    } else {
-      toast('Tautan pratinjau belum siap. Muat ulang halaman.', false);
-    }
+    if (preview) copyOrShow(preview);
+    else toast('Tautan pratinjau belum siap. Muat ulang halaman.', false);
   } else if (currentActiveTab === 'akun') {
     openSheet(`
       <div class="sheet-head"><h3>Panduan Singkat</h3><button onclick="closeSheet()">Tutup</button></div>
@@ -2400,6 +2395,30 @@ const previewLink = () => {
   return `${window.location.origin}/pratinjau/${ev.slug || ''}/${ev.preview_token}`;
 };
 const guestLink = g => `${window.location.origin}/${eventSlug()}/${g.invitation_token}`;
+
+// Clipboard bisa ditolak browser (bukan HTTPS, izin dicabut, atau tab
+// tidak fokus). Jangan cuma bilang "gagal" — tampilkan tautannya supaya
+// pengguna tetap bisa menyalin manual.
+function copyOrShow(text, label = 'Tautan pratinjau', okMsg) {
+  const done = () => toast(okMsg || label + ' disalin');
+  const fallback = () => {
+    const long = String(text).length > 80 || String(text).includes('\n');
+    const field = long
+      ? `<textarea id="copy-manual" readonly rows="6" style="width:100%;font-family:inherit;font-size:13px;line-height:1.5;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink);resize:none" onclick="this.select()">${esc(text)}</textarea>`
+      : `<input type="text" id="copy-manual" readonly value="${esc(text)}" style="width:100%;font-family:inherit;font-size:13px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink)" onclick="this.select()" />`;
+    openSheet(`
+      <div class="sheet-head"><h3>${esc(label)}</h3><button onclick="closeSheet()">Tutup</button></div>
+      <div class="listcard" style="padding:16px">
+        <p style="margin:0 0 12px;font-size:13.5px;color:var(--sub);line-height:1.55">
+          Browser menolak menyalin otomatis. Tekan lama lalu pilih Semua &amp; Salin.
+        </p>
+        ${field}
+        <button class="btn" style="margin-top:12px" onclick="closeSheet()">Tutup</button>
+      </div>`);
+  };
+  if (!navigator.clipboard || !navigator.clipboard.writeText) return fallback();
+  navigator.clipboard.writeText(text).then(done).catch(fallback);
+}
 
 function normalizePhone(v) {
   let d = String(v || '').replace(/[^0-9]/g, '');
@@ -2696,8 +2715,8 @@ function openGuestActions(id) {
 
 async function guestAction(a, g) {
   if (a === 'copy') {
-    navigator.clipboard.writeText(guestLink(g)).then(() => toast('Tautan disalin'), () => toast('Gagal menyalin tautan', false));
     closeSheet();
+    copyOrShow(guestLink(g), 'Tautan tamu');
   } else if (a === 'wa') {
     if (g.invitation_type === 'cetak') return toast('Undangan cetak tidak dikirim lewat WhatsApp.', false);
     await markGuestSent(g);
@@ -2717,11 +2736,10 @@ async function guestAction(a, g) {
       }
       toast('Membuka WhatsApp…');
     } else {
-      navigator.clipboard.writeText(message).then(() => {
-        toast('Nomor WA kosong. Pesan & tautan disalin!');
-      }, () => {
-        toast('Gagal menyalin teks', false);
-      });
+      closeSheet();
+      loadDashboard();
+      copyOrShow(message, 'Pesan WhatsApp', 'Nomor WA kosong. Pesan & tautan disalin!');
+      return;
     }
     
     closeSheet();
@@ -2756,11 +2774,10 @@ async function sendPendingWA(id) {
     }
     toast('Membuka WhatsApp…');
   } else {
-    navigator.clipboard.writeText(message).then(() => {
-      toast('Nomor WA kosong. Pesan & tautan disalin!');
-    }, () => {
-      toast('Gagal menyalin teks', false);
-    });
+    closeSheet();
+    loadDashboard();
+    copyOrShow(message, 'Pesan WhatsApp', 'Nomor WA kosong. Pesan & tautan disalin!');
+    return;
   }
   
   closeSheet();
