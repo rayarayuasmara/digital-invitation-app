@@ -17,6 +17,7 @@
   --brand:#0a3dc2; --soft:#e8edfb; --green:#12b76a; --green-bg:#dcf7ea; --green-ink:#0b8a57;
   --red-bg:#fde4e5; --red-ink:#c62d33; --amber-bg:#fdf0d5; --amber-ink:#a86a00; --blue-bg:#dbe5ff; --tag:#eef0f5; --tag-ink:#4a5263;
   --shadow:0 1px 2px rgba(12,24,60,.05), 0 8px 24px rgba(12,24,60,.04);
+  --field-border:#c9cdd6; --field-bg:#ffffff;
   /* Skala tipografi: 8 langkah, bukan 24. */
   --fs-caption:11px; --fs-footnote:12px; --fs-subhead:13px; --fs-body:15px;
   --fs-headline:17px; --fs-title:20px; --fs-large:28px; --fs-display:40px;
@@ -24,6 +25,7 @@
 }
 :root[data-dark="1"]{
   --bg:#0b0f1a; --card:#151b2b; --ink:#f2f5ff; --sub:#97a0b5; --line:#242c40; --soft:#1d2a4f; --brand:#6d8bff;
+  --field-border:#3b4459; --field-bg:#151b2b;
   --green-bg:#0f3a2a; --green-ink:#4ade9a; --red-bg:#3d1d22; --red-ink:#ff8b90; --amber-bg:#3d300f; --amber-ink:#ffc865; --blue-bg:#1b2a57; --tag:#222a3f; --tag-ink:#c3cadb;
   --shadow:none;
 }
@@ -262,15 +264,17 @@ input, select, textarea { font-size: 16px !important; }
 .bar i{display:block;height:100%;width:0;background:var(--green);border-radius:99px;transition:width .6s}
 
 /* Form */
-.field{display:flex;align-items:center;gap:12px;padding:0 4px;min-height:54px;position:relative}
-.field+.field{border-top:1px solid var(--line)}
-.field label{flex:0 0 auto;max-width:48%;font-size:var(--fs-body);color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.field input,.field select,.field textarea{flex:1;min-width:0;border:0;background:transparent;outline:none;font-size:16px;padding:14px 0;text-align:right;color:var(--ink)}
+/* Baris pengaturan: label kiri (ink), nilai kanan (sub), hairline masuk padding. */
+.field{display:flex;align-items:center;gap:14px;padding:0;min-height:64px;position:relative}
+.field:not(:first-child){border-top:1px solid var(--line)}
+.field label{flex:0 0 auto;max-width:52%;font-size:17px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.field input,.field select,.field textarea{flex:1;min-width:0;border:0;background:transparent;outline:none;font-size:17px;padding:18px 0;text-align:right;color:var(--ink)}
+.field input::placeholder,.field textarea::placeholder{color:var(--sub)}
 .field select{appearance:none;-webkit-appearance:none}
 .field textarea{resize:none;text-align:left}
-.field.col{flex-direction:column;align-items:stretch;gap:0;padding-bottom:8px}
-.field.col label{padding-top:14px;width:auto;font-size:13px}
-.field.col textarea{text-align:left;padding-top:6px;font-size:17px}
+.field.col{flex-direction:column;align-items:stretch;gap:0;padding:14px 0}
+.field.col label{padding:0 0 6px;max-width:100%;font-size:13px;color:var(--sub)}
+.field.col textarea{text-align:left;padding:0;font-size:17px}
 .switch{position:relative;width:52px;height:32px;flex-shrink:0}
 .switch input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;z-index:2;cursor:pointer}
 .switch span{position:absolute;inset:0;border-radius:99px;background:var(--line);transition:background .25s}
@@ -324,7 +328,7 @@ input, select, textarea { font-size: 16px !important; }
 .sheet-head{display:flex;justify-content:space-between;align-items:center;margin:0 4px 14px}
 .sheet-head h3{margin:0;font-family:'Geist',sans-serif;font-weight:800;font-size:var(--fs-title)}
 .sheet-head button{color:var(--brand);font-weight:600;font-size:var(--fs-body);min-height:44px;display:inline-flex;align-items:center;padding:0 4px}
-.sheet .listcard{padding:0 18px}
+.sheet .listcard{padding:0 20px}
 .sheet .listcard .act{display:flex;align-items:center;gap:12px;width:100%;padding:16px 0;font-size:16px;color:var(--brand);font-weight:500}
 .sheet .listcard .act+.act{border-top:1px solid var(--line)}
 .sheet .act.danger{color:#e5484d}
@@ -340,9 +344,31 @@ input, select, textarea { font-size: 16px !important; }
 #login{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
 #login .card{width:100%;max-width:420px;padding:28px}
 #login .logo{width:56px;height:56px;border-radius:16px;font-size:26px;margin-bottom:18px}
-#login h1{margin:0;font-family:'Geist',sans-serif;font-weight:800;font-size:30px;color:var(--brand)}
+#login h1{margin:0;font-family:'Geist',sans-serif;font-weight:800;font-size:28px;letter-spacing:-.02em;color:var(--ink)}
 #auth-sub{color:var(--sub);margin:6px 0 22px;font-size:15px}
 #login .group{border:1px solid var(--line);border-radius:18px;padding:0 4px;margin-bottom:16px}
+
+/* Kolom isian tunggal: kotak bergaris, label mengambang di dalamnya. */
+.afield{position:relative;margin-bottom:12px}
+.afield input{
+  width:100%;height:58px;border:1px solid var(--field-border);border-radius:16px;
+  background:var(--field-bg);padding:24px 16px 8px;font-size:17px;color:var(--ink);
+  outline:none;transition:border-color .15s,box-shadow .15s;
+  -webkit-appearance:none;appearance:none;
+}
+.afield label{
+  position:absolute;left:17px;top:50%;transform:translateY(-50%);
+  font-size:17px;color:var(--sub);pointer-events:none;
+  transition:top .15s,font-size .15s,transform .15s,color .15s;
+}
+.afield input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--soft)}
+.afield input:focus+label,
+.afield input:not(:placeholder-shown)+label{top:9px;transform:none;font-size:12px}
+.afield input:focus+label{color:var(--brand)}
+.afield.has-eye input{padding-right:54px}
+.afield .eye{position:absolute;right:7px;top:50%;transform:translateY(-50%);margin:0}
+.afield .eye:active{transform:translateY(-50%) scale(.9)}
+.afield-hint{font-size:13px;color:var(--sub);line-height:1.45;padding:2px 4px 0;margin-top:-6px;margin-bottom:10px}
 
 /* Check-in overlay & QR Scanner */
 .checkin{position:fixed;inset:0;z-index:60;background:var(--bg);overflow-y:auto;display:flex;justify-content:center}
@@ -407,6 +433,7 @@ html.lock{overflow:hidden}
 .eye:active{background:var(--soft);transform:scale(.9)}.eye[aria-pressed="true"]{color:var(--brand)}
 .eye svg{width:20px;height:20px}
 .caps{margin:-4px 4px 12px;font-size:13px;color:var(--amber-ink)}
+.login-err:empty{display:none}
 .login-err{min-height:18px;margin:-4px 4px 12px;font-size:13px;color:var(--red-ink)}
 .auth-foot{margin:-4px 2px 14px;text-align:right}
 .authlink{background:none;border:0;padding:0;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--brand);cursor:pointer}
@@ -468,10 +495,10 @@ html.lock{overflow:hidden}
 .pager button svg{width:16px;height:16px}
 .pager button:disabled{opacity:.4;pointer-events:none}
 .field.locked label{color:var(--sub)}
-.field .lock-note{font-size:11.5px;color:var(--sub);display:flex;align-items:center;gap:4px;padding-bottom:8px}
+.field .lock-note{font-size:13px;color:var(--sub);display:flex;align-items:center;gap:4px;padding-bottom:8px}
 .switch input:disabled+span{opacity:.55}
 .ses-row input:first-child{text-align:left;font-weight:600}.ses-row input:last-child{flex:0 0 40%;border-left:1px solid var(--line);padding-left:12px;text-align:left}
-.field .ro-val{flex:1;text-align:right;padding:14px 0;font-size:16px;color:var(--sub);user-select:none}
+.field .ro-val{flex:1;text-align:right;padding:18px 0;font-size:17px;color:var(--sub);user-select:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ===== Revisi: sortir, hero, kartu check-in ===== */
 .hi{font-weight:400}
@@ -789,9 +816,14 @@ html.lock{overflow:hidden}
       <h1>RayaRayu</h1>
       <p id="auth-sub">Masuk untuk mengelola tamu dan detail acara Anda.</p>
       <form id="login-form" onsubmit="login(event)">
-        <div class="group">
-          <div class="field"><label for="email">Email</label><input type="email" id="email" required placeholder="nama@email.com" autocomplete="username" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" /></div>
-          <div class="field"><label for="password">Password</label><input type="password" id="password" required placeholder="Wajib diisi" autocomplete="current-password" /><button type="button" class="eye" id="pw-eye" aria-label="Tampilkan password" aria-pressed="false"><i data-lucide="eye"></i></button></div>
+        <div class="afield">
+          <input type="email" id="email" required placeholder=" " autocomplete="username" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" />
+          <label for="email">Email</label>
+        </div>
+        <div class="afield has-eye">
+          <input type="password" id="password" required placeholder=" " autocomplete="current-password" />
+          <label for="password">Password</label>
+          <button type="button" class="eye" id="pw-eye" aria-label="Tampilkan password" aria-pressed="false"><i data-lucide="eye"></i></button>
         </div>
         <p class="auth-foot"><button type="button" class="authlink" onclick="showAuthView('forgot')">Lupa password?</button></p>
         <p class="caps hidden" id="caps">Caps Lock sedang aktif</p>
@@ -800,19 +832,32 @@ html.lock{overflow:hidden}
       </form>
 
       <form id="signup-form" class="hidden" onsubmit="signup(event)">
-        <div class="group">
-          <div class="field"><label for="su-name">Nama</label><input type="text" id="su-name" required placeholder="Nama Anda atau pasangan" autocomplete="name" /></div>
-          <div class="field"><label for="su-email">Email</label><input type="email" id="su-email" required placeholder="nama@email.com" autocomplete="username" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" /></div>
-          <div class="field"><label for="su-phone">No. WhatsApp <span style="font-weight:400;color:var(--sub)">(opsional)</span></label><input type="tel" id="su-phone" placeholder="08123456789" inputmode="tel" autocomplete="tel" /><div class="sub" style="font-size:11.5px;padding:4px 2px 0">Untuk bantuan dan pengingat acara. Tidak ditampilkan ke tamu.</div></div>
-          <div class="field"><label for="su-password">Password</label><input type="password" id="su-password" required minlength="8" placeholder="Minimal 8 karakter" autocomplete="new-password" /></div>
+        <div class="afield">
+          <input type="text" id="su-name" required placeholder=" " autocomplete="name" />
+          <label for="su-name">Nama</label>
         </div>
+        <div class="afield">
+          <input type="email" id="su-email" required placeholder=" " autocomplete="username" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" />
+          <label for="su-email">Email</label>
+        </div>
+        <div class="afield">
+          <input type="tel" id="su-phone" placeholder=" " inputmode="tel" autocomplete="tel" />
+          <label for="su-phone">No. WhatsApp (opsional)</label>
+        </div>
+        <p class="afield-hint">Untuk bantuan dan pengingat acara. Tidak ditampilkan ke tamu.</p>
+        <div class="afield">
+          <input type="password" id="su-password" required minlength="8" placeholder=" " autocomplete="new-password" />
+          <label for="su-password">Password</label>
+        </div>
+        <p class="afield-hint">Minimal 8 karakter.</p>
         <p class="login-err" id="su-err" role="alert"></p>
         <button type="submit" id="btn-signup" class="btn">Daftar</button>
       </form>
 
       <form id="forgot-form" class="hidden" onsubmit="sendReset(event)">
-        <div class="group">
-          <div class="field"><label for="fg-email">Email</label><input type="email" id="fg-email" required placeholder="nama@email.com" autocomplete="username" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" /></div>
+        <div class="afield">
+          <input type="email" id="fg-email" required placeholder=" " autocomplete="username" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" />
+          <label for="fg-email">Email</label>
         </div>
         <p class="login-err" id="fg-err" role="alert"></p>
         <button type="submit" id="btn-forgot" class="btn">Kirim tautan reset</button>
@@ -822,9 +867,14 @@ html.lock{overflow:hidden}
       </form>
 
       <form id="reset-form" class="hidden" onsubmit="saveNewPassword(event)">
-        <div class="group">
-          <div class="field"><label for="rs-password">Password baru</label><input type="password" id="rs-password" required minlength="8" placeholder="Minimal 8 karakter" autocomplete="new-password" /></div>
-          <div class="field"><label for="rs-password2">Ulangi password baru</label><input type="password" id="rs-password2" required minlength="8" placeholder="Ketik ulang" autocomplete="new-password" /></div>
+        <div class="afield">
+          <input type="password" id="rs-password" required minlength="8" placeholder=" " autocomplete="new-password" />
+          <label for="rs-password">Password baru</label>
+        </div>
+        <p class="afield-hint">Minimal 8 karakter.</p>
+        <div class="afield">
+          <input type="password" id="rs-password2" required minlength="8" placeholder=" " autocomplete="new-password" />
+          <label for="rs-password2">Ulangi password baru</label>
         </div>
         <p class="login-err" id="rs-err" role="alert"></p>
         <button type="submit" id="btn-reset" class="btn">Simpan password</button>
@@ -1050,31 +1100,31 @@ html.lock{overflow:hidden}
 
         <!-- Sub-tab 1: Profil acara -->
         <form id="event-form" onsubmit="submitEditEvent(event)" class="subpane">
-          <div class="card" style="padding:4px 18px">
+          <div class="card" style="padding:0 20px">
             <div class="field"><label for="ev-title">Judul</label><input type="text" id="ev-title" required /></div>
             <div class="field"><label for="ev-date">Tanggal</label><input type="date" id="ev-date" required /></div>
           </div>
-          <div class="card" style="padding:4px 18px">
+          <div class="card" style="padding:0 20px">
             <div class="field"><label for="ev-couple">Nama mempelai</label><input type="text" id="ev-couple" maxlength="60" placeholder="Rudi &amp; Irul" required /></div>
             <div class="sub" style="font-size:12px;padding:0 4px 10px">Tampil sebagai judul undangan. Untuk akun WO, isi nama mempelai, bukan nama WO.</div>
             <div class="field"><label for="ev-slug">Slug tautan</label><input type="text" id="ev-slug" maxlength="40" placeholder="rudi-irul" autocapitalize="none" autocorrect="off" spellcheck="false" oninput="updateSlugHint()" /></div>
             <div class="sub" style="font-size:12px;padding:0 4px 12px" id="ev-slug-hint">Hanya huruf kecil, angka, dan strip.</div>
           </div>
-          <div class="card" style="padding:4px 18px">
+          <div class="card" style="padding:0 20px">
             <div class="field col"><label>Sesi acara</label></div>
             <div class="field ses-row"><input type="text" id="ev-s1-name" maxlength="40" placeholder="Nama sesi 1" aria-label="Nama sesi 1" required /><input type="text" id="ev-s1-time" maxlength="30" placeholder="10.00 WIB" aria-label="Jam sesi 1" required /></div>
             <div class="field ses-row"><input type="text" id="ev-s2-name" maxlength="40" placeholder="Nama sesi 2" aria-label="Nama sesi 2" required /><input type="text" id="ev-s2-time" maxlength="30" placeholder="12.00 WIB" aria-label="Jam sesi 2" required /></div>
             <div class="sub" style="font-size:12px;padding:0 4px 12px">Tamu dibagi ke 2 sesi ini. Jam sesi tampil di undangan dan pesan WhatsApp (<code>{waktu}</code>); nama sesi tersedia sebagai <code>{sesi}</code>. Mengganti nama sesi otomatis ikut mengubah sesi semua tamu.</div>
           </div>
-          <div class="card" style="padding:4px 18px"><div class="field col"><label for="ev-location">Lokasi</label><textarea id="ev-location" rows="2" required></textarea></div></div>
-          <div class="card" style="padding:4px 18px"><div class="field col"><label for="ev-caption">Pesan pembuka</label><textarea id="ev-caption" rows="4" required></textarea></div>
+          <div class="card" style="padding:0 20px"><div class="field col"><label for="ev-location">Lokasi</label><textarea id="ev-location" rows="2" required></textarea></div></div>
+          <div class="card" style="padding:0 20px"><div class="field col"><label for="ev-caption">Pesan pembuka</label><textarea id="ev-caption" rows="4" required></textarea></div>
             <div class="sub" style="font-size:12px;padding:0 4px 12px">Tampil di halaman undangan tamu, bukan di pesan WhatsApp.</div></div>
           <button type="submit" id="btn-save-event" class="btn">Simpan profil acara</button>
         </form>
 
         <!-- Sub-tab 3: Petugas -->
         <div id="petugas-pane" class="subpane hidden">
-          <div class="card" style="padding:16px 18px">
+          <div class="card" style="padding:20px">
             <div class="ch" style="margin-bottom:6px"><h3>Kode Petugas</h3></div>
             <div class="sub" style="font-size:13px;margin-bottom:12px">Bagikan kode ini ke petugas pintu masuk. Petugas hanya bisa melihat daftar tamu dan check-in. Tidak bisa mengubah data, tidak bisa melihat nomor WhatsApp tamu.</div>
             <div class="field"><label for="scanner-code">Kode aktif</label><input type="text" id="scanner-code" readonly placeholder="Belum dibuat" autocomplete="off" /></div>
@@ -1095,7 +1145,7 @@ html.lock{overflow:hidden}
             <div class="chips" id="wa-cats" role="tablist" aria-label="Kategori template"></div>
           </div>
 
-          <div class="card" id="wa-editor" style="padding:16px 18px">
+          <div class="card" id="wa-editor" style="padding:20px">
             <div class="ch" style="margin-bottom:6px"><h3 id="wa-cat-title">Umum</h3><span class="tag" id="wa-cat-count"></span></div>
             <div class="sub" style="font-size:13px;margin-bottom:12px" id="wa-cat-hint"></div>
 
@@ -1108,7 +1158,7 @@ html.lock{overflow:hidden}
             <div class="wa-meta"><span id="wa-count">0 karakter</span><button type="button" class="wa-link" id="wa-reset" onclick="resetWaCategory()">Kosongkan</button></div>
           </div>
 
-          <div class="card" style="padding:16px 18px">
+          <div class="card" style="padding:20px">
             <div class="ch" style="margin-bottom:10px"><h3>Pratinjau</h3><span class="sub" style="font-size:13px">Contoh: <b>Budi Santoso</b></span></div>
             <div class="wa-bubble"><div id="wa-preview"></div><span class="wa-time">09.41 ✓✓</span></div>
           </div>
@@ -1136,7 +1186,7 @@ html.lock{overflow:hidden}
           </div>
         </div>
 
-        <div class="card" style="padding:4px 18px">
+        <div class="card" style="padding:0 20px">
           <div class="field" role="button" tabindex="0" style="cursor:pointer" onclick="openChangePassword()" onkeydown="if(event.key==='Enter'||event.key===' ')openChangePassword()">
             <label>Password</label>
             <span class="ro-val">••••••••</span>
@@ -1149,7 +1199,7 @@ html.lock{overflow:hidden}
           </div>
         </div>
 
-        <div class="card hidden" id="admin-orders-card" style="padding:4px 18px">
+        <div class="card hidden" id="admin-orders-card" style="padding:0 20px">
           <div class="field" role="button" tabindex="0" style="cursor:pointer" onclick="openAdminOrders()" onkeydown="if(event.key==='Enter'||event.key===' ')openAdminOrders()">
             <label>Pesanan masuk</label>
             <span class="ro-val" id="admin-orders-count">—</span>
@@ -2480,8 +2530,8 @@ function copyOrShow(text, label = 'Tautan pratinjau', okMsg) {
   const fallback = () => {
     const long = String(text).length > 80 || String(text).includes('\n');
     const field = long
-      ? `<textarea id="copy-manual" readonly rows="6" style="width:100%;font-family:inherit;font-size:16px;line-height:1.5;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink);resize:none" onclick="this.select()">${esc(text)}</textarea>`
-      : `<input type="text" id="copy-manual" readonly value="${esc(text)}" style="width:100%;font-family:inherit;font-size:16px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink)" onclick="this.select()" />`;
+      ? `<textarea id="copy-manual" readonly rows="6" style="width:100%;font-family:inherit;font-size:16px;line-height:1.5;padding:12px 14px;border:1px solid var(--field-border);border-radius:14px;background:var(--soft);color:var(--ink);resize:none" onclick="this.select()">${esc(text)}</textarea>`
+      : `<input type="text" id="copy-manual" readonly value="${esc(text)}" style="width:100%;font-family:inherit;font-size:16px;padding:12px 14px;border:1px solid var(--field-border);border-radius:14px;background:var(--soft);color:var(--ink)" onclick="this.select()" />`;
     openSheet(`
       <div class="sheet-head"><h3>${esc(label)}</h3><button onclick="closeSheet()">Tutup</button></div>
       <div class="listcard" style="padding:16px">
@@ -2836,10 +2886,9 @@ async function rejectOrder(id) {
 function openChangePassword() {
   openSheet(`
     <div class="sheet-head"><h3>Ganti password</h3><button onclick="closeSheet()">Batal</button></div>
-    <div class="listcard" style="padding:0 18px">
-      <div class="field"><label for="cp-new">Password baru</label><input type="password" id="cp-new" minlength="8" placeholder="Minimal 8 karakter" autocomplete="new-password" /></div>
-      <div class="field"><label for="cp-again">Ulangi</label><input type="password" id="cp-again" minlength="8" placeholder="Ketik ulang" autocomplete="new-password" /></div>
-    </div>
+    <div class="afield"><input type="password" id="cp-new" minlength="8" placeholder=" " autocomplete="new-password" /><label for="cp-new">Password baru</label></div>
+    <p class="afield-hint">Minimal 8 karakter.</p>
+    <div class="afield"><input type="password" id="cp-again" minlength="8" placeholder=" " autocomplete="new-password" /><label for="cp-again">Ulangi password baru</label></div>
     <p class="login-err" id="cp-err" role="alert" style="padding:0 4px"></p>
     <button class="btn" id="cp-save" onclick="savePasswordSheet()">Simpan password</button>
   `);
@@ -2868,10 +2917,8 @@ function openEditPhone() {
   const phone = (globalData && globalData.client && globalData.client.phone) || '';
   openSheet(`
     <div class="sheet-head"><h3>Nomor WhatsApp</h3><button onclick="closeSheet()">Batal</button></div>
-    <div class="listcard" style="padding:0 18px">
-      <div class="field"><label for="ph-input">Nomor</label><input type="tel" id="ph-input" inputmode="tel" placeholder="08123456789" value="${esc(phone)}" /></div>
-    </div>
-    <p class="sub" style="font-size:13px;padding:4px 4px 10px">Dipakai untuk bantuan dan saat upgrade paket. Tidak ditampilkan ke tamu.</p>
+    <div class="afield"><input type="tel" id="ph-input" inputmode="tel" placeholder=" " value="${esc(phone)}" /><label for="ph-input">Nomor WhatsApp</label></div>
+    <p class="afield-hint">Dipakai untuk bantuan dan saat upgrade paket. Tidak ditampilkan ke tamu.</p>
     <p class="login-err" id="ph-err" role="alert" style="padding:0 4px"></p>
     <button class="btn" onclick="savePhoneSheet()">Simpan</button>
   `);
@@ -3814,7 +3861,7 @@ checkSession();
   eye.onclick = () => { const show = pw.type === 'password'; pw.type = show ? 'text' : 'password'; eye.setAttribute('aria-pressed', show); eye.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password'); eye.innerHTML = `<i data-lucide="${show ? 'eye-off' : 'eye'}"></i>`; icons(); pw.focus(); };
   pw.addEventListener('keyup', e => $('caps').classList.toggle('hidden', !(e.getModifierState && e.getModifierState('CapsLock'))));
   ['email', 'password'].forEach(id => $(id).addEventListener('input', () => { $('login-err').textContent = ''; }));
-  window.loginFail = m => { $('login-err').textContent = /invalid/i.test(m) ? 'Email atau password tidak cocok.' : m; const g = document.querySelector('#login-form .group'); g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake'); };
+  window.loginFail = m => { $('login-err').textContent = /invalid/i.test(m) ? 'Email atau password tidak cocok.' : m; const g = document.querySelector('#login-form .afield'); g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake'); };
 
   const s = $('sheet'); let y0 = null, dy = 0, lastY = 0, lastT = 0, vy = 0;
   s.addEventListener('pointerdown', e => { if (e.target.closest('.grab, .sheet-head') && !e.target.closest('button')) { y0 = e.clientY; dy = 0; vy = 0; lastY = e.clientY; lastT = performance.now(); s.style.transition = 'none'; s.setPointerCapture(e.pointerId); } });
