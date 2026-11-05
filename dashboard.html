@@ -18,7 +18,6 @@
   --red-bg:#fde4e5; --red-ink:#c62d33; --amber-bg:#fdf0d5; --amber-ink:#a86a00; --blue-bg:#dbe5ff; --tag:#eef0f5; --tag-ink:#4a5263;
   --shadow:0 1px 2px rgba(12,24,60,.05), 0 8px 24px rgba(12,24,60,.04);
   --field-border:#c9cdd6; --field-bg:#ffffff;
-  --glass-btn:rgba(118,118,128,.12); --glass-btn-line:rgba(12,24,60,.06); --glass-btn-strong:rgba(118,118,128,.20);
   /* Skala tipografi: 8 langkah, bukan 24. */
   --fs-caption:11px; --fs-footnote:12px; --fs-subhead:13px; --fs-body:15px;
   --fs-headline:17px; --fs-title:20px; --fs-large:28px; --fs-display:40px;
@@ -27,7 +26,6 @@
 :root[data-dark="1"]{
   --bg:#000000; --card:#1c1c1e; --ink:#ffffff; --sub:#9d9da3; --line:#38383a; --soft:#2c2c2e; --brand:#6d8bff;
   --field-border:#48484a; --field-bg:#1c1c1e;
-  --glass-btn:rgba(118,118,128,.24); --glass-btn-line:rgba(255,255,255,.10); --glass-btn-strong:rgba(118,118,128,.36);
   --green:#30d158; --green-bg:rgba(48,209,88,.16); --green-ink:#30d158;
   --red-bg:rgba(255,69,58,.16); --red-ink:#ff6961;
   --amber-bg:rgba(255,214,10,.16); --amber-ink:#ffd60a;
@@ -344,18 +342,16 @@ input, select, textarea { font-size: 16px !important; }
 .grab{width:40px;height:5px;border-radius:99px;background:var(--line);margin:0 auto 14px}
 .sheet-head{position:relative;display:flex;align-items:center;justify-content:space-between;margin:0 4px 14px;min-height:44px}
 .sheet-head h3{position:absolute;left:60px;right:60px;margin:0;text-align:center;font-family:'Geist',sans-serif;font-weight:700;font-size:var(--fs-title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
-/* iOS 26: tombol bulat kaca di kiri & kanan judul. */
+/* iOS 26: tombol bulat di kiri & kanan judul, warna mengikuti kartu lain. */
 .sheet-head .ibtn{
   flex:0 0 auto;display:grid;place-items:center;
   width:44px;height:44px;padding:0;border-radius:50%;
-  background:var(--glass-btn);border:1px solid var(--glass-btn-line);
-  -webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);
-  color:var(--ink);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 6px 16px -8px rgba(9,16,40,.4);
-  transition:transform .16s var(--ease),background .2s;
+  background:var(--card);border:1px solid var(--line);color:var(--sub);
+  box-shadow:var(--shadow);
+  transition:transform .16s var(--ease),background .2s,color .2s;
 }
 .sheet-head .ibtn svg{width:20px;height:20px;stroke-width:2.2}
-.sheet-head .ibtn.primary{background:var(--glass-btn-strong)}
+.sheet-head .ibtn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
 .sheet-head .ibtn:active{transform:scale(.92)}
 .sheet-head .ibtn:disabled{opacity:.4;pointer-events:none}
 .sheet-head>span{width:44px;height:44px;flex:0 0 auto}
