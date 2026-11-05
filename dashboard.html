@@ -18,7 +18,7 @@
   --red-bg:#fde4e5; --red-ink:#c62d33; --amber-bg:#fdf0d5; --amber-ink:#a86a00; --blue-bg:#dbe5ff; --tag:#eef0f5; --tag-ink:#4a5263;
   --shadow:0 1px 2px rgba(12,24,60,.05), 0 8px 24px rgba(12,24,60,.04);
   --field-border:#c9cdd6; --field-bg:#ffffff;
-  --glass-btn:rgba(255,255,255,.62); --glass-btn-line:rgba(12,24,60,.08);
+  --glass-btn:rgba(118,118,128,.12); --glass-btn-line:rgba(12,24,60,.06); --glass-btn-strong:rgba(118,118,128,.20);
   /* Skala tipografi: 8 langkah, bukan 24. */
   --fs-caption:11px; --fs-footnote:12px; --fs-subhead:13px; --fs-body:15px;
   --fs-headline:17px; --fs-title:20px; --fs-large:28px; --fs-display:40px;
@@ -27,7 +27,7 @@
 :root[data-dark="1"]{
   --bg:#000000; --card:#1c1c1e; --ink:#ffffff; --sub:#9d9da3; --line:#38383a; --soft:#2c2c2e; --brand:#6d8bff;
   --field-border:#48484a; --field-bg:#1c1c1e;
-  --glass-btn:rgba(255,255,255,.10); --glass-btn-line:rgba(255,255,255,.14);
+  --glass-btn:rgba(118,118,128,.24); --glass-btn-line:rgba(255,255,255,.10); --glass-btn-strong:rgba(118,118,128,.36);
   --green:#30d158; --green-bg:rgba(48,209,88,.16); --green-ink:#30d158;
   --red-bg:rgba(255,69,58,.16); --red-ink:#ff6961;
   --amber-bg:rgba(255,214,10,.16); --amber-ink:#ffd60a;
@@ -343,25 +343,22 @@ input, select, textarea { font-size: 16px !important; }
 .sheet.open{transform:translate(-50%,0)}
 .grab{width:40px;height:5px;border-radius:99px;background:var(--line);margin:0 auto 14px}
 .sheet-head{position:relative;display:flex;align-items:center;justify-content:space-between;margin:0 4px 14px;min-height:44px}
-.sheet-head h3{position:absolute;left:84px;right:84px;margin:0;text-align:center;font-family:'Geist',sans-serif;font-weight:700;font-size:var(--fs-title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
-/* Liquid Glass (iOS 26): kapsul tembus pandang, blur, garis tipis, kilau atas. */
+.sheet-head h3{position:absolute;left:60px;right:60px;margin:0;text-align:center;font-family:'Geist',sans-serif;font-weight:700;font-size:var(--fs-title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+/* iOS 26: tombol bulat kaca di kiri & kanan judul. */
 .sheet-head .ibtn{
-  position:relative;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
-  min-width:44px;height:38px;padding:0 13px;border-radius:999px;
+  flex:0 0 auto;display:grid;place-items:center;
+  width:44px;height:44px;padding:0;border-radius:50%;
   background:var(--glass-btn);border:1px solid var(--glass-btn-line);
   -webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);
-  color:var(--brand);font-family:inherit;font-size:15px;font-weight:600;letter-spacing:-.01em;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 6px 16px -8px rgba(9,16,40,.35);
-  transition:transform .16s var(--ease),background .2s,box-shadow .2s;
+  color:var(--ink);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 6px 16px -8px rgba(9,16,40,.4);
+  transition:transform .16s var(--ease),background .2s;
 }
-.sheet-head .ibtn::after{content:"";position:absolute;inset:-3px -2px} /* area tekan 44px */
-.sheet-head .ibtn.primary{
-  background:var(--brand);border-color:transparent;color:#fff;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 20px -8px rgba(10,61,194,.65);
-}
-.sheet-head .ibtn:active{transform:scale(.95)}
+.sheet-head .ibtn svg{width:20px;height:20px;stroke-width:2.2}
+.sheet-head .ibtn.primary{background:var(--glass-btn-strong)}
+.sheet-head .ibtn:active{transform:scale(.92)}
 .sheet-head .ibtn:disabled{opacity:.4;pointer-events:none}
-.sheet-head>span{width:68px;height:38px;flex:0 0 auto}
+.sheet-head>span{width:44px;height:44px;flex:0 0 auto}
 .sheet .listcard{padding:0 20px}
 .sheet .listcard .act{display:flex;align-items:center;gap:12px;width:100%;padding:16px 0;font-size:16px;color:var(--brand);font-weight:500}
 .sheet .listcard .act+.act{border-top:1px solid var(--line)}
@@ -1734,7 +1731,7 @@ function openEventSwitcher() {
 function openCreateEventSheet() {
   openSheet(`
     <div class="sheet-head">
-      <button class="ibtn" onclick="closeSheet()">Batal</button>
+      <button class="ibtn" onclick="closeSheet()" aria-label="Batal"><i data-lucide="x"></i></button>
       <h3>Acara baru</h3>
       <span></span>
     </div>
@@ -1957,7 +1954,7 @@ function renderWishesSheet() {
   if (!wishesDone && box.scrollHeight <= box.clientHeight + 4) loadMoreWishes();
 }
 function openWishesSheet() {
-  openSheet(`<div class="sheet-head wsheet-head"><h3>Ucapan &amp; Doa</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+  openSheet(`<div class="sheet-head wsheet-head"><h3>Ucapan &amp; Doa</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="wchat wsheet-chat" id="wchat-all"></div>`);
   renderWishesSheet();
   $('wchat-all').addEventListener('scroll', e => { const b = e.target; if (b.scrollTop + b.clientHeight >= b.scrollHeight - 120) loadMoreWishes(); }, { passive: true });
@@ -1996,7 +1993,7 @@ $('wchat').addEventListener('click', e => { const m = e.target.closest('.wmsg');
 function openWish(i) {
   const w = wishesData[i]; if (!w) return; const g = wishGuest(w), b = g ? guestBadge(g) : null;
   const phone = g && g.phone ? String(g.phone).replace(/\D/g, '').replace(/^0/, '62') : '';
-  openSheet(`<div class="sheet-head"><h3>${esc(w.guest_name)}</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+  openSheet(`<div class="sheet-head"><h3>${esc(w.guest_name)}</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="listcard"><div class="wfull">${esc(w.message)}</div><div class="wfoot">${esc(fmtWhen(Date.parse(w.created_at)))}${b ? `<span class="st st-${b[0]}">${b[1]}</span>` : ''}</div>
     <button class="act" id="w-copy"><i data-lucide="copy"></i>Salin ucapan</button>
     ${phone ? `<a class="act" href="https://wa.me/${phone}?text=${encodeURIComponent('Terima kasih atas ucapan dan doanya, ' + w.guest_name + ' 🙏')}" target="_blank" rel="noopener"><i data-lucide="message-circle"></i>Balas lewat WhatsApp</a>` : ''}</div>`);
@@ -2406,7 +2403,7 @@ function openFilterSheet() {
         <span class="mf-n">${gs.filter(g => MF_GET[k](g) === o.v).length}</span></button>`).join('') : '<div class="empty" style="padding:10px">Belum ada data.</div>');
   };
   openSheet(`
-    <div class="sheet-head"><button class="ibtn" id="mf-reset">Reset</button><h3>Filter</h3><button class="ibtn primary" onclick="closeSheet()">Selesai</button></div>
+    <div class="sheet-head"><button class="ibtn" id="mf-reset" aria-label="Reset filter"><i data-lucide="rotate-ccw"></i></button><h3>Filter</h3><button class="ibtn primary" onclick="closeSheet()" aria-label="Selesai"><i data-lucide="check"></i></button></div>
     <div class="listcard">${sec('cat')}${sec('type')}${sec('session')}</div>`);
   $('sheet').querySelectorAll('.mf-opt').forEach(b => b.onclick = () => {
     const set = MF[b.dataset.k].set, v = b.dataset.v;
@@ -2557,7 +2554,7 @@ function handleFabClick() {
     else toast('Tautan pratinjau belum siap. Muat ulang halaman.', false);
   } else if (currentActiveTab === 'akun') {
     openSheet(`
-      <div class="sheet-head"><h3>Panduan Singkat</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+      <div class="sheet-head"><h3>Panduan Singkat</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
       <div class="listcard" style="padding-bottom:16px;">
         <div style="font-size:15px; color:var(--sub); display:flex; flex-direction:column; gap:14px; line-height:1.5; padding-top:12px;">
           <div><b>1. Tambah Tamu:</b> Pilih tipe undangan, nama, kategori, nomor WA, dan kuota pax.</div>
@@ -2589,7 +2586,7 @@ function copyOrShow(text, label = 'Tautan pratinjau', okMsg) {
       ? `<textarea id="copy-manual" readonly rows="6" style="width:100%;font-family:inherit;font-size:16px;line-height:1.5;padding:12px 14px;border:1px solid var(--field-border);border-radius:14px;background:var(--soft);color:var(--ink);resize:none" onclick="this.select()">${esc(text)}</textarea>`
       : `<input type="text" id="copy-manual" readonly value="${esc(text)}" style="width:100%;font-family:inherit;font-size:16px;padding:12px 14px;border:1px solid var(--field-border);border-radius:14px;background:var(--soft);color:var(--ink)" onclick="this.select()" />`;
     openSheet(`
-      <div class="sheet-head"><h3>${esc(label)}</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+      <div class="sheet-head"><h3>${esc(label)}</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
       <div class="listcard" style="padding:16px">
         <p style="margin:0 0 12px;font-size:13.5px;color:var(--sub);line-height:1.55">
           Browser menolak menyalin otomatis. Tekan lama lalu pilih Semua &amp; Salin.
@@ -2690,7 +2687,7 @@ function openUpgrade() {
   const phone = (globalData && globalData.client && globalData.client.phone) || '';
   if (!phone) {
     openSheet(`
-      <div class="sheet-head"><h3>Nomor WhatsApp</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+      <div class="sheet-head"><h3>Nomor WhatsApp</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
       <div class="listcard" style="padding:16px">
         <p style="margin:0 0 14px;font-size:15px;color:var(--sub);line-height:1.5">
           Kami perlu nomor WhatsApp untuk konfirmasi pembayaran.
@@ -2743,7 +2740,7 @@ async function loadPayment() {
 
 async function renderUpgradeSheet() {
   openSheet(`
-    <div class="sheet-head"><h3>Upgrade paket</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+    <div class="sheet-head"><h3>Upgrade paket</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="listcard" style="padding:16px"><div class="empty">Memuat paket…</div></div>`);
 
   await loadOrder();
@@ -2754,7 +2751,7 @@ async function renderUpgradeSheet() {
     .eq('is_active', true).gt('price', 0).order('sort_order');
 
   if (error || !plans || !plans.length) {
-    openSheet(`<div class="sheet-head"><h3>Upgrade paket</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+    openSheet(`<div class="sheet-head"><h3>Upgrade paket</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
       <div class="listcard" style="padding:16px"><div class="empty">Paket belum tersedia. Coba lagi nanti.</div></div>`);
     return;
   }
@@ -2778,7 +2775,7 @@ async function renderUpgradeSheet() {
   }).join('');
 
   openSheet(`
-    <div class="sheet-head"><h3>Upgrade paket</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+    <div class="sheet-head"><h3>Upgrade paket</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="listcard" style="padding:16px">
       <p style="margin:0 0 4px;font-size:15px;color:var(--sub);line-height:1.5">
         Bayar sekali untuk acara ini. Masa aktif dihitung saat paket diaktifkan.
@@ -2788,7 +2785,7 @@ async function renderUpgradeSheet() {
 }
 
 async function choosePlan(code) {
-  openSheet(`<div class="sheet-head"><h3>Membuat pesanan…</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+  openSheet(`<div class="sheet-head"><h3>Membuat pesanan…</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="listcard" style="padding:16px"><div class="empty">Menyiapkan kode pembayaran…</div></div>`);
   const { data, error } = await supabaseClient.rpc('create_order', {
     p_event_id: currentEventId, p_plan_code: code
@@ -2807,7 +2804,7 @@ function renderOrderStep(step) {
 
   if (step === 3) {
     openSheet(`
-      <div class="sheet-head"><h3>Menunggu verifikasi</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+      <div class="sheet-head"><h3>Menunggu verifikasi</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
       <div class="listcard" style="padding:16px">
         <p style="margin:0 0 6px;font-size:15px;line-height:1.55">
           Bukti pembayaran untuk pesanan <b>${esc(activeOrder.order_code || '')}</b> sudah kami terima.
@@ -2822,7 +2819,7 @@ function renderOrderStep(step) {
 
   const pay = activePayment || {};
   openSheet(`
-    <div class="sheet-head"><h3>Pembayaran</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+    <div class="sheet-head"><h3>Pembayaran</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="listcard" style="padding:16px">
       <div class="paybox" style="margin-top:0">
         <div class="payrow"><span>Kode pesanan</span><b>${esc(activeOrder.order_code || '—')}</b>
@@ -2886,16 +2883,16 @@ async function cancelOrder() {
 
 /* ---------- Admin: verifikasi pesanan ---------- */
 async function openAdminOrders() {
-  openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+  openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="listcard" style="padding:16px"><div class="empty">Memuat…</div></div>`);
   const { data, error } = await supabaseClient.rpc('admin_list_orders');
   if (error || !Array.isArray(data)) {
-    openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+    openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
       <div class="listcard" style="padding:16px"><div class="empty">Gagal memuat pesanan.</div></div>`);
     return;
   }
   if (!data.length) {
-    openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+    openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
       <div class="listcard" style="padding:16px"><div class="empty">Tidak ada pesanan menunggu.</div></div>`);
     return;
   }
@@ -2912,7 +2909,7 @@ async function openAdminOrders() {
         <button class="copybtn" style="color:var(--red-ink)" onclick="rejectOrder('${esc(o.id)}')">Tolak</button>
       </div>
     </div>`).join('');
-  openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+  openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="listcard" style="padding:0 16px">${rows}</div>`);
 }
 
@@ -2941,7 +2938,7 @@ async function rejectOrder(id) {
 /* ---------- Akun: keamanan ---------- */
 function openChangePassword() {
   openSheet(`
-    <div class="sheet-head"><h3>Ganti password</h3><button class="ibtn" onclick="closeSheet()">Batal</button></div>
+    <div class="sheet-head"><h3>Ganti password</h3><button class="ibtn" onclick="closeSheet()" aria-label="Batal"><i data-lucide="x"></i></button></div>
     <div class="afield"><input type="password" id="cp-new" minlength="8" placeholder=" " autocomplete="new-password" /><label for="cp-new">Password baru</label></div>
     <p class="afield-hint">Minimal 8 karakter.</p>
     <div class="afield"><input type="password" id="cp-again" minlength="8" placeholder=" " autocomplete="new-password" /><label for="cp-again">Ulangi password baru</label></div>
@@ -2972,7 +2969,7 @@ async function savePasswordSheet() {
 function openEditPhone() {
   const phone = (globalData && globalData.client && globalData.client.phone) || '';
   openSheet(`
-    <div class="sheet-head"><h3>Nomor WhatsApp</h3><button class="ibtn" onclick="closeSheet()">Batal</button></div>
+    <div class="sheet-head"><h3>Nomor WhatsApp</h3><button class="ibtn" onclick="closeSheet()" aria-label="Batal"><i data-lucide="x"></i></button></div>
     <div class="afield"><input type="tel" id="ph-input" inputmode="tel" placeholder=" " value="${esc(phone)}" /><label for="ph-input">Nomor WhatsApp</label></div>
     <p class="afield-hint">Dipakai untuk bantuan dan saat upgrade paket. Tidak ditampilkan ke tamu.</p>
     <p class="login-err" id="ph-err" role="alert" style="padding:0 4px"></p>
@@ -3166,7 +3163,7 @@ async function saveWaTemplates() {
 function openGuestActions(id) {
   const g = findGuest(id); if (!g) return;
   openSheet(`
-    <div class="sheet-head"><h3>${esc(g.group_name)}</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+    <div class="sheet-head"><h3>${esc(g.group_name)}</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="listcard">
       <button class="act" data-a="copy"><i data-lucide="link"></i>Salin tautan undangan</button>
       ${g.invitation_type === 'cetak' ? '' : '<button class="act" data-a="wa"><i data-lucide="message-circle"></i>Kirim lewat WhatsApp</button>'}
@@ -3249,7 +3246,7 @@ async function sendPendingWA(id) {
 
 function confirmDelete(g) {
   openSheet(`
-    <div class="sheet-head"><h3>Hapus tamu?</h3><button class="ibtn" onclick="closeSheet()">Batal</button></div>
+    <div class="sheet-head"><h3>Hapus tamu?</h3><button class="ibtn" onclick="closeSheet()" aria-label="Batal"><i data-lucide="x"></i></button></div>
     <div class="listcard">
       <div class="act-title" style="padding:16px 0">“${esc(g.group_name)}” akan dihapus. Tautan undangannya tidak bisa dipakai lagi.</div>
       <button class="act danger" id="do-del" style="justify-content:center;border-top:1px solid var(--line)"><i data-lucide="trash-2"></i>Hapus</button>
@@ -3277,7 +3274,7 @@ function openGuestSheet(id) {
   const rsvpVal = g ? (g.invitation_type === 'cetak' ? 'hadir' : (g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen' ? 'absen' : (g.rsvp_status || 'pending'))) : (currentType === 'cetak' ? 'hadir' : 'pending');
 
   openSheet(`
-    <div class="sheet-head"><button class="ibtn" onclick="closeSheet()">Batal</button><h3>${g ? 'Edit tamu' : 'Tamu baru'}</h3><button class="ibtn primary" id="gs-save">${g ? 'Simpan' : 'Tambah'}</button></div>
+    <div class="sheet-head"><button class="ibtn" onclick="closeSheet()" aria-label="Batal"><i data-lucide="x"></i></button><h3>${g ? 'Edit tamu' : 'Tamu baru'}</h3><button class="ibtn primary" id="gs-save" aria-label="${g ? 'Simpan' : 'Tambah'}"><i data-lucide="check"></i></button></div>
     <div class="listcard">
       <div class="field"><label>Nama</label><input type="text" id="gs-name" placeholder="Budi Santoso & Keluarga" value="${esc(g?.group_name || '')}" /></div>
       <div class="field"><label>No. WhatsApp</label><input type="tel" id="gs-phone" placeholder="08123456789 (Opsional)" value="${esc(g?.phone || '')}" /></div>
@@ -3428,7 +3425,7 @@ async function saveGuest(g) {
 function openPending() {
   const list = globalData.guests.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent);
   openSheet(`
-    <div class="sheet-head"><h3>Tamu pending · ${list.length}</h3><button class="ibtn" onclick="closeSheet()">Tutup</button></div>
+    <div class="sheet-head"><h3>Tamu pending · ${list.length}</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     ${list.length
       ? `<div class="listcard">${list.map((g) => `
           <button class="act" style="width:100%;text-align:left" onclick="sendPendingWA('${g.id}')">
