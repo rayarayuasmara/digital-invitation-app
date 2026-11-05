@@ -280,12 +280,12 @@ input, select, textarea { font-size: 16px !important; }
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 16'%3E%3Cpath d='M2 6l3-3 3 3M2 10l3 3 3-3' fill='none' stroke='%238e8e93' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right center;background-size:10px 16px;
 }
-.field input[type="date"]{
+.field input[type="date"],.afield input[type="date"]{
   position:relative;padding-right:22px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M1.5 1.5L6.5 6.5l-5 5' fill='none' stroke='%238e8e93' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right center;background-size:8px 13px;
 }
-.field input[type="date"]::-webkit-calendar-picker-indicator{opacity:0;position:absolute;right:0;width:24px;height:100%;margin:0;cursor:pointer}
+.field input[type="date"]::-webkit-calendar-picker-indicator,.afield input[type="date"]::-webkit-calendar-picker-indicator{opacity:0;position:absolute;right:0;width:24px;height:100%;margin:0;cursor:pointer}
 .field textarea{resize:none;text-align:left}
 .field.col{flex-direction:column;align-items:stretch;gap:0;padding:14px 0}
 .field.col label{padding:0 0 6px;max-width:100%;font-size:13px;color:var(--sub)}
@@ -340,11 +340,14 @@ input, select, textarea { font-size: 16px !important; }
 .sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:480px;z-index:51;background:var(--bg);border-radius:28px 28px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow-y:auto;transform:translate(-50%,105%);transition:transform .4s cubic-bezier(.32,.72,0,1)}
 .sheet.open{transform:translate(-50%,0)}
 .grab{width:40px;height:5px;border-radius:99px;background:var(--line);margin:0 auto 14px}
-.sheet-head{display:flex;justify-content:space-between;align-items:center;margin:0 4px 14px;gap:8px}
-.sheet-head h3{margin:0;flex:1;text-align:center;padding:0 6px;font-family:'Geist',sans-serif;font-weight:800;font-size:var(--fs-title)}
-.sheet-head button{color:var(--brand);font-weight:600;font-size:var(--fs-body);min-height:44px;display:inline-flex;align-items:center;padding:0 4px}
-.sheet-head .ibtn{flex:0 0 auto;width:44px;height:44px;min-height:44px;padding:0;margin:0 -8px;justify-content:center;border-radius:50%;color:var(--brand)}
-.sheet-head .ibtn svg{width:22px;height:22px}
+.sheet-head{position:relative;display:flex;align-items:center;justify-content:space-between;margin:0 4px 14px;min-height:44px}
+.sheet-head h3{position:absolute;left:52px;right:52px;margin:0;text-align:center;font-family:'Geist',sans-serif;font-weight:700;font-size:var(--fs-title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.sheet-head .ibtn{flex:0 0 auto;width:44px;height:44px;display:grid;place-items:center;padding:0;margin:0;border-radius:50%;color:var(--sub);transition:background .15s,color .15s,transform .12s}
+.sheet-head .ibtn svg{width:22px;height:22px;stroke-width:2.1}
+.sheet-head .ibtn.primary{color:var(--brand)}
+.sheet-head .ibtn:active{background:var(--soft);transform:scale(.92)}
+.sheet-head .ibtn:disabled{opacity:.3;pointer-events:none}
+.sheet-head>span{width:44px;height:44px;flex:0 0 auto}
 .sheet .listcard{padding:0 20px}
 .sheet .listcard .act{display:flex;align-items:center;gap:12px;width:100%;padding:16px 0;font-size:16px;color:var(--brand);font-weight:500}
 .sheet .listcard .act+.act{border-top:1px solid var(--line)}
@@ -386,6 +389,8 @@ input, select, textarea { font-size: 16px !important; }
 .afield .eye{position:absolute;right:7px;top:50%;transform:translateY(-50%);margin:0}
 .afield .eye:active{transform:translateY(-50%) scale(.9)}
 .afield-hint{font-size:13px;color:var(--sub);line-height:1.45;padding:2px 4px 0;margin-top:-6px;margin-bottom:10px}
+.afield-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.afield-row .afield{margin-bottom:12px}
 
 /* Check-in overlay & QR Scanner */
 .checkin{position:fixed;inset:0;z-index:60;background:var(--bg);overflow-y:auto;display:flex;justify-content:center}
@@ -913,20 +918,26 @@ html.lock{overflow:hidden}
         <div class="card">
           <div id="ob-step-1">
             <h2 style="margin:0 0 6px">Siapa yang menikah?</h2>
-            <p class="sub" style="font-size:13px;margin:0 0 14px">Nama ini tampil sebagai judul undangan. Bisa diubah nanti.</p>
-            <div class="field"><label for="ob-couple">Nama mempelai</label><input type="text" id="ob-couple" maxlength="60" placeholder="Rudi &amp; Irul" oninput="obSyncSlug()" /></div>
-            <div class="field"><label for="ob-slug">Slug tautan</label><input type="text" id="ob-slug" maxlength="40" placeholder="rudi-irul" autocapitalize="none" autocorrect="off" spellcheck="false" oninput="obSetSlugTouched()" /></div>
-            <div class="sub" id="ob-slug-hint" style="font-size:12px;padding:0 4px 12px">Hanya huruf kecil, angka, dan strip.</div>
+            <p class="sub" style="font-size:13px;margin:0 0 18px">Nama ini tampil sebagai judul undangan. Bisa diubah nanti.</p>
+            <div class="afield"><input type="text" id="ob-couple" maxlength="60" placeholder=" " oninput="obSyncSlug()" /><label for="ob-couple">Nama mempelai</label></div>
+            <div class="afield"><input type="text" id="ob-slug" maxlength="40" placeholder=" " autocapitalize="none" autocorrect="off" spellcheck="false" oninput="obSetSlugTouched()" /><label for="ob-slug">Slug tautan</label></div>
+            <p class="afield-hint" id="ob-slug-hint">Hanya huruf kecil, angka, dan strip.</p>
             <button type="button" class="btn" onclick="obNext()">Lanjut</button>
           </div>
 
           <div id="ob-step-2" class="hidden">
             <h2 style="margin:0 0 6px">Detail acara</h2>
-            <p class="sub" style="font-size:13px;margin:0 0 14px">Masih bisa diubah kapan saja di tab Acara.</p>
-            <div class="field"><label for="ob-date">Tanggal</label><input type="date" id="ob-date" /></div>
-            <div class="field"><label for="ob-loc">Lokasi</label><input type="text" id="ob-loc" placeholder="Gedung / kota" /></div>
-            <div class="field ses-row"><input type="text" id="ob-s1n" placeholder="Nama sesi 1" value="Akad" aria-label="Nama sesi 1" /><input type="text" id="ob-s1t" placeholder="10.00 WIB" aria-label="Jam sesi 1" /></div>
-            <div class="field ses-row"><input type="text" id="ob-s2n" placeholder="Nama sesi 2" value="Resepsi" aria-label="Nama sesi 2" /><input type="text" id="ob-s2t" placeholder="12.00 WIB" aria-label="Jam sesi 2" /></div>
+            <p class="sub" style="font-size:13px;margin:0 0 18px">Masih bisa diubah kapan saja di tab Acara.</p>
+            <div class="afield"><input type="date" id="ob-date" /><label for="ob-date">Tanggal</label></div>
+            <div class="afield"><input type="text" id="ob-loc" placeholder=" " /><label for="ob-loc">Lokasi</label></div>
+            <div class="afield-row">
+              <div class="afield"><input type="text" id="ob-s1n" placeholder=" " value="Akad" /><label for="ob-s1n">Sesi 1</label></div>
+              <div class="afield"><input type="text" id="ob-s1t" placeholder=" " value="10.00 WIB" /><label for="ob-s1t">Jam</label></div>
+            </div>
+            <div class="afield-row">
+              <div class="afield"><input type="text" id="ob-s2n" placeholder=" " value="Resepsi" /><label for="ob-s2n">Sesi 2</label></div>
+              <div class="afield"><input type="text" id="ob-s2t" placeholder=" " value="12.00 WIB" /><label for="ob-s2t">Jam</label></div>
+            </div>
             <div style="display:flex;gap:8px;margin-top:14px">
               <button type="button" class="btn line" onclick="obBack()">Kembali</button>
               <button type="button" class="btn" id="ob-save" onclick="obSubmit()">Buat undangan</button>
@@ -1708,14 +1719,28 @@ function openEventSwitcher() {
 
 function openCreateEventSheet() {
   openSheet(`
-    <h3 style="margin:0 0 14px">Acara baru</h3>
-    <div class="field"><label for="ce-title">Judul</label><input id="ce-title" type="text" placeholder="The Wedding of ..." /></div>
-    <div class="field"><label for="ce-couple">Nama mempelai</label><input id="ce-couple" type="text" placeholder="Rudi &amp; Irul" /></div>
-    <div class="field"><label for="ce-slug">Slug tautan (opsional)</label><input id="ce-slug" type="text" placeholder="otomatis dari nama mempelai" autocapitalize="none" autocorrect="off" spellcheck="false" /></div>
-    <div class="field"><label for="ce-date">Tanggal</label><input id="ce-date" type="date" /></div>
-    <div class="field"><label for="ce-loc">Lokasi</label><input id="ce-loc" type="text" placeholder="Gedung / kota" /></div>
-    <div class="field ses-row"><input id="ce-s1n" type="text" placeholder="Nama sesi 1" value="Akad" /><input id="ce-s1t" type="text" placeholder="10.00 WIB" /></div>
-    <div class="field ses-row"><input id="ce-s2n" type="text" placeholder="Nama sesi 2" value="Resepsi" /><input id="ce-s2t" type="text" placeholder="12.00 WIB" /></div>
+    <div class="sheet-head">
+      <button class="ibtn" onclick="closeSheet()" aria-label="Batal"><i data-lucide="x"></i></button>
+      <h3>Acara baru</h3>
+      <span></span>
+    </div>
+
+    <div class="afield"><input id="ce-title" type="text" placeholder=" " /><label for="ce-title">Judul</label></div>
+    <div class="afield"><input id="ce-couple" type="text" placeholder=" " /><label for="ce-couple">Nama mempelai</label></div>
+    <div class="afield"><input id="ce-slug" type="text" placeholder=" " autocapitalize="none" autocorrect="off" spellcheck="false" /><label for="ce-slug">Slug tautan (opsional)</label></div>
+    <p class="afield-hint">Kosongkan untuk dibuat otomatis dari nama mempelai.</p>
+    <div class="afield"><input id="ce-date" type="date" /><label for="ce-date">Tanggal</label></div>
+    <div class="afield"><input id="ce-loc" type="text" placeholder=" " /><label for="ce-loc">Lokasi</label></div>
+
+    <div class="afield-row">
+      <div class="afield"><input id="ce-s1n" type="text" placeholder=" " value="Akad" /><label for="ce-s1n">Sesi 1</label></div>
+      <div class="afield"><input id="ce-s1t" type="text" placeholder=" " value="10.00 WIB" /><label for="ce-s1t">Jam</label></div>
+    </div>
+    <div class="afield-row">
+      <div class="afield"><input id="ce-s2n" type="text" placeholder=" " value="Resepsi" /><label for="ce-s2n">Sesi 2</label></div>
+      <div class="afield"><input id="ce-s2t" type="text" placeholder=" " value="12.00 WIB" /><label for="ce-s2t">Jam</label></div>
+    </div>
+
     <p class="login-err" id="ce-err" role="alert"></p>
     <button class="btn" id="ce-save" onclick="submitCreateEvent()">Buat acara</button>`);
 }
@@ -2367,7 +2392,7 @@ function openFilterSheet() {
         <span class="mf-n">${gs.filter(g => MF_GET[k](g) === o.v).length}</span></button>`).join('') : '<div class="empty" style="padding:10px">Belum ada data.</div>');
   };
   openSheet(`
-    <div class="sheet-head"><button class="ibtn" id="mf-reset" aria-label="Reset filter"><i data-lucide="rotate-ccw"></i></button><h3>Filter</h3><button class="ibtn" onclick="closeSheet()" aria-label="Selesai"><i data-lucide="check"></i></button></div>
+    <div class="sheet-head"><button class="ibtn" id="mf-reset" aria-label="Reset filter"><i data-lucide="rotate-ccw"></i></button><h3>Filter</h3><button class="ibtn primary" onclick="closeSheet()" aria-label="Selesai"><i data-lucide="check"></i></button></div>
     <div class="listcard">${sec('cat')}${sec('type')}${sec('session')}</div>`);
   $('sheet').querySelectorAll('.mf-opt').forEach(b => b.onclick = () => {
     const set = MF[b.dataset.k].set, v = b.dataset.v;
@@ -3238,7 +3263,7 @@ function openGuestSheet(id) {
   const rsvpVal = g ? (g.invitation_type === 'cetak' ? 'hadir' : (g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen' ? 'absen' : (g.rsvp_status || 'pending'))) : (currentType === 'cetak' ? 'hadir' : 'pending');
 
   openSheet(`
-    <div class="sheet-head"><button class="ibtn" onclick="closeSheet()" aria-label="Batal"><i data-lucide="x"></i></button><h3>${g ? 'Edit tamu' : 'Tamu baru'}</h3><button class="ibtn" id="gs-save" aria-label="${g ? 'Simpan' : 'Tambah'}"><i data-lucide="check"></i></button></div>
+    <div class="sheet-head"><button class="ibtn" onclick="closeSheet()" aria-label="Batal"><i data-lucide="x"></i></button><h3>${g ? 'Edit tamu' : 'Tamu baru'}</h3><button class="ibtn primary" id="gs-save" aria-label="${g ? 'Simpan' : 'Tambah'}"><i data-lucide="check"></i></button></div>
     <div class="listcard">
       <div class="field"><label>Nama</label><input type="text" id="gs-name" placeholder="Budi Santoso & Keluarga" value="${esc(g?.group_name || '')}" /></div>
       <div class="field"><label>No. WhatsApp</label><input type="tel" id="gs-phone" placeholder="08123456789 (Opsional)" value="${esc(g?.phone || '')}" /></div>
