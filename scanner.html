@@ -137,10 +137,10 @@ html.lock{overflow:hidden}
 .st-absen{background:var(--red-bg);color:var(--red-ink)}
 .st-warn{background:var(--amber-bg);color:var(--amber-ink)}
 .empty{padding:32px 8px;text-align:center;color:var(--sub);font-size:15px}
-.tokrow{display:flex;gap:10px}
-.tokrow .sbar{flex:1;height:50px;box-shadow:none;border:1px solid var(--line)}
+.tokrow{display:flex;gap:10px;align-items:center}
+.tokrow .sbar{flex:1 1 auto;min-width:0;height:50px;box-shadow:none;border:1px solid var(--line)}
 .tokrow input{font-family:'Geist Mono',monospace;text-transform:uppercase}
-.tokrow .btn{width:auto;height:50px;padding:0 20px;font-size:15px;border-radius:16px}
+.tokrow .btn{flex:0 0 auto;width:auto;height:50px;padding:0 20px;font-size:15px;border-radius:16px;white-space:nowrap}
 .lbl{font-size:13px;color:var(--sub);margin-bottom:10px;font-weight:500}
 
 .backdrop{position:fixed;inset:0;background:rgba(9,16,40,.45);z-index:50;opacity:0;pointer-events:none;transition:opacity .35s var(--ease)}

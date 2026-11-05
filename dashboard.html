@@ -24,9 +24,12 @@
   --lh-body:1.45; --lh-tight:1.12;
 }
 :root[data-dark="1"]{
-  --bg:#0b0f1a; --card:#151b2b; --ink:#f2f5ff; --sub:#97a0b5; --line:#242c40; --soft:#1d2a4f; --brand:#6d8bff;
-  --field-border:#3b4459; --field-bg:#151b2b;
-  --green-bg:#0f3a2a; --green-ink:#4ade9a; --red-bg:#3d1d22; --red-ink:#ff8b90; --amber-bg:#3d300f; --amber-ink:#ffc865; --blue-bg:#1b2a57; --tag:#222a3f; --tag-ink:#c3cadb;
+  --bg:#000000; --card:#1c1c1e; --ink:#ffffff; --sub:#9d9da3; --line:#38383a; --soft:#2c2c2e; --brand:#6d8bff;
+  --field-border:#48484a; --field-bg:#1c1c1e;
+  --green:#30d158; --green-bg:rgba(48,209,88,.16); --green-ink:#30d158;
+  --red-bg:rgba(255,69,58,.16); --red-ink:#ff6961;
+  --amber-bg:rgba(255,214,10,.16); --amber-ink:#ffd60a;
+  --blue-bg:rgba(10,132,255,.18); --tag:#2c2c2e; --tag-ink:#c7c7cc;
   --shadow:none;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -268,9 +271,21 @@ input, select, textarea { font-size: 16px !important; }
 .field{display:flex;align-items:center;gap:14px;padding:0;min-height:64px;position:relative}
 .field:not(:first-child){border-top:1px solid var(--line)}
 .field label{flex:0 0 auto;max-width:52%;font-size:17px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.field input,.field select,.field textarea{flex:1;min-width:0;border:0;background:transparent;outline:none;font-size:17px;padding:18px 0;text-align:right;color:var(--ink)}
+.field input,.field select,.field textarea{flex:1;min-width:0;border:0;background:transparent;outline:none;font-size:17px;padding:18px 0;text-align:right;color:var(--sub)}
+.field input:focus,.field select:focus{color:var(--ink)}
 .field input::placeholder,.field textarea::placeholder{color:var(--sub)}
-.field select{appearance:none;-webkit-appearance:none}
+.field>.switch{margin-left:auto}
+.field select{
+  appearance:none;-webkit-appearance:none;padding-right:22px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 16'%3E%3Cpath d='M2 6l3-3 3 3M2 10l3 3 3-3' fill='none' stroke='%238e8e93' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right center;background-size:10px 16px;
+}
+.field input[type="date"]{
+  position:relative;padding-right:22px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13'%3E%3Cpath d='M1.5 1.5L6.5 6.5l-5 5' fill='none' stroke='%238e8e93' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right center;background-size:8px 13px;
+}
+.field input[type="date"]::-webkit-calendar-picker-indicator{opacity:0;position:absolute;right:0;width:24px;height:100%;margin:0;cursor:pointer}
 .field textarea{resize:none;text-align:left}
 .field.col{flex-direction:column;align-items:stretch;gap:0;padding:14px 0}
 .field.col label{padding:0 0 6px;max-width:100%;font-size:13px;color:var(--sub)}
@@ -325,9 +340,11 @@ input, select, textarea { font-size: 16px !important; }
 .sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:480px;z-index:51;background:var(--bg);border-radius:28px 28px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow-y:auto;transform:translate(-50%,105%);transition:transform .4s cubic-bezier(.32,.72,0,1)}
 .sheet.open{transform:translate(-50%,0)}
 .grab{width:40px;height:5px;border-radius:99px;background:var(--line);margin:0 auto 14px}
-.sheet-head{display:flex;justify-content:space-between;align-items:center;margin:0 4px 14px}
-.sheet-head h3{margin:0;font-family:'Geist',sans-serif;font-weight:800;font-size:var(--fs-title)}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;margin:0 4px 14px;gap:8px}
+.sheet-head h3{margin:0;flex:1;text-align:center;padding:0 6px;font-family:'Geist',sans-serif;font-weight:800;font-size:var(--fs-title)}
 .sheet-head button{color:var(--brand);font-weight:600;font-size:var(--fs-body);min-height:44px;display:inline-flex;align-items:center;padding:0 4px}
+.sheet-head .ibtn{flex:0 0 auto;width:44px;height:44px;min-height:44px;padding:0;margin:0 -8px;justify-content:center;border-radius:50%;color:var(--brand)}
+.sheet-head .ibtn svg{width:22px;height:22px}
 .sheet .listcard{padding:0 20px}
 .sheet .listcard .act{display:flex;align-items:center;gap:12px;width:100%;padding:16px 0;font-size:16px;color:var(--brand);font-weight:500}
 .sheet .listcard .act+.act{border-top:1px solid var(--line)}
@@ -388,7 +405,7 @@ input, select, textarea { font-size: 16px !important; }
 
 /* ===== Lapisan UI ===== */
 :root{--ease:cubic-bezier(.32,.72,0,1);--spring:cubic-bezier(.34,1.56,.64,1);--glass:rgba(255,255,255,.7);--glass-line:rgba(255,255,255,.65);--bgs:rgba(244,245,248,.82)}
-:root[data-dark="1"]{--glass:rgba(30,37,58,.62);--glass-line:rgba(255,255,255,.1);--bgs:rgba(11,15,26,.8)}
+:root[data-dark="1"]{--glass:rgba(28,28,30,.72);--glass-line:rgba(255,255,255,.08);--bgs:rgba(0,0,0,.82)}
 @keyframes rise{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
 @keyframes viewIn{from{opacity:0;transform:translateY(10px) scale(.98);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
 @keyframes swap{from{transform:rotate(-120deg) scale(.5);opacity:0}to{transform:none;opacity:1}}
@@ -600,10 +617,10 @@ html.lock{overflow:hidden}
 #scanner-overlay .st-absen{background:var(--red-bg);color:var(--red-ink)}
 #scanner-overlay .st-warn{background:var(--amber-bg);color:var(--amber-ink)}
 #scanner-overlay .empty{padding:32px 8px;text-align:center;color:var(--sub);font-size:15px}
-#scanner-overlay .tokrow{display:flex;gap:10px}
-#scanner-overlay .tokrow .sbar{flex:1;height:50px;box-shadow:none;border:1px solid var(--line)}
+#scanner-overlay .tokrow{display:flex;gap:10px;align-items:center}
+#scanner-overlay .tokrow .sbar{flex:1 1 auto;min-width:0;height:50px;box-shadow:none;border:1px solid var(--line)}
 #scanner-overlay .tokrow input{font-family:'Geist Mono',monospace;text-transform:uppercase}
-#scanner-overlay .tokrow .btn{width:auto;height:50px;padding:0 20px;font-size:15px;border-radius:16px}
+#scanner-overlay .tokrow .btn{flex:0 0 auto;width:auto;height:50px;padding:0 20px;font-size:15px;border-radius:16px;white-space:nowrap}
 #scanner-overlay .lbl{font-size:13px;color:var(--sub);margin-bottom:10px;font-weight:500}
 #scanner-overlay .res{text-align:center;padding:6px 4px 4px}
 #scanner-overlay .res-ico{width:72px;height:72px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;animation:pop .6s var(--spring)}
@@ -1901,7 +1918,7 @@ function renderWishesSheet() {
   if (!wishesDone && box.scrollHeight <= box.clientHeight + 4) loadMoreWishes();
 }
 function openWishesSheet() {
-  openSheet(`<div class="sheet-head wsheet-head"><h3>Ucapan &amp; Doa</h3><button onclick="closeSheet()">Tutup</button></div>
+  openSheet(`<div class="sheet-head wsheet-head"><h3>Ucapan &amp; Doa</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="wchat wsheet-chat" id="wchat-all"></div>`);
   renderWishesSheet();
   $('wchat-all').addEventListener('scroll', e => { const b = e.target; if (b.scrollTop + b.clientHeight >= b.scrollHeight - 120) loadMoreWishes(); }, { passive: true });
@@ -1940,7 +1957,7 @@ $('wchat').addEventListener('click', e => { const m = e.target.closest('.wmsg');
 function openWish(i) {
   const w = wishesData[i]; if (!w) return; const g = wishGuest(w), b = g ? guestBadge(g) : null;
   const phone = g && g.phone ? String(g.phone).replace(/\D/g, '').replace(/^0/, '62') : '';
-  openSheet(`<div class="sheet-head"><h3>${esc(w.guest_name)}</h3><button onclick="closeSheet()">Tutup</button></div>
+  openSheet(`<div class="sheet-head"><h3>${esc(w.guest_name)}</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="listcard"><div class="wfull">${esc(w.message)}</div><div class="wfoot">${esc(fmtWhen(Date.parse(w.created_at)))}${b ? `<span class="st st-${b[0]}">${b[1]}</span>` : ''}</div>
     <button class="act" id="w-copy"><i data-lucide="copy"></i>Salin ucapan</button>
     ${phone ? `<a class="act" href="https://wa.me/${phone}?text=${encodeURIComponent('Terima kasih atas ucapan dan doanya, ' + w.guest_name + ' 🙏')}" target="_blank" rel="noopener"><i data-lucide="message-circle"></i>Balas lewat WhatsApp</a>` : ''}</div>`);
@@ -2350,7 +2367,7 @@ function openFilterSheet() {
         <span class="mf-n">${gs.filter(g => MF_GET[k](g) === o.v).length}</span></button>`).join('') : '<div class="empty" style="padding:10px">Belum ada data.</div>');
   };
   openSheet(`
-    <div class="sheet-head"><button id="mf-reset">Reset</button><h3>Filter</h3><button onclick="closeSheet()">Selesai</button></div>
+    <div class="sheet-head"><button class="ibtn" id="mf-reset" aria-label="Reset filter"><i data-lucide="rotate-ccw"></i></button><h3>Filter</h3><button class="ibtn" onclick="closeSheet()" aria-label="Selesai"><i data-lucide="check"></i></button></div>
     <div class="listcard">${sec('cat')}${sec('type')}${sec('session')}</div>`);
   $('sheet').querySelectorAll('.mf-opt').forEach(b => b.onclick = () => {
     const set = MF[b.dataset.k].set, v = b.dataset.v;
@@ -2501,7 +2518,7 @@ function handleFabClick() {
     else toast('Tautan pratinjau belum siap. Muat ulang halaman.', false);
   } else if (currentActiveTab === 'akun') {
     openSheet(`
-      <div class="sheet-head"><h3>Panduan Singkat</h3><button onclick="closeSheet()">Tutup</button></div>
+      <div class="sheet-head"><h3>Panduan Singkat</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
       <div class="listcard" style="padding-bottom:16px;">
         <div style="font-size:15px; color:var(--sub); display:flex; flex-direction:column; gap:14px; line-height:1.5; padding-top:12px;">
           <div><b>1. Tambah Tamu:</b> Pilih tipe undangan, nama, kategori, nomor WA, dan kuota pax.</div>
@@ -2533,7 +2550,7 @@ function copyOrShow(text, label = 'Tautan pratinjau', okMsg) {
       ? `<textarea id="copy-manual" readonly rows="6" style="width:100%;font-family:inherit;font-size:16px;line-height:1.5;padding:12px 14px;border:1px solid var(--field-border);border-radius:14px;background:var(--soft);color:var(--ink);resize:none" onclick="this.select()">${esc(text)}</textarea>`
       : `<input type="text" id="copy-manual" readonly value="${esc(text)}" style="width:100%;font-family:inherit;font-size:16px;padding:12px 14px;border:1px solid var(--field-border);border-radius:14px;background:var(--soft);color:var(--ink)" onclick="this.select()" />`;
     openSheet(`
-      <div class="sheet-head"><h3>${esc(label)}</h3><button onclick="closeSheet()">Tutup</button></div>
+      <div class="sheet-head"><h3>${esc(label)}</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
       <div class="listcard" style="padding:16px">
         <p style="margin:0 0 12px;font-size:13.5px;color:var(--sub);line-height:1.55">
           Browser menolak menyalin otomatis. Tekan lama lalu pilih Semua &amp; Salin.
@@ -2634,7 +2651,7 @@ function openUpgrade() {
   const phone = (globalData && globalData.client && globalData.client.phone) || '';
   if (!phone) {
     openSheet(`
-      <div class="sheet-head"><h3>Nomor WhatsApp</h3><button onclick="closeSheet()">Tutup</button></div>
+      <div class="sheet-head"><h3>Nomor WhatsApp</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
       <div class="listcard" style="padding:16px">
         <p style="margin:0 0 14px;font-size:15px;color:var(--sub);line-height:1.5">
           Kami perlu nomor WhatsApp untuk konfirmasi pembayaran.
@@ -2687,7 +2704,7 @@ async function loadPayment() {
 
 async function renderUpgradeSheet() {
   openSheet(`
-    <div class="sheet-head"><h3>Upgrade paket</h3><button onclick="closeSheet()">Tutup</button></div>
+    <div class="sheet-head"><h3>Upgrade paket</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="listcard" style="padding:16px"><div class="empty">Memuat paket…</div></div>`);
 
   await loadOrder();
@@ -2698,7 +2715,7 @@ async function renderUpgradeSheet() {
     .eq('is_active', true).gt('price', 0).order('sort_order');
 
   if (error || !plans || !plans.length) {
-    openSheet(`<div class="sheet-head"><h3>Upgrade paket</h3><button onclick="closeSheet()">Tutup</button></div>
+    openSheet(`<div class="sheet-head"><h3>Upgrade paket</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
       <div class="listcard" style="padding:16px"><div class="empty">Paket belum tersedia. Coba lagi nanti.</div></div>`);
     return;
   }
@@ -2722,7 +2739,7 @@ async function renderUpgradeSheet() {
   }).join('');
 
   openSheet(`
-    <div class="sheet-head"><h3>Upgrade paket</h3><button onclick="closeSheet()">Tutup</button></div>
+    <div class="sheet-head"><h3>Upgrade paket</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="listcard" style="padding:16px">
       <p style="margin:0 0 4px;font-size:15px;color:var(--sub);line-height:1.5">
         Bayar sekali untuk acara ini. Masa aktif dihitung saat paket diaktifkan.
@@ -2732,7 +2749,7 @@ async function renderUpgradeSheet() {
 }
 
 async function choosePlan(code) {
-  openSheet(`<div class="sheet-head"><h3>Membuat pesanan…</h3><button onclick="closeSheet()">Tutup</button></div>
+  openSheet(`<div class="sheet-head"><h3>Membuat pesanan…</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="listcard" style="padding:16px"><div class="empty">Menyiapkan kode pembayaran…</div></div>`);
   const { data, error } = await supabaseClient.rpc('create_order', {
     p_event_id: currentEventId, p_plan_code: code
@@ -2751,7 +2768,7 @@ function renderOrderStep(step) {
 
   if (step === 3) {
     openSheet(`
-      <div class="sheet-head"><h3>Menunggu verifikasi</h3><button onclick="closeSheet()">Tutup</button></div>
+      <div class="sheet-head"><h3>Menunggu verifikasi</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
       <div class="listcard" style="padding:16px">
         <p style="margin:0 0 6px;font-size:15px;line-height:1.55">
           Bukti pembayaran untuk pesanan <b>${esc(activeOrder.order_code || '')}</b> sudah kami terima.
@@ -2766,7 +2783,7 @@ function renderOrderStep(step) {
 
   const pay = activePayment || {};
   openSheet(`
-    <div class="sheet-head"><h3>Pembayaran</h3><button onclick="closeSheet()">Tutup</button></div>
+    <div class="sheet-head"><h3>Pembayaran</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="listcard" style="padding:16px">
       <div class="paybox" style="margin-top:0">
         <div class="payrow"><span>Kode pesanan</span><b>${esc(activeOrder.order_code || '—')}</b>
@@ -2830,16 +2847,16 @@ async function cancelOrder() {
 
 /* ---------- Admin: verifikasi pesanan ---------- */
 async function openAdminOrders() {
-  openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button onclick="closeSheet()">Tutup</button></div>
+  openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="listcard" style="padding:16px"><div class="empty">Memuat…</div></div>`);
   const { data, error } = await supabaseClient.rpc('admin_list_orders');
   if (error || !Array.isArray(data)) {
-    openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button onclick="closeSheet()">Tutup</button></div>
+    openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
       <div class="listcard" style="padding:16px"><div class="empty">Gagal memuat pesanan.</div></div>`);
     return;
   }
   if (!data.length) {
-    openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button onclick="closeSheet()">Tutup</button></div>
+    openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
       <div class="listcard" style="padding:16px"><div class="empty">Tidak ada pesanan menunggu.</div></div>`);
     return;
   }
@@ -2856,7 +2873,7 @@ async function openAdminOrders() {
         <button class="copybtn" style="color:var(--red-ink)" onclick="rejectOrder('${esc(o.id)}')">Tolak</button>
       </div>
     </div>`).join('');
-  openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button onclick="closeSheet()">Tutup</button></div>
+  openSheet(`<div class="sheet-head"><h3>Pesanan masuk</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="listcard" style="padding:0 16px">${rows}</div>`);
 }
 
@@ -2885,7 +2902,7 @@ async function rejectOrder(id) {
 /* ---------- Akun: keamanan ---------- */
 function openChangePassword() {
   openSheet(`
-    <div class="sheet-head"><h3>Ganti password</h3><button onclick="closeSheet()">Batal</button></div>
+    <div class="sheet-head"><h3>Ganti password</h3><button class="ibtn" onclick="closeSheet()" aria-label="Batal"><i data-lucide="x"></i></button></div>
     <div class="afield"><input type="password" id="cp-new" minlength="8" placeholder=" " autocomplete="new-password" /><label for="cp-new">Password baru</label></div>
     <p class="afield-hint">Minimal 8 karakter.</p>
     <div class="afield"><input type="password" id="cp-again" minlength="8" placeholder=" " autocomplete="new-password" /><label for="cp-again">Ulangi password baru</label></div>
@@ -2916,7 +2933,7 @@ async function savePasswordSheet() {
 function openEditPhone() {
   const phone = (globalData && globalData.client && globalData.client.phone) || '';
   openSheet(`
-    <div class="sheet-head"><h3>Nomor WhatsApp</h3><button onclick="closeSheet()">Batal</button></div>
+    <div class="sheet-head"><h3>Nomor WhatsApp</h3><button class="ibtn" onclick="closeSheet()" aria-label="Batal"><i data-lucide="x"></i></button></div>
     <div class="afield"><input type="tel" id="ph-input" inputmode="tel" placeholder=" " value="${esc(phone)}" /><label for="ph-input">Nomor WhatsApp</label></div>
     <p class="afield-hint">Dipakai untuk bantuan dan saat upgrade paket. Tidak ditampilkan ke tamu.</p>
     <p class="login-err" id="ph-err" role="alert" style="padding:0 4px"></p>
@@ -3110,7 +3127,7 @@ async function saveWaTemplates() {
 function openGuestActions(id) {
   const g = findGuest(id); if (!g) return;
   openSheet(`
-    <div class="sheet-head"><h3>${esc(g.group_name)}</h3><button onclick="closeSheet()">Tutup</button></div>
+    <div class="sheet-head"><h3>${esc(g.group_name)}</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     <div class="listcard">
       <button class="act" data-a="copy"><i data-lucide="link"></i>Salin tautan undangan</button>
       ${g.invitation_type === 'cetak' ? '' : '<button class="act" data-a="wa"><i data-lucide="message-circle"></i>Kirim lewat WhatsApp</button>'}
@@ -3193,7 +3210,7 @@ async function sendPendingWA(id) {
 
 function confirmDelete(g) {
   openSheet(`
-    <div class="sheet-head"><h3>Hapus tamu?</h3><button onclick="closeSheet()">Batal</button></div>
+    <div class="sheet-head"><h3>Hapus tamu?</h3><button class="ibtn" onclick="closeSheet()" aria-label="Batal"><i data-lucide="x"></i></button></div>
     <div class="listcard">
       <div class="act-title" style="padding:16px 0">“${esc(g.group_name)}” akan dihapus. Tautan undangannya tidak bisa dipakai lagi.</div>
       <button class="act danger" id="do-del" style="justify-content:center;border-top:1px solid var(--line)"><i data-lucide="trash-2"></i>Hapus</button>
@@ -3221,7 +3238,7 @@ function openGuestSheet(id) {
   const rsvpVal = g ? (g.invitation_type === 'cetak' ? 'hadir' : (g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen' ? 'absen' : (g.rsvp_status || 'pending'))) : (currentType === 'cetak' ? 'hadir' : 'pending');
 
   openSheet(`
-    <div class="sheet-head"><button onclick="closeSheet()">Batal</button><h3>${g ? 'Edit tamu' : 'Tamu baru'}</h3><button id="gs-save">${g ? 'Simpan' : 'Tambah'}</button></div>
+    <div class="sheet-head"><button class="ibtn" onclick="closeSheet()" aria-label="Batal"><i data-lucide="x"></i></button><h3>${g ? 'Edit tamu' : 'Tamu baru'}</h3><button class="ibtn" id="gs-save" aria-label="${g ? 'Simpan' : 'Tambah'}"><i data-lucide="check"></i></button></div>
     <div class="listcard">
       <div class="field"><label>Nama</label><input type="text" id="gs-name" placeholder="Budi Santoso & Keluarga" value="${esc(g?.group_name || '')}" /></div>
       <div class="field"><label>No. WhatsApp</label><input type="tel" id="gs-phone" placeholder="08123456789 (Opsional)" value="${esc(g?.phone || '')}" /></div>
@@ -3372,7 +3389,7 @@ async function saveGuest(g) {
 function openPending() {
   const list = globalData.guests.filter(g => (g.rsvp_status === 'pending' || !g.rsvp_status) && g.is_sent);
   openSheet(`
-    <div class="sheet-head"><h3>Tamu pending · ${list.length}</h3><button onclick="closeSheet()">Tutup</button></div>
+    <div class="sheet-head"><h3>Tamu pending · ${list.length}</h3><button class="ibtn" onclick="closeSheet()" aria-label="Tutup"><i data-lucide="x"></i></button></div>
     ${list.length
       ? `<div class="listcard">${list.map((g) => `
           <button class="act" style="width:100%;text-align:left" onclick="sendPendingWA('${g.id}')">
