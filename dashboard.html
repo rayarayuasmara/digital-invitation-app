@@ -553,6 +553,20 @@ html.lock{overflow:hidden}
 .field-nav{cursor:pointer}
 .field-nav .chev{width:18px;height:18px;color:var(--sub);flex-shrink:0}
 
+/* ===== Form & tab Undangan (onboarding, buat acara, detail) ===== */
+.card.flush{padding:0 20px}
+.card.pad{padding:18px}
+.card.pad-sm{padding:16px 18px}
+.form-hint{font-size:12px;line-height:1.45;color:var(--sub);padding:0 4px 10px}
+.form-hint-last{padding-bottom:12px}
+.lead{margin:4px 0 0;font-size:13px;line-height:1.4;color:var(--sub)}
+.sub.sm{font-size:13px}
+.sub.mb12{margin-bottom:12px}
+.btn-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.btn-pair .btn{font-size:15px}
+#acara-subtabs{margin-bottom:4px}
+#acara-subtabs .seg-btn{font-size:14px;padding:0 10px;height:42px}
+
 /* ===== Multi-select filter & pagination (Tab Tamu) ===== */
 .sfbtn{position:relative;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex-shrink:0;background:var(--soft);color:var(--brand)}
 .sfbtn svg{width:20px;height:20px}
@@ -1050,16 +1064,16 @@ html.lock{overflow:hidden}
         </div>
         <form id="ce-form" class="subpane" onsubmit="submitCreateEvent(event)">
           <section class="wiz-panel" data-ce-panel="0">
-            <div class="card" style="padding:0 20px">
+            <div class="card flush">
               <div class="afield"><input type="text" id="ce-couple" maxlength="60" placeholder=" " required oninput="ceSyncDerived()" /><label for="ce-couple">Nama mempelai</label></div>
-              <div class="sub" style="font-size:12px;padding:0 4px 10px">Untuk akun WO, isi nama mempelai, bukan nama WO.</div>
+              <div class="form-hint">Untuk akun WO, isi nama mempelai, bukan nama WO.</div>
               <div class="afield"><input type="text" id="ce-title" maxlength="60" placeholder=" " oninput="ceTitleTouched=true;ceUpdateSummary()" /><label for="ce-title">Judul undangan</label></div>
               <div class="afield"><input type="text" id="ce-slug" maxlength="40" placeholder=" " autocapitalize="none" autocorrect="off" spellcheck="false" oninput="ceSlugTouched=true;ceSlugHint();ceUpdateSummary()" /><label for="ce-slug">Slug tautan</label></div>
-              <div class="sub" style="font-size:12px;padding:0 4px 12px" id="ce-slug-hint">Tautan dibuat otomatis dari nama mempelai.</div>
+              <div class="form-hint form-hint-last" id="ce-slug-hint">Tautan dibuat otomatis dari nama mempelai.</div>
             </div>
           </section>
           <section class="wiz-panel hidden" data-ce-panel="1">
-            <div class="card" style="padding:18px">
+            <div class="card pad">
               <div class="ch"><h3>Pilih tema undangan</h3></div>
               <button type="button" class="theme-option selected" aria-pressed="true" onclick="ceSelectTheme('classic')">
                 <div>
@@ -1071,19 +1085,19 @@ html.lock{overflow:hidden}
             </div>
           </section>
           <section class="wiz-panel hidden" data-ce-panel="2">
-            <div class="card" style="padding:0 20px">
+            <div class="card flush">
               <div class="afield"><input type="date" id="ce-date" placeholder=" " required oninput="ceUpdateSummary()" /><label for="ce-date">Tanggal acara</label></div>
               <div class="afield"><input type="text" id="ce-location" placeholder=" " required oninput="ceUpdateSummary()" /><label for="ce-location">Lokasi / venue</label></div>
             </div>
-            <div class="card" style="padding:16px 18px">
-              <div class="ch"><div><h3>Agenda acara</h3><p class="sub" style="margin:4px 0 0;font-size:13px">Tamu memilih sesi yang akan dihadiri.</p></div></div>
+            <div class="card pad-sm">
+              <div class="ch"><div><h3>Agenda acara</h3><p class="lead">Tamu memilih sesi yang akan dihadiri.</p></div></div>
               <div id="ce-sessions"></div>
               <button type="button" class="sess-add" id="ce-add-session" onclick="ceAddSession()"><i data-lucide="plus"></i>Tambah sesi acara</button>
-              <div class="sub" style="font-size:12px;padding:10px 4px 2px">Minimal 1, maksimal 3 sesi. Contoh waktu: 10.00 WIB.</div>
+              <div class="form-hint">Minimal 1, maksimal 3 sesi. Contoh waktu: 10.00 WIB.</div>
             </div>
-            <div class="card" style="padding:0 20px">
+            <div class="card flush">
               <div class="afield"><textarea id="ce-caption" rows="3" placeholder=" "></textarea><label for="ce-caption">Pesan pembuka (opsional)</label></div>
-              <div class="sub" style="font-size:12px;padding:0 4px 12px">Ditampilkan di halaman undangan, bukan di pesan WhatsApp.</div>
+              <div class="form-hint form-hint-last">Ditampilkan di halaman undangan, bukan di pesan WhatsApp.</div>
             </div>
           </section>
           <section class="wiz-panel hidden" data-ce-panel="3">
@@ -1094,7 +1108,7 @@ html.lock{overflow:hidden}
             </div>
           </section>
           <section class="wiz-panel hidden" data-ce-panel="4">
-            <div class="card" style="padding:18px">
+            <div class="card pad">
               <div class="ch"><h3>Periksa detail undangan</h3></div>
               <div class="summary-list">
                 <div class="summary-row"><span>Mempelai</span><b id="ce-summary-couple">—</b></div>
@@ -1285,10 +1299,10 @@ html.lock{overflow:hidden}
     <div id="tab-acara" class="hidden">
       <header class="topbar"><h1>Undangan</h1><span class="logo">R</span></header>
       <div class="page">
-        <div class="tabs" id="acara-subtabs" role="tablist" style="padding:0 4px">
-          <button class="on" role="tab" aria-selected="true" data-sub="profil" onclick="switchAcaraSub('profil')">Detail</button>
-          <button role="tab" aria-selected="false" data-sub="wa" onclick="switchAcaraSub('wa')">Pesan WhatsApp<i class="dotmark" id="wa-dirty" hidden></i></button>
-          <button role="tab" aria-selected="false" data-sub="petugas" onclick="switchAcaraSub('petugas')">Petugas</button>
+        <div class="seg" id="acara-subtabs" role="tablist" aria-label="Bagian undangan">
+          <button class="seg-btn on" role="tab" aria-selected="true" data-sub="profil" onclick="switchAcaraSub('profil')">Detail</button>
+          <button class="seg-btn" role="tab" aria-selected="false" data-sub="wa" onclick="switchAcaraSub('wa')">Pesan WhatsApp<i class="dotmark" id="wa-dirty" hidden></i></button>
+          <button class="seg-btn" role="tab" aria-selected="false" data-sub="petugas" onclick="switchAcaraSub('petugas')">Petugas</button>
         </div>
 
         <!-- Sub-tab 1: alur kelola undangan -->
@@ -1302,18 +1316,18 @@ html.lock{overflow:hidden}
           </div>
           <section class="wiz-panel" data-event-panel="0">
             <div class="wizard-intro"><p class="wizard-kicker">Data dasar</p><h2>Data mempelai</h2><p>Nama dan tautan yang tampil di undangan.</p></div>
-            <div class="card" style="padding:0 20px">
+            <div class="card flush">
               <div class="afield"><input type="text" id="ev-couple" maxlength="60" placeholder=" " required /><label for="ev-couple">Nama mempelai</label></div>
-              <div class="sub" style="font-size:12px;padding:0 4px 10px">Untuk akun WO, isi nama mempelai, bukan nama WO.</div>
+              <div class="form-hint">Untuk akun WO, isi nama mempelai, bukan nama WO.</div>
               <div class="afield"><input type="text" id="ev-title" maxlength="60" placeholder=" " required /><label for="ev-title">Judul undangan</label></div>
-              <div class="sub" style="font-size:12px;padding:0 4px 10px">Judul tampil di undangan dan pesan WhatsApp.</div>
+              <div class="form-hint">Judul tampil di undangan dan pesan WhatsApp.</div>
               <div class="afield"><input type="text" id="ev-slug" maxlength="40" placeholder=" " autocapitalize="none" autocorrect="off" spellcheck="false" oninput="updateSlugHint();eventUpdateSummary()" /><label for="ev-slug">Slug tautan</label></div>
-              <div class="sub" style="font-size:12px;padding:0 4px 12px" id="ev-slug-hint">Hanya huruf kecil, angka, dan strip.</div>
+              <div class="form-hint form-hint-last" id="ev-slug-hint">Hanya huruf kecil, angka, dan strip.</div>
             </div>
           </section>
           <section class="wiz-panel hidden" data-event-panel="1">
             <div class="wizard-intro"><p class="wizard-kicker">Tampilan</p><h2>Pilih tema</h2><p>Gunakan tema yang tersedia untuk pratinjau undangan.</p></div>
-            <div class="card" style="padding:18px">
+            <div class="card pad">
               <button type="button" class="theme-option selected" aria-pressed="true" onclick="eventSelectTheme('classic')">
                 <div>
                   <div class="theme-preview"><span class="tp-mark">R</span><small>UNDANGAN PERNIKAHAN</small><strong id="ev-theme-couple">Nama Mempelai</strong><span id="ev-theme-date">Hari &amp; tanggal acara</span></div>
@@ -1325,19 +1339,19 @@ html.lock{overflow:hidden}
           </section>
           <section class="wiz-panel hidden" data-event-panel="2">
             <div class="wizard-intro"><p class="wizard-kicker">Waktu &amp; tempat</p><h2>Detail acara</h2><p>Atur jadwal dan lokasi untuk tamu.</p></div>
-            <div class="card" style="padding:0 20px">
+            <div class="card flush">
               <div class="afield"><input type="date" id="ev-date" placeholder=" " required oninput="eventUpdateSummary()" /><label for="ev-date">Tanggal acara</label></div>
               <div class="afield"><input type="text" id="ev-location" placeholder=" " required oninput="eventUpdateSummary()" /><label for="ev-location">Lokasi / venue</label></div>
             </div>
-            <div class="card" style="padding:16px 18px">
-              <div class="ch"><div><h3>Agenda acara</h3><p class="sub" style="margin:4px 0 0;font-size:13px">Atur nama dan waktu tiap sesi.</p></div></div>
+            <div class="card pad-sm">
+              <div class="ch"><div><h3>Agenda acara</h3><p class="lead">Atur nama dan waktu tiap sesi.</p></div></div>
               <div id="ev-sessions"></div>
               <button type="button" class="sess-add" id="ev-add-session" onclick="addSession()"><i data-lucide="plus"></i>Tambah sesi acara</button>
-              <div class="sub" style="font-size:12px;padding:10px 4px 2px">Minimal 1, maksimal 3 sesi. Tamu dari sesi yang dihapus dipindahkan ke sesi pertama.</div>
+              <div class="form-hint">Minimal 1, maksimal 3 sesi. Tamu dari sesi yang dihapus dipindahkan ke sesi pertama.</div>
             </div>
-            <div class="card" style="padding:0 20px">
+            <div class="card flush">
               <div class="afield"><textarea id="ev-caption" rows="3" placeholder=" " oninput="eventUpdateSummary()"></textarea><label for="ev-caption">Pesan pembuka (opsional)</label></div>
-              <div class="sub" style="font-size:12px;padding:0 4px 12px">Tampil di undangan, bukan di pesan WhatsApp.</div>
+              <div class="form-hint form-hint-last">Tampil di undangan, bukan di pesan WhatsApp.</div>
             </div>
           </section>
           <section class="wiz-panel hidden" data-event-panel="3">
@@ -1346,7 +1360,7 @@ html.lock{overflow:hidden}
           </section>
           <section class="wiz-panel hidden" data-event-panel="4">
             <div class="wizard-intro"><p class="wizard-kicker">Langkah terakhir</p><h2>Periksa undangan</h2><p>Pastikan detail utama sudah benar sebelum menyimpan.</p></div>
-            <div class="card" style="padding:18px"><div class="summary-list">
+            <div class="card pad"><div class="summary-list">
               <div class="summary-row"><span>Mempelai</span><b id="ev-summary-couple">—</b></div>
               <div class="summary-row"><span>Judul</span><b id="ev-summary-title">—</b></div>
               <div class="summary-row"><span>Tautan</span><b id="ev-summary-slug">—</b></div>
@@ -1368,14 +1382,14 @@ html.lock{overflow:hidden}
         <div id="petugas-pane" class="subpane hidden">
           <div class="card" style="padding:20px">
             <div class="ch" style="margin-bottom:6px"><h3>Kode Petugas</h3></div>
-            <div class="sub" style="font-size:13px;margin-bottom:12px">Bagikan kode ini ke petugas pintu masuk. Petugas hanya bisa melihat daftar tamu dan check-in. Tidak bisa mengubah data, tidak bisa melihat nomor WhatsApp tamu.</div>
+            <div class="sub sm mb12">Bagikan kode ini ke petugas pintu masuk. Petugas hanya bisa melihat daftar tamu dan check-in. Tidak bisa mengubah data, tidak bisa melihat nomor WhatsApp tamu.</div>
             <div class="field"><label for="scanner-code">Kode aktif</label><input type="text" id="scanner-code" readonly placeholder="Belum dibuat" autocomplete="off" /></div>
             <button type="button" class="btn" onclick="rotateScannerCode()">Buat / ganti kode</button>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
-              <button type="button" class="btn line" style="font-size:15px" onclick="copyScannerCode()">Salin kode</button>
-              <button type="button" class="btn line" style="font-size:15px" onclick="copyScannerLink()">Salin tautan</button>
+            <div class="btn-pair">
+              <button type="button" class="btn line" onclick="copyScannerCode()">Salin kode</button>
+              <button type="button" class="btn line" onclick="copyScannerLink()">Salin tautan</button>
             </div>
-            <div class="sub" style="font-size:12px;margin-top:10px">Mengganti kode langsung mematikan kode lama. Petugas perlu memasukkan kode baru.</div>
+            <div class="form-hint">Mengganti kode langsung mematikan kode lama. Petugas perlu memasukkan kode baru.</div>
           </div>
         </div>
 
@@ -1383,13 +1397,13 @@ html.lock{overflow:hidden}
         <div id="wa-pane" class="subpane hidden">
           <div class="card" style="padding:16px 18px 14px">
             <div class="ch" style="margin-bottom:4px"><h3>Template per kategori</h3></div>
-            <div class="sub" style="font-size:13px">Pilih kategori tamu, lalu pilih gaya pesan atau tulis sendiri. Kategori tanpa template memakai template <b>Umum</b>.</div>
+            <div class="sub sm">Pilih kategori tamu, lalu pilih gaya pesan atau tulis sendiri. Kategori tanpa template memakai template <b>Umum</b>.</div>
             <div class="chips" id="wa-cats" role="tablist" aria-label="Kategori template"></div>
           </div>
 
           <div class="card" id="wa-editor" style="padding:20px">
             <div class="ch" style="margin-bottom:6px"><h3 id="wa-cat-title">Umum</h3><span class="tag" id="wa-cat-count"></span></div>
-            <div class="sub" style="font-size:13px;margin-bottom:12px" id="wa-cat-hint"></div>
+            <div class="sub sm mb12" id="wa-cat-hint"></div>
 
             <div class="wa-label">Gaya pesan</div>
             <div class="wa-styles" id="wa-styles"></div>
@@ -1428,7 +1442,7 @@ html.lock{overflow:hidden}
           </div>
         </div>
 
-        <div class="card" style="padding:0 20px">
+        <div class="card flush">
           <div class="field field-nav" role="button" tabindex="0" onclick="openChangePassword()" onkeydown="if(event.key==='Enter'||event.key===' ')openChangePassword()">
             <label>Password</label>
             <span class="ro-val">••••••••</span>
