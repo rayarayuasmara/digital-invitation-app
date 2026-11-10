@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Button } from '@/components/arc/button/button'
+import { Search, X } from 'lucide-react'
 import { ConfirmMorph } from '@/components/arc/confirm-morph/confirm-morph'
 import { Input } from '@/components/arc/input/input'
 import { NumberField } from '@/components/arc/number-field/number-field'
-import { SearchField } from '@/components/arc/search-field/search-field'
 import { Select } from '@/components/arc/select/select'
+import { Sheet } from '@/components/Sheet'
 import type { DashboardData } from '@/lib/dashboard'
 import { addGuest, deleteGuest, markSent, updateGuest } from '@/lib/guests'
 import type { Guest, GuestForm } from '@/lib/guests'
@@ -32,150 +32,158 @@ function matches(g: Guest, f: Filter) {
   return g.is_checked_in
 }
 
-function statusLabel(g: Guest) {
-  if (g.is_checked_in) return 'Sudah check-in'
-  if (g.rsvp_status === 'hadir') return 'Hadir'
-  if (g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen') return 'Tidak hadir'
-  if (!g.is_sent) return 'Belum terkirim'
-  return 'Pending'
+function statusBadge(g: Guest): { text: string; tone: 'ok' | 'bad' | '' } {
+  if (g.is_checked_in) return { text: 'Check-in', tone: 'ok' }
+  if (g.rsvp_status === 'hadir') return { text: 'Hadir', tone: 'ok' }
+  if (g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen') return { text: 'Tidak hadir', tone: 'bad' }
+  if (!g.is_sent) return { text: 'Belum terkirim', tone: '' }
+  return { text: 'Pending', tone: '' }
 }
 
 type Props = {
   data: DashboardData
   onChanged: () => Promise<void>
+  notify: (message: string) => void
+  /** Increment to open the new-guest sheet, for example from the tab bar action. */
+  createSignal: number
 }
 
-export function GuestsPanel({ data, onChanged }: Props) {
+export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
   const event = data.event!
   const guests = data.guests as Guest[]
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<Filter>('semua')
-  const [editing, setEditing] = useState<Guest | 'new' | null>(null)
-  const [message, setMessage] = useState('')
+  const [sheet, setSheet] = useState<{ mode: 'new' } | { mode: 'edit'; guest: Guest } | null>(null)
+
+  useEffect(() => {
+    if (createSignal > 0) setSheet({ mode: 'new' })
+  }, [createSignal])
 
   const categories = useMemo(() => {
     const set = new Set(['Keluarga', 'Teman', 'Umum', 'VIP', 'Artis', 'Tetangga', ...guests.map(g => g.category)])
     return [...set].filter(Boolean)
   }, [guests])
 
-  const sessions = (event.sessions ?? []) as { name: string; time_text?: string }[]
+  const sessions = (event.sessions ?? []).map(s => s.name)
 
   const visible = guests
     .filter(g => g.group_name.toLowerCase().includes(query.trim().toLowerCase()))
     .filter(g => matches(g, filter))
     .sort((a, b) => a.group_name.localeCompare(b.group_name))
 
-  const copyLink = async (g: Guest) => {
-    const url = `${window.location.origin}/${event.slug}/${g.invitation_token}`
-    await navigator.clipboard.writeText(url)
-    setMessage(`Tautan ${g.group_name} disalin`)
-  }
-
   const run = async (fn: () => Promise<void>, ok: string) => {
-    setMessage('')
     try {
       await fn()
-      setMessage(ok)
+      notify(ok)
       await onChanged()
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : 'Terjadi kesalahan.')
+      notify(e instanceof Error ? e.message : 'Terjadi kesalahan.')
     }
   }
 
-  if (editing) {
-    return (
-      <GuestFormView
-        guest={editing === 'new' ? null : editing}
-        categories={categories}
-        sessions={sessions.map(s => s.name)}
-        onCancel={() => setEditing(null)}
-        onSave={async (form) => {
-          await run(async () => {
-            if (editing === 'new') await addGuest(event.id, form)
-            else await updateGuest(editing, event.id, form)
-          }, editing === 'new' ? 'Tamu ditambahkan' : 'Tamu diperbarui')
-          setEditing(null)
-        }}
-      />
-    )
+  const copyLink = async (g: Guest) => {
+    const url = `${window.location.origin}/${event.slug}/${g.invitation_token}`
+    try {
+      await navigator.clipboard.writeText(url)
+      notify(`Tautan ${g.group_name} disalin`)
+    } catch {
+      notify('Gagal menyalin tautan.')
+    }
   }
 
-  return (
-    <section style={{ display: 'grid', gap: 16 }}>
-      <div style={{ display: 'flex', gap: 12, alignItems: 'end', flexWrap: 'wrap' }}>
-        <div style={{ flex: '1 1 240px' }}>
-          <SearchField label="Cari tamu" value={query} onValueChange={setQuery} placeholder="Cari nama tamu" />
-        </div>
-        <Button variant="primary" size="md" style={brandButton} onClick={() => setEditing('new')}>Tambah tamu</Button>
-      </div>
+  const close = () => setSheet(null)
 
-      <div role="group" aria-label="Filter tamu" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+  return (
+    <>
+      <h1 className="page-title">Tamu</h1>
+      <p className="page-sub">{guests.length} tamu terdaftar</p>
+
+      <label className="search">
+        <Search size={18} aria-hidden color="var(--sub)" />
+        <input
+          type="search"
+          placeholder="Cari nama tamu"
+          aria-label="Cari nama tamu"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+        />
+        {query && (
+          <button type="button" className="icon-btn" style={{ width: 26, height: 26, border: 0 }} onClick={() => setQuery('')} aria-label="Hapus pencarian">
+            <X size={14} aria-hidden />
+          </button>
+        )}
+      </label>
+
+      <div className="chips" role="group" aria-label="Filter tamu">
         {filters.map(f => (
-          <button
-            key={f.value}
-            type="button"
-            aria-pressed={filter === f.value}
-            onClick={() => setFilter(f.value)}
-            style={{
-              ...chip,
-              background: filter === f.value ? 'var(--accent)' : 'var(--surface)',
-              color: filter === f.value ? 'var(--accent-foreground)' : 'var(--foreground)',
-              borderColor: filter === f.value ? 'var(--accent)' : 'var(--border)',
-            }}
-          >
+          <button key={f.value} type="button" className="chip" aria-pressed={filter === f.value} onClick={() => setFilter(f.value)}>
             {f.label}
           </button>
         ))}
       </div>
 
-      {message && <p role="status" style={{ margin: 0, color: 'var(--text-secondary)' }}>{message}</p>}
+      {visible.length === 0 && <p className="empty">Tidak ada tamu yang sesuai.</p>}
 
-      {visible.length === 0 && (
-        <p style={{ color: 'var(--text-secondary)' }}>Tidak ada tamu yang sesuai.</p>
-      )}
-
-      <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 8 }}>
-        {visible.map(g => (
-          <li key={g.id} style={row}>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <p style={{ margin: 0, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.group_name}</p>
-              <p style={{ margin: '2px 0 0', color: 'var(--text-secondary)', fontSize: 13 }}>
-                {g.category} · {g.max_pax} orang · {statusLabel(g)}
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-              <Button variant="ghost" size="sm" onClick={() => copyLink(g)}>Salin tautan</Button>
-              {!g.is_sent && g.invitation_type !== 'cetak' && (
-                <Button variant="ghost" size="sm" onClick={() => run(() => markSent(g.id), 'Ditandai terkirim')}>Tandai terkirim</Button>
-              )}
-              <Button variant="secondary" size="sm" onClick={() => setEditing(g)}>Ubah</Button>
-              <ConfirmMorph
-                label="Hapus"
-                prompt={`Hapus ${g.group_name}?`}
-                confirmLabel="Ya, hapus"
-                cancelLabel="Batal"
-                pendingLabel="Menghapus…"
-                doneLabel="Terhapus"
-                tone="danger"
-                onConfirm={() => run(() => deleteGuest(g.id), 'Tamu dihapus')}
-              />
-            </div>
-          </li>
-        ))}
+      <ul className="list" style={{ marginTop: 8 }}>
+        {visible.map(g => {
+          const badge = statusBadge(g)
+          return (
+            <li key={g.id}>
+              <button type="button" className="list-row" onClick={() => setSheet({ mode: 'edit', guest: g })}>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <p className="name">{g.group_name}</p>
+                  <p className="meta">{g.category} · {g.max_pax} orang</p>
+                </div>
+                <span className={`badge ${badge.tone === 'ok' ? 'badge-ok' : badge.tone === 'bad' ? 'badge-bad' : ''}`}>{badge.text}</span>
+              </button>
+            </li>
+          )
+        })}
       </ul>
-    </section>
+
+      <Sheet
+        open={sheet !== null}
+        title={sheet?.mode === 'edit' ? 'Ubah tamu' : 'Tamu baru'}
+        onClose={close}
+      >
+        {sheet && (
+          <GuestSheetBody
+            key={sheet.mode === 'edit' ? sheet.guest.id : 'new'}
+            guest={sheet.mode === 'edit' ? sheet.guest : null}
+            categories={categories}
+            sessions={sessions}
+            onCancel={close}
+            onSave={async form => {
+              await run(async () => {
+                if (sheet.mode === 'edit') await updateGuest(sheet.guest, event.id, form)
+                else await addGuest(event.id, form)
+              }, sheet.mode === 'edit' ? 'Tamu diperbarui' : 'Tamu ditambahkan')
+              close()
+            }}
+            onCopyLink={sheet.mode === 'edit' ? () => copyLink(sheet.guest) : undefined}
+            onMarkSent={sheet.mode === 'edit' && !sheet.guest.is_sent && sheet.guest.invitation_type !== 'cetak'
+              ? () => run(() => markSent(sheet.guest.id), 'Ditandai terkirim').then(close)
+              : undefined}
+            onDelete={sheet.mode === 'edit' ? () => run(() => deleteGuest(sheet.guest.id), 'Tamu dihapus').then(close) : undefined}
+          />
+        )}
+      </Sheet>
+    </>
   )
 }
 
-type FormProps = {
+type BodyProps = {
   guest: Guest | null
   categories: string[]
   sessions: string[]
   onCancel: () => void
   onSave: (form: GuestForm) => Promise<void>
+  onCopyLink?: () => void
+  onMarkSent?: () => void
+  onDelete?: () => void
 }
 
-function GuestFormView({ guest, categories, sessions, onCancel, onSave }: FormProps) {
+function GuestSheetBody({ guest, categories, sessions, onCancel, onSave, onCopyLink, onMarkSent, onDelete }: BodyProps) {
   const [form, setForm] = useState<GuestForm>(
     guest
       ? {
@@ -209,70 +217,46 @@ function GuestFormView({ guest, categories, sessions, onCancel, onSave }: FormPr
   }
 
   return (
-    <form onSubmit={submit} style={{ display: 'grid', gap: 16, maxWidth: 480 }}>
-      <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>{guest ? 'Ubah tamu' : 'Tamu baru'}</h2>
-
+    <form className="sheet-body" onSubmit={submit}>
       <Input label="Nama tamu" value={form.name} onChange={e => set('name', e.target.value)} required />
       <Input label="No. WhatsApp (opsional)" type="tel" inputMode="tel" value={form.phone} onChange={e => set('phone', e.target.value)} />
-
-      <Select
-        label="Kategori"
-        value={form.category}
-        onValueChange={v => set('category', v)}
-        options={categories.map(c => ({ value: c, label: c }))}
-      />
-
+      <Select label="Kategori" value={form.category} onValueChange={v => set('category', v)} options={categories.map(c => ({ value: c, label: c }))} />
       <NumberField label="Jumlah orang" value={form.maxPax} min={1} max={50} onValueChange={v => set('maxPax', v)} />
-
       <Select
         label="Jenis undangan"
         value={form.invitationType}
         onValueChange={v => set('invitationType', v as 'digital' | 'cetak')}
         options={[{ value: 'digital', label: 'Digital' }, { value: 'cetak', label: 'Cetak' }]}
       />
-
       {sessions.length > 0 && (
-        <Select
-          label="Sesi"
-          value={form.session}
-          onValueChange={v => set('session', v)}
-          options={sessions.map(s => ({ value: s, label: s }))}
-        />
+        <Select label="Sesi" value={form.session} onValueChange={v => set('session', v)} options={sessions.map(s => ({ value: s, label: s }))} />
       )}
 
-      {error && <p role="alert" style={{ margin: 0, color: 'var(--danger)' }}>{error}</p>}
+      {error && <p role="alert" style={{ margin: 0, color: 'var(--red-ink)' }}>{error}</p>}
 
-      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-        <Button type="button" variant="secondary" onClick={onCancel}>Batal</Button>
-        <Button type="submit" variant="primary" loading={busy} style={brandButton}>Simpan</Button>
-      </div>
+      <button type="submit" className="btn btn-primary" disabled={busy}>
+        {busy ? 'Menyimpan…' : 'Simpan'}
+      </button>
+      <button type="button" className="btn btn-secondary" onClick={onCancel}>Batal</button>
+
+      {guest && (onCopyLink || onMarkSent || onDelete) && (
+        <div style={{ display: 'grid', gap: 10, borderTop: '1px solid var(--line)', paddingTop: 16 }}>
+          {onCopyLink && <button type="button" className="btn btn-secondary" onClick={onCopyLink}>Salin tautan undangan</button>}
+          {onMarkSent && <button type="button" className="btn btn-secondary" onClick={onMarkSent}>Tandai terkirim</button>}
+          {onDelete && (
+            <ConfirmMorph
+              label="Hapus tamu"
+              prompt={`Hapus ${guest.group_name}?`}
+              confirmLabel="Ya, hapus"
+              cancelLabel="Batal"
+              pendingLabel="Menghapus…"
+              doneLabel="Terhapus"
+              tone="danger"
+              onConfirm={onDelete}
+            />
+          )}
+        </div>
+      )}
     </form>
   )
 }
-
-const brandButton = {
-  background: 'var(--accent)',
-  borderColor: 'var(--accent)',
-  color: 'var(--accent-foreground)',
-} as const
-
-const chip = {
-  padding: '6px 12px',
-  borderRadius: 999,
-  border: '1px solid var(--border)',
-  font: 'inherit',
-  fontSize: 13,
-  cursor: 'pointer',
-} as const
-
-const row = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: 12,
-  flexWrap: 'wrap',
-  border: '1px solid var(--border)',
-  borderRadius: 14,
-  padding: '12px 16px',
-  background: 'var(--surface)',
-} as const

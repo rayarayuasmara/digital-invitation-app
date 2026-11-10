@@ -36,6 +36,7 @@ export type DashboardEvent = {
   location: string | null
   event_date: string | null
   scanner_code: string | null
+  preview_token: string | null
 }
 
 export type DashboardData = {
