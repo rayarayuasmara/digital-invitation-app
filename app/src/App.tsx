@@ -1,12 +1,14 @@
 import { AuthProvider, useAuth } from '@/lib/auth'
 import { AuthPage } from '@/pages/AuthPage'
 import { DashboardPage } from '@/pages/DashboardPage'
+import { ResetPasswordPage } from '@/pages/ResetPasswordPage'
 
 function Shell() {
   const { session, loading } = useAuth()
 
   if (loading) return null
   if (!session) return <AuthPage />
+  if (window.location.pathname === '/reset-password') return <ResetPasswordPage />
 
   return <DashboardPage />
 }

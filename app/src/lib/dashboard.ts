@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import type { Guest } from './guests'
 
 export type Stats = {
   total_guests: number
@@ -28,7 +29,9 @@ export type CategoryStat = {
 
 export type DashboardEvent = {
   id: string
+  slug: string
   title: string
+  sessions: { id: string; name: string; time_text?: string }[] | null
   couple_name: string | null
   location: string | null
   event_date: string | null
@@ -40,6 +43,7 @@ export type DashboardData = {
   event: DashboardEvent | null
   stats: Stats
   categories: CategoryStat[]
+  guests: Guest[]
 }
 
 export async function fetchDashboard(): Promise<DashboardData> {
