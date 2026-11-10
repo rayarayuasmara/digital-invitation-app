@@ -753,3 +753,17 @@ body {
 .tiles > .tile:last-child {
   grid-column: 1 / -1;
 }
+
+.rsvp {
+  display: grid;
+  justify-items: center;
+  margin-top: 8px;
+}
+
+.rsvp {
+  width: 100%;
+}
+
+.rsvp > figure {
+  width: 100%;
+}
