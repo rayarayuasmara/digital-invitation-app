@@ -39,6 +39,7 @@ export type DashboardEvent = {
   scanner_code: string | null
   preview_token: string | null
   wa_templates: Templates | null
+  wishes_seen_at: string | null
 }
 
 export type DashboardData = {

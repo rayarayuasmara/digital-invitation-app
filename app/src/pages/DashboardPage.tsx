@@ -86,7 +86,7 @@ export function DashboardPage() {
 
   return (
     <main className="app">
-      {tab === 'beranda' && <HomePage data={data} />}
+      {tab === 'beranda' && <HomePage data={data} notify={notify} />}
       {tab === 'tamu' && (
         <GuestsPanel data={data} onChanged={load} notify={notify} createSignal={createSignal} />
       )}
