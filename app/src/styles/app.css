@@ -617,3 +617,139 @@ body {
   align-items: center;
   gap: 12px;
 }
+
+.hero {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+}
+
+.hero-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hero-number {
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-of {
+  color: var(--sub);
+  font-size: 14px;
+}
+
+.meter {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--soft);
+  overflow: hidden;
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-split {
+  display: flex;
+  gap: 16px;
+  color: var(--sub);
+  font-size: 14px;
+}
+
+.hero-split b {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.row-between {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.stack {
+  display: flex;
+  gap: 3px;
+  height: 12px;
+  margin: 12px 0;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--soft);
+}
+
+.stack-seg {
+  display: block;
+  height: 100%;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stack-ok { background: var(--green-ink); }
+.stack-bad { background: var(--red-ink); }
+.stack-wait { background: #e8a33d; }
+
+.legend {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend b {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-ok { background: var(--green-ink); }
+.dot-bad { background: var(--red-ink); }
+.dot-wait { background: #e8a33d; }
+
+.tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.tile {
+  min-width: 0;
+}
+
+.tile-value {
+  margin: 6px 0 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.tile-warn .tile-value {
+  color: #b7791f;
+}
+
+.tiles > .tile:last-child {
+  grid-column: 1 / -1;
+}
