@@ -136,6 +136,11 @@
     .when-date { font-family: var(--serif); font-size: clamp(30px, 9vw, 38px); line-height: 1.05; margin: 22px 0 4px; }
     .when-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
     .pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid currentColor; border-radius: 999px; font-size: 13px; font-weight: 500; }
+    .when-sessions { display: grid; gap: 8px; margin: 16px 0 0; }
+    .wsess { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; padding: 12px 16px; border: 1px solid rgba(11,11,11,.16); border-radius: 14px; font-size: 15px; }
+    .wsess b { font-weight: 600; white-space: nowrap; }
+    .wsess small { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; opacity: .55; margin-left: 8px; }
+    .wsess.on { border-color: var(--ink); background: rgba(11,11,11,.05); }
     .where { margin: 18px 0 0; max-width: 36ch; }
     .cd { display: grid; grid-template-columns: 1fr 1fr; margin-top: 26px; border-top: 1px solid var(--ink); }
     .cd > div { padding: 16px 0 14px; }
@@ -451,10 +456,7 @@
         <div class="brand rv"><span class="bn">RayaRayu</span><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="#0B0B0B"/><path d="M4.6 8.2l2.3 2.3 4.5-4.7" stroke="#76B5C0" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <h2 class="display h2 rv" style="margin-top:34px">Waktu &amp;<br><span class="it">Tempat</span></h2>
         <div class="when-date rv" id="event-date">-</div>
-        <div class="when-meta rv">
-          <span class="pill">Akad &amp; Resepsi</span>
-          <span class="pill" id="event-time">-</span>
-        </div>
+        <div class="when-sessions rv" id="event-sessions"></div>
         <p class="where rv" id="event-location">-</p>
 
         <div class="cd rv" id="countdown" aria-live="off" role="timer" aria-label="Hitung mundur menuju acara">
@@ -856,12 +858,25 @@ function renderInvitation(g) {
   if (S.eventDate && !isNaN(S.eventDate)) {
     const tz = 'Asia/Jakarta';
     $('event-date').textContent = S.eventDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: tz });
-    $('event-time').textContent = g.session_time
-      ? (g.session_name ? g.session_name + ' · ' : '') + g.session_time
-      : 'Pukul ' + S.eventDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz }).replace(':', '.') + ' WIB';
+
+    // Jadwal: semua sesi ditampilkan, sesi tamu ini ditandai.
+    const sess = Array.isArray(g.sessions) ? g.sessions : [];
+    if (sess.length) {
+      $('event-sessions').innerHTML = sess.map(s => {
+        const mine = s.name === g.session_name;
+        return `<div class="wsess${mine ? ' on' : ''}">
+          <span>${esc(s.name)}${mine ? ' <small>undangan Anda</small>' : ''}</span>
+          <b>${esc(s.time_text || '—')}</b>
+        </div>`;
+      }).join('');
+    } else {
+      $('event-sessions').innerHTML = g.session_time
+        ? `<div class="wsess on"><span>${esc(g.session_name || 'Acara')}</span><b>${esc(g.session_time)}</b></div>`
+        : `<div class="wsess on"><span>Acara</span><b>Pukul ${S.eventDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz }).replace(':', '.')} WIB</b></div>`;
+    }
   } else {
     $('event-date').textContent = 'Segera diumumkan';
-    $('event-time').hidden = true;
+    $('event-sessions').hidden = true;
     $('cal-btn').hidden = true;
   }
   $('event-location').textContent = g.event_location || '';

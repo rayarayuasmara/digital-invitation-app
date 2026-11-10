@@ -527,6 +527,15 @@ html.lock{overflow:hidden}
 .field .lock-note{font-size:13px;color:var(--sub);display:flex;align-items:center;gap:4px;padding-bottom:8px}
 .switch input:disabled+span{opacity:.55}
 .ses-row input:first-child{text-align:left;font-weight:600}.ses-row input:last-child{flex:0 0 40%;border-left:1px solid var(--line);padding-left:12px;text-align:left}
+/* Editor sesi dinamis */
+.ses-row{gap:8px}
+.ses-row .sess-name{flex:1 1 auto;min-width:0;text-align:left;font-weight:600}
+.ses-row .sess-time{flex:0 0 32%;min-width:0;border-left:1px solid var(--line);padding-left:10px;text-align:left}
+.sess-del{flex:0 0 auto;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--sub)}
+.sess-del svg{width:16px;height:16px}
+.sess-del:active{color:var(--red-ink)}
+.sess-add{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 4px;color:var(--brand);font-size:15px;font-weight:600}
+.sess-add svg{width:16px;height:16px}
 .field .ro-val{flex:1;text-align:right;padding:18px 0;font-size:17px;color:var(--sub);user-select:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ===== Revisi: sortir, hero, kartu check-in ===== */
@@ -1147,9 +1156,9 @@ html.lock{overflow:hidden}
           </div>
           <div class="card" style="padding:0 20px">
             <div class="field col"><label>Sesi acara</label></div>
-            <div class="field ses-row"><input type="text" id="ev-s1-name" maxlength="40" placeholder="Nama sesi 1" aria-label="Nama sesi 1" required /><input type="text" id="ev-s1-time" maxlength="30" placeholder="10.00 WIB" aria-label="Jam sesi 1" required /></div>
-            <div class="field ses-row"><input type="text" id="ev-s2-name" maxlength="40" placeholder="Nama sesi 2" aria-label="Nama sesi 2" required /><input type="text" id="ev-s2-time" maxlength="30" placeholder="12.00 WIB" aria-label="Jam sesi 2" required /></div>
-            <div class="sub" style="font-size:12px;padding:0 4px 12px">Tamu dibagi ke 2 sesi ini. Jam sesi tampil di undangan dan pesan WhatsApp (<code>{waktu}</code>); nama sesi tersedia sebagai <code>{sesi}</code>. Mengganti nama sesi otomatis ikut mengubah sesi semua tamu.</div>
+            <div id="ev-sessions"></div>
+            <button type="button" class="sess-add" id="ev-add-session" onclick="addSession()"><i data-lucide="plus"></i>Tambah sesi</button>
+            <div class="sub" style="font-size:12px;padding:0 4px 12px">Tamu dibagi ke sesi ini. Jam sesi tampil di undangan dan pesan WhatsApp (<code>{waktu}</code>); nama sesi tersedia sebagai <code>{sesi}</code>. Menghapus sesi memindahkan tamunya ke sesi pertama.</div>
           </div>
           <div class="card" style="padding:0 20px"><div class="field col"><label for="ev-location">Lokasi</label><textarea id="ev-location" rows="2" required></textarea></div></div>
           <div class="card" style="padding:0 20px"><div class="field col"><label for="ev-caption">Pesan pembuka</label><textarea id="ev-caption" rows="4" required></textarea></div>
@@ -1762,18 +1771,25 @@ async function submitCreateEvent() {
   if (!title || !date) { err.textContent = 'Judul dan tanggal wajib diisi.'; return; }
   if (!couple) { err.textContent = 'Nama mempelai wajib diisi.'; return; }
   if (slug && slug.length < 3) { err.textContent = 'Slug minimal 3 karakter.'; return; }
+
+  const sessions = [];
+  const s1n = $('ce-s1n').value.trim(), s2n = $('ce-s2n').value.trim();
+  if (s1n) sessions.push({ name: s1n, time_text: $('ce-s1t').value.trim() || null });
+  if (s2n) sessions.push({ name: s2n, time_text: $('ce-s2t').value.trim() || null });
+  if (!sessions.length) sessions.push({ name: 'Akad', time_text: null });
+  if (new Set(sessions.map(s => s.name.toLowerCase())).size !== sessions.length) {
+    err.textContent = 'Nama sesi harus berbeda.'; return;
+  }
+
   btn.disabled = true;
   err.textContent = '';
   const { data, error } = await supabaseClient.rpc('create_event', {
     p_title: title,
     p_event_date: date,
     p_location: $('ce-loc').value.trim(),
-    p_session_1_name: $('ce-s1n').value.trim(),
-    p_session_1_time: $('ce-s1t').value.trim(),
-    p_session_2_name: $('ce-s2n').value.trim(),
-    p_session_2_time: $('ce-s2t').value.trim(),
     p_couple_name: couple,
-    p_slug: slug || null
+    p_slug: slug || null,
+    p_sessions: sessions
   });
   btn.disabled = false;
   if (error || !data || !data.success) {
@@ -2103,8 +2119,9 @@ function renderUI() {
   $('ev-slug').disabled = !!event.published_at;
   updateSlugHint();
   $('ev-date').value = d.toLocaleDateString('sv-SE', { timeZone: 'Asia/Jakarta' });
-  $('ev-s1-name').value = event.session_1_name || 'Sesi 1'; $('ev-s1-time').value = event.session_1_time || '';
-  $('ev-s2-name').value = event.session_2_name || 'Sesi 2'; $('ev-s2-time').value = event.session_2_time || '';
+  editSessions = (event.sessions || []).map(s => ({ id: s.id, name: s.name, time: s.time_text || '' }));
+  if (!editSessions.length) editSessions = [{ id: null, name: 'Akad', time: '' }];
+  renderSessionsEditor();
   $('ev-location').value = event.location || '';
   $('ev-caption').value = event.caption || '';
   renderScannerCode(event);
@@ -2246,15 +2263,19 @@ async function submitEditEvent(e) {
   const location = $('ev-location').value.trim();
   const caption = $('ev-caption').value.trim();
   
-  const s1n = $('ev-s1-name').value.trim(), s2n = $('ev-s2-name').value.trim();
-  const s1t = $('ev-s1-time').value.trim(), s2t = $('ev-s2-time').value.trim();
+  const rows = [...document.querySelectorAll('#ev-sessions .ses-row')].map(r => ({
+    id: r.dataset.sid || null,
+    name: r.querySelector('.sess-name').value.trim(),
+    time_text: r.querySelector('.sess-time').value.trim() || null
+  }));
   const couple = $('ev-couple').value.trim();
   const slug = normalizeSlug($('ev-slug').value);
   if (!title || !dateVal) return toast('Judul dan tanggal wajib diisi', false);
   if (!couple) return toast('Nama mempelai wajib diisi', false);
   if (!slug || slug.length < 3) return toast('Slug tautan minimal 3 karakter', false);
-  if (!s1n || !s2n || !s1t || !s2t) return toast('Nama dan jam kedua sesi wajib diisi', false);
-  if (s1n.toLowerCase() === s2n.toLowerCase()) return toast('Nama kedua sesi harus berbeda', false);
+  if (!rows.length) return toast('Minimal satu sesi', false);
+  if (rows.some(r => !r.name)) return toast('Nama sesi wajib diisi', false);
+  if (new Set(rows.map(r => r.name.toLowerCase())).size !== rows.length) return toast('Nama sesi harus berbeda', false);
 
   const btn = $('btn-save-event');
   btn.disabled = true;
@@ -2269,20 +2290,28 @@ async function submitEditEvent(e) {
         couple_name: couple,
         slug: slug,
         event_date: eventDateKeepTime(dateVal),
-        session_1_name: s1n, session_1_time: s1t,
-        session_2_name: s2n, session_2_time: s2t,
         location: location,
         caption: caption
       })
       .eq('id', eventId);
 
-    btn.disabled = false;
-    btn.textContent = 'Simpan profil acara';
-
     if (directError) {
+      btn.disabled = false;
+      btn.textContent = 'Simpan profil acara';
       return toast('Gagal menyimpan: ' + directError.message, false);
     }
 
+    const { data: sres, error: serr } = await supabaseClient.rpc('save_event_sessions', {
+      p_event_id: eventId, p_sessions: rows
+    });
+    if (serr || !sres || sres.success === false) {
+      btn.disabled = false;
+      btn.textContent = 'Simpan profil acara';
+      return toast((sres && sres.message) || 'Gagal menyimpan sesi', false);
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Simpan profil acara';
     toast('Profil acara berhasil disimpan');
     loadDashboard();
   } catch (err) {
@@ -2362,18 +2391,45 @@ function showAllRecent() {
 }
 
 /* ---------- Filter multi-select: Kategori / Jenis Undangan / Sesi ---------- */
-const guestSession = g => g.session || ((globalData && globalData.event && globalData.event.session_1_name) || 'Sesi 1');
+const guestSession = g => g.session || ((globalData && globalData.event && (globalData.event.sessions || [])[0] || {}).name) || 'Sesi 1';
 const guestType = g => g.invitation_type === 'cetak' ? 'cetak' : 'digital';
 const MF_GET = { cat: g => g.category || 'Umum', type: guestType, session: guestSession };
 
-// Sesi = tepat 2 sesi acara (nama & jam diatur di Acara > Profil Acara)
+// Sesi acara: 1–3 baris, urut. Dikelola di Acara > Profil Acara.
+let editSessions = [];
+
 function eventSessions() {
   const ev = (globalData && globalData.event) || {};
-  return [
-    { name: ev.session_1_name || 'Sesi 1', time: ev.session_1_time || '' },
-    { name: ev.session_2_name || 'Sesi 2', time: ev.session_2_time || '' }
-  ];
+  const list = Array.isArray(ev.sessions) ? ev.sessions : [];
+  return list.map(s => ({ id: s.id, name: s.name, time: s.time_text || '' }));
 }
+
+function renderSessionsEditor() {
+  const box = $('ev-sessions');
+  if (!box) return;
+  box.innerHTML = editSessions.map((s, i) => `
+    <div class="field ses-row" data-sid="${esc(s.id || '')}">
+      <input class="sess-name" type="text" maxlength="40" placeholder="Nama sesi ${i + 1}" value="${esc(s.name || '')}" aria-label="Nama sesi ${i + 1}" />
+      <input class="sess-time" type="text" maxlength="30" placeholder="10.00 WIB" value="${esc(s.time || '')}" aria-label="Jam sesi ${i + 1}" />
+      ${editSessions.length > 1 ? `<button type="button" class="sess-del" onclick="removeSession(${i})" aria-label="Hapus sesi ${i + 1}"><i data-lucide="x"></i></button>` : ''}
+    </div>`).join('');
+  icons();
+  const add = $('ev-add-session');
+  if (add) add.classList.toggle('hidden', editSessions.length >= 3);
+}
+
+function addSession() {
+  if (editSessions.length >= 3) return;
+  editSessions.push({ id: null, name: '', time: '' });
+  renderSessionsEditor();
+}
+
+function removeSession(i) {
+  if (editSessions.length <= 1) return;
+  editSessions.splice(i, 1);
+  renderSessionsEditor();
+}
+
 const sessionOptions = () => eventSessions().map(x => x.name);
 const sessionTime = g => { const ss = eventSessions(); return (ss.find(x => x.name === guestSession(g)) || ss[0]).time; };
 
@@ -2400,7 +2456,7 @@ function openFilterSheet() {
   };
   openSheet(`
     <div class="sheet-head"><button class="ibtn" id="mf-reset" aria-label="Reset filter"><i data-lucide="rotate-ccw"></i></button><h3>Filter</h3><button class="ibtn primary" onclick="closeSheet()" aria-label="Selesai"><i data-lucide="check"></i></button></div>
-    <div class="listcard">${sec('cat')}${sec('type')}${sec('session')}</div>`);
+    <div class="listcard">${sec('cat')}${sec('type')}${eventSessions().length > 1 ? sec('session') : ''}</div>`);
   $('sheet').querySelectorAll('.mf-opt').forEach(b => b.onclick = () => {
     const set = MF[b.dataset.k].set, v = b.dataset.v;
     if (set.has(v)) set.delete(v); else set.add(v);
@@ -2651,16 +2707,20 @@ async function obSubmit() {
   btn.textContent = 'Membuat…';
   err.textContent = '';
   try {
+    const obSessions = [];
+    const ob1 = $('ob-s1n').value.trim() || 'Akad';
+    const ob2 = $('ob-s2n').value.trim() || 'Resepsi';
+    obSessions.push({ name: ob1, time_text: $('ob-s1t').value.trim() || null });
+    if (ob2 && ob2.toLowerCase() !== ob1.toLowerCase()) {
+      obSessions.push({ name: ob2, time_text: $('ob-s2t').value.trim() || null });
+    }
     const { data, error } = await supabaseClient.rpc('create_event', {
       p_title: title,
       p_event_date: date,
       p_location: $('ob-loc').value.trim(),
-      p_session_1_name: $('ob-s1n').value.trim() || 'Akad',
-      p_session_1_time: $('ob-s1t').value.trim() || null,
-      p_session_2_name: $('ob-s2n').value.trim() || 'Resepsi',
-      p_session_2_time: $('ob-s2t').value.trim() || null,
       p_couple_name: couple,
-      p_slug: normalizeSlug($('ob-slug').value)
+      p_slug: normalizeSlug($('ob-slug').value),
+      p_sessions: obSessions
     });
     if (error || !data || data.success === false) {
       err.textContent = (data && data.message) || 'Gagal membuat undangan. Coba lagi.';
@@ -3281,12 +3341,12 @@ function openGuestSheet(id) {
           <option value="cetak" ${currentType === 'cetak' ? 'selected' : ''}>Cetak (Fisik)</option>
         </select>
       </div>
-      <div class="field">
+      ${sessions.length > 1 ? `<div class="field">
         <label>Sesi</label>
         <select id="gs-session">
           ${sessions.map(x => `<option value="${esc(x)}" ${x === curSession ? 'selected' : ''}>${esc(x)}</option>`).join('')}
         </select>
-      </div>
+      </div>` : ''}
       <div class="field">
         <label>Kategori</label>
         <select id="gs-cat" onchange="checkCustomCategory(this)">

@@ -33,6 +33,7 @@ Jalankan **berurutan**. Jangan melompat.
 | 13 | `2026-10-30-p6-preview-token.sql` | Tautan pratinjau per acara (`preview_token`) — **diterapkan 2026-10-30** |
 | 14 | `2026-10-30-p7-signup-phone.sql` | Nomor WhatsApp saat daftar (`clients.phone`) — **diterapkan 2026-10-30** |
 | 15 | `2026-11-04-p8-payment-flow.sql` | Pesanan & pembayaran transfer manual (`orders`, `app_settings`, bucket `payment-proofs`) — **diterapkan 2026-11-04** |
+| 16 | `2026-11-10-p9-dynamic-sessions.sql` | Sesi acara dinamis 1–3 (`event_sessions`) — **diterapkan 2026-11-10** |
 
 ### Prasyarat tiap tahap
 
