@@ -3,50 +3,52 @@ import type { DashboardData } from '@/lib/dashboard'
 
 type Props = { data: DashboardData }
 
-const percent = (part: number, whole: number) => (whole > 0 ? Math.round((part / whole) * 100) : 0)
-
 export function HomePage({ data }: Props) {
   const { event, stats, categories } = data
+  const quotaUsed = stats.max_quota > 0 ? Math.round((stats.total_guests / stats.max_quota) * 100) : 0
 
   return (
     <>
       <h1 className="page-title">Beranda</h1>
       <p className="page-sub">{event?.title}</p>
 
-      <section className="stat-grid" aria-label="Ringkasan tamu">
-        <div className="card stat-card">
-          <p className="stat-label">Total tamu</p>
-          <p className="stat-value">{stats.total_guests}</p>
-          <p className="stat-note">Kuota {stats.max_quota}</p>
+      <section className="bento" aria-label="Ringkasan tamu">
+        <div className="card bento-hero">
+          <Gauge
+            label="Total tamu"
+            value={quotaUsed}
+            detail={`${stats.total_guests} dari ${stats.max_quota} kuota`}
+          />
+          <dl className="split">
+            <div>
+              <dt>Digital</dt>
+              <dd>{stats.digital}</dd>
+            </div>
+            <div>
+              <dt>Cetak</dt>
+              <dd>{stats.cetak}</dd>
+            </div>
+          </dl>
         </div>
 
-        <div className="card stat-card">
-          <Gauge
-            label="Hadir"
-            value={percent(stats.hadir, stats.total_guests)}
-            detail={`${stats.hadir} tamu · ${stats.hadir_pax} orang`}
-          />
+        <div className="card bento-tile">
+          <p className="stat-label">Hadir</p>
+          <p className="stat-value">{stats.hadir}</p>
+          <p className="stat-note">{stats.hadir_pax} orang</p>
         </div>
 
-        <div className="card stat-card">
-          <Gauge
-            label="Sudah check-in"
-            value={percent(stats.checked_in, stats.attending)}
-            detail={`${stats.checked_in} dari ${stats.attending} hadir`}
-          />
+        <div className="card bento-tile">
+          <p className="stat-label">Sudah check-in</p>
+          <p className="stat-value">{stats.checked_in}</p>
+          <p className="stat-note">dari {stats.attending} hadir</p>
         </div>
 
-        <div className="card stat-card">
-          <Gauge
-            label="Belum terkirim"
-            value={percent(stats.unsent, stats.total_guests)}
-            detail={`${stats.unsent} tamu belum dikirim`}
-            thresholds={[
-              { from: 0, tone: 'success', label: 'Semua terkirim' },
-              { from: 20, tone: 'warning', label: 'Perlu dikirim' },
-              { from: 50, tone: 'danger', label: 'Banyak tertunda' },
-            ]}
-          />
+        <div className="card bento-tile bento-wide">
+          <div>
+            <p className="stat-label">Belum terkirim</p>
+            <p className="stat-value">{stats.unsent}</p>
+          </div>
+          <p className="stat-note" style={{ textAlign: 'right' }}>{stats.pending} menunggu RSVP</p>
         </div>
       </section>
 

@@ -6,6 +6,7 @@ import { TabBar } from '@/components/TabBar'
 import type { Tab } from '@/components/TabBar'
 import { AccountPage } from '@/pages/AccountPage'
 import { GuestsPanel } from '@/pages/GuestsPanel'
+import { ScannerScreen } from '@/pages/ScannerScreen'
 import { HomePage } from '@/pages/HomePage'
 import { InvitationPage } from '@/pages/InvitationPage'
 
@@ -16,6 +17,7 @@ export function DashboardPage() {
   const [tab, setTab] = useState<Tab>('beranda')
   const [createSignal, setCreateSignal] = useState(0)
   const [notice, setNotice] = useState('')
+  const [scannerOpen, setScannerOpen] = useState(false)
 
   const load = useCallback(async () => {
     try {
@@ -53,7 +55,10 @@ export function DashboardPage() {
   const onAction = () => {
     if (tab === 'tamu') setCreateSignal(n => n + 1)
     else if (tab === 'undangan') sharePreview()
-    else if (tab === 'beranda') notify('Scanner akan dipindahkan pada tahap berikutnya.')
+    else if (tab === 'beranda') {
+      if (data?.event?.scanner_code) setScannerOpen(true)
+      else notify('Kode scanner belum tersedia.')
+    }
     else notify('Bantuan akan tersedia pada pembaruan berikutnya.')
   }
 
@@ -92,6 +97,14 @@ export function DashboardPage() {
 
       {notice && (
         <div role="status" className="toast">{notice}</div>
+      )}
+
+      {scannerOpen && data.event?.scanner_code && (
+        <ScannerScreen
+          code={data.event.scanner_code}
+          eventTitle={data.event.title}
+          onExit={() => setScannerOpen(false)}
+        />
       )}
     </main>
   )
