@@ -80,6 +80,13 @@ body {
   gap: 12px;
 }
 
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
 .stat-label {
   margin: 0;
   color: var(--sub);

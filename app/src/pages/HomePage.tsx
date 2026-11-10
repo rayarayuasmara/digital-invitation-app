@@ -1,15 +1,12 @@
+import { Gauge } from '@/components/arc/gauge/gauge'
 import type { DashboardData } from '@/lib/dashboard'
 
 type Props = { data: DashboardData }
 
+const percent = (part: number, whole: number) => (whole > 0 ? Math.round((part / whole) * 100) : 0)
+
 export function HomePage({ data }: Props) {
   const { event, stats, categories } = data
-  const tiles = [
-    { label: 'Total tamu', value: stats.total_guests, note: `Kuota ${stats.max_quota}` },
-    { label: 'Hadir', value: stats.hadir, note: `${stats.hadir_pax} orang` },
-    { label: 'Sudah check-in', value: stats.checked_in, note: `${stats.checked_pax} orang` },
-    { label: 'Belum terkirim', value: stats.unsent, note: `${stats.pending} menunggu RSVP` },
-  ]
 
   return (
     <>
@@ -17,13 +14,40 @@ export function HomePage({ data }: Props) {
       <p className="page-sub">{event?.title}</p>
 
       <section className="stat-grid" aria-label="Ringkasan tamu">
-        {tiles.map(t => (
-          <div key={t.label} className="card">
-            <p className="stat-label">{t.label}</p>
-            <p className="stat-value">{t.value}</p>
-            <p className="stat-note">{t.note}</p>
-          </div>
-        ))}
+        <div className="card stat-card">
+          <p className="stat-label">Total tamu</p>
+          <p className="stat-value">{stats.total_guests}</p>
+          <p className="stat-note">Kuota {stats.max_quota}</p>
+        </div>
+
+        <div className="card stat-card">
+          <Gauge
+            label="Hadir"
+            value={percent(stats.hadir, stats.total_guests)}
+            detail={`${stats.hadir} tamu · ${stats.hadir_pax} orang`}
+          />
+        </div>
+
+        <div className="card stat-card">
+          <Gauge
+            label="Sudah check-in"
+            value={percent(stats.checked_in, stats.attending)}
+            detail={`${stats.checked_in} dari ${stats.attending} hadir`}
+          />
+        </div>
+
+        <div className="card stat-card">
+          <Gauge
+            label="Belum terkirim"
+            value={percent(stats.unsent, stats.total_guests)}
+            detail={`${stats.unsent} tamu belum dikirim`}
+            thresholds={[
+              { from: 0, tone: 'success', label: 'Semua terkirim' },
+              { from: 20, tone: 'warning', label: 'Perlu dikirim' },
+              { from: 50, tone: 'danger', label: 'Banyak tertunda' },
+            ]}
+          />
+        </div>
       </section>
 
       <h2 className="section-title">Kategori tamu</h2>

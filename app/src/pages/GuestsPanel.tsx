@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Search, X } from 'lucide-react'
-import { ConfirmMorph } from '@/components/arc/confirm-morph/confirm-morph'
+import { Dialog, DialogContent } from '@/components/arc/dialog/dialog'
 import { Input } from '@/components/arc/input/input'
 import { NumberField } from '@/components/arc/number-field/number-field'
 import { Select } from '@/components/arc/select/select'
@@ -198,6 +198,7 @@ function GuestSheetBody({ guest, categories, sessions, onCancel, onSave, onCopyL
   )
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const set = <K extends keyof GuestForm>(key: K, value: GuestForm[K]) => setForm(f => ({ ...f, [key]: value }))
 
@@ -244,16 +245,17 @@ function GuestSheetBody({ guest, categories, sessions, onCancel, onSave, onCopyL
           {onCopyLink && <button type="button" className="btn btn-secondary" onClick={onCopyLink}>Salin tautan undangan</button>}
           {onMarkSent && <button type="button" className="btn btn-secondary" onClick={onMarkSent}>Tandai terkirim</button>}
           {onDelete && (
-            <ConfirmMorph
-              label="Hapus tamu"
-              prompt={`Hapus ${guest.group_name}?`}
-              confirmLabel="Ya, hapus"
-              cancelLabel="Batal"
-              pendingLabel="Menghapus…"
-              doneLabel="Terhapus"
-              tone="danger"
-              onConfirm={onDelete}
-            />
+            <>
+              <button type="button" className="btn btn-danger" onClick={() => setConfirmDelete(true)}>Hapus tamu</button>
+              <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+                <DialogContent title={`Hapus ${guest.group_name}?`} description="Data tamu ini akan dihapus dan tidak bisa dikembalikan.">
+                  <div style={{ display: 'grid', gap: 10 }}>
+                    <button type="button" className="btn btn-danger" onClick={() => { setConfirmDelete(false); onDelete() }}>Ya, hapus</button>
+                    <button type="button" className="btn btn-secondary" onClick={() => setConfirmDelete(false)}>Batal</button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
           )}
         </div>
       )}
