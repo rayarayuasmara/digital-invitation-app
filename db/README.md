@@ -34,6 +34,7 @@ Jalankan **berurutan**. Jangan melompat.
 | 14 | `2026-10-30-p7-signup-phone.sql` | Nomor WhatsApp saat daftar (`clients.phone`) — **diterapkan 2026-10-30** |
 | 15 | `2026-11-04-p8-payment-flow.sql` | Pesanan & pembayaran transfer manual (`orders`, `app_settings`, bucket `payment-proofs`) — **diterapkan 2026-11-04** |
 | 16 | `2026-11-10-p9-dynamic-sessions.sql` | Sesi acara dinamis 1–3 (`event_sessions`) — **diterapkan 2026-11-10** |
+| 17 | `2026-11-10-p10-access-hardening.sql` | Batasi direct write, cegah eskalasi role/paket, validasi RSVP/ucapan di DB — **diterapkan 2026-11-10** (versi `20261110053237`) |
 
 ### Prasyarat tiap tahap
 
@@ -110,16 +111,23 @@ dari `anon`, `authenticated`, dan `public`.
 
 | Tabel | Policy | Siapa |
 |---|---|---|
-| `clients` | `Allow client full access` | pemilik baris (`user_id = auth.uid()`) |
-| `events` | `Allow events access` | klien pemilik acara |
+| `clients` | `Allow client full access` | pemilik baris; policy ini mengizinkan UPDATE semua kolom |
+| `events` | `Allow events access` | klien pemilik acara; policy ini mengizinkan UPDATE semua kolom |
 | `guests` | `Allow guests access` | klien pemilik acara |
 | `rsvps` | `Allow rsvps access` | klien pemilik acara |
 | `tickets` | `Allow tickets access` | klien pemilik acara |
 | `wishes` | `Klien bisa membaca ucapan acaranya` | klien pemilik acara, hanya SELECT |
 
-Tidak ada policy untuk `anon` di tabel mana pun. Tamu mengakses data lewat RPC,
-bukan lewat tabel. Ini disengaja: kalau ada policy `using (true)` untuk `public`,
-seluruh tabel terbuka lagi.
+P10 sudah mengganti policy `ALL` di atas. RLS kini membatasi akses baca ke
+pemilik, dan kolom yang dapat ditulis langsung dibatasi lewat grants. Sebelum
+migrasi P10, kolom sensitif seperti `role`, `tier`, masa aktif/publikasi acara,
+RSVP, dan tiket masih dapat diubah langsung lewat API.
+
+Sesudah P10, tabel klien/acara/tamu/RSVP/tiket hanya dapat dibaca langsung oleh
+pemilik yang login; penulisan tetap lewat RPC kecuali `clients.phone` dan kolom
+dashboard `events.caption`, `events.wishes_seen_at`, `events.wa_templates`.
+Katalog `plans` dan `addons` tetap dapat dibaca publik. Tamu memakai RPC token.
+Hindari policy `using (true)` untuk role `public` pada tabel data.
 
 Semua policy memakai `(select auth.uid())`, bukan `auth.uid()`, supaya nilainya
 dihitung sekali per query.
@@ -280,11 +288,34 @@ fungsi apa pun — hanya membuka kembali data ke publik.
 ## 8. Sisa risiko yang diketahui
 
 - `auth_leaked_password_protection` mati. Hanya tersedia di plan berbayar.
-  Risiko rendah karena aplikasi tidak punya halaman daftar atau reset password.
-- Tidak ada rate limit pada RPC publik. Diterima karena token 49,5 bit dan kode
-  petugas 64 bit.
+  Aktifkan jika plan mendukung; pendaftaran dan reset password tersedia di UI.
+- RPC publik belum memiliki rate limit. Validasi token bukan pengganti pembatasan
+  laju; pantau spam RSVP/ucapan dan tambahkan proteksi edge/API sebelum trafik
+  meningkat.
 - `get_scanner_guests` masih mengembalikan `invitation_token`, tapi hanya untuk
   pemilik acara yang login.
+- `get_event_rsvp_summary(token)` mengembalikan nama dan status RSVP semua tamu
+  kepada pemegang satu token undangan. Pastikan perilaku ini memang keputusan
+  privasi produk; pertimbangkan opsi nonaktif atau ringkasan agregat.
+
+### P10 — akses langsung dan validasi publik
+
+Setelah migrasi P10 dijalankan:
+
+- `authenticated` tidak lagi mendapat INSERT/DELETE/UPDATE tabel secara luas.
+  UPDATE langsung dibatasi ke nomor telepon klien dan tiga kolom dashboard acara.
+- `role`, tier/limit paket, status publikasi/masa aktif, `scanner_code`, RSVP,
+  tiket, tamu, serta ucapan hanya berubah lewat RPC yang sesuai.
+- `submit_rsvp` memvalidasi status dan jumlah hadir (1 sampai `max_pax`; 0
+  jika tidak hadir). `send_wish` menolak kosong dan membatasi 300 karakter.
+- Endpoint publik yang memang diperlukan tetap memberi akses `anon` melalui
+  token/kode; helper dan fungsi trigger tidak lagi tersedia sebagai RPC anon.
+
+Uji manual sesudah deploy dengan akun klien biasa: perubahan `phone`, caption,
+template WA, dan waktu ucapan harus tetap berhasil; upaya mengubah `role`,
+`tier`, `published_at`, `expires_at`, `scanner_code`, RSVP, atau tiket lewat
+PostgREST harus ditolak. Pastikan tambah/edit tamu, check-in, RSVP publik, dan
+ucapan valid tetap berfungsi.
 
 ### Paket dan kuota
 

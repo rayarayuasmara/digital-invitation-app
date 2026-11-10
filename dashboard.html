@@ -19,7 +19,7 @@
   --shadow:0 1px 2px rgba(12,24,60,.05), 0 8px 24px rgba(12,24,60,.04);
   --field-border:#c9cdd6; --field-bg:#ffffff;
   /* Skala tipografi: 8 langkah, bukan 24. */
-  --fs-caption:11px; --fs-footnote:12px; --fs-subhead:13px; --fs-body:15px;
+  --fs-caption:12px; --fs-footnote:13px; --fs-subhead:13px; --fs-body:15px;
   --fs-headline:17px; --fs-title:20px; --fs-large:28px; --fs-display:40px;
   --lh-body:1.45; --lh-tight:1.12;
 }
@@ -69,6 +69,10 @@ input, select, textarea { font-size: 16px !important; }
 .ev-switch{display:flex;align-items:center;gap:6px;max-width:60vw;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--brand);font-family:inherit;font-size:12px;font-weight:600}
 .ev-switch span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ev-switch svg{width:13px;height:13px;flex:0 0 auto}
+.ce-back{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--sub);display:grid;place-items:center;flex:0 0 auto;box-shadow:var(--shadow);transition:transform .15s,color .15s,border-color .15s}
+.ce-back svg{width:20px;height:20px;stroke-width:2.2}
+.ce-back:active{transform:scale(.92)}
+@media (hover:hover) and (pointer:fine){.ce-back:hover{border-color:var(--brand);color:var(--brand)}}
 .ev-opt{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:var(--card);font-family:inherit;font-size:15px;color:var(--ink);text-align:left}
 .ev-opt+.ev-opt{margin-top:10px}
 .ev-opt small{display:block;color:var(--sub);font-size:12px;margin-top:3px}
@@ -161,7 +165,7 @@ input, select, textarea { font-size: 16px !important; }
 .st.st-unsent{background:var(--tag);color:var(--tag-ink)}
 
 /* Tombol Ikon Bundar Tipis */
-.ib{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card);transition:all .15s}
+.ib{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--sub);flex-shrink:0;background:var(--card);transition:transform .15s,background-color .15s,color .15s,border-color .15s}
 @media (hover:hover) and (pointer:fine){.ib:hover{border-color:var(--brand);color:var(--brand)}}
 .ib.sent{background:var(--green-bg);border-color:var(--green);color:var(--green-ink)}
 .ib svg{width:18px;height:18px}
@@ -186,7 +190,7 @@ input, select, textarea { font-size: 16px !important; }
   padding: 5px 12px;
   border-radius: 999px;
   cursor: pointer;
-  transition: all .2s;
+  transition:background-color .2s,color .2s,transform .2s,box-shadow .2s;
   text-align: center;
 }
 .card-switch button.active {
@@ -233,6 +237,7 @@ input, select, textarea { font-size: 16px !important; }
 .sbar{display:flex;align-items:center;gap:6px;background:var(--card);border-radius:18px;height:54px;padding:0 6px 0 16px;box-shadow:var(--shadow)}
 .sbar>svg{color:var(--sub);width:20px;height:20px;flex-shrink:0}
 .sbar input{flex:1;min-width:0;border:0;outline:none;font-size:16px;color:var(--ink)}
+.sbar:focus-within{outline:2px solid var(--brand);outline-offset:2px}
 .sbar input::placeholder{color:var(--sub)}
 .vr{width:1px;height:24px;background:var(--line);flex-shrink:0}
 .fsel{position:relative;display:flex;align-items:center;gap:2px;padding:0 6px 0 2px;color:var(--sub);font-size:13px;height:100%;flex-shrink:0}
@@ -272,6 +277,7 @@ input, select, textarea { font-size: 16px !important; }
 .field:not(:first-child){border-top:1px solid var(--line)}
 .field label{flex:0 0 auto;max-width:52%;font-size:17px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .field input,.field select,.field textarea{flex:1;min-width:0;border:0;background:transparent;outline:none;font-size:17px;padding:18px 0;text-align:right;color:var(--sub)}
+.field:focus-within{outline:2px solid var(--brand);outline-offset:2px;border-radius:10px;z-index:1}
 .field input:focus,.field select:focus{color:var(--ink)}
 .field input::placeholder,.field textarea::placeholder{color:var(--sub)}
 .field>.switch{margin-left:auto}
@@ -314,7 +320,7 @@ input, select, textarea { font-size: 16px !important; }
   height:calc(80px + env(safe-area-inset-bottom));
   z-index:30;
   pointer-events:none;
-  background: transparent;
+  background:linear-gradient(to bottom,transparent 0%,var(--bg) 48%);
   display:flex;align-items:center;justify-content:center;
   padding-bottom:calc(10px + env(safe-area-inset-bottom));
 }
@@ -504,6 +510,33 @@ html.lock{overflow:hidden}
 .toast{transition:transform .6s var(--spring);background:var(--glass);color:var(--ink);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid var(--glass-line)}
 @media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
 
+/* Dashboard stays compact on phones, but uses the available width on desktop. */
+@media screen and (min-width:900px){
+  #app{max-width:1120px}
+  #tab-home .topbar{padding-left:32px;padding-right:32px}
+  #tab-home .page{
+    display:grid;
+    grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);
+    gap:16px;
+    padding:16px 32px calc(140px + env(safe-area-inset-bottom));
+    align-items:start;
+  }
+  #tab-home .page>*+*{margin-top:0}
+  #tab-home .page>.wbanner,
+  #tab-home .page>.hero,
+  #tab-home .page>.plan,
+  #tab-home .page>.hgrid,
+  #tab-home .page>.brandcard{grid-column:1/-1}
+  #tab-home .hgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  #tab-home .und .gauge{max-width:440px;margin-left:auto;margin-right:auto}
+  #tab-tamu .page,#tab-acara .page,#tab-akun .page{max-width:840px;margin-inline:auto}
+  #tab-tamu .topbar,#tab-acara .topbar,#tab-akun .topbar{max-width:840px;margin-inline:auto;padding-left:24px;padding-right:24px}
+  #create-event .page{max-width:760px;margin-inline:auto}
+  #create-event .topbar{max-width:760px;margin-inline:auto;padding-left:24px;padding-right:24px}
+  .nav-container-wrap{max-width:1120px}
+  .tabbar{max-width:640px}
+}
+
 /* ===== Multi-select filter & pagination (Tab Tamu) ===== */
 .sfbtn{position:relative;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex-shrink:0;background:var(--soft);color:var(--brand)}
 .sfbtn svg{width:20px;height:20px}
@@ -619,7 +652,7 @@ html.lock{overflow:hidden}
 #scanner-overlay .sbar input::placeholder{color:var(--sub)}
 #scanner-overlay .chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:12px -16px 0;padding:0 16px}
 #scanner-overlay .chips::-webkit-scrollbar{display:none}
-#scanner-overlay .chip{flex-shrink:0;height:36px;padding:0 15px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--sub);font-size:14px;font-weight:600;white-space:nowrap;transition:all .25s}
+#scanner-overlay .chip{flex-shrink:0;height:36px;padding:0 15px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--sub);font-size:14px;font-weight:600;white-space:nowrap;transition:background-color .2s,border-color .2s,color .2s,transform .15s}
 #scanner-overlay .chip.on{background:var(--brand);border-color:var(--brand);color:#fff}
 :root[data-dark="1"] #scanner-overlay .chip.on{color:#0b0f1a}
 #scanner-overlay .listcard{background:var(--card);border-radius:26px;padding:4px 18px 8px;box-shadow:var(--shadow);max-height:420px;overflow-y:auto;scrollbar-width:none}
@@ -712,7 +745,7 @@ html.lock{overflow:hidden}
 .dotmark{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber-ink);margin-left:6px;vertical-align:middle}
 .wa-label{font-size:13px;color:var(--sub);margin-bottom:8px}
 .wa-styles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.wa-style{border:1px solid var(--line);border-radius:16px;padding:10px 8px;text-align:center;background:var(--card);transition:all .2s}
+.wa-style{border:1px solid var(--line);border-radius:16px;padding:10px 8px;text-align:center;background:var(--card);transition:background-color .2s,border-color .2s,color .2s,box-shadow .2s}
 .wa-style b{display:block;font-size:14px;font-weight:600}
 .wa-style small{display:block;font-size:11.5px;color:var(--sub);margin-top:2px}
 .wa-style.on{border-color:var(--brand);background:var(--soft)}
@@ -927,41 +960,41 @@ html.lock{overflow:hidden}
   <!-- 2. DASHBOARD AREA -->
   <section id="dash" class="hidden">
 
-    <!-- ONBOARDING: akun belum punya acara -->
-    <div id="onboarding" class="hidden">
-      <header class="topbar"><h1>Mulai</h1><span class="logo">R</span></header>
-      <div class="page">
-        <div class="card">
-          <div id="ob-step-1">
-            <h2 style="margin:0 0 6px">Siapa yang menikah?</h2>
-            <p class="sub" style="font-size:13px;margin:0 0 18px">Nama ini tampil sebagai judul undangan. Bisa diubah nanti.</p>
-            <div class="afield"><input type="text" id="ob-couple" maxlength="60" placeholder=" " oninput="obSyncSlug()" /><label for="ob-couple">Nama mempelai</label></div>
-            <div class="afield"><input type="text" id="ob-slug" maxlength="40" placeholder=" " autocapitalize="none" autocorrect="off" spellcheck="false" oninput="obSetSlugTouched()" /><label for="ob-slug">Slug tautan</label></div>
-            <p class="afield-hint" id="ob-slug-hint">Hanya huruf kecil, angka, dan strip.</p>
-            <button type="button" class="btn" onclick="obNext()">Lanjut</button>
-          </div>
-
-          <div id="ob-step-2" class="hidden">
-            <h2 style="margin:0 0 6px">Detail acara</h2>
-            <p class="sub" style="font-size:13px;margin:0 0 18px">Masih bisa diubah kapan saja di tab Acara.</p>
-            <div class="afield"><input type="date" id="ob-date" /><label for="ob-date">Tanggal</label></div>
-            <div class="afield"><input type="text" id="ob-loc" placeholder=" " /><label for="ob-loc">Lokasi</label></div>
-            <div class="afield-row">
-              <div class="afield"><input type="text" id="ob-s1n" placeholder=" " value="Akad" /><label for="ob-s1n">Sesi 1</label></div>
-              <div class="afield"><input type="text" id="ob-s1t" placeholder=" " value="10.00 WIB" /><label for="ob-s1t">Jam</label></div>
-            </div>
-            <div class="afield-row">
-              <div class="afield"><input type="text" id="ob-s2n" placeholder=" " value="Resepsi" /><label for="ob-s2n">Sesi 2</label></div>
-              <div class="afield"><input type="text" id="ob-s2t" placeholder=" " value="12.00 WIB" /><label for="ob-s2t">Jam</label></div>
-            </div>
-            <div style="display:flex;gap:8px;margin-top:14px">
-              <button type="button" class="btn line" onclick="obBack()">Kembali</button>
-              <button type="button" class="btn" id="ob-save" onclick="obSubmit()">Buat undangan</button>
-            </div>
-          </div>
-
-          <p class="login-err" id="ob-err" role="alert"></p>
+    <!-- FORM ACARA BARU (onboarding / tambah acara) — halaman penuh, bukan popup -->
+    <div id="create-event" class="hidden">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+          <button class="ce-back" id="ce-back" onclick="cancelCreateEvent()" hidden aria-label="Kembali"><i data-lucide="arrow-left"></i></button>
+          <h1 id="ce-heading" style="margin:0">Acara baru</h1>
         </div>
+        <span class="logo">R</span>
+      </header>
+      <div class="page">
+        <form id="ce-form" class="subpane" onsubmit="submitCreateEvent(event)">
+          <div class="card" style="padding:0 20px">
+            <div class="field"><label for="ce-couple">Nama mempelai</label><input type="text" id="ce-couple" maxlength="60" placeholder="Rudi &amp; Irul" required oninput="ceSyncDerived()" /></div>
+            <div class="sub" style="font-size:12px;padding:0 4px 10px">Tampil sebagai judul undangan. Untuk akun WO, isi nama mempelai, bukan nama WO.</div>
+            <div class="field"><label for="ce-title">Judul</label><input type="text" id="ce-title" maxlength="60" placeholder="The Wedding of Rudi &amp; Irul" oninput="ceTitleTouched=true" /></div>
+            <div class="field"><label for="ce-slug">Slug tautan</label><input type="text" id="ce-slug" maxlength="40" placeholder="rudi-irul" autocapitalize="none" autocorrect="off" spellcheck="false" oninput="ceSlugTouched=true;ceSlugHint()" /></div>
+            <div class="sub" style="font-size:12px;padding:0 4px 12px" id="ce-slug-hint">Hanya huruf kecil, angka, dan strip.</div>
+          </div>
+          <div class="card" style="padding:0 20px">
+            <div class="field"><label for="ce-date">Tanggal</label><input type="date" id="ce-date" required /></div>
+            <div class="field col"><label for="ce-location">Lokasi</label><textarea id="ce-location" rows="2" placeholder="Alamat gedung / venue" required></textarea></div>
+          </div>
+          <div class="card" style="padding:0 20px">
+            <div class="field col"><label for="ce-caption">Pesan pembuka <span style="color:var(--sub);font-weight:400">(opsional)</span></label><textarea id="ce-caption" rows="3" placeholder="Dengan penuh syukur, kami mengundang Bapak/Ibu/Saudara/i untuk hadir…"></textarea></div>
+            <div class="sub" style="font-size:12px;padding:0 4px 12px">Tampil di halaman undangan tamu, bukan di pesan WhatsApp.</div>
+          </div>
+          <div class="card" style="padding:0 20px">
+            <div class="field col"><label>Sesi acara</label></div>
+            <div id="ce-sessions"></div>
+            <button type="button" class="sess-add" id="ce-add-session" onclick="ceAddSession()"><i data-lucide="plus"></i>Tambah sesi</button>
+            <div class="sub" style="font-size:12px;padding:0 4px 12px">Jam sesi tampil di undangan dan pesan WhatsApp. Minimal satu sesi.</div>
+          </div>
+          <p class="login-err" id="ce-err" role="alert"></p>
+          <button type="submit" id="ce-save" class="btn">Buat undangan</button>
+        </form>
         <p class="sub" style="text-align:center;font-size:12px;padding:4px 20px">
           Setelah dibuat, kamu bisa melihat pratinjau undangan sebelum menerbitkannya.
         </p>
@@ -1145,14 +1178,16 @@ html.lock{overflow:hidden}
         <!-- Sub-tab 1: Profil acara -->
         <form id="event-form" onsubmit="submitEditEvent(event)" class="subpane">
           <div class="card" style="padding:0 20px">
-            <div class="field"><label for="ev-title">Judul</label><input type="text" id="ev-title" required /></div>
-            <div class="field"><label for="ev-date">Tanggal</label><input type="date" id="ev-date" required /></div>
-          </div>
-          <div class="card" style="padding:0 20px">
             <div class="field"><label for="ev-couple">Nama mempelai</label><input type="text" id="ev-couple" maxlength="60" placeholder="Rudi &amp; Irul" required /></div>
             <div class="sub" style="font-size:12px;padding:0 4px 10px">Tampil sebagai judul undangan. Untuk akun WO, isi nama mempelai, bukan nama WO.</div>
+            <div class="field"><label for="ev-title">Judul</label><input type="text" id="ev-title" required /></div>
+            <div class="sub" style="font-size:12px;padding:0 4px 10px">Tampil sebagai <code>{acara}</code> di pesan WhatsApp dan judul undangan.</div>
             <div class="field"><label for="ev-slug">Slug tautan</label><input type="text" id="ev-slug" maxlength="40" placeholder="rudi-irul" autocapitalize="none" autocorrect="off" spellcheck="false" oninput="updateSlugHint()" /></div>
             <div class="sub" style="font-size:12px;padding:0 4px 12px" id="ev-slug-hint">Hanya huruf kecil, angka, dan strip.</div>
+          </div>
+          <div class="card" style="padding:0 20px">
+            <div class="field"><label for="ev-date">Tanggal</label><input type="date" id="ev-date" required /></div>
+            <div class="field col"><label for="ev-location">Lokasi</label><textarea id="ev-location" rows="2" required></textarea></div>
           </div>
           <div class="card" style="padding:0 20px">
             <div class="field col"><label>Sesi acara</label></div>
@@ -1160,9 +1195,10 @@ html.lock{overflow:hidden}
             <button type="button" class="sess-add" id="ev-add-session" onclick="addSession()"><i data-lucide="plus"></i>Tambah sesi</button>
             <div class="sub" style="font-size:12px;padding:0 4px 12px">Tamu dibagi ke sesi ini. Jam sesi tampil di undangan dan pesan WhatsApp (<code>{waktu}</code>); nama sesi tersedia sebagai <code>{sesi}</code>. Menghapus sesi memindahkan tamunya ke sesi pertama.</div>
           </div>
-          <div class="card" style="padding:0 20px"><div class="field col"><label for="ev-location">Lokasi</label><textarea id="ev-location" rows="2" required></textarea></div></div>
-          <div class="card" style="padding:0 20px"><div class="field col"><label for="ev-caption">Pesan pembuka</label><textarea id="ev-caption" rows="4" required></textarea></div>
-            <div class="sub" style="font-size:12px;padding:0 4px 12px">Tampil di halaman undangan tamu, bukan di pesan WhatsApp.</div></div>
+          <div class="card" style="padding:0 20px">
+            <div class="field col"><label for="ev-caption">Pesan pembuka</label><textarea id="ev-caption" rows="4" required></textarea></div>
+            <div class="sub" style="font-size:12px;padding:0 4px 12px">Tampil di halaman undangan tamu, bukan di pesan WhatsApp.</div>
+          </div>
           <button type="submit" id="btn-save-event" class="btn">Simpan profil acara</button>
         </form>
 
@@ -1423,7 +1459,11 @@ let guestPage = 1, guestListSig = '';
 let sortField = 'created';
 let sortDir = 'desc';
 let currentActiveTab = 'home';
-let obSlugTouched = false;
+let ceMode = 'onboarding';
+let cePrevTab = 'home';
+let ceSlugTouched = false;
+let ceTitleTouched = false;
+let ceSessions = [];
 let currentCardViewMode = 'checkin';
 let html5QrCode = null;
 
@@ -1688,7 +1728,7 @@ async function loadDashboard() {
   globalData = data;
 
   if (!data.event) { showOnboarding(); return; }
-  $('onboarding').classList.add('hidden');
+  $('create-event').classList.add('hidden');
   // Panel tab ditumpuk di DOM. Tanpa ini keempatnya ikut terlihat saat scroll.
   switchTab(currentActiveTab || 'home');
 
@@ -1730,93 +1770,153 @@ function openEventSwitcher() {
     </button>`;
   }).join('');
   openSheet(`<h3 style="margin:0 0 14px">Pilih acara</h3>${rows}
-    <button class="btn line" style="margin-top:14px" onclick="openCreateEventSheet()">Buat acara baru</button>`);
+    <button class="btn line" style="margin-top:14px" onclick="openCreateEventPage()">Buat acara baru</button>`);
 }
 
-function openCreateEventSheet() {
-  openSheet(`
-    <div class="sheet-head">
-      <button class="ibtn" onclick="closeSheet()" aria-label="Batal"><i data-lucide="x"></i></button>
-      <h3>Acara baru</h3>
-      <span></span>
-    </div>
-
-    <div class="afield"><input id="ce-title" type="text" placeholder=" " /><label for="ce-title">Judul</label></div>
-    <div class="afield"><input id="ce-couple" type="text" placeholder=" " /><label for="ce-couple">Nama mempelai</label></div>
-    <div class="afield"><input id="ce-slug" type="text" placeholder=" " autocapitalize="none" autocorrect="off" spellcheck="false" /><label for="ce-slug">Slug tautan (opsional)</label></div>
-    <p class="afield-hint">Kosongkan untuk dibuat otomatis dari nama mempelai.</p>
-    <div class="afield"><input id="ce-date" type="date" /><label for="ce-date">Tanggal</label></div>
-    <div class="afield"><input id="ce-loc" type="text" placeholder=" " /><label for="ce-loc">Lokasi</label></div>
-
-    <div class="afield-row">
-      <div class="afield"><input id="ce-s1n" type="text" placeholder=" " value="Akad" /><label for="ce-s1n">Sesi 1</label></div>
-      <div class="afield"><input id="ce-s1t" type="text" placeholder=" " value="10.00 WIB" /><label for="ce-s1t">Jam</label></div>
-    </div>
-    <div class="afield-row">
-      <div class="afield"><input id="ce-s2n" type="text" placeholder=" " value="Resepsi" /><label for="ce-s2n">Sesi 2</label></div>
-      <div class="afield"><input id="ce-s2t" type="text" placeholder=" " value="12.00 WIB" /><label for="ce-s2t">Jam</label></div>
-    </div>
-
-    <p class="login-err" id="ce-err" role="alert"></p>
-    <button class="btn" id="ce-save" onclick="submitCreateEvent()">Buat acara</button>`);
+function openCreateEventPage() {
+  closeSheet();
+  showCreateEvent('add', currentActiveTab || 'home');
 }
 
-async function submitCreateEvent() {
+function showCreateEvent(mode, prevTab) {
+  ceMode = mode || 'onboarding';
+  cePrevTab = prevTab || 'home';
+  ceResetForm();
+  document.querySelectorAll('#dash > div[id^="tab-"]').forEach(d => d.classList.add('hidden'));
+  $('nav-container-wrap').classList.add('hidden');
+  const sw = $('ev-switch');
+  if (sw) sw.hidden = true;
+  $('ce-heading').textContent = ceMode === 'onboarding' ? 'Mulai' : 'Acara baru';
+  $('ce-back').hidden = ceMode === 'onboarding';
+  $('create-event').classList.remove('hidden');
+  const first = $('ce-couple'); if (first) setTimeout(() => first.focus(), 60);
+  icons();
+}
+
+function cancelCreateEvent() {
+  if (ceMode === 'onboarding') return; // onboarding tidak punya tujuan "kembali"
+  $('create-event').classList.add('hidden');
+  $('nav-container-wrap').classList.remove('hidden');
+  switchTab(cePrevTab);
+  renderEventSwitcher();
+}
+
+function showOnboarding() {
+  showCreateEvent('onboarding', 'home');
+}
+
+function ceResetForm() {
+  ceSlugTouched = false;
+  ceTitleTouched = false;
+  ceSessions = [
+    { name: 'Akad', time: '10.00 WIB' },
+    { name: 'Resepsi', time: '12.00 WIB' }
+  ];
+  const f = $('ce-form'); if (f) f.reset();
+  ['ce-couple', 'ce-title', 'ce-slug', 'ce-date', 'ce-location', 'ce-caption'].forEach(id => {
+    const el = $(id); if (el) el.value = '';
+  });
+  const err = $('ce-err'); if (err) err.textContent = '';
+  const save = $('ce-save'); if (save) { save.disabled = false; save.textContent = 'Buat undangan'; }
+  ceSlugHint();
+  renderCeSessions();
+}
+
+function ceSyncDerived() {
+  const couple = $('ce-couple').value.trim();
+  if (!ceTitleTouched) $('ce-title').value = couple ? 'The Wedding of ' + couple : '';
+  if (!ceSlugTouched) $('ce-slug').value = normalizeSlug(couple);
+  ceSlugHint();
+}
+
+function ceSlugHint() {
+  const el = $('ce-slug-hint'); if (!el) return '';
+  const v = normalizeSlug($('ce-slug').value);
+  el.textContent = 'Tautan undangan: /' + (v || '...') + '/<token> — hanya huruf kecil, angka, dan strip.';
+  return v;
+}
+
+function renderCeSessions() {
+  const box = $('ce-sessions'); if (!box) return;
+  box.innerHTML = ceSessions.map((s, i) => `
+    <div class="field ses-row" data-i="${i}">
+      <input class="sess-name" type="text" maxlength="40" placeholder="Nama sesi ${i + 1}" value="${esc(s.name || '')}" aria-label="Nama sesi ${i + 1}" oninput="ceSessions[${i}].name=this.value" />
+      <input class="sess-time" type="text" maxlength="30" placeholder="10.00 WIB" value="${esc(s.time || '')}" aria-label="Jam sesi ${i + 1}" oninput="ceSessions[${i}].time=this.value" />
+      ${ceSessions.length > 1 ? `<button type="button" class="sess-del" onclick="ceRemoveSession(${i})" aria-label="Hapus sesi ${i + 1}"><i data-lucide="x"></i></button>` : ''}
+    </div>`).join('');
+  icons();
+  const add = $('ce-add-session');
+  if (add) add.classList.toggle('hidden', ceSessions.length >= 3);
+}
+
+function ceAddSession() {
+  if (ceSessions.length >= 3) return;
+  ceSessions.push({ name: '', time: '' });
+  renderCeSessions();
+}
+
+function ceRemoveSession(i) {
+  if (ceSessions.length <= 1) return;
+  ceSessions.splice(i, 1);
+  renderCeSessions();
+}
+
+async function submitCreateEvent(e) {
+  e.preventDefault();
   const btn = $('ce-save');
   const err = $('ce-err');
-  const title = $('ce-title').value.trim();
-  const date = $('ce-date').value;
   const couple = $('ce-couple').value.trim();
+  const title = $('ce-title').value.trim() || ('The Wedding of ' + couple);
   const slug = normalizeSlug($('ce-slug').value);
-  if (!title || !date) { err.textContent = 'Judul dan tanggal wajib diisi.'; return; }
-  if (!couple) { err.textContent = 'Nama mempelai wajib diisi.'; return; }
-  if (slug && slug.length < 3) { err.textContent = 'Slug minimal 3 karakter.'; return; }
+  const date = $('ce-date').value;
+  const location = $('ce-location').value.trim();
+  const caption = $('ce-caption').value.trim();
 
-  const sessions = [];
-  const s1n = $('ce-s1n').value.trim(), s2n = $('ce-s2n').value.trim();
-  if (s1n) sessions.push({ name: s1n, time_text: $('ce-s1t').value.trim() || null });
-  if (s2n) sessions.push({ name: s2n, time_text: $('ce-s2t').value.trim() || null });
+  if (!couple) { err.textContent = 'Nama mempelai wajib diisi.'; return; }
+  if (slug.length < 3) { err.textContent = 'Slug tautan minimal 3 karakter (huruf kecil, angka, strip).'; return; }
+  if (!date) { err.textContent = 'Tanggal acara wajib diisi.'; return; }
+  if (!location) { err.textContent = 'Lokasi wajib diisi.'; return; }
+
+  const sessions = [...document.querySelectorAll('#ce-sessions .ses-row')].map(r => ({
+    name: r.querySelector('.sess-name').value.trim(),
+    time_text: r.querySelector('.sess-time').value.trim() || null
+  })).filter(s => s.name);
   if (!sessions.length) sessions.push({ name: 'Akad', time_text: null });
+  if (sessions.some(s => !s.name)) { err.textContent = 'Nama sesi wajib diisi.'; return; }
   if (new Set(sessions.map(s => s.name.toLowerCase())).size !== sessions.length) {
     err.textContent = 'Nama sesi harus berbeda.'; return;
   }
 
   btn.disabled = true;
+  btn.textContent = 'Membuat…';
   err.textContent = '';
-  const { data, error } = await supabaseClient.rpc('create_event', {
-    p_title: title,
-    p_event_date: date,
-    p_location: $('ce-loc').value.trim(),
-    p_couple_name: couple,
-    p_slug: slug || null,
-    p_sessions: sessions
-  });
-  btn.disabled = false;
-  if (error || !data || !data.success) {
-    err.textContent = (data && data.message) ? data.message : 'Gagal membuat acara.';
-    return;
+  try {
+    const { data, error } = await supabaseClient.rpc('create_event', {
+      p_title: title,
+      p_event_date: date,
+      p_location: location,
+      p_couple_name: couple,
+      p_slug: slug,
+      p_sessions: sessions
+    });
+    if (error || !data || data.success === false) {
+      err.textContent = (data && data.message) ? data.message : 'Gagal membuat acara.';
+      return;
+    }
+    if (caption) {
+      await supabaseClient.from('events').update({ caption }).eq('id', data.event_id);
+    }
+    currentEventId = data.event_id;
+    localStorage.setItem('rr_event_id', data.event_id);
+    await loadDashboard();
+    toast('Undangan dibuat. Berikutnya: pratinjau lalu terbitkan.');
+  } catch (ex) {
+    console.error(ex);
+    err.textContent = 'Gagal membuat acara. Coba lagi.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Buat undangan';
   }
-  currentEventId = data.event_id;
-  localStorage.setItem('rr_event_id', data.event_id);
-  closeSheet();
-  await loadDashboard();
-  toast('Acara dibuat');
-}
-
-function showOnboarding() {
-  $('onboarding').classList.remove('hidden');
-  obSlugTouched = false;
-  $('ob-step-1').classList.remove('hidden');
-  $('ob-step-2').classList.add('hidden');
-  $('ob-err').textContent = '';
-  $('ob-save').disabled = false;
-  $('ob-save').textContent = 'Buat undangan';
-  obSlugHint();
-  document.querySelectorAll('#dash > div[id^="tab-"]').forEach(d => d.classList.add('hidden'));
-  $('nav-container-wrap').classList.add('hidden');
-  const sw = $('ev-switch');
-  if (sw) sw.hidden = true;
-  icons();
 }
 
 async function pickEvent(id) {
@@ -2409,8 +2509,8 @@ function renderSessionsEditor() {
   if (!box) return;
   box.innerHTML = editSessions.map((s, i) => `
     <div class="field ses-row" data-sid="${esc(s.id || '')}">
-      <input class="sess-name" type="text" maxlength="40" placeholder="Nama sesi ${i + 1}" value="${esc(s.name || '')}" aria-label="Nama sesi ${i + 1}" />
-      <input class="sess-time" type="text" maxlength="30" placeholder="10.00 WIB" value="${esc(s.time || '')}" aria-label="Jam sesi ${i + 1}" />
+      <input class="sess-name" type="text" maxlength="40" placeholder="Nama sesi ${i + 1}" value="${esc(s.name || '')}" aria-label="Nama sesi ${i + 1}" oninput="editSessions[${i}].name=this.value" />
+      <input class="sess-time" type="text" maxlength="30" placeholder="10.00 WIB" value="${esc(s.time || '')}" aria-label="Jam sesi ${i + 1}" oninput="editSessions[${i}].time=this.value" />
       ${editSessions.length > 1 ? `<button type="button" class="sess-del" onclick="removeSession(${i})" aria-label="Hapus sesi ${i + 1}"><i data-lucide="x"></i></button>` : ''}
     </div>`).join('');
   icons();
@@ -2664,79 +2764,6 @@ function upgradeWaUrl() {
   const who = (globalData && globalData.client && globalData.client.name) || '';
   const msg = `Halo RayaRayu, saya ${who} ingin upgrade paket undangan.`;
   return `https://wa.me/${WA_BUSINESS}?text=${encodeURIComponent(msg)}`;
-}
-
-function obSyncSlug() {
-  if (!obSlugTouched) $('ob-slug').value = normalizeSlug($('ob-couple').value);
-  obSlugHint();
-}
-function obSetSlugTouched() {
-  obSlugTouched = true;
-  obSlugHint();
-}
-function obSlugHint() {
-  const v = normalizeSlug($('ob-slug').value);
-  $('ob-slug-hint').textContent = 'Tautan undangan: /' + (v || '...') + '/<token>';
-  return v;
-}
-function obNext() {
-  const err = $('ob-err');
-  const couple = $('ob-couple').value.trim();
-  const slug = normalizeSlug($('ob-slug').value);
-  if (!couple) { err.textContent = 'Nama mempelai wajib diisi.'; return; }
-  if (slug.length < 3) { err.textContent = 'Slug minimal 3 karakter (huruf kecil, angka, strip).'; return; }
-  err.textContent = '';
-  $('ob-step-1').classList.add('hidden');
-  $('ob-step-2').classList.remove('hidden');
-  window.scrollTo(0, 0);
-}
-function obBack() {
-  $('ob-err').textContent = '';
-  $('ob-step-2').classList.add('hidden');
-  $('ob-step-1').classList.remove('hidden');
-  window.scrollTo(0, 0);
-}
-
-async function obSubmit() {
-  const btn = $('ob-save'), err = $('ob-err');
-  const date = $('ob-date').value;
-  const couple = $('ob-couple').value.trim();
-  if (!date) { err.textContent = 'Tanggal acara wajib diisi.'; return; }
-  const title = 'The Wedding of ' + couple;
-  btn.disabled = true;
-  btn.textContent = 'Membuat…';
-  err.textContent = '';
-  try {
-    const obSessions = [];
-    const ob1 = $('ob-s1n').value.trim() || 'Akad';
-    const ob2 = $('ob-s2n').value.trim() || 'Resepsi';
-    obSessions.push({ name: ob1, time_text: $('ob-s1t').value.trim() || null });
-    if (ob2 && ob2.toLowerCase() !== ob1.toLowerCase()) {
-      obSessions.push({ name: ob2, time_text: $('ob-s2t').value.trim() || null });
-    }
-    const { data, error } = await supabaseClient.rpc('create_event', {
-      p_title: title,
-      p_event_date: date,
-      p_location: $('ob-loc').value.trim(),
-      p_couple_name: couple,
-      p_slug: normalizeSlug($('ob-slug').value),
-      p_sessions: obSessions
-    });
-    if (error || !data || data.success === false) {
-      err.textContent = (data && data.message) || 'Gagal membuat undangan. Coba lagi.';
-      return;
-    }
-    currentEventId = data.event_id;
-    localStorage.setItem('rr_event_id', data.event_id);
-    await loadDashboard();
-    toast('Undangan dibuat. Berikutnya: pratinjau lalu terbitkan.');
-  } catch (e) {
-    console.error(e);
-    err.textContent = 'Gagal membuat undangan. Coba lagi.';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Buat undangan';
-  }
 }
 
 function openUpgrade() {
