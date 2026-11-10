@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import type { Guest } from './guests'
+import type { Templates } from './whatsapp'
 
 export type Stats = {
   total_guests: number
@@ -37,6 +38,7 @@ export type DashboardEvent = {
   event_date: string | null
   scanner_code: string | null
   preview_token: string | null
+  wa_templates: Templates | null
 }
 
 export type DashboardData = {

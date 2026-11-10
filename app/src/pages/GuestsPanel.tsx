@@ -9,6 +9,7 @@ import { Sheet } from '@/components/Sheet'
 import type { DashboardData } from '@/lib/dashboard'
 import { addGuest, deleteGuest, markSent, updateGuest } from '@/lib/guests'
 import type { Guest, GuestForm } from '@/lib/guests'
+import { messageFor, normalizePhone, openWhatsApp } from '@/lib/whatsapp'
 
 type Filter = 'semua' | 'hadir' | 'tidak_hadir' | 'pending' | 'belum_terkirim' | 'check_in'
 
@@ -93,6 +94,31 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
 
   const close = () => setSheet(null)
 
+  const sendWhatsApp = async (g: Guest) => {
+    const message = messageFor(event, data.event?.wa_templates ?? null, g)
+    if (!g.is_sent) {
+      try {
+        await markSent(g.id)
+      } catch {
+        /* status terkirim gagal disimpan, pesan tetap dibuka */
+      }
+    }
+    const phone = normalizePhone(g.phone)
+    if (phone) {
+      openWhatsApp(phone, message)
+      notify('Membuka WhatsApp…')
+    } else {
+      try {
+        await navigator.clipboard.writeText(message)
+        notify('Nomor WhatsApp kosong. Pesan disalin.')
+      } catch {
+        notify('Nomor WhatsApp kosong dan pesan gagal disalin.')
+      }
+    }
+    await onChanged()
+    close()
+  }
+
   return (
     <>
       <h1 className="page-title">Tamu</h1>
@@ -161,6 +187,9 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
               close()
             }}
             onCopyLink={sheet.mode === 'edit' ? () => copyLink(sheet.guest) : undefined}
+            onSendWhatsApp={sheet.mode === 'edit' && sheet.guest.invitation_type !== 'cetak'
+              ? () => sendWhatsApp(sheet.guest)
+              : undefined}
             onMarkSent={sheet.mode === 'edit' && !sheet.guest.is_sent && sheet.guest.invitation_type !== 'cetak'
               ? () => run(() => markSent(sheet.guest.id), 'Ditandai terkirim').then(close)
               : undefined}
@@ -179,11 +208,12 @@ type BodyProps = {
   onCancel: () => void
   onSave: (form: GuestForm) => Promise<void>
   onCopyLink?: () => void
+  onSendWhatsApp?: () => void
   onMarkSent?: () => void
   onDelete?: () => void
 }
 
-function GuestSheetBody({ guest, categories, sessions, onCancel, onSave, onCopyLink, onMarkSent, onDelete }: BodyProps) {
+function GuestSheetBody({ guest, categories, sessions, onCancel, onSave, onCopyLink, onSendWhatsApp, onMarkSent, onDelete }: BodyProps) {
   const [form, setForm] = useState<GuestForm>(
     guest
       ? {
@@ -240,8 +270,9 @@ function GuestSheetBody({ guest, categories, sessions, onCancel, onSave, onCopyL
       </button>
       <button type="button" className="btn btn-secondary" onClick={onCancel}>Batal</button>
 
-      {guest && (onCopyLink || onMarkSent || onDelete) && (
+      {guest && (onCopyLink || onSendWhatsApp || onMarkSent || onDelete) && (
         <div style={{ display: 'grid', gap: 10, borderTop: '1px solid var(--line)', paddingTop: 16 }}>
+          {onSendWhatsApp && <button type="button" className="btn btn-primary" onClick={onSendWhatsApp}>Kirim lewat WhatsApp</button>}
           {onCopyLink && <button type="button" className="btn btn-secondary" onClick={onCopyLink}>Salin tautan undangan</button>}
           {onMarkSent && <button type="button" className="btn btn-secondary" onClick={onMarkSent}>Tandai terkirim</button>}
           {onDelete && (

@@ -90,7 +90,7 @@ export function DashboardPage() {
       {tab === 'tamu' && (
         <GuestsPanel data={data} onChanged={load} notify={notify} createSignal={createSignal} />
       )}
-      {tab === 'undangan' && <InvitationPage data={data} onShare={sharePreview} />}
+      {tab === 'undangan' && <InvitationPage data={data} onShare={sharePreview} onChanged={load} notify={notify} />}
       {tab === 'akun' && <AccountPage data={data} notify={notify} />}
 
       <TabBar value={tab} onChange={setTab} onAction={onAction} />
