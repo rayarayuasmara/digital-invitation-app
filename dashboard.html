@@ -341,7 +341,7 @@ input, select, textarea { font-size: 16px !important; }
 .fab svg{width:24px;height:24px}
 
 /* Sheet */
-.backdrop{position:fixed;inset:0;background:rgba(9,16,40,.4);z-index:50;opacity:0;pointer-events:none;transition:opacity .3s}
+.backdrop{position:fixed;inset:env(safe-area-inset-top,0px) 0 0;background:rgba(9,16,40,.4);z-index:50;opacity:0;pointer-events:none;transition:opacity .3s}
 .backdrop.open{opacity:1;pointer-events:auto}
 .sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:480px;z-index:51;background:var(--bg);border-radius:28px 28px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow-y:auto;transform:translate(-50%,105%);transition:transform .4s cubic-bezier(.32,.72,0,1)}
 .sheet.open{transform:translate(-50%,0)}

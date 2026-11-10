@@ -148,7 +148,7 @@ html.lock{overflow:hidden}
 .tokrow .btn{flex:0 0 auto;width:auto;height:50px;padding:0 20px;font-size:15px;border-radius:16px;white-space:nowrap}
 .lbl{font-size:13px;color:var(--sub);margin-bottom:10px;font-weight:500}
 
-.backdrop{position:fixed;inset:0;background:rgba(9,16,40,.45);z-index:50;opacity:0;pointer-events:none;transition:opacity .35s var(--ease)}
+.backdrop{position:fixed;inset:env(safe-area-inset-top,0px) 0 0;background:rgba(9,16,40,.45);z-index:50;opacity:0;pointer-events:none;transition:opacity .35s var(--ease)}
 .backdrop.open{opacity:1;pointer-events:auto}
 .sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:480px;z-index:51;background:var(--bg);border-radius:32px 32px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow-y:auto;transform:translate(-50%,105%);transition:transform .6s var(--ease);box-shadow:0 -20px 60px rgba(9,16,40,.25);overscroll-behavior:contain}
 .sheet.open{transform:translate(-50%,0)}
