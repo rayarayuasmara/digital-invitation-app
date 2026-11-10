@@ -541,6 +541,18 @@ html.lock{overflow:hidden}
   .tabbar{max-width:640px}
 }
 
+/* ===== Kontrol segmen (tema, dll.) ===== */
+.seg{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.seg::-webkit-scrollbar{display:none}
+.seg-btn{flex:1 1 0;min-width:max-content;height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--sub);font-size:14px;font-weight:600;text-align:center;transition:background .25s,color .25s,border-color .25s}
+.seg-btn:active{transform:scale(.97)}
+.seg-btn.on{background:var(--brand);border-color:var(--brand);color:#fff}
+:root[data-dark="1"] .seg-btn.on{color:#0b0f1a}
+
+/* Baris navigasi di Akun: chevron seragam. */
+.field-nav{cursor:pointer}
+.field-nav .chev{width:18px;height:18px;color:var(--sub);flex-shrink:0}
+
 /* ===== Multi-select filter & pagination (Tab Tamu) ===== */
 .sfbtn{position:relative;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex-shrink:0;background:var(--soft);color:var(--brand)}
 .sfbtn svg{width:20px;height:20px}
@@ -1409,31 +1421,31 @@ html.lock{overflow:hidden}
         
         <div class="card">
           <div class="ch"><h3>Tampilan Tema</h3></div>
-          <div class="tabs smooth-scroll" id="theme-seg" style="border:0;gap:8px">
-            <button data-t="auto" class="on" style="border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;flex-shrink:0">Otomatis</button>
-            <button data-t="light" style="border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;flex-shrink:0">Terang</button>
-            <button data-t="dark" style="border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;flex-shrink:0">Gelap</button>
+          <div class="seg" id="theme-seg" role="group" aria-label="Pilih tema tampilan">
+            <button type="button" class="seg-btn on" data-t="auto">Otomatis</button>
+            <button type="button" class="seg-btn" data-t="light">Terang</button>
+            <button type="button" class="seg-btn" data-t="dark">Gelap</button>
           </div>
         </div>
 
         <div class="card" style="padding:0 20px">
-          <div class="field" role="button" tabindex="0" style="cursor:pointer" onclick="openChangePassword()" onkeydown="if(event.key==='Enter'||event.key===' ')openChangePassword()">
+          <div class="field field-nav" role="button" tabindex="0" onclick="openChangePassword()" onkeydown="if(event.key==='Enter'||event.key===' ')openChangePassword()">
             <label>Password</label>
             <span class="ro-val">••••••••</span>
-            <i data-lucide="chevron-right" style="width:18px;height:18px;color:var(--sub)"></i>
+            <i data-lucide="chevron-right" class="chev"></i>
           </div>
-          <div class="field" role="button" tabindex="0" style="cursor:pointer" onclick="openEditPhone()" onkeydown="if(event.key==='Enter'||event.key===' ')openEditPhone()">
+          <div class="field field-nav" role="button" tabindex="0" onclick="openEditPhone()" onkeydown="if(event.key==='Enter'||event.key===' ')openEditPhone()">
             <label>Nomor WhatsApp</label>
             <span class="ro-val" id="akun-phone">Belum diisi</span>
-            <i data-lucide="chevron-right" style="width:18px;height:18px;color:var(--sub)"></i>
+            <i data-lucide="chevron-right" class="chev"></i>
           </div>
         </div>
 
         <div class="card hidden" id="admin-orders-card" style="padding:0 20px">
-          <div class="field" role="button" tabindex="0" style="cursor:pointer" onclick="openAdminOrders()" onkeydown="if(event.key==='Enter'||event.key===' ')openAdminOrders()">
+          <div class="field field-nav" role="button" tabindex="0" onclick="openAdminOrders()" onkeydown="if(event.key==='Enter'||event.key===' ')openAdminOrders()">
             <label>Pesanan masuk</label>
             <span class="ro-val" id="admin-orders-count">—</span>
-            <i data-lucide="chevron-right" style="width:18px;height:18px;color:var(--sub)"></i>
+            <i data-lucide="chevron-right" class="chev"></i>
           </div>
         </div>
 
@@ -1641,8 +1653,7 @@ function applyTheme() {
   document.querySelectorAll('#theme-seg button').forEach(b => {
     const on = b.dataset.t === pref;
     b.classList.toggle('on', on);
-    b.style.background = on ? 'var(--brand)' : '';
-    b.style.color = on ? '#fff' : '';
+    b.setAttribute('aria-pressed', String(on));
   });
 }
 mq.addEventListener('change', applyTheme);
