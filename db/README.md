@@ -35,6 +35,7 @@ Jalankan **berurutan**. Jangan melompat.
 | 15 | `2026-11-04-p8-payment-flow.sql` | Pesanan & pembayaran transfer manual (`orders`, `app_settings`, bucket `payment-proofs`) — **diterapkan 2026-11-04** |
 | 16 | `2026-11-10-p9-dynamic-sessions.sql` | Sesi acara dinamis 1–3 (`event_sessions`) — **diterapkan 2026-11-10** |
 | 17 | `2026-11-10-p10-access-hardening.sql` | Batasi direct write, cegah eskalasi role/paket, validasi RSVP/ucapan di DB — **diterapkan 2026-11-10** (versi `20261110053237`) |
+| 18 | `2026-11-10-p11-event-profile-wizard.sql` | RPC aman untuk menyimpan profil undangan dan sesi secara atomik — **diterapkan 2026-11-10** (versi `20261110080803`) |
 
 ### Prasyarat tiap tahap
 
@@ -310,6 +311,11 @@ Setelah migrasi P10 dijalankan:
   jika tidak hadir). `send_wish` menolak kosong dan membatasi 300 karakter.
 - Endpoint publik yang memang diperlukan tetap memberi akses `anon` melalui
   token/kode; helper dan fungsi trigger tidak lagi tersedia sebagai RPC anon.
+
+P11 menambahkan `save_event_profile(...)` agar wizard dapat menyimpan profil
+undangan dan sesi secara atomik melalui RPC pemilik. Hak execute hanya untuk
+`authenticated`; fungsi memeriksa pemilik acara dan membatasi tema ke `classic`
+yang memang saat ini tersedia.
 
 Uji manual sesudah deploy dengan akun klien biasa: perubahan `phone`, caption,
 template WA, dan waktu ucapan harus tetap berhasil; upaya mengubah `role`,

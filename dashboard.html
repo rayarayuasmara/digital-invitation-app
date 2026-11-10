@@ -389,14 +389,18 @@ input, select, textarea { font-size: 16px !important; }
   outline:none;transition:border-color .15s,box-shadow .15s;
   -webkit-appearance:none;appearance:none;
 }
+.afield textarea{width:100%;min-height:104px;border:1px solid var(--field-border);border-radius:16px;background:var(--field-bg);padding:26px 16px 10px;font-size:16px;line-height:1.45;color:var(--ink);resize:vertical;outline:none;transition:border-color .15s,box-shadow .15s}
 .afield label{
   position:absolute;left:17px;top:50%;transform:translateY(-50%);
   font-size:17px;color:var(--sub);pointer-events:none;
   transition:top .15s,font-size .15s,transform .15s,color .15s;
 }
 .afield input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--soft)}
+.afield textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--soft)}
 .afield input:focus+label,
+.afield textarea:focus+label,
 .afield input:not(:placeholder-shown)+label{top:9px;transform:none;font-size:12px}
+.afield textarea:not(:placeholder-shown)+label{top:9px;transform:none;font-size:12px}
 .afield input:focus+label{color:var(--brand)}
 .afield.has-eye input{padding-right:54px}
 .afield .eye{position:absolute;right:7px;top:50%;transform:translateY(-50%);margin:0}
@@ -559,16 +563,20 @@ html.lock{overflow:hidden}
 .field.locked label{color:var(--sub)}
 .field .lock-note{font-size:13px;color:var(--sub);display:flex;align-items:center;gap:4px;padding-bottom:8px}
 .switch input:disabled+span{opacity:.55}
-.ses-row input:first-child{text-align:left;font-weight:600}.ses-row input:last-child{flex:0 0 40%;border-left:1px solid var(--line);padding-left:12px;text-align:left}
-/* Editor sesi dinamis */
-.ses-row{gap:8px}
-.ses-row .sess-name{flex:1 1 auto;min-width:0;text-align:left;font-weight:600}
-.ses-row .sess-time{flex:0 0 32%;min-width:0;border-left:1px solid var(--line);padding-left:10px;text-align:left}
-.sess-del{flex:0 0 auto;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--sub)}
+/* Agenda: satu kartu per sesi, dengan field mengikuti pola form registrasi. */
+.ses-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;border:1px solid var(--line);border-radius:18px;background:var(--bg)}
+.ses-card-head{grid-column:1/-1;display:flex;align-items:center;gap:9px;min-height:36px}
+.ses-index{width:28px;height:28px;border-radius:9px;background:var(--soft);color:var(--brand);display:grid;place-items:center;font:600 13px 'Geist Mono',monospace}
+.ses-card-head strong{flex:1;min-width:0;font-size:14px;font-weight:700;color:var(--ink)}
+.ses-row .afield{min-width:0;margin:0}
+.ses-row .afield input{height:52px;padding:21px 12px 7px;text-align:left;font-size:16px}
+.ses-row .afield label{left:13px;max-width:calc(100% - 24px);font-size:14px}
+.sess-del{flex:0 0 auto;width:36px;height:36px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;background:var(--card);color:var(--sub);transition:color .15s,border-color .15s,background-color .15s}
 .sess-del svg{width:16px;height:16px}
-.sess-del:active{color:var(--red-ink)}
-.sess-add{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 4px;color:var(--brand);font-size:15px;font-weight:600}
-.sess-add svg{width:16px;height:16px}
+.sess-del:active{color:var(--red-ink);border-color:var(--red-ink)}
+.sess-add{display:flex;width:100%;align-items:center;justify-content:center;gap:8px;min-height:48px;margin-top:12px;padding:0 14px;border:1px dashed var(--brand);border-radius:15px;background:var(--soft);color:var(--brand);font-size:15px;font-weight:600}
+.sess-add svg{width:17px;height:17px}
+@media (max-width:359px){.ses-row{grid-template-columns:1fr}}
 .field .ro-val{flex:1;text-align:right;padding:18px 0;font-size:17px;color:var(--sub);user-select:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ===== Revisi: sortir, hero, kartu check-in ===== */
@@ -761,6 +769,52 @@ html.lock{overflow:hidden}
 .wa-bubble{position:relative;background:#d9fdd3;color:#111b21;border-radius:14px 14px 14px 4px;padding:10px 12px 8px;font-size:14.5px;line-height:1.45;white-space:pre-wrap;word-break:break-word;max-height:380px;overflow:auto}
 :root[data-dark="1"] .wa-bubble{background:#144d37;color:#e9edef}
 .wa-bubble b{font-weight:700}
+
+/* Wizard undangan: progres ringkas, form registrasi, preview yang nyata. */
+.wizard-intro{padding:4px 4px 2px}
+.wizard-kicker{margin:0 0 4px;color:var(--brand);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.wizard-intro h2{margin:0;font-size:24px;line-height:1.15;font-weight:800;letter-spacing:-.025em}
+.wizard-intro p{margin:7px 0 0;color:var(--sub);font-size:14px;line-height:1.45}
+.wiz-progress{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));position:relative;margin:8px 0 18px}
+.wiz-progress::before{content:"";position:absolute;top:15px;left:10%;right:10%;height:2px;background:var(--line)}
+.wiz-step{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;background:transparent;color:var(--sub);text-align:center}
+.wiz-dot{width:32px;height:32px;border:2px solid var(--line);border-radius:50%;display:grid;place-items:center;background:var(--bg);color:var(--sub);font:600 13px 'Geist Mono',monospace;transition:background-color .2s,border-color .2s,color .2s,transform .2s}
+.wiz-label{max-width:100%;font-size:11px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wiz-step.active{color:var(--brand);font-weight:700}
+.wiz-step.active .wiz-dot,.wiz-step.done .wiz-dot{background:var(--brand);border-color:var(--brand);color:#fff}
+.wiz-step.done .wiz-dot{font-family:'Geist',sans-serif}
+.wiz-step:disabled{cursor:default;opacity:.72}
+.wiz-step:focus-visible{outline:2px solid var(--brand);outline-offset:3px;border-radius:12px}
+.wiz-panel[hidden]{display:none!important}
+.wiz-panel>.card+.card{margin-top:12px}
+.wiz-panel .afield{margin-bottom:12px}
+.wiz-panel .afield:last-child{margin-bottom:0}
+.wizard-actions{display:flex;gap:10px;margin-top:14px}
+.wizard-actions .btn{flex:1;min-width:0}
+.wizard-actions .btn[hidden]{display:none}
+.wizard-actions .btn.line{flex:0 0 112px}
+.theme-option{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;width:100%;padding:12px;border:2px solid var(--brand);border-radius:20px;background:var(--card);text-align:left;box-shadow:0 0 0 3px var(--soft)}
+.theme-preview{min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:20px;border-radius:14px;background:linear-gradient(145deg,#fffdf8,#f5efe4);color:#27334d;text-align:center}
+.theme-preview .tp-mark{width:30px;height:30px;border:1px solid #c9bda5;border-radius:50%;display:grid;place-items:center;font:600 13px 'Geist Mono',monospace;color:#806c4e}
+.theme-preview small{font-size:9px;letter-spacing:.14em;color:#806c4e}
+.theme-preview strong{font:500 22px/1.15 Georgia,serif;letter-spacing:-.02em}
+.theme-preview span{font-size:11px;color:#806c4e}
+.theme-info{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 4px}
+.theme-info b{display:block;font-size:15px}
+.theme-info small{display:block;margin-top:3px;color:var(--sub);font-size:12px}
+.theme-check{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--brand);color:#fff;flex:0 0 auto}
+.theme-check svg{width:16px;height:16px}
+.theme-note,.photo-empty{margin-top:12px;padding:14px 16px;border-radius:16px;background:var(--soft);color:var(--sub);font-size:13px;line-height:1.45}
+.photo-empty{display:grid;justify-items:center;gap:10px;padding:26px 18px;text-align:center}
+.photo-empty .photo-icon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:var(--card);color:var(--brand)}
+.photo-empty .photo-icon svg{width:22px;height:22px}
+.photo-empty strong{color:var(--ink);font-size:15px}
+.photo-empty p{max-width:280px;margin:0}
+.summary-list{display:grid;gap:0}
+.summary-row{display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid var(--line);font-size:14px}
+.summary-row:last-child{border-bottom:0}
+.summary-row span{color:var(--sub)}
+.summary-row b{max-width:62%;text-align:right;overflow-wrap:anywhere;font-weight:600}
 .wa-bubble u{text-decoration:underline;color:#027eb5}
 :root[data-dark="1"] .wa-bubble u{color:#53bdeb}
 .wa-time{display:block;text-align:right;font-size:11px;opacity:.55;margin-top:2px}
@@ -970,34 +1024,84 @@ html.lock{overflow:hidden}
         <span class="logo">R</span>
       </header>
       <div class="page">
+        <div class="wizard-intro">
+          <p class="wizard-kicker">Buat undangan</p>
+          <h2 id="ce-step-title">Data mempelai</h2>
+          <p id="ce-step-description">Mulai dari nama. Tema dan detail acara bisa diatur setelahnya.</p>
+        </div>
+        <div class="wiz-progress" id="ce-progress" aria-label="Tahapan membuat undangan">
+          <button type="button" class="wiz-step active" data-step="0" onclick="ceGoStep(0)"><span class="wiz-dot">1</span><span class="wiz-label">Mempelai</span></button>
+          <button type="button" class="wiz-step" data-step="1" onclick="ceGoStep(1)"><span class="wiz-dot">2</span><span class="wiz-label">Tema</span></button>
+          <button type="button" class="wiz-step" data-step="2" onclick="ceGoStep(2)"><span class="wiz-dot">3</span><span class="wiz-label">Acara</span></button>
+          <button type="button" class="wiz-step" data-step="3" onclick="ceGoStep(3)"><span class="wiz-dot">4</span><span class="wiz-label">Foto</span></button>
+          <button type="button" class="wiz-step" data-step="4" onclick="ceGoStep(4)"><span class="wiz-dot">5</span><span class="wiz-label">Selesai</span></button>
+        </div>
         <form id="ce-form" class="subpane" onsubmit="submitCreateEvent(event)">
-          <div class="card" style="padding:0 20px">
-            <div class="field"><label for="ce-couple">Nama mempelai</label><input type="text" id="ce-couple" maxlength="60" placeholder="Rudi &amp; Irul" required oninput="ceSyncDerived()" /></div>
-            <div class="sub" style="font-size:12px;padding:0 4px 10px">Tampil sebagai judul undangan. Untuk akun WO, isi nama mempelai, bukan nama WO.</div>
-            <div class="field"><label for="ce-title">Judul</label><input type="text" id="ce-title" maxlength="60" placeholder="The Wedding of Rudi &amp; Irul" oninput="ceTitleTouched=true" /></div>
-            <div class="field"><label for="ce-slug">Slug tautan</label><input type="text" id="ce-slug" maxlength="40" placeholder="rudi-irul" autocapitalize="none" autocorrect="off" spellcheck="false" oninput="ceSlugTouched=true;ceSlugHint()" /></div>
-            <div class="sub" style="font-size:12px;padding:0 4px 12px" id="ce-slug-hint">Hanya huruf kecil, angka, dan strip.</div>
-          </div>
-          <div class="card" style="padding:0 20px">
-            <div class="field"><label for="ce-date">Tanggal</label><input type="date" id="ce-date" required /></div>
-            <div class="field col"><label for="ce-location">Lokasi</label><textarea id="ce-location" rows="2" placeholder="Alamat gedung / venue" required></textarea></div>
-          </div>
-          <div class="card" style="padding:0 20px">
-            <div class="field col"><label for="ce-caption">Pesan pembuka <span style="color:var(--sub);font-weight:400">(opsional)</span></label><textarea id="ce-caption" rows="3" placeholder="Dengan penuh syukur, kami mengundang Bapak/Ibu/Saudara/i untuk hadir…"></textarea></div>
-            <div class="sub" style="font-size:12px;padding:0 4px 12px">Tampil di halaman undangan tamu, bukan di pesan WhatsApp.</div>
-          </div>
-          <div class="card" style="padding:0 20px">
-            <div class="field col"><label>Sesi acara</label></div>
-            <div id="ce-sessions"></div>
-            <button type="button" class="sess-add" id="ce-add-session" onclick="ceAddSession()"><i data-lucide="plus"></i>Tambah sesi</button>
-            <div class="sub" style="font-size:12px;padding:0 4px 12px">Jam sesi tampil di undangan dan pesan WhatsApp. Minimal satu sesi.</div>
-          </div>
+          <section class="wiz-panel" data-ce-panel="0">
+            <div class="card" style="padding:0 20px">
+              <div class="afield"><input type="text" id="ce-couple" maxlength="60" placeholder=" " required oninput="ceSyncDerived()" /><label for="ce-couple">Nama mempelai</label></div>
+              <div class="sub" style="font-size:12px;padding:0 4px 10px">Untuk akun WO, isi nama mempelai, bukan nama WO.</div>
+              <div class="afield"><input type="text" id="ce-title" maxlength="60" placeholder=" " oninput="ceTitleTouched=true;ceUpdateSummary()" /><label for="ce-title">Judul undangan</label></div>
+              <div class="afield"><input type="text" id="ce-slug" maxlength="40" placeholder=" " autocapitalize="none" autocorrect="off" spellcheck="false" oninput="ceSlugTouched=true;ceSlugHint();ceUpdateSummary()" /><label for="ce-slug">Slug tautan</label></div>
+              <div class="sub" style="font-size:12px;padding:0 4px 12px" id="ce-slug-hint">Tautan dibuat otomatis dari nama mempelai.</div>
+            </div>
+          </section>
+          <section class="wiz-panel hidden" data-ce-panel="1">
+            <div class="card" style="padding:18px">
+              <div class="ch"><h3>Pilih tema undangan</h3></div>
+              <button type="button" class="theme-option selected" aria-pressed="true" onclick="ceSelectTheme('classic')">
+                <div>
+                  <div class="theme-preview"><span class="tp-mark">R</span><small>UNDANGAN PERNIKAHAN</small><strong id="ce-theme-couple">Nama Mempelai</strong><span id="ce-theme-date">Hari &amp; tanggal acara</span></div>
+                  <div class="theme-info"><div><b>RayaRayu Classic</b><small>Tema undangan yang tersedia</small></div><span class="theme-check"><i data-lucide="check"></i></span></div>
+                </div>
+              </button>
+              <div class="theme-note">Tema lain akan ditambahkan setelah pilihan desain dan pratinjaunya siap.</div>
+            </div>
+          </section>
+          <section class="wiz-panel hidden" data-ce-panel="2">
+            <div class="card" style="padding:0 20px">
+              <div class="afield"><input type="date" id="ce-date" placeholder=" " required oninput="ceUpdateSummary()" /><label for="ce-date">Tanggal acara</label></div>
+              <div class="afield"><input type="text" id="ce-location" placeholder=" " required oninput="ceUpdateSummary()" /><label for="ce-location">Lokasi / venue</label></div>
+            </div>
+            <div class="card" style="padding:16px 18px">
+              <div class="ch"><div><h3>Agenda acara</h3><p class="sub" style="margin:4px 0 0;font-size:13px">Tamu memilih sesi yang akan dihadiri.</p></div></div>
+              <div id="ce-sessions"></div>
+              <button type="button" class="sess-add" id="ce-add-session" onclick="ceAddSession()"><i data-lucide="plus"></i>Tambah sesi acara</button>
+              <div class="sub" style="font-size:12px;padding:10px 4px 2px">Minimal 1, maksimal 3 sesi. Contoh waktu: 10.00 WIB.</div>
+            </div>
+            <div class="card" style="padding:0 20px">
+              <div class="afield"><textarea id="ce-caption" rows="3" placeholder=" "></textarea><label for="ce-caption">Pesan pembuka (opsional)</label></div>
+              <div class="sub" style="font-size:12px;padding:0 4px 12px">Ditampilkan di halaman undangan, bukan di pesan WhatsApp.</div>
+            </div>
+          </section>
+          <section class="wiz-panel hidden" data-ce-panel="3">
+            <div class="card photo-empty">
+              <span class="photo-icon"><i data-lucide="image-plus"></i></span>
+              <strong>Foto menyusul</strong>
+              <p>Pengaturan foto belum tersedia. Kamu bisa lanjut membuat undangan dan kembali saat fitur ini siap.</p>
+            </div>
+          </section>
+          <section class="wiz-panel hidden" data-ce-panel="4">
+            <div class="card" style="padding:18px">
+              <div class="ch"><h3>Periksa detail undangan</h3></div>
+              <div class="summary-list">
+                <div class="summary-row"><span>Mempelai</span><b id="ce-summary-couple">—</b></div>
+                <div class="summary-row"><span>Judul</span><b id="ce-summary-title">—</b></div>
+                <div class="summary-row"><span>Tautan</span><b id="ce-summary-slug">—</b></div>
+                <div class="summary-row"><span>Tema</span><b>RayaRayu Classic</b></div>
+                <div class="summary-row"><span>Tanggal</span><b id="ce-summary-date">—</b></div>
+                <div class="summary-row"><span>Lokasi</span><b id="ce-summary-location">—</b></div>
+                <div class="summary-row"><span>Agenda</span><b id="ce-summary-sessions">—</b></div>
+              </div>
+            </div>
+          </section>
           <p class="login-err" id="ce-err" role="alert"></p>
-          <button type="submit" id="ce-save" class="btn">Buat undangan</button>
+          <div class="wizard-actions">
+            <button type="button" class="btn line" id="ce-step-back" onclick="cePrevStep()" hidden>Kembali</button>
+            <button type="button" class="btn" id="ce-step-next" onclick="ceNextStep()">Berikutnya</button>
+            <button type="submit" id="ce-save" class="btn" hidden>Buat undangan</button>
+          </div>
         </form>
-        <p class="sub" style="text-align:center;font-size:12px;padding:4px 20px">
-          Setelah dibuat, kamu bisa melihat pratinjau undangan sebelum menerbitkannya.
-        </p>
       </div>
     </div>
 
@@ -1167,39 +1271,85 @@ html.lock{overflow:hidden}
 
     <!-- TAB ACARA -->
     <div id="tab-acara" class="hidden">
-      <header class="topbar"><h1>Acara</h1><span class="logo">R</span></header>
+      <header class="topbar"><h1>Undangan</h1><span class="logo">R</span></header>
       <div class="page">
         <div class="tabs" id="acara-subtabs" role="tablist" style="padding:0 4px">
-          <button class="on" role="tab" aria-selected="true" data-sub="profil" onclick="switchAcaraSub('profil')">Profil Acara</button>
+          <button class="on" role="tab" aria-selected="true" data-sub="profil" onclick="switchAcaraSub('profil')">Detail</button>
           <button role="tab" aria-selected="false" data-sub="wa" onclick="switchAcaraSub('wa')">Pesan WhatsApp<i class="dotmark" id="wa-dirty" hidden></i></button>
           <button role="tab" aria-selected="false" data-sub="petugas" onclick="switchAcaraSub('petugas')">Petugas</button>
         </div>
 
-        <!-- Sub-tab 1: Profil acara -->
+        <!-- Sub-tab 1: alur kelola undangan -->
         <form id="event-form" onsubmit="submitEditEvent(event)" class="subpane">
-          <div class="card" style="padding:0 20px">
-            <div class="field"><label for="ev-couple">Nama mempelai</label><input type="text" id="ev-couple" maxlength="60" placeholder="Rudi &amp; Irul" required /></div>
-            <div class="sub" style="font-size:12px;padding:0 4px 10px">Tampil sebagai judul undangan. Untuk akun WO, isi nama mempelai, bukan nama WO.</div>
-            <div class="field"><label for="ev-title">Judul</label><input type="text" id="ev-title" required /></div>
-            <div class="sub" style="font-size:12px;padding:0 4px 10px">Tampil sebagai <code>{acara}</code> di pesan WhatsApp dan judul undangan.</div>
-            <div class="field"><label for="ev-slug">Slug tautan</label><input type="text" id="ev-slug" maxlength="40" placeholder="rudi-irul" autocapitalize="none" autocorrect="off" spellcheck="false" oninput="updateSlugHint()" /></div>
-            <div class="sub" style="font-size:12px;padding:0 4px 12px" id="ev-slug-hint">Hanya huruf kecil, angka, dan strip.</div>
+          <div class="wiz-progress" id="event-progress" aria-label="Tahapan pengaturan undangan">
+            <button type="button" class="wiz-step active" data-step="0" onclick="eventGoStep(0)"><span class="wiz-dot">1</span><span class="wiz-label">Mempelai</span></button>
+            <button type="button" class="wiz-step" data-step="1" onclick="eventGoStep(1)"><span class="wiz-dot">2</span><span class="wiz-label">Tema</span></button>
+            <button type="button" class="wiz-step" data-step="2" onclick="eventGoStep(2)"><span class="wiz-dot">3</span><span class="wiz-label">Acara</span></button>
+            <button type="button" class="wiz-step" data-step="3" onclick="eventGoStep(3)"><span class="wiz-dot">4</span><span class="wiz-label">Foto</span></button>
+            <button type="button" class="wiz-step" data-step="4" onclick="eventGoStep(4)"><span class="wiz-dot">5</span><span class="wiz-label">Selesai</span></button>
           </div>
-          <div class="card" style="padding:0 20px">
-            <div class="field"><label for="ev-date">Tanggal</label><input type="date" id="ev-date" required /></div>
-            <div class="field col"><label for="ev-location">Lokasi</label><textarea id="ev-location" rows="2" required></textarea></div>
+          <section class="wiz-panel" data-event-panel="0">
+            <div class="wizard-intro"><p class="wizard-kicker">Data dasar</p><h2>Data mempelai</h2><p>Nama dan tautan yang tampil di undangan.</p></div>
+            <div class="card" style="padding:0 20px">
+              <div class="afield"><input type="text" id="ev-couple" maxlength="60" placeholder=" " required /><label for="ev-couple">Nama mempelai</label></div>
+              <div class="sub" style="font-size:12px;padding:0 4px 10px">Untuk akun WO, isi nama mempelai, bukan nama WO.</div>
+              <div class="afield"><input type="text" id="ev-title" maxlength="60" placeholder=" " required /><label for="ev-title">Judul undangan</label></div>
+              <div class="sub" style="font-size:12px;padding:0 4px 10px">Judul tampil di undangan dan pesan WhatsApp.</div>
+              <div class="afield"><input type="text" id="ev-slug" maxlength="40" placeholder=" " autocapitalize="none" autocorrect="off" spellcheck="false" oninput="updateSlugHint();eventUpdateSummary()" /><label for="ev-slug">Slug tautan</label></div>
+              <div class="sub" style="font-size:12px;padding:0 4px 12px" id="ev-slug-hint">Hanya huruf kecil, angka, dan strip.</div>
+            </div>
+          </section>
+          <section class="wiz-panel hidden" data-event-panel="1">
+            <div class="wizard-intro"><p class="wizard-kicker">Tampilan</p><h2>Pilih tema</h2><p>Gunakan tema yang tersedia untuk pratinjau undangan.</p></div>
+            <div class="card" style="padding:18px">
+              <button type="button" class="theme-option selected" aria-pressed="true" onclick="eventSelectTheme('classic')">
+                <div>
+                  <div class="theme-preview"><span class="tp-mark">R</span><small>UNDANGAN PERNIKAHAN</small><strong id="ev-theme-couple">Nama Mempelai</strong><span id="ev-theme-date">Hari &amp; tanggal acara</span></div>
+                  <div class="theme-info"><div><b>RayaRayu Classic</b><small>Tema yang sedang digunakan</small></div><span class="theme-check"><i data-lucide="check"></i></span></div>
+                </div>
+              </button>
+              <div class="theme-note">Tema lain akan hadir setelah desain dan pratinjaunya siap.</div>
+            </div>
+          </section>
+          <section class="wiz-panel hidden" data-event-panel="2">
+            <div class="wizard-intro"><p class="wizard-kicker">Waktu &amp; tempat</p><h2>Detail acara</h2><p>Atur jadwal dan lokasi untuk tamu.</p></div>
+            <div class="card" style="padding:0 20px">
+              <div class="afield"><input type="date" id="ev-date" placeholder=" " required oninput="eventUpdateSummary()" /><label for="ev-date">Tanggal acara</label></div>
+              <div class="afield"><input type="text" id="ev-location" placeholder=" " required oninput="eventUpdateSummary()" /><label for="ev-location">Lokasi / venue</label></div>
+            </div>
+            <div class="card" style="padding:16px 18px">
+              <div class="ch"><div><h3>Agenda acara</h3><p class="sub" style="margin:4px 0 0;font-size:13px">Atur nama dan waktu tiap sesi.</p></div></div>
+              <div id="ev-sessions"></div>
+              <button type="button" class="sess-add" id="ev-add-session" onclick="addSession()"><i data-lucide="plus"></i>Tambah sesi acara</button>
+              <div class="sub" style="font-size:12px;padding:10px 4px 2px">Minimal 1, maksimal 3 sesi. Tamu dari sesi yang dihapus dipindahkan ke sesi pertama.</div>
+            </div>
+            <div class="card" style="padding:0 20px">
+              <div class="afield"><textarea id="ev-caption" rows="3" placeholder=" " oninput="eventUpdateSummary()"></textarea><label for="ev-caption">Pesan pembuka (opsional)</label></div>
+              <div class="sub" style="font-size:12px;padding:0 4px 12px">Tampil di undangan, bukan di pesan WhatsApp.</div>
+            </div>
+          </section>
+          <section class="wiz-panel hidden" data-event-panel="3">
+            <div class="wizard-intro"><p class="wizard-kicker">Media</p><h2>Foto</h2><p>Bagian ini opsional dan bisa dilewati.</p></div>
+            <div class="card photo-empty"><span class="photo-icon"><i data-lucide="image-plus"></i></span><strong>Foto belum tersedia</strong><p>Pengaturan foto akan hadir setelah fitur galeri tersedia.</p></div>
+          </section>
+          <section class="wiz-panel hidden" data-event-panel="4">
+            <div class="wizard-intro"><p class="wizard-kicker">Langkah terakhir</p><h2>Periksa undangan</h2><p>Pastikan detail utama sudah benar sebelum menyimpan.</p></div>
+            <div class="card" style="padding:18px"><div class="summary-list">
+              <div class="summary-row"><span>Mempelai</span><b id="ev-summary-couple">—</b></div>
+              <div class="summary-row"><span>Judul</span><b id="ev-summary-title">—</b></div>
+              <div class="summary-row"><span>Tautan</span><b id="ev-summary-slug">—</b></div>
+              <div class="summary-row"><span>Tema</span><b>RayaRayu Classic</b></div>
+              <div class="summary-row"><span>Tanggal</span><b id="ev-summary-date">—</b></div>
+              <div class="summary-row"><span>Lokasi</span><b id="ev-summary-location">—</b></div>
+              <div class="summary-row"><span>Agenda</span><b id="ev-summary-sessions">—</b></div>
+            </div></div>
+          </section>
+          <p class="login-err" id="event-wiz-err" role="alert"></p>
+          <div class="wizard-actions">
+            <button type="button" class="btn line" id="event-step-back" onclick="eventPrevStep()" hidden>Kembali</button>
+            <button type="button" class="btn" id="event-step-next" onclick="eventNextStep()">Berikutnya</button>
+            <button type="submit" id="btn-save-event" class="btn" hidden>Simpan undangan</button>
           </div>
-          <div class="card" style="padding:0 20px">
-            <div class="field col"><label>Sesi acara</label></div>
-            <div id="ev-sessions"></div>
-            <button type="button" class="sess-add" id="ev-add-session" onclick="addSession()"><i data-lucide="plus"></i>Tambah sesi</button>
-            <div class="sub" style="font-size:12px;padding:0 4px 12px">Tamu dibagi ke sesi ini. Jam sesi tampil di undangan dan pesan WhatsApp (<code>{waktu}</code>); nama sesi tersedia sebagai <code>{sesi}</code>. Menghapus sesi memindahkan tamunya ke sesi pertama.</div>
-          </div>
-          <div class="card" style="padding:0 20px">
-            <div class="field col"><label for="ev-caption">Pesan pembuka</label><textarea id="ev-caption" rows="4" required></textarea></div>
-            <div class="sub" style="font-size:12px;padding:0 4px 12px">Tampil di halaman undangan tamu, bukan di pesan WhatsApp.</div>
-          </div>
-          <button type="submit" id="btn-save-event" class="btn">Simpan profil acara</button>
         </form>
 
         <!-- Sub-tab 3: Petugas -->
@@ -1299,7 +1449,7 @@ html.lock{overflow:hidden}
     <div class="pillnav">
       <button id="nav-home" class="on" onclick="switchTab('home')"><i data-lucide="house"></i><span>Beranda</span><b class="nbadge hidden" id="nav-home-badge"></b></button>
       <button id="nav-tamu" onclick="switchTab('tamu')"><i data-lucide="users"></i><span>Tamu</span></button>
-      <button id="nav-acara" onclick="switchTab('acara')"><i data-lucide="calendar-days"></i><span>Acara</span></button>
+      <button id="nav-acara" onclick="switchTab('acara')"><i data-lucide="sparkles"></i><span>Undangan</span></button>
       <button id="nav-akun" onclick="switchTab('akun')"><i data-lucide="user"></i><span>Akun</span></button>
     </div>
     <button class="fab" id="fab-btn" onclick="handleFabClick()" aria-label="Aksi Cepat"><i data-lucide="scan-line" id="fab-icon"></i></button>
@@ -1464,6 +1614,10 @@ let cePrevTab = 'home';
 let ceSlugTouched = false;
 let ceTitleTouched = false;
 let ceSessions = [];
+let ceStep = 0;
+let ceTheme = 'classic';
+let eventStep = 0;
+let eventTheme = 'classic';
 let currentCardViewMode = 'checkin';
 let html5QrCode = null;
 
@@ -1806,6 +1960,8 @@ function showOnboarding() {
 }
 
 function ceResetForm() {
+  ceStep = 0;
+  ceTheme = 'classic';
   ceSlugTouched = false;
   ceTitleTouched = false;
   ceSessions = [
@@ -1820,6 +1976,7 @@ function ceResetForm() {
   const save = $('ce-save'); if (save) { save.disabled = false; save.textContent = 'Buat undangan'; }
   ceSlugHint();
   renderCeSessions();
+  ceSetStep(0);
 }
 
 function ceSyncDerived() {
@@ -1827,24 +1984,166 @@ function ceSyncDerived() {
   if (!ceTitleTouched) $('ce-title').value = couple ? 'The Wedding of ' + couple : '';
   if (!ceSlugTouched) $('ce-slug').value = normalizeSlug(couple);
   ceSlugHint();
+  ceUpdateSummary();
 }
 
 function ceSlugHint() {
   const el = $('ce-slug-hint'); if (!el) return '';
   const v = normalizeSlug($('ce-slug').value);
-  el.textContent = 'Tautan undangan: /' + (v || '...') + '/<token> — hanya huruf kecil, angka, dan strip.';
+  el.textContent = 'Tautan dibuat otomatis dari nama mempelai; bisa diubah sebelum undangan diterbitkan.';
   return v;
 }
+
+const WIZARD_STEPS = [
+  ['Data mempelai', 'Nama dan tautan yang akan tampil pada undangan.'],
+  ['Pilih tema', 'Lihat gaya undangan yang tersedia saat ini.'],
+  ['Detail acara', 'Atur waktu, lokasi, dan rangkaian acara.'],
+  ['Foto', 'Bagian ini opsional dan dapat dilewati.'],
+  ['Periksa undangan', 'Pastikan detailnya sudah benar sebelum dibuat.']
+];
+
+function ceSetStep(step) {
+  ceStep = Math.max(0, Math.min(4, step));
+  document.querySelectorAll('#ce-form [data-ce-panel]').forEach((panel, i) => panel.classList.toggle('hidden', i !== ceStep));
+  document.querySelectorAll('#ce-progress .wiz-step').forEach((button, i) => {
+    const done = i < ceStep, active = i === ceStep;
+    button.classList.toggle('active', active); button.classList.toggle('done', done);
+    button.disabled = i > ceStep + 1;
+    button.setAttribute('aria-current', active ? 'step' : 'false');
+    const dot = button.querySelector('.wiz-dot'); if (dot) dot.textContent = done ? '✓' : String(i + 1);
+  });
+  $('ce-step-title').textContent = WIZARD_STEPS[ceStep][0];
+  $('ce-step-description').textContent = WIZARD_STEPS[ceStep][1];
+  $('ce-step-back').hidden = ceStep === 0;
+  $('ce-step-next').hidden = ceStep === 4;
+  $('ce-save').hidden = ceStep !== 4;
+  const err = $('ce-err'); if (err) err.textContent = '';
+  ceUpdateSummary();
+  icons();
+}
+
+function ceUpdateSummary() {
+  const couple = $('ce-couple')?.value.trim() || '';
+  const title = $('ce-title')?.value.trim() || (couple ? `The Wedding of ${couple}` : '—');
+  const slug = normalizeSlug($('ce-slug')?.value || '');
+  const date = $('ce-date')?.value || '';
+  const dateLabel = date ? new Date(`${date}T12:00:00`).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' }) : '—';
+  const sessions = [...document.querySelectorAll('#ce-sessions .ses-row')].map(row => {
+    const name = row.querySelector('.sess-name')?.value.trim();
+    const time = row.querySelector('.sess-time')?.value.trim();
+    return name ? `${name}${time ? ` · ${time}` : ''}` : '';
+  }).filter(Boolean).join(', ') || '—';
+  const set = (id, value) => { const el = $(id); if (el) el.textContent = value; };
+  set('ce-summary-couple', couple || '—'); set('ce-summary-title', title);
+  set('ce-summary-slug', slug ? `/${slug}/<token>` : '—'); set('ce-summary-date', dateLabel);
+  set('ce-summary-location', $('ce-location')?.value.trim() || '—'); set('ce-summary-sessions', sessions);
+  set('ce-theme-couple', couple || 'Nama Mempelai'); set('ce-theme-date', dateLabel === '—' ? 'Hari & tanggal acara' : dateLabel);
+}
+
+function ceCheckStep() {
+  const err = $('ce-err');
+  const fail = (message, selector) => { err.textContent = message; const el = selector && $(selector); if (el) el.focus(); return false; };
+  if (ceStep === 0) {
+    const couple = $('ce-couple').value.trim();
+    if (!couple) return fail('Nama mempelai wajib diisi.', 'ce-couple');
+    ceSyncDerived();
+    if (normalizeSlug($('ce-slug').value).length < 3) return fail('Slug tautan minimal 3 karakter.', 'ce-slug');
+  }
+  if (ceStep === 2) {
+    if (!$('ce-date').value) return fail('Tanggal acara wajib diisi.', 'ce-date');
+    if (!$('ce-location').value.trim()) return fail('Lokasi acara wajib diisi.', 'ce-location');
+    const names = [...document.querySelectorAll('#ce-sessions .sess-name')].map(el => el.value.trim());
+    if (!names.length || names.some(name => !name)) return fail('Isi nama untuk setiap sesi.', 'ce-sess-name-0');
+    if (new Set(names.map(name => name.toLowerCase())).size !== names.length) return fail('Nama sesi harus berbeda.', 'ce-sess-name-0');
+  }
+  if (err) err.textContent = '';
+  return true;
+}
+
+function ceNextStep() { if (ceCheckStep()) ceSetStep(ceStep + 1); }
+function cePrevStep() { ceSetStep(ceStep - 1); }
+function ceGoStep(step) {
+  if (step <= ceStep) ceSetStep(step);
+  else if (step === ceStep + 1) ceNextStep();
+}
+function ceSelectTheme(theme) { if (theme !== 'classic') return; ceTheme = theme; ceUpdateSummary(); }
+
+function eventSetStep(step) {
+  eventStep = Math.max(0, Math.min(4, step));
+  document.querySelectorAll('#event-form [data-event-panel]').forEach((panel, i) => panel.classList.toggle('hidden', i !== eventStep));
+  document.querySelectorAll('#event-progress .wiz-step').forEach((button, i) => {
+    const done = i < eventStep, active = i === eventStep;
+    button.classList.toggle('active', active); button.classList.toggle('done', done);
+    button.disabled = i > eventStep + 1;
+    button.setAttribute('aria-current', active ? 'step' : 'false');
+    const dot = button.querySelector('.wiz-dot'); if (dot) dot.textContent = done ? '✓' : String(i + 1);
+  });
+  $('event-step-back').hidden = eventStep === 0;
+  $('event-step-next').hidden = eventStep === 4;
+  $('btn-save-event').hidden = eventStep !== 4;
+  const err = $('event-wiz-err'); if (err) err.textContent = '';
+  eventUpdateSummary();
+  icons();
+}
+
+function eventUpdateSummary() {
+  if (!globalData?.event) return;
+  const couple = $('ev-couple')?.value.trim() || '';
+  const title = $('ev-title')?.value.trim() || '—';
+  const slug = normalizeSlug($('ev-slug')?.value || '');
+  const date = $('ev-date')?.value || '';
+  const dateLabel = date ? new Date(`${date}T12:00:00`).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' }) : '—';
+  const sessions = [...document.querySelectorAll('#ev-sessions .ses-row')].map(row => {
+    const name = row.querySelector('.sess-name')?.value.trim();
+    const time = row.querySelector('.sess-time')?.value.trim();
+    return name ? `${name}${time ? ` · ${time}` : ''}` : '';
+  }).filter(Boolean).join(', ') || '—';
+  const set = (id, value) => { const el = $(id); if (el) el.textContent = value; };
+  set('ev-summary-couple', couple || '—'); set('ev-summary-title', title);
+  set('ev-summary-slug', slug ? `/${slug}/<token>` : '—'); set('ev-summary-date', dateLabel);
+  set('ev-summary-location', $('ev-location')?.value.trim() || '—'); set('ev-summary-sessions', sessions);
+  set('ev-theme-couple', couple || 'Nama Mempelai'); set('ev-theme-date', dateLabel === '—' ? 'Hari & tanggal acara' : dateLabel);
+}
+
+function eventCheckStep() {
+  const err = $('event-wiz-err');
+  const fail = (message, selector) => { err.textContent = message; const el = selector && $(selector); if (el) el.focus(); return false; };
+  if (eventStep === 0) {
+    if (!$('ev-couple').value.trim()) return fail('Nama mempelai wajib diisi.', 'ev-couple');
+    if (!$('ev-title').value.trim()) return fail('Judul undangan wajib diisi.', 'ev-title');
+    if (normalizeSlug($('ev-slug').value).length < 3) return fail('Slug tautan minimal 3 karakter.', 'ev-slug');
+  }
+  if (eventStep === 2) {
+    if (!$('ev-date').value) return fail('Tanggal acara wajib diisi.', 'ev-date');
+    if (!$('ev-location').value.trim()) return fail('Lokasi acara wajib diisi.', 'ev-location');
+    const names = [...document.querySelectorAll('#ev-sessions .sess-name')].map(el => el.value.trim());
+    if (!names.length || names.some(name => !name)) return fail('Isi nama untuk setiap sesi.', 'ev-sess-name-0');
+    if (new Set(names.map(name => name.toLowerCase())).size !== names.length) return fail('Nama sesi harus berbeda.', 'ev-sess-name-0');
+  }
+  if (err) err.textContent = '';
+  return true;
+}
+
+function eventNextStep() { if (eventCheckStep()) eventSetStep(eventStep + 1); }
+function eventPrevStep() { eventSetStep(eventStep - 1); }
+function eventGoStep(step) {
+  if (step <= eventStep) eventSetStep(step);
+  else if (step === eventStep + 1) eventNextStep();
+}
+function eventSelectTheme(theme) { if (theme !== 'classic') return; eventTheme = theme; eventUpdateSummary(); }
 
 function renderCeSessions() {
   const box = $('ce-sessions'); if (!box) return;
   box.innerHTML = ceSessions.map((s, i) => `
-    <div class="field ses-row" data-i="${i}">
-      <input class="sess-name" type="text" maxlength="40" placeholder="Nama sesi ${i + 1}" value="${esc(s.name || '')}" aria-label="Nama sesi ${i + 1}" oninput="ceSessions[${i}].name=this.value" />
-      <input class="sess-time" type="text" maxlength="30" placeholder="10.00 WIB" value="${esc(s.time || '')}" aria-label="Jam sesi ${i + 1}" oninput="ceSessions[${i}].time=this.value" />
+    <div class="ses-row" data-i="${i}">
+      <div class="ses-card-head"><span class="ses-index">${i + 1}</span><strong>Sesi ${i + 1}</strong>
       ${ceSessions.length > 1 ? `<button type="button" class="sess-del" onclick="ceRemoveSession(${i})" aria-label="Hapus sesi ${i + 1}"><i data-lucide="x"></i></button>` : ''}
+      </div>
+      <div class="afield"><input class="sess-name" id="ce-sess-name-${i}" type="text" maxlength="40" placeholder=" " value="${esc(s.name || '')}" required oninput="ceSessions[${i}].name=this.value;ceUpdateSummary()" /><label for="ce-sess-name-${i}">Nama sesi</label></div>
+      <div class="afield"><input class="sess-time" id="ce-sess-time-${i}" type="text" maxlength="30" placeholder=" " value="${esc(s.time || '')}" aria-label="Waktu sesi ${i + 1}" oninput="ceSessions[${i}].time=this.value;ceUpdateSummary()" /><label for="ce-sess-time-${i}">Waktu, mis. 10.00 WIB</label></div>
     </div>`).join('');
   icons();
+  ceUpdateSummary();
   const add = $('ce-add-session');
   if (add) add.classList.toggle('hidden', ceSessions.length >= 3);
 }
@@ -2215,6 +2514,7 @@ function renderUI() {
   $('ev-loc-txt').textContent = event.location || '–';
   $('ev-title').value = event.title || '';
   $('ev-couple').value = event.couple_name || client.name || '';
+  eventTheme = event.theme_id || 'classic';
   $('ev-slug').value = event.slug || '';
   $('ev-slug').disabled = !!event.published_at;
   updateSlugHint();
@@ -2224,6 +2524,7 @@ function renderUI() {
   renderSessionsEditor();
   $('ev-location').value = event.location || '';
   $('ev-caption').value = event.caption || '';
+  eventSetStep(0);
   renderScannerCode(event);
   renderPlanCard(event, stats);
 
@@ -2382,42 +2683,28 @@ async function submitEditEvent(e) {
   btn.textContent = 'Menyimpan…';
 
   try {
-    const eventId = globalData.event.id;
-    const { error: directError } = await supabaseClient
-      .from('events')
-      .update({
-        title: title,
-        couple_name: couple,
-        slug: slug,
-        event_date: eventDateKeepTime(dateVal),
-        location: location,
-        caption: caption
-      })
-      .eq('id', eventId);
-
-    if (directError) {
-      btn.disabled = false;
-      btn.textContent = 'Simpan profil acara';
-      return toast('Gagal menyimpan: ' + directError.message, false);
-    }
-
-    const { data: sres, error: serr } = await supabaseClient.rpc('save_event_sessions', {
-      p_event_id: eventId, p_sessions: rows
+    const { data, error } = await supabaseClient.rpc('save_event_profile', {
+      p_event_id: globalData.event.id,
+      p_title: title,
+      p_couple_name: couple,
+      p_slug: slug,
+      p_event_date: eventDateKeepTime(dateVal),
+      p_location: location,
+      p_caption: caption,
+      p_theme_id: eventTheme || 'classic',
+      p_sessions: rows
     });
-    if (serr || !sres || sres.success === false) {
-      btn.disabled = false;
-      btn.textContent = 'Simpan profil acara';
-      return toast((sres && sres.message) || 'Gagal menyimpan sesi', false);
+    if (error || !data || data.success === false) {
+      return toast((data && data.message) || (error && error.message) || 'Gagal menyimpan undangan.', false);
     }
 
-    btn.disabled = false;
-    btn.textContent = 'Simpan profil acara';
-    toast('Profil acara berhasil disimpan');
-    loadDashboard();
+    toast('Undangan berhasil disimpan');
+    await loadDashboard();
   } catch (err) {
+    toast('Terjadi kesalahan: ' + (err.message || 'Coba lagi.'), false);
+  } finally {
     btn.disabled = false;
-    btn.textContent = 'Simpan profil acara';
-    toast('Terjadi kesalahan: ' + err.message, false);
+    btn.textContent = 'Simpan undangan';
   }
 }
 
@@ -2508,12 +2795,15 @@ function renderSessionsEditor() {
   const box = $('ev-sessions');
   if (!box) return;
   box.innerHTML = editSessions.map((s, i) => `
-    <div class="field ses-row" data-sid="${esc(s.id || '')}">
-      <input class="sess-name" type="text" maxlength="40" placeholder="Nama sesi ${i + 1}" value="${esc(s.name || '')}" aria-label="Nama sesi ${i + 1}" oninput="editSessions[${i}].name=this.value" />
-      <input class="sess-time" type="text" maxlength="30" placeholder="10.00 WIB" value="${esc(s.time || '')}" aria-label="Jam sesi ${i + 1}" oninput="editSessions[${i}].time=this.value" />
+    <div class="ses-row" data-sid="${esc(s.id || '')}">
+      <div class="ses-card-head"><span class="ses-index">${i + 1}</span><strong>Sesi ${i + 1}</strong>
       ${editSessions.length > 1 ? `<button type="button" class="sess-del" onclick="removeSession(${i})" aria-label="Hapus sesi ${i + 1}"><i data-lucide="x"></i></button>` : ''}
+      </div>
+      <div class="afield"><input class="sess-name" id="ev-sess-name-${i}" type="text" maxlength="40" placeholder=" " value="${esc(s.name || '')}" required oninput="editSessions[${i}].name=this.value;eventUpdateSummary()" /><label for="ev-sess-name-${i}">Nama sesi</label></div>
+      <div class="afield"><input class="sess-time" id="ev-sess-time-${i}" type="text" maxlength="30" placeholder=" " value="${esc(s.time || '')}" aria-label="Waktu sesi ${i + 1}" oninput="editSessions[${i}].time=this.value;eventUpdateSummary()" /><label for="ev-sess-time-${i}">Waktu, mis. 10.00 WIB</label></div>
     </div>`).join('');
   icons();
+  eventUpdateSummary();
   const add = $('ev-add-session');
   if (add) add.classList.toggle('hidden', editSessions.length >= 3);
 }
