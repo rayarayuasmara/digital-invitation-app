@@ -1,10 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Search, X } from 'lucide-react'
+import { Copy, MessageCircle, Pencil, Search, Trash2, X } from 'lucide-react'
+import { Avatar } from '@/components/arc/avatar/avatar'
+import { Badge } from '@/components/arc/badge/badge'
+import type { BadgeTone } from '@/components/arc/badge/badge'
 import { Dialog, DialogContent } from '@/components/arc/dialog/dialog'
 import { Input } from '@/components/arc/input/input'
 import { NumberField } from '@/components/arc/number-field/number-field'
 import { Select } from '@/components/arc/select/select'
+import { SwipeActions, SwipeActionsRow } from '@/components/arc/swipe-actions/swipe-actions'
+import type { SwipeAction } from '@/components/arc/swipe-actions/swipe-actions'
 import { Sheet } from '@/components/Sheet'
 import type { DashboardData } from '@/lib/dashboard'
 import { addGuest, deleteGuest, markSent, updateGuest } from '@/lib/guests'
@@ -33,12 +38,12 @@ function matches(g: Guest, f: Filter) {
   return g.is_checked_in
 }
 
-function statusBadge(g: Guest): { text: string; tone: 'ok' | 'bad' | '' } {
-  if (g.is_checked_in) return { text: 'Check-in', tone: 'ok' }
-  if (g.rsvp_status === 'hadir') return { text: 'Hadir', tone: 'ok' }
-  if (g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen') return { text: 'Tidak hadir', tone: 'bad' }
-  if (!g.is_sent) return { text: 'Belum terkirim', tone: '' }
-  return { text: 'Pending', tone: '' }
+function statusOf(g: Guest): { text: string; tone: BadgeTone } {
+  if (g.is_checked_in) return { text: 'Check-in', tone: 'info' }
+  if (g.rsvp_status === 'hadir') return { text: 'Hadir', tone: 'success' }
+  if (g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen') return { text: 'Tidak hadir', tone: 'danger' }
+  if (!g.is_sent) return { text: 'Belum terkirim', tone: 'neutral' }
+  return { text: 'Pending', tone: 'warning' }
 }
 
 type Props = {
@@ -55,6 +60,7 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<Filter>('semua')
   const [sheet, setSheet] = useState<{ mode: 'new' } | { mode: 'edit'; guest: Guest } | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Guest | null>(null)
 
   useEffect(() => {
     if (createSignal > 0) setSheet({ mode: 'new' })
@@ -92,8 +98,6 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
     }
   }
 
-  const close = () => setSheet(null)
-
   const sendWhatsApp = async (g: Guest) => {
     const message = messageFor(event, data.event?.wa_templates ?? null, g)
     if (!g.is_sent) {
@@ -116,7 +120,22 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
       }
     }
     await onChanged()
-    close()
+  }
+
+  const close = () => setSheet(null)
+
+  const actionsFor = (g: Guest): SwipeAction[] => {
+    const actions: SwipeAction[] = [
+      { label: 'Salin tautan', icon: <Copy size={18} aria-hidden />, tone: 'neutral', keepRow: true, onSelect: () => copyLink(g) },
+    ]
+    if (g.invitation_type !== 'cetak') {
+      actions.push({ label: 'Kirim WA', icon: <MessageCircle size={18} aria-hidden />, tone: 'accent', keepRow: true, onSelect: () => sendWhatsApp(g) })
+    }
+    actions.push(
+      { label: 'Edit', icon: <Pencil size={18} aria-hidden />, tone: 'neutral', keepRow: true, onSelect: () => setSheet({ mode: 'edit', guest: g }) },
+      { label: 'Hapus', icon: <Trash2 size={18} aria-hidden />, tone: 'danger', keepRow: true, onSelect: () => setDeleteTarget(g) },
+    )
+    return actions
   }
 
   return (
@@ -150,22 +169,30 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
 
       {visible.length === 0 && <p className="empty">Tidak ada tamu yang sesuai.</p>}
 
-      <ul className="list" style={{ marginTop: 8 }}>
-        {visible.map(g => {
-          const badge = statusBadge(g)
-          return (
-            <li key={g.id}>
-              <button type="button" className="list-row" onClick={() => setSheet({ mode: 'edit', guest: g })}>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <p className="name">{g.group_name}</p>
-                  <p className="meta">{g.category} · {g.max_pax} orang</p>
-                </div>
-                <span className={`badge ${badge.tone === 'ok' ? 'badge-ok' : badge.tone === 'bad' ? 'badge-bad' : ''}`}>{badge.text}</span>
-              </button>
-            </li>
-          )
-        })}
-      </ul>
+      <SwipeActions label="Daftar tamu">
+        <ul className="list" style={{ marginTop: 8 }}>
+          {visible.map(g => {
+            const status = statusOf(g)
+            return (
+              <li key={g.id}>
+                <SwipeActionsRow label={g.group_name} fullSwipe={false} trailing={actionsFor(g)}>
+                  <button type="button" className="guest-row" onClick={() => setSheet({ mode: 'edit', guest: g })}>
+                    <Avatar name={g.group_name} size="md" />
+                    <div className="guest-info">
+                      <p className="name">{g.group_name}</p>
+                      <div className="guest-badges">
+                        <Badge size="sm" outline pill>{g.category || 'Umum'}</Badge>
+                        <Badge size="sm" tone={status.tone} pill>{status.text}</Badge>
+                        <span className="meta">{g.max_pax} orang</span>
+                      </div>
+                    </div>
+                  </button>
+                </SwipeActionsRow>
+              </li>
+            )
+          })}
+        </ul>
+      </SwipeActions>
 
       <Sheet
         open={sheet !== null}
@@ -188,15 +215,37 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
             }}
             onCopyLink={sheet.mode === 'edit' ? () => copyLink(sheet.guest) : undefined}
             onSendWhatsApp={sheet.mode === 'edit' && sheet.guest.invitation_type !== 'cetak'
-              ? () => sendWhatsApp(sheet.guest)
+              ? () => sendWhatsApp(sheet.guest).then(close)
               : undefined}
             onMarkSent={sheet.mode === 'edit' && !sheet.guest.is_sent && sheet.guest.invitation_type !== 'cetak'
               ? () => run(() => markSent(sheet.guest.id), 'Ditandai terkirim').then(close)
               : undefined}
-            onDelete={sheet.mode === 'edit' ? () => run(() => deleteGuest(sheet.guest.id), 'Tamu dihapus').then(close) : undefined}
+            onDelete={sheet.mode === 'edit' ? () => setDeleteTarget(sheet.guest) : undefined}
           />
         )}
       </Sheet>
+
+      <Dialog open={deleteTarget !== null} onOpenChange={open => { if (!open) setDeleteTarget(null) }}>
+        {deleteTarget && (
+          <DialogContent title={`Hapus ${deleteTarget.group_name}?`} description="Data tamu ini akan dihapus dan tidak bisa dikembalikan.">
+            <div style={{ display: 'grid', gap: 10 }}>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={() => {
+                  const target = deleteTarget
+                  setDeleteTarget(null)
+                  setSheet(null)
+                  run(() => deleteGuest(target.id), 'Tamu dihapus')
+                }}
+              >
+                Ya, hapus
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={() => setDeleteTarget(null)}>Batal</button>
+            </div>
+          </DialogContent>
+        )}
+      </Dialog>
     </>
   )
 }
@@ -228,7 +277,6 @@ function GuestSheetBody({ guest, categories, sessions, onCancel, onSave, onCopyL
   )
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const set = <K extends keyof GuestForm>(key: K, value: GuestForm[K]) => setForm(f => ({ ...f, [key]: value }))
 
@@ -275,19 +323,7 @@ function GuestSheetBody({ guest, categories, sessions, onCancel, onSave, onCopyL
           {onSendWhatsApp && <button type="button" className="btn btn-primary" onClick={onSendWhatsApp}>Kirim lewat WhatsApp</button>}
           {onCopyLink && <button type="button" className="btn btn-secondary" onClick={onCopyLink}>Salin tautan undangan</button>}
           {onMarkSent && <button type="button" className="btn btn-secondary" onClick={onMarkSent}>Tandai terkirim</button>}
-          {onDelete && (
-            <>
-              <button type="button" className="btn btn-danger" onClick={() => setConfirmDelete(true)}>Hapus tamu</button>
-              <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-                <DialogContent title={`Hapus ${guest.group_name}?`} description="Data tamu ini akan dihapus dan tidak bisa dikembalikan.">
-                  <div style={{ display: 'grid', gap: 10 }}>
-                    <button type="button" className="btn btn-danger" onClick={() => { setConfirmDelete(false); onDelete() }}>Ya, hapus</button>
-                    <button type="button" className="btn btn-secondary" onClick={() => setConfirmDelete(false)}>Batal</button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </>
-          )}
+          {onDelete && <button type="button" className="btn btn-danger" onClick={onDelete}>Hapus tamu</button>}
         </div>
       )}
     </form>
