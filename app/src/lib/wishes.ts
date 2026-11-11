@@ -2,6 +2,7 @@ import { supabase } from './supabase'
 
 export type Wish = {
   id: string
+  guest_id: string | null
   guest_name: string | null
   message: string
   created_at: string
@@ -19,7 +20,7 @@ export async function fetchWishes(eventId: string, seenAt: string | null, limit 
   const [list, total, unseen] = await Promise.all([
     supabase
       .from('wishes')
-      .select('id, guest_name, message, created_at')
+      .select('id, guest_id, guest_name, message, created_at')
       .eq('event_id', eventId)
       .order('created_at', { ascending: false })
       .range(0, limit - 1),

@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Bell, MessageSquareText } from 'lucide-react'
 import { AnimatedCounter } from '@/components/arc/animated-counter/animated-counter'
+import { Badge } from '@/components/arc/badge/badge'
 import { DonutChart } from '@/components/arc/donut-chart/donut-chart'
 import { WishThread } from '@/components/WishThread'
 import type { DashboardData } from '@/lib/dashboard'
@@ -11,18 +13,24 @@ type Props = { data: DashboardData; notify: (message: string) => void }
 const pct = (part: number, whole: number) => (whole > 0 ? (part / whole) * 100 : 0)
 const WISH_LIMIT = 50
 
-function WishesCard({ eventId, seenAt, notify }: { eventId: string; seenAt: string | null; notify: (m: string) => void }) {
+export function HomePage({ data, notify }: Props) {
+  const { event, stats, categories, client, guests } = data
+  const total = stats.total_guests
+  const quotaPct = pct(total, stats.max_quota)
+  const eventId = event!.id
+
+  const [seen, setSeen] = useState<string | null>(event?.wishes_seen_at ?? null)
   const [wishes, setWishes] = useState<Wish[] | null>(null)
-  const [total, setTotal] = useState(0)
+  const [wishTotal, setWishTotal] = useState(0)
   const [unread, setUnread] = useState(0)
   const [error, setError] = useState('')
-  const [seen, setSeen] = useState(seenAt)
+  const sectionRef = useRef<HTMLElement>(null)
 
   const load = useCallback(async () => {
     try {
       const summary = await fetchWishes(eventId, seen, WISH_LIMIT)
       setWishes([...summary.wishes].reverse())
-      setTotal(summary.total)
+      setWishTotal(summary.total)
       setUnread(summary.unread)
       setError('')
     } catch (e) {
@@ -44,32 +52,9 @@ function WishesCard({ eventId, seenAt, notify }: { eventId: string; seenAt: stri
     }
   }
 
-  return (
-    <section className="card" style={{ marginTop: 12, padding: 0, overflow: 'hidden' }}>
-      <div className="wish-head">
-        <div>
-          <p className="stat-label" style={{ margin: 0 }}>Ucapan</p>
-          <p className="stat-note" style={{ margin: '2px 0 0' }}>{total} ucapan · hanya untuk dibaca</p>
-        </div>
-        {unread > 0 && (
-          <button type="button" className="badge badge-ok" onClick={markSeen} style={{ border: 0, cursor: 'pointer' }}>
-            {unread} baru · tandai dibaca
-          </button>
-        )}
-      </div>
-
-      {error && <p role="alert" className="wish-empty" style={{ color: 'var(--red-ink)' }}>{error}</p>}
-      {!error && wishes === null && <p className="wish-empty">Memuat ucapan…</p>}
-      {wishes && wishes.length === 0 && <p className="wish-empty">Belum ada ucapan masuk.</p>}
-      {wishes && wishes.length > 0 && <WishThread wishes={wishes} />}
-    </section>
-  )
-}
-
-export function HomePage({ data, notify }: Props) {
-  const { event, stats, categories } = data
-  const total = stats.total_guests
-  const quotaPct = pct(total, stats.max_quota)
+  const jumpToWishes = () => {
+    sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   const rsvp = [
     { key: 'hadir', label: 'Hadir', value: stats.hadir, color: 'var(--green-ink)' },
@@ -79,8 +64,21 @@ export function HomePage({ data, notify }: Props) {
 
   return (
     <>
-      <h1 className="page-title">Beranda</h1>
-      <p className="page-sub">{event?.title}</p>
+      <div className="page-head">
+        <div style={{ minWidth: 0 }}>
+          <h1 className="page-title">Beranda</h1>
+          <p className="page-sub">{event?.title}</p>
+        </div>
+        <button
+          type="button"
+          className="icon-btn bell"
+          onClick={jumpToWishes}
+          aria-label={unread > 0 ? `Notifikasi, ${unread} ucapan belum dibaca` : 'Notifikasi'}
+        >
+          <Bell size={18} aria-hidden />
+          {unread > 0 && <span className="bell-count">{unread > 99 ? '99+' : unread}</span>}
+        </button>
+      </div>
 
       <section className="card hero">
         <p className="stat-label">Total tamu</p>
@@ -128,7 +126,27 @@ export function HomePage({ data, notify }: Props) {
         </div>
       </section>
 
-      <WishesCard eventId={event!.id} seenAt={event?.wishes_seen_at ?? null} notify={notify} />
+      <section ref={sectionRef} id="ucapan" className="card wish-card" style={{ marginTop: 12 }} aria-labelledby="ucapan-title">
+        <div className="wish-head">
+          <div className="wish-title">
+            <MessageSquareText size={18} aria-hidden />
+            <h2 id="ucapan-title">Ucapan</h2>
+            <span className="wish-total">{wishTotal}</span>
+          </div>
+          {unread > 0 && (
+            <button type="button" onClick={markSeen} className="wish-unread" aria-label={`${unread} ucapan belum dibaca, tandai sudah dibaca`}>
+              <Badge tone="info" size="sm" pill>{unread} belum dibaca</Badge>
+            </button>
+          )}
+        </div>
+
+        {error && <p role="alert" className="wish-empty" style={{ color: 'var(--red-ink)' }}>{error}</p>}
+        {!error && wishes === null && <p className="wish-empty">Memuat ucapan…</p>}
+        {wishes && wishes.length === 0 && <p className="wish-empty">Belum ada ucapan masuk.</p>}
+        {wishes && wishes.length > 0 && (
+          <WishThread wishes={wishes} guests={guests} hostName={client.name} seenAt={seen} />
+        )}
+      </section>
 
       <h2 className="section-title">Kategori tamu</h2>
       <ul className="list">

@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Copy, MessageCircle, Pencil, Search, Trash2, X } from 'lucide-react'
+import { Copy, MessageCircle, Pencil, Search, SlidersHorizontal, Trash2, X } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
 import type { BadgeTone } from '@/components/arc/badge/badge'
+import { Checkbox } from '@/components/arc/checkbox/checkbox'
 import { Dialog, DialogContent } from '@/components/arc/dialog/dialog'
 import { Input } from '@/components/arc/input/input'
 import { NumberField } from '@/components/arc/number-field/number-field'
@@ -38,6 +39,16 @@ function matches(g: Guest, f: Filter) {
   return g.is_checked_in
 }
 
+type FacetKey = 'cat' | 'type' | 'session'
+
+const facetValue: Record<FacetKey, (g: Guest) => string> = {
+  cat: g => g.category || 'Umum',
+  type: g => (g.invitation_type === 'cetak' ? 'cetak' : 'digital'),
+  session: g => g.session || '',
+}
+
+const facetLabel: Record<FacetKey, string> = { cat: 'Kategori', type: 'Jenis undangan', session: 'Sesi' }
+
 function statusOf(g: Guest): { text: string; tone: BadgeTone } {
   if (g.is_checked_in) return { text: 'Check-in', tone: 'info' }
   if (g.rsvp_status === 'hadir') return { text: 'Hadir', tone: 'success' }
@@ -61,6 +72,9 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
   const [filter, setFilter] = useState<Filter>('semua')
   const [sheet, setSheet] = useState<{ mode: 'new' } | { mode: 'edit'; guest: Guest } | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Guest | null>(null)
+  const [filterOpen, setFilterOpen] = useState(false)
+  const [picked, setPicked] = useState<Record<FacetKey, Set<string>>>({ cat: new Set(), type: new Set(), session: new Set() })
+  const activeCount = picked.cat.size + picked.type.size + picked.session.size
 
   useEffect(() => {
     if (createSignal > 0) setSheet({ mode: 'new' })
@@ -73,9 +87,27 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
 
   const sessions = (event.sessions ?? []).map(s => s.name)
 
+  const facetOptions = useMemo(() => {
+    const build = (key: FacetKey) => {
+      const values = [...new Set(guests.map(facetValue[key]).filter(Boolean))].sort()
+      return values.map(v => ({ value: v, label: key === 'type' ? (v === 'cetak' ? 'Cetak' : 'Digital') : v }))
+    }
+    return { cat: build('cat'), type: build('type'), session: build('session') }
+  }, [guests])
+
+  const toggleFacet = (key: FacetKey, value: string) => {
+    setPicked(p => {
+      const next = new Set(p[key])
+      if (next.has(value)) next.delete(value)
+      else next.add(value)
+      return { ...p, [key]: next }
+    })
+  }
+
   const visible = guests
     .filter(g => g.group_name.toLowerCase().includes(query.trim().toLowerCase()))
     .filter(g => matches(g, filter))
+    .filter(g => (Object.keys(picked) as FacetKey[]).every(k => picked[k].size === 0 || picked[k].has(facetValue[k](g))))
     .sort((a, b) => a.group_name.localeCompare(b.group_name))
 
   const run = async (fn: () => Promise<void>, ok: string) => {
@@ -124,42 +156,53 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
 
   const close = () => setSheet(null)
 
-  const actionsFor = (g: Guest): SwipeAction[] => {
+  const trailingFor = (g: Guest): SwipeAction[] => {
     const actions: SwipeAction[] = [
-      { label: 'Salin tautan', icon: <Copy size={18} aria-hidden />, tone: 'neutral', keepRow: true, onSelect: () => copyLink(g) },
+      { label: 'Salin', icon: <Copy size={18} aria-hidden />, tone: 'neutral', keepRow: true, onSelect: () => copyLink(g) },
     ]
     if (g.invitation_type !== 'cetak') {
       actions.push({ label: 'Kirim WA', icon: <MessageCircle size={18} aria-hidden />, tone: 'accent', keepRow: true, onSelect: () => sendWhatsApp(g) })
     }
-    actions.push(
-      { label: 'Edit', icon: <Pencil size={18} aria-hidden />, tone: 'neutral', keepRow: true, onSelect: () => setSheet({ mode: 'edit', guest: g }) },
-      { label: 'Hapus', icon: <Trash2 size={18} aria-hidden />, tone: 'danger', keepRow: true, onSelect: () => setDeleteTarget(g) },
-    )
     return actions
   }
 
+  const leadingFor = (g: Guest): SwipeAction[] => [
+    { label: 'Edit', icon: <Pencil size={18} aria-hidden />, tone: 'neutral', keepRow: true, onSelect: () => setSheet({ mode: 'edit', guest: g }) },
+    { label: 'Hapus', icon: <Trash2 size={18} aria-hidden />, tone: 'danger', keepRow: true, onSelect: () => setDeleteTarget(g) },
+  ]
+
   return (
     <>
-      <h1 className="page-title">Tamu</h1>
-      <p className="page-sub">{guests.length} tamu terdaftar</p>
+      <div className="page-head">
+        <div style={{ minWidth: 0 }}>
+          <h1 className="page-title">Tamu</h1>
+          <p className="page-sub">{guests.length} tamu terdaftar</p>
+        </div>
+      </div>
 
-      <label className="search">
-        <Search size={18} aria-hidden color="var(--sub)" />
-        <input
-          type="search"
-          placeholder="Cari nama tamu"
-          aria-label="Cari nama tamu"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-        />
-        {query && (
-          <button type="button" className="icon-btn" style={{ width: 26, height: 26, border: 0 }} onClick={() => setQuery('')} aria-label="Hapus pencarian">
-            <X size={14} aria-hidden />
-          </button>
-        )}
-      </label>
+      <div className="search-row">
+        <label className="search" style={{ flex: 1, margin: 0 }}>
+          <Search size={18} aria-hidden color="var(--sub)" />
+          <input
+            type="search"
+            placeholder="Cari nama tamu"
+            aria-label="Cari nama tamu"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+          />
+          {query && (
+            <button type="button" className="icon-btn" style={{ width: 26, height: 26, border: 0 }} onClick={() => setQuery('')} aria-label="Hapus pencarian">
+              <X size={14} aria-hidden />
+            </button>
+          )}
+        </label>
+        <button type="button" className="icon-btn filter-btn" onClick={() => setFilterOpen(true)} aria-label="Filter tamu">
+          <SlidersHorizontal size={18} aria-hidden />
+          {activeCount > 0 && <span className="bell-count">{activeCount}</span>}
+        </button>
+      </div>
 
-      <div className="chips" role="group" aria-label="Filter tamu">
+      <div className="chips" role="group" aria-label="Filter status tamu">
         {filters.map(f => (
           <button key={f.value} type="button" className="chip" aria-pressed={filter === f.value} onClick={() => setFilter(f.value)}>
             {f.label}
@@ -169,30 +212,60 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
 
       {visible.length === 0 && <p className="empty">Tidak ada tamu yang sesuai.</p>}
 
-      <SwipeActions label="Daftar tamu">
-        <ul className="list" style={{ marginTop: 8 }}>
-          {visible.map(g => {
-            const status = statusOf(g)
-            return (
-              <li key={g.id}>
-                <SwipeActionsRow label={g.group_name} fullSwipe={false} trailing={actionsFor(g)}>
-                  <button type="button" className="guest-row" onClick={() => setSheet({ mode: 'edit', guest: g })}>
-                    <Avatar name={g.group_name} size="md" />
-                    <div className="guest-info">
-                      <p className="name">{g.group_name}</p>
-                      <div className="guest-badges">
-                        <Badge size="sm" outline pill>{g.category || 'Umum'}</Badge>
-                        <Badge size="sm" tone={status.tone} pill>{status.text}</Badge>
-                        <span className="meta">{g.max_pax} orang</span>
-                      </div>
-                    </div>
-                  </button>
-                </SwipeActionsRow>
-              </li>
-            )
-          })}
-        </ul>
+      <SwipeActions label="Daftar tamu" className="guest-surface">
+        {visible.map(g => {
+          const status = statusOf(g)
+          const showPax = g.rsvp_status === 'hadir' && g.is_checked_in
+          return (
+            <SwipeActionsRow
+              key={g.id}
+              label={g.group_name}
+              fullSwipe={false}
+              leading={leadingFor(g)}
+              trailing={trailingFor(g)}
+            >
+              <button type="button" className="guest-row" onClick={() => setSheet({ mode: 'edit', guest: g })}>
+                <Avatar name={g.group_name} size="lg" />
+                <div className="guest-info">
+                  <p className="name">{g.group_name}</p>
+                  <div className="guest-badges">
+                    <Badge size="sm" outline pill>{g.category || 'Umum'}</Badge>
+                    <Badge size="sm" tone={status.tone} pill>{status.text}</Badge>
+                    {showPax && <Badge size="sm" tone="success" pill>{g.max_pax} pax</Badge>}
+                  </div>
+                </div>
+              </button>
+            </SwipeActionsRow>
+          )
+        })}
       </SwipeActions>
+
+      <Sheet open={filterOpen} title="Filter tamu" onClose={() => setFilterOpen(false)}>
+        <div className="sheet-body">
+          {(Object.keys(facetLabel) as FacetKey[]).map(key => (
+            <section key={key} className="facet">
+              <p className="section-title" style={{ margin: '4px 0 8px' }}>{facetLabel[key]}</p>
+              <div className="facet-list">
+                {facetOptions[key].length === 0 && <p className="meta">Belum ada data.</p>}
+                {facetOptions[key].map(o => (
+                  <Checkbox
+                    key={o.value}
+                    label={o.label}
+                    checked={picked[key].has(o.value)}
+                    onCheckedChange={() => toggleFacet(key, o.value)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+          <button type="button" className="btn btn-secondary" onClick={() => setPicked({ cat: new Set(), type: new Set(), session: new Set() })} disabled={activeCount === 0}>
+            Reset filter
+          </button>
+          <button type="button" className="btn btn-primary" onClick={() => setFilterOpen(false)}>
+            Tampilkan {visible.length} tamu
+          </button>
+        </div>
+      </Sheet>
 
       <Sheet
         open={sheet !== null}

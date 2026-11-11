@@ -809,7 +809,72 @@ body {
   justify-content: space-between;
   gap: 12px;
   padding: 16px 16px 12px;
-  border-bottom: 1px solid var(--line);
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bell {
+  position: relative;
+  flex: 0 0 auto;
+  margin-top: 8px;
+}
+
+.bell-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--red-ink);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+.wish-card {
+  padding: 0;
+  overflow: hidden;
+  scroll-margin-top: 16px;
+}
+
+.wish-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+}
+
+.wish-title h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.wish-total {
+  color: var(--sub);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.wish-unread {
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.thread-frame {
+  height: 440px;
+  border-top: 1px solid var(--line);
 }
 
 .wish-empty {
@@ -902,12 +967,6 @@ body {
   border-radius: 18px 18px 18px 6px;
 }
 
-.list li > div,
-.list li > div > div {
-  background: var(--card);
-  border-radius: 16px;
-}
-
 .guest-row {
   display: flex;
   align-items: center;
@@ -949,4 +1008,50 @@ body {
 .guest-badges .meta {
   color: var(--sub);
   font-size: 12px;
+}
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.filter-btn {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+}
+
+.filter-btn .bell-count {
+  top: -4px;
+  right: -4px;
+}
+
+.facet-list {
+  display: grid;
+  gap: 12px;
+  padding: 4px 4px 0;
+}
+
+.facet {
+  display: grid;
+  gap: 4px;
+}
+
+.guest-surface {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.thread-frame ol > li + li {
+  margin-top: 14px;
+}
+
+.thread-frame button[aria-pressed] > :nth-child(2) {
+  display: none;
 }
