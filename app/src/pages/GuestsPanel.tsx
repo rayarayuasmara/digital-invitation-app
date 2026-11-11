@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Copy, MessageCircle, Pencil, Search, SlidersHorizontal, Trash2, X } from 'lucide-react'
+import { Copy, MessageCircle, Pencil, Search, Trash2, X } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
 import type { BadgeTone } from '@/components/arc/badge/badge'
-import { Checkbox } from '@/components/arc/checkbox/checkbox'
 import { Dialog, DialogContent } from '@/components/arc/dialog/dialog'
 import { Input } from '@/components/arc/input/input'
+import { MultiSelect } from '@/components/arc/multi-select/multi-select'
 import { NumberField } from '@/components/arc/number-field/number-field'
 import { Select } from '@/components/arc/select/select'
 import { SwipeActions, SwipeActionsRow } from '@/components/arc/swipe-actions/swipe-actions'
@@ -17,10 +17,10 @@ import { addGuest, deleteGuest, markSent, updateGuest } from '@/lib/guests'
 import type { Guest, GuestForm } from '@/lib/guests'
 import { messageFor, normalizePhone, openWhatsApp } from '@/lib/whatsapp'
 
-type Filter = 'semua' | 'hadir' | 'tidak_hadir' | 'pending' | 'belum_terkirim' | 'check_in'
+type Status = 'hadir' | 'tidak_hadir' | 'pending' | 'belum_terkirim' | 'check_in'
+type SortKey = 'nama' | 'dibuat' | 'diubah'
 
-const filters: { value: Filter; label: string }[] = [
-  { value: 'semua', label: 'Semua' },
+const statusOptions: { value: Status; label: string }[] = [
   { value: 'hadir', label: 'Hadir' },
   { value: 'tidak_hadir', label: 'Tidak hadir' },
   { value: 'pending', label: 'Pending' },
@@ -28,26 +28,26 @@ const filters: { value: Filter; label: string }[] = [
   { value: 'check_in', label: 'Sudah check-in' },
 ]
 
+const typeOptions = [
+  { value: 'digital', label: 'Digital' },
+  { value: 'cetak', label: 'Cetak' },
+]
+
+const sortOptions: { value: SortKey; label: string }[] = [
+  { value: 'nama', label: 'Nama (A–Z)' },
+  { value: 'dibuat', label: 'Terbaru ditambahkan' },
+  { value: 'diubah', label: 'Terakhir diubah' },
+]
+
 const emptyForm: GuestForm = { name: '', category: 'Umum', maxPax: 1, phone: '', invitationType: 'digital', session: '' }
 
-function matches(g: Guest, f: Filter) {
-  if (f === 'semua') return true
+function matches(g: Guest, f: Status) {
   if (f === 'hadir') return g.rsvp_status === 'hadir'
   if (f === 'tidak_hadir') return g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen'
   if (f === 'pending') return (!g.rsvp_status || g.rsvp_status === 'pending') && g.is_sent
   if (f === 'belum_terkirim') return !g.is_sent
   return g.is_checked_in
 }
-
-type FacetKey = 'cat' | 'type' | 'session'
-
-const facetValue: Record<FacetKey, (g: Guest) => string> = {
-  cat: g => g.category || 'Umum',
-  type: g => (g.invitation_type === 'cetak' ? 'cetak' : 'digital'),
-  session: g => g.session || '',
-}
-
-const facetLabel: Record<FacetKey, string> = { cat: 'Kategori', type: 'Jenis undangan', session: 'Sesi' }
 
 function statusOf(g: Guest): { text: string; tone: BadgeTone } {
   if (g.is_checked_in) return { text: 'Check-in', tone: 'info' }
@@ -69,46 +69,52 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
   const event = data.event!
   const guests = data.guests as Guest[]
   const [query, setQuery] = useState('')
-  const [filter, setFilter] = useState<Filter>('semua')
+  const [statuses, setStatuses] = useState<string[]>([])
+  const [categories, setCategories] = useState<string[]>([])
+  const [types, setTypes] = useState<string[]>([])
+  const [sessions, setSessions] = useState<string[]>([])
+  const [sort, setSort] = useState<SortKey>('nama')
   const [sheet, setSheet] = useState<{ mode: 'new' } | { mode: 'edit'; guest: Guest } | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Guest | null>(null)
-  const [filterOpen, setFilterOpen] = useState(false)
-  const [picked, setPicked] = useState<Record<FacetKey, Set<string>>>({ cat: new Set(), type: new Set(), session: new Set() })
-  const activeCount = picked.cat.size + picked.type.size + picked.session.size
 
   useEffect(() => {
     if (createSignal > 0) setSheet({ mode: 'new' })
   }, [createSignal])
 
-  const categories = useMemo(() => {
+  const categoryOptions = useMemo(() => {
     const set = new Set(['Keluarga', 'Teman', 'Umum', 'VIP', 'Artis', 'Tetangga', ...guests.map(g => g.category)])
-    return [...set].filter(Boolean)
+    return [...set].filter(Boolean).map(c => ({ value: c, label: c }))
   }, [guests])
 
-  const sessions = (event.sessions ?? []).map(s => s.name)
+  const sessionOptions = useMemo(() => {
+    const set = new Set<string>([...(event.sessions ?? []).map(s => s.name), ...guests.map(g => g.session ?? '')])
+    return [...set].filter(Boolean).map(s => ({ value: s, label: s }))
+  }, [event.sessions, guests])
 
-  const facetOptions = useMemo(() => {
-    const build = (key: FacetKey) => {
-      const values = [...new Set(guests.map(facetValue[key]).filter(Boolean))].sort()
-      return values.map(v => ({ value: v, label: key === 'type' ? (v === 'cetak' ? 'Cetak' : 'Digital') : v }))
-    }
-    return { cat: build('cat'), type: build('type'), session: build('session') }
-  }, [guests])
+  const filtered = statuses.length > 0 || categories.length > 0 || types.length > 0 || sessions.length > 0 || sort !== 'nama'
 
-  const toggleFacet = (key: FacetKey, value: string) => {
-    setPicked(p => {
-      const next = new Set(p[key])
-      if (next.has(value)) next.delete(value)
-      else next.add(value)
-      return { ...p, [key]: next }
-    })
+  const reset = () => {
+    setStatuses([])
+    setCategories([])
+    setTypes([])
+    setSessions([])
+    setSort('nama')
   }
 
-  const visible = guests
-    .filter(g => g.group_name.toLowerCase().includes(query.trim().toLowerCase()))
-    .filter(g => matches(g, filter))
-    .filter(g => (Object.keys(picked) as FacetKey[]).every(k => picked[k].size === 0 || picked[k].has(facetValue[k](g))))
-    .sort((a, b) => a.group_name.localeCompare(b.group_name))
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    const list = guests
+      .filter(g => g.group_name.toLowerCase().includes(q))
+      .filter(g => statuses.length === 0 || statuses.some(s => matches(g, s as Status)))
+      .filter(g => categories.length === 0 || categories.includes(g.category || 'Umum'))
+      .filter(g => types.length === 0 || types.includes(g.invitation_type === 'cetak' ? 'cetak' : 'digital'))
+      .filter(g => sessions.length === 0 || sessions.includes(g.session ?? ''))
+    const time = (iso: string | null) => (iso ? new Date(iso).getTime() : 0)
+    if (sort === 'dibuat') list.sort((a, b) => time(b.created_at) - time(a.created_at))
+    else if (sort === 'diubah') list.sort((a, b) => time(b.updated_at) - time(a.updated_at))
+    else list.sort((a, b) => a.group_name.localeCompare(b.group_name))
+    return list
+  }, [guests, query, statuses, categories, types, sessions, sort])
 
   const run = async (fn: () => Promise<void>, ok: string) => {
     try {
@@ -156,19 +162,14 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
 
   const close = () => setSheet(null)
 
-  const trailingFor = (g: Guest): SwipeAction[] => {
-    const actions: SwipeAction[] = [
-      { label: 'Salin', icon: <Copy size={18} aria-hidden />, tone: 'neutral', keepRow: true, onSelect: () => copyLink(g) },
-    ]
-    if (g.invitation_type !== 'cetak') {
-      actions.push({ label: 'Kirim WA', icon: <MessageCircle size={18} aria-hidden />, tone: 'accent', keepRow: true, onSelect: () => sendWhatsApp(g) })
-    }
-    return actions
-  }
-
-  const leadingFor = (g: Guest): SwipeAction[] => [
-    { label: 'Edit', icon: <Pencil size={18} aria-hidden />, tone: 'neutral', keepRow: true, onSelect: () => setSheet({ mode: 'edit', guest: g }) },
-    { label: 'Hapus', icon: <Trash2 size={18} aria-hidden />, tone: 'danger', keepRow: true, onSelect: () => setDeleteTarget(g) },
+  /** Same actions on the swipe and in the row menu, in the order people reach for them. */
+  const rowActions = (g: Guest): SwipeAction[] => [
+    { label: 'Copy link', icon: <Copy size={18} aria-hidden />, onSelect: () => copyLink(g) },
+    ...(g.invitation_type !== 'cetak'
+      ? [{ label: 'Kirim WA', icon: <MessageCircle size={18} aria-hidden />, tone: 'accent' as const, onSelect: () => sendWhatsApp(g) }]
+      : []),
+    { label: 'Edit', icon: <Pencil size={18} aria-hidden />, onSelect: () => setSheet({ mode: 'edit', guest: g }) },
+    { label: 'Hapus', icon: <Trash2 size={18} aria-hidden />, tone: 'danger' as const, onSelect: () => setDeleteTarget(g) },
   ]
 
   return (
@@ -180,35 +181,72 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
         </div>
       </div>
 
-      <div className="search-row">
-        <label className="search" style={{ flex: 1, margin: 0 }}>
-          <Search size={18} aria-hidden color="var(--sub)" />
-          <input
-            type="search"
-            placeholder="Cari nama tamu"
-            aria-label="Cari nama tamu"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
+      <label className="search">
+        <Search size={18} aria-hidden color="var(--sub)" />
+        <input
+          type="search"
+          placeholder="Cari nama tamu"
+          aria-label="Cari nama tamu"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+        />
+        {query && (
+          <button type="button" className="icon-btn" style={{ width: 26, height: 26, border: 0 }} onClick={() => setQuery('')} aria-label="Hapus pencarian">
+            <X size={14} aria-hidden />
+          </button>
+        )}
+      </label>
+
+      <div className="filter-grid">
+        <MultiSelect
+          label="Status"
+          options={statusOptions}
+          value={statuses}
+          onValueChange={setStatuses}
+          placeholder="Semua status"
+          maxVisible={1}
+        />
+        <MultiSelect
+          label="Kategori"
+          options={categoryOptions}
+          value={categories}
+          onValueChange={setCategories}
+          placeholder="Semua kategori"
+          maxVisible={1}
+        />
+        <MultiSelect
+          label="Jenis undangan"
+          options={typeOptions}
+          value={types}
+          onValueChange={setTypes}
+          placeholder="Semua jenis"
+          maxVisible={1}
+        />
+        <MultiSelect
+          label="Sesi"
+          options={sessionOptions}
+          value={sessions}
+          onValueChange={setSessions}
+          placeholder={sessionOptions.length ? 'Semua sesi' : 'Tidak ada sesi'}
+          maxVisible={1}
+          disabled={sessionOptions.length === 0}
+        />
+        <div className="filter-sort">
+          <Select
+            label="Urutkan"
+            value={sort}
+            onValueChange={v => setSort(v as SortKey)}
+            options={sortOptions}
           />
-          {query && (
-            <button type="button" className="icon-btn" style={{ width: 26, height: 26, border: 0 }} onClick={() => setQuery('')} aria-label="Hapus pencarian">
-              <X size={14} aria-hidden />
-            </button>
-          )}
-        </label>
-        <button type="button" className="icon-btn filter-btn" onClick={() => setFilterOpen(true)} aria-label="Filter tamu">
-          <SlidersHorizontal size={18} aria-hidden />
-          {activeCount > 0 && <span className="bell-count">{activeCount}</span>}
-        </button>
+        </div>
       </div>
 
-      <div className="chips" role="group" aria-label="Filter status tamu">
-        {filters.map(f => (
-          <button key={f.value} type="button" className="chip" aria-pressed={filter === f.value} onClick={() => setFilter(f.value)}>
-            {f.label}
-          </button>
-        ))}
-      </div>
+      {filtered && (
+        <div className="filter-summary">
+          <span>{visible.length} tamu cocok</span>
+          <button type="button" className="link-btn" onClick={reset}>Reset filter</button>
+        </div>
+      )}
 
       {visible.length === 0 && <p className="empty">Tidak ada tamu yang sesuai.</p>}
 
@@ -217,14 +255,8 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
           const status = statusOf(g)
           const showPax = g.rsvp_status === 'hadir' && g.is_checked_in
           return (
-            <SwipeActionsRow
-              key={g.id}
-              label={g.group_name}
-              fullSwipe={false}
-              leading={leadingFor(g)}
-              trailing={trailingFor(g)}
-            >
-              <button type="button" className="guest-row" onClick={() => setSheet({ mode: 'edit', guest: g })}>
+            <SwipeActionsRow key={g.id} label={g.group_name} trailing={rowActions(g)}>
+              <button type="button" className="guest-main" onClick={() => setSheet({ mode: 'edit', guest: g })}>
                 <Avatar name={g.group_name} size="lg" />
                 <div className="guest-info">
                   <p className="name">{g.group_name}</p>
@@ -240,33 +272,6 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
         })}
       </SwipeActions>
 
-      <Sheet open={filterOpen} title="Filter tamu" onClose={() => setFilterOpen(false)}>
-        <div className="sheet-body">
-          {(Object.keys(facetLabel) as FacetKey[]).map(key => (
-            <section key={key} className="facet">
-              <p className="section-title" style={{ margin: '4px 0 8px' }}>{facetLabel[key]}</p>
-              <div className="facet-list">
-                {facetOptions[key].length === 0 && <p className="meta">Belum ada data.</p>}
-                {facetOptions[key].map(o => (
-                  <Checkbox
-                    key={o.value}
-                    label={o.label}
-                    checked={picked[key].has(o.value)}
-                    onCheckedChange={() => toggleFacet(key, o.value)}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
-          <button type="button" className="btn btn-secondary" onClick={() => setPicked({ cat: new Set(), type: new Set(), session: new Set() })} disabled={activeCount === 0}>
-            Reset filter
-          </button>
-          <button type="button" className="btn btn-primary" onClick={() => setFilterOpen(false)}>
-            Tampilkan {visible.length} tamu
-          </button>
-        </div>
-      </Sheet>
-
       <Sheet
         open={sheet !== null}
         title={sheet?.mode === 'edit' ? 'Ubah tamu' : 'Tamu baru'}
@@ -276,8 +281,8 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
           <GuestSheetBody
             key={sheet.mode === 'edit' ? sheet.guest.id : 'new'}
             guest={sheet.mode === 'edit' ? sheet.guest : null}
-            categories={categories}
-            sessions={sessions}
+            categories={categoryOptions.map(c => c.value)}
+            sessions={sessionOptions.map(s => s.value)}
             onCancel={close}
             onSave={async form => {
               await run(async () => {

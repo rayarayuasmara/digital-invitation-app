@@ -13,6 +13,10 @@ export type Guest = {
   is_sent: boolean
   is_checked_in: boolean
   rsvp_status: string | null
+  created_at: string | null
+  updated_at: string | null
+  _rsvp_at: string | null
+  _checkin_at: string | null
 }
 
 export type GuestForm = {

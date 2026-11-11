@@ -1,10 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Bell, MessageSquareText } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { MessageSquareText } from 'lucide-react'
 import { AnimatedCounter } from '@/components/arc/animated-counter/animated-counter'
 import { Badge } from '@/components/arc/badge/badge'
+import { Countdown } from '@/components/arc/countdown/countdown'
 import { DonutChart } from '@/components/arc/donut-chart/donut-chart'
+import { NotificationCenter } from '@/components/arc/notification-center/notification-center'
+import type { NotificationItem } from '@/components/arc/notification-center/notification-center'
+import { UsageMeter } from '@/components/arc/usage-meter/usage-meter'
+import type { UsageMeterSegment } from '@/components/arc/usage-meter/usage-meter'
 import { WishThread } from '@/components/WishThread'
 import type { DashboardData } from '@/lib/dashboard'
+import type { Guest } from '@/lib/guests'
 import { fetchWishes, markWishesSeen } from '@/lib/wishes'
 import type { Wish } from '@/lib/wishes'
 
@@ -12,6 +18,76 @@ type Props = { data: DashboardData; notify: (message: string) => void }
 
 const pct = (part: number, whole: number) => (whole > 0 ? (part / whole) * 100 : 0)
 const WISH_LIMIT = 50
+const NOTIF_SEEN_KEY = 'rr_notif_seen'
+/** The usage meter reads clearly with at most four segments. */
+const METER_SEGMENTS = 4
+
+function timeAgo(iso: string) {
+  const min = Math.floor(Math.max(0, Date.now() - new Date(iso).getTime()) / 60000)
+  if (min < 1) return 'Baru saja'
+  if (min < 60) return `${min} menit lalu`
+  const hr = Math.floor(min / 60)
+  if (hr < 24) return `${hr} jam lalu`
+  return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', timeZone: 'Asia/Jakarta' })
+}
+
+/**
+ * The notification centre is the one place for everything that happened: new wishes, RSVP replies and
+ * check-ins today. Order and upgrade notices will slot into the same list.
+ */
+function buildNotifications(wishes: Wish[], guests: Guest[], seen: string | null, notifSeen: number): NotificationItem[] {
+  const seenWish = seen ? new Date(seen).getTime() : 0
+  const items: { at: number; item: NotificationItem }[] = []
+
+  for (const w of wishes) {
+    const at = new Date(w.created_at).getTime()
+    items.push({
+      at,
+      item: {
+        id: `wish:${w.id}`,
+        title: `Ucapan baru dari ${w.guest_name || 'Tamu'}`,
+        description: w.message.length > 80 ? `${w.message.slice(0, 80)}…` : w.message,
+        time: timeAgo(w.created_at),
+        read: at <= seenWish,
+        tone: 'info',
+      },
+    })
+  }
+
+  for (const g of guests) {
+    if (g._rsvp_at && (g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen')) {
+      const at = new Date(g._rsvp_at).getTime()
+      const attending = g.rsvp_status === 'hadir'
+      items.push({
+        at,
+        item: {
+          id: `rsvp:${g.id}`,
+          title: `${g.group_name} ${attending ? 'akan hadir' : 'tidak bisa hadir'}`,
+          description: `Konfirmasi RSVP · ${g.max_pax} orang`,
+          time: timeAgo(g._rsvp_at),
+          read: at <= notifSeen,
+          tone: attending ? 'success' : 'warning',
+        },
+      })
+    }
+    if (g._checkin_at) {
+      const at = new Date(g._checkin_at).getTime()
+      items.push({
+        at,
+        item: {
+          id: `checkin:${g.id}`,
+          title: `${g.group_name} sudah check-in`,
+          description: `${g.max_pax} orang masuk`,
+          time: timeAgo(g._checkin_at),
+          read: at <= notifSeen,
+          tone: 'success',
+        },
+      })
+    }
+  }
+
+  return items.sort((a, b) => b.at - a.at).slice(0, 40).map(x => x.item)
+}
 
 export function HomePage({ data, notify }: Props) {
   const { event, stats, categories, client, guests } = data
@@ -24,7 +100,7 @@ export function HomePage({ data, notify }: Props) {
   const [wishTotal, setWishTotal] = useState(0)
   const [unread, setUnread] = useState(0)
   const [error, setError] = useState('')
-  const sectionRef = useRef<HTMLElement>(null)
+  const [notifSeen, setNotifSeen] = useState(() => Number(localStorage.getItem(NOTIF_SEEN_KEY) || 0))
 
   const load = useCallback(async () => {
     try {
@@ -52,8 +128,16 @@ export function HomePage({ data, notify }: Props) {
     }
   }
 
-  const jumpToWishes = () => {
-    sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const notifications = useMemo(
+    () => buildNotifications(wishes ?? [], guests, seen, notifSeen),
+    [wishes, guests, seen, notifSeen],
+  )
+
+  const onNotificationsOpen = (open: boolean) => {
+    if (!open) return
+    const now = Date.now()
+    localStorage.setItem(NOTIF_SEEN_KEY, String(now))
+    setNotifSeen(now)
   }
 
   const rsvp = [
@@ -62,6 +146,17 @@ export function HomePage({ data, notify }: Props) {
     { key: 'pending', label: 'Pending', value: stats.pending, color: '#e8a33d' },
   ]
 
+  /** Top categories fill the meter; the tail folds into one segment so the bar stays readable on a phone. */
+  const segments = useMemo<UsageMeterSegment[]>(() => {
+    const ordered = [...categories].sort((a, b) => b.total - a.total)
+    if (ordered.length <= METER_SEGMENTS) {
+      return ordered.map(c => ({ id: c.category, label: c.category, value: c.total }))
+    }
+    const head = ordered.slice(0, METER_SEGMENTS - 1).map(c => ({ id: c.category, label: c.category, value: c.total }))
+    const tail = ordered.slice(METER_SEGMENTS - 1)
+    return [...head, { id: '__rest', label: 'Kategori lain', value: tail.reduce((sum, c) => sum + c.total, 0) }]
+  }, [categories])
+
   return (
     <>
       <div className="page-head">
@@ -69,16 +164,25 @@ export function HomePage({ data, notify }: Props) {
           <h1 className="page-title">Beranda</h1>
           <p className="page-sub">{event?.title}</p>
         </div>
-        <button
-          type="button"
-          className="icon-btn bell"
-          onClick={jumpToWishes}
-          aria-label={unread > 0 ? `Notifikasi, ${unread} ucapan belum dibaca` : 'Notifikasi'}
-        >
-          <Bell size={18} aria-hidden />
-          {unread > 0 && <span className="bell-count">{unread > 99 ? '99+' : unread}</span>}
-        </button>
+        <div className="page-head-actions">
+          <NotificationCenter
+            notifications={notifications}
+            label="Notifikasi"
+            onOpenChange={onNotificationsOpen}
+          />
+        </div>
       </div>
+
+      <section className="card countdown-card" aria-label="Hitung mundur acara">
+        <Countdown
+          target={event?.event_date ?? new Date().toISOString()}
+          timeZone="Asia/Jakarta"
+          variant="compact"
+          label="Menuju hari H"
+          completeLabel="Acara sudah berlangsung"
+          units={['days', 'hours', 'minutes']}
+        />
+      </section>
 
       <section className="card hero">
         <p className="stat-label">Total tamu</p>
@@ -96,16 +200,23 @@ export function HomePage({ data, notify }: Props) {
       </section>
 
       <section className="card" style={{ marginTop: 12 }}>
-        <p className="stat-label">Status RSVP</p>
-        <div className="rsvp">
-          <DonutChart
-            label="Status RSVP tamu"
-            size={168}
-            thickness={20}
-            totalLabel="Tamu"
-            data={rsvp.map(r => ({ key: r.key, label: r.label, value: r.value, color: r.color }))}
-          />
-        </div>
+        <p className="stat-label" style={{ marginBottom: 12 }}>Status RSVP</p>
+        <DonutChart
+          label="Status RSVP tamu"
+          totalLabel="Tamu"
+          data={rsvp.map(r => ({ key: r.key, label: r.label, value: r.value, color: r.color }))}
+        />
+      </section>
+
+      <section className="card" style={{ marginTop: 12 }}>
+        <UsageMeter
+          label="Kategori tamu"
+          segments={segments}
+          limit={Math.max(stats.max_quota, total, 1)}
+          unit="tamu"
+          decimals={0}
+          freeLabel="Sisa kuota"
+        />
       </section>
 
       <section className="tiles" aria-label="Ringkasan lain">
@@ -126,10 +237,10 @@ export function HomePage({ data, notify }: Props) {
         </div>
       </section>
 
-      <section ref={sectionRef} id="ucapan" className="card wish-card" style={{ marginTop: 12 }} aria-labelledby="ucapan-title">
+      <section id="ucapan" className="card wish-card" style={{ marginTop: 12 }} aria-labelledby="ucapan-title">
         <div className="wish-head">
           <div className="wish-title">
-            <MessageSquareText size={18} aria-hidden />
+            <MessageSquareText size={20} aria-hidden />
             <h2 id="ucapan-title">Ucapan</h2>
             <span className="wish-total">{wishTotal}</span>
           </div>
@@ -147,19 +258,6 @@ export function HomePage({ data, notify }: Props) {
           <WishThread wishes={wishes} guests={guests} hostName={client.name} seenAt={seen} />
         )}
       </section>
-
-      <h2 className="section-title">Kategori tamu</h2>
-      <ul className="list">
-        {categories.map(c => (
-          <li key={c.category} className="list-row" style={{ cursor: 'default' }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p className="name">{c.category}</p>
-              <p className="meta">{c.total} tamu · {c.pax} orang</p>
-            </div>
-            <span className="badge badge-ok">{c.hadir} hadir</span>
-          </li>
-        ))}
-      </ul>
     </>
   )
 }
