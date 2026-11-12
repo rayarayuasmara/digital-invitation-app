@@ -997,7 +997,7 @@
 }
 
 .thread {
-  max-height: 400px;
+  max-height: 260px;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 0;
@@ -1005,6 +1005,11 @@
   gap: var(--space-2);
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
+}
+
+/* Full-height scroll inside the "Lihat semua" sheet. */
+.wish-sheet .thread {
+  max-height: 78vh;
 }
 
 .thread:focus-visible {
@@ -1487,4 +1492,29 @@
 .cat-chip b {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+/* "Lihat semua" link under the Ucapan preview. */
+.wish-more-wrap {
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.wish-more {
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--soft);
+  color: var(--accent);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+@media (hover: hover) {
+  .wish-more:hover {
+    background: var(--accent-subtle);
+  }
 }

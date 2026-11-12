@@ -38,7 +38,7 @@ const DEFAULT_UNITS: CountdownUnit[] = ["days", "hours", "minutes", "seconds"];
 const SECONDS: Record<CountdownUnit, number> = { days: 86_400, hours: 3_600, minutes: 60, seconds: 1 };
 /** How far each unit counts before carrying into the next, when a larger unit is shown. */
 const LIMIT: Record<CountdownUnit, number> = { days: Infinity, hours: 24, minutes: 60, seconds: 60 };
-const NAMES: Record<CountdownUnit, [string, string, string]> = { days: ["Days", "d", "day"], hours: ["Hours", "h", "hour"], minutes: ["Minutes", "m", "minute"], seconds: ["Seconds", "s", "second"] };
+const NAMES: Record<CountdownUnit, [string, string, string]> = { days: ["Hari", "d", "hari"], hours: ["Jam", "h", "jam"], minutes: ["Menit", "m", "menit"], seconds: ["Detik", "s", "detik"] };
 const MAX_TIMEOUT = 2_147_483_647;
 const systemClock = () => Date.now();
 
@@ -110,7 +110,7 @@ function Wheel({ digit, base, delay, reduced }: { digit: number; base: number; d
   </motion.span>;
 }
 
-export function Countdown({ target, timeZone, units = DEFAULT_UNITS, variant = "large", completeLabel = "Live now", onComplete, label = "Time remaining", clock = systemClock, ref, className }: CountdownProps) {
+export function Countdown({ target, timeZone, units = DEFAULT_UNITS, variant = "large", completeLabel = "Live now", onComplete, label = "Sisa waktu", clock = systemClock, ref, className }: CountdownProps) {
   const root = useRef<HTMLDivElement>(null);
   useImperativeHandle(ref, () => root.current as HTMLDivElement);
   const hydrated = useSyncExternalStore(subscribeNothing, () => true, () => false);
@@ -182,7 +182,7 @@ export function Countdown({ target, timeZone, units = DEFAULT_UNITS, variant = "
     return () => observer.disconnect();
   }, [height, reduced, width]);
 
-  const spoken = complete ? (typeof completeLabel === "string" ? completeLabel : "Complete") : pending ? "" : parts.filter((part, index) => part.value > 0 || index === parts.length - 1).filter(part => seconds < 60 || part.unit !== "seconds").map(part => `${part.value} ${part.value === 1 ? NAMES[part.unit][2] : `${NAMES[part.unit][2]}s`}`).join(", ");
+  const spoken = complete ? (typeof completeLabel === "string" ? completeLabel : "Complete") : pending ? "" : parts.filter((part, index) => part.value > 0 || index === parts.length - 1).filter(part => seconds < 60 || part.unit !== "seconds").map(part => `${part.value} ${NAMES[part.unit][2]}`).join(", ");
   const swap = reduced
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: motionTokens.duration.fast } }
     : { initial: { opacity: 0, scale: .92, filter: `blur(${motionTokens.blur.soft}px)` }, animate: { opacity: 1, scale: 1, filter: "blur(0px)" }, exit: { opacity: 0, scale: .92, filter: `blur(${motionTokens.blur.soft}px)`, transition: { duration: motionTokens.duration.fast } }, transition: spring.morph };

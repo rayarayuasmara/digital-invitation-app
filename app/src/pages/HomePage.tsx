@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ChevronRight, MapPin, MessageSquareText } from 'lucide-react'
 import { AnimatedCounter } from '@/components/arc/animated-counter/animated-counter'
 import { Badge } from '@/components/arc/badge/badge'
+import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
 import { Card, CardHeader } from '@/components/arc/card'
 import { Countdown } from '@/components/arc/countdown/countdown'
 import { NotificationCenter } from '@/components/arc/notification-center/notification-center'
@@ -310,7 +311,27 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
           {!error && wishes === null && <p className="wish-empty">Memuat ucapan…</p>}
           {wishes && wishes.length === 0 && <p className="wish-empty">Belum ada ucapan masuk.</p>}
           {wishes && wishes.length > 0 && (
-            <WishThread wishes={wishes} guests={guests} hostName={client.name} seenAt={seen} />
+            <>
+              <WishThread wishes={wishes.slice(-3)} guests={guests} hostName={client.name} seenAt={seen} />
+              {wishTotal > 3 && (
+                <div className="wish-more-wrap">
+                  <BottomSheet
+                    trigger={
+                      <button type="button" className="wish-more" aria-label={`Lihat semua ${wishTotal} ucapan`}>
+                        Lihat semua {wishTotal} ucapan
+                      </button>
+                    }
+                    title="Ucapan"
+                    description={`${wishTotal} ucapan masuk`}
+                    detents={[0.92]}
+                  >
+                    <div className="wish-sheet">
+                      <WishThread wishes={wishes} guests={guests} hostName={client.name} seenAt={seen} />
+                    </div>
+                  </BottomSheet>
+                </div>
+              )}
+            </>
           )}
         </div>
       </Card>
