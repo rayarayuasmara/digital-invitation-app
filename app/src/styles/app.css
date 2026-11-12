@@ -1309,3 +1309,54 @@
   padding-top: 4px;
 }
 
+
+/* beUI donut pilot. The component is copied source, so its internal layout is
+   Tailwind; this wrapper only handles spacing and keeps the ring compact on a
+   phone-sized shell. */
+.rsvp-chart {
+  margin-top: var(--space-3);
+}
+
+.rsvp-chart [data-donut-legend] {
+  min-height: 44px;
+}
+
+/* The app draws one global focus outline; drop beUI's extra ring inside the
+   pilot so keyboard focus looks the same as everywhere else. */
+.rsvp-chart [data-donut-legend]:focus-visible {
+  --tw-ring-shadow: 0 0 #0000;
+}
+
+.rsvp-chart-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 10.5rem) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.donut-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 650;
+  letter-spacing: var(--tracking-display);
+  line-height: 1.1;
+}
+
+.donut-caption {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--sub);
+  font-size: 0.6875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.donut-legend-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.donut-legend-value span {
+  color: var(--sub);
+}

@@ -4,11 +4,17 @@ import { AnimatedCounter } from '@/components/arc/animated-counter/animated-coun
 import { Badge } from '@/components/arc/badge/badge'
 import { Card, CardHeader } from '@/components/arc/card'
 import { Countdown } from '@/components/arc/countdown/countdown'
-import { DonutChart } from '@/components/arc/donut-chart/donut-chart'
 import { NotificationCenter } from '@/components/arc/notification-center/notification-center'
 import type { NotificationItem } from '@/components/arc/notification-center/notification-center'
 import { UsageMeter } from '@/components/arc/usage-meter/usage-meter'
 import type { UsageMeterSegment } from '@/components/arc/usage-meter/usage-meter'
+import { DonutChart } from '@/components/charts/donut-chart'
+import {
+  DonutChartCenter,
+  DonutChartLegend,
+  DonutChartPlot,
+} from '@/components/charts/donut-chart'
+import { DigitSwap } from '@/components/motion/digit-swap'
 import { WishThread } from '@/components/WishThread'
 import type { DashboardData } from '@/lib/dashboard'
 import type { Guest } from '@/lib/guests'
@@ -142,9 +148,9 @@ export function HomePage({ data, notify }: Props) {
   }
 
   const rsvp = [
-    { key: 'hadir', label: 'Hadir', value: stats.hadir, color: 'var(--green-ink)' },
-    { key: 'tidak', label: 'Tidak hadir', value: stats.absen, color: 'var(--red-ink)' },
-    { key: 'pending', label: 'Pending', value: stats.pending, color: '#e8a33d' },
+    { id: 'hadir', name: 'Hadir', value: stats.hadir, color: 'var(--green-ink)' },
+    { id: 'tidak', name: 'Tidak hadir', value: stats.absen, color: 'var(--red-ink)' },
+    { id: 'pending', name: 'Pending', value: stats.pending, color: '#e8a33d' },
   ]
 
   /** Top categories fill the meter; the tail folds into one segment so the bar stays readable on a phone. */
@@ -202,12 +208,39 @@ export function HomePage({ data, notify }: Props) {
 
       <Card variant="default" padding="md" style={{ marginTop: 12 }}>
         <CardHeader title="Status RSVP" description="Distribusi konfirmasi kehadiran tamu" />
-        <DonutChart
-          label="Status RSVP tamu"
-          totalLabel="Tamu"
-          size={180}
-          data={rsvp.map(r => ({ key: r.key, label: r.label, value: r.value, color: r.color }))}
-        />
+        <div className="rsvp-chart" data-beui>
+          <DonutChart
+            segments={rsvp}
+            label="Status RSVP tamu"
+            labels={{ label: 'Status RSVP tamu', total: 'Total tamu' }}
+            formatValue={value => value.toLocaleString('id-ID')}
+          >
+            <div className="rsvp-chart-grid">
+              <DonutChartPlot>
+                <DonutChartCenter>
+                  {(segment, total) => (
+                    <>
+                      <span className="donut-value">
+                        <DigitSwap value={(segment?.value ?? total).toLocaleString('id-ID')} />
+                      </span>
+                      <span className="donut-caption">
+                        {segment ? `${segment.name} · ${(segment.share * 100).toFixed(1)}%` : 'Total tamu'}
+                      </span>
+                    </>
+                  )}
+                </DonutChartCenter>
+              </DonutChartPlot>
+              <DonutChartLegend
+                renderValue={segment => (
+                  <span className="donut-legend-value">
+                    <b>{segment.value}</b>
+                    <span> · {(segment.share * 100).toFixed(1)}%</span>
+                  </span>
+                )}
+              />
+            </div>
+          </DonutChart>
+        </div>
       </Card>
 
       <Card variant="default" padding="md" style={{ marginTop: 12 }}>
