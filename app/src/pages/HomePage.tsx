@@ -4,6 +4,8 @@ import { AnimatedCounter } from '@/components/arc/animated-counter/animated-coun
 import { Badge } from '@/components/arc/badge/badge'
 import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
 import { Card, CardHeader } from '@/components/arc/card'
+import { ChatThread } from '@/components/arc/chat-thread/chat-thread'
+import type { ChatMessage, ChatParticipant } from '@/components/arc/chat-thread/chat-thread'
 import { Countdown } from '@/components/arc/countdown/countdown'
 import { UsageMeter } from '@/components/arc/usage-meter/usage-meter'
 import { NotificationCenter } from '@/components/arc/notification-center/notification-center'
@@ -15,7 +17,6 @@ import {
   DonutChartPlot,
 } from '@/components/charts/donut-chart'
 import { DigitSwap } from '@/components/motion/digit-swap'
-import { WishThread } from '@/components/WishThread'
 import type { DashboardData } from '@/lib/dashboard'
 import type { Guest } from '@/lib/guests'
 import type { GuestStatus } from '@/pages/GuestsPanel'
@@ -111,7 +112,7 @@ function buildNotifications(wishes: Wish[], guests: Guest[], seen: string | null
 }
 
 export function HomePage({ data, notify, onOpenGuests }: Props) {
-  const { event, stats, categories, client, guests } = data
+  const { event, stats, categories, guests } = data
   const total = stats.total_guests
   const eventId = event!.id
 
@@ -180,6 +181,34 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
     .filter(s => s.time_text)
     .map(s => `${s.name} ${s.time_text}`)
     .join(' · ')
+
+  // Map wishes into Arc ChatThread's shape. Guests without a guest_id get a
+  // synthetic participant keyed by name so their name still shows as the author.
+  const chatParticipants = useMemo<ChatParticipant[]>(() => {
+    const map = new Map<string, ChatParticipant>()
+    for (const g of guests) map.set(g.id, { id: g.id, name: g.group_name })
+    for (const w of wishes ?? []) {
+      if (w.guest_id) {
+        if (!map.has(w.guest_id)) {
+          const g = guests.find(x => x.group_name.trim().toLowerCase() === (w.guest_name ?? '').trim().toLowerCase())
+          map.set(w.guest_id, { id: w.guest_id, name: g?.group_name || w.guest_name || 'Tamu' })
+        }
+      } else {
+        const key = `name:${(w.guest_name || 'Tamu').trim().toLowerCase()}`
+        if (!map.has(key)) map.set(key, { id: key, name: w.guest_name || 'Tamu' })
+      }
+    }
+    return [...map.values()]
+  }, [guests, wishes])
+
+  const chatMessages = useMemo<ChatMessage[]>(() => {
+    return (wishes ?? []).map(w => {
+      const authorId = w.guest_id
+        ? (chatParticipants.some(p => p.id === w.guest_id) ? w.guest_id : `name:${(w.guest_name || 'Tamu').trim().toLowerCase()}`)
+        : `name:${(w.guest_name || 'Tamu').trim().toLowerCase()}`
+      return { id: w.id, authorId, text: w.message, createdAt: w.created_at }
+    })
+  }, [wishes, chatParticipants])
 
   return (
     <>
@@ -328,7 +357,17 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
           {wishes && wishes.length === 0 && <p className="wish-empty">Belum ada ucapan masuk.</p>}
           {wishes && wishes.length > 0 && (
             <>
-              <WishThread wishes={wishes.slice(-3)} guests={guests} hostName={client.name} seenAt={seen} />
+              <div className="chat-preview">
+                <ChatThread
+                  participants={chatParticipants}
+                  currentUserId="host"
+                  messages={chatMessages.slice(-3)}
+                  composer={false}
+                  locale="id-ID"
+                  labels={{ unknownAuthor: 'Tamu' }}
+                  label="Ucapan tamu"
+                />
+              </div>
               {wishTotal > 3 && (
                 <div className="wish-more-wrap">
                   <BottomSheet
@@ -341,8 +380,16 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
                     description={`${wishTotal} ucapan masuk`}
                     detents={[0.92]}
                   >
-                    <div className="wish-sheet">
-                      <WishThread wishes={wishes} guests={guests} hostName={client.name} seenAt={seen} />
+                    <div className="chat-sheet">
+                      <ChatThread
+                        participants={chatParticipants}
+                        currentUserId="host"
+                        messages={chatMessages}
+                        composer={false}
+                        locale="id-ID"
+                        labels={{ unknownAuthor: 'Tamu' }}
+                        label="Ucapan tamu"
+                      />
                     </div>
                   </BottomSheet>
                 </div>

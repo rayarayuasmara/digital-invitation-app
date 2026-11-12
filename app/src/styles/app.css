@@ -1531,3 +1531,20 @@
     background: var(--accent-subtle);
   }
 }
+
+/* Arc chat thread as a read-only inbox inside Beranda. */
+.chat-preview {
+  height: 280px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+}
+
+.chat-sheet {
+  height: 78vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
