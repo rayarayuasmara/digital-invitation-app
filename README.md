@@ -1,6 +1,28 @@
 # digital-invitation-app
 
-Undangan pernikahan digital RayaRayu. Empat halaman statis:
+Undangan pernikahan digital RayaRayu. Repo ini punya dua lapis:
+
+| Lapis | Lokasi | Status |
+|---|---|---|
+| **React (aktif)** | `app/` | Migrasi yang dilanjutkan. Vite + React + Arc UI |
+| HTML vanila (acuan) | root: `index.html`, `dashboard.html`, `invitation.html`, `scanner.html` | Versi live saat ini, disimpan sebagai acuan migrasi |
+
+Arsip HTML lama tambahan ada di `index.html.legacy` dan
+`dashboard.html.legacy` (lokal, tidak masuk git).
+
+## Menjalankan app React
+
+```bash
+cd app
+npm install
+npm run dev     # http://localhost:5173
+npm run build   # cek tipe + build produksi
+```
+
+Konfigurasi Supabase ada di `app/.env`
+(`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`).
+
+## Acuan HTML vanila
 
 | File | URL | Isi |
 |---|---|---|
@@ -13,8 +35,9 @@ Undangan pernikahan digital RayaRayu. Empat halaman statis:
 | `invitation.html` | `/{slug}/{token}` | Undangan tamu |
 | `invitation.html` | `/pratinjau/{slug}/{token}` | Pratinjau undangan |
 
-Tidak ada build step. Deploy lewat Vercel dari branch `main`, rewrite di
-`vercel.json`.
+Deploy live masih memakai halaman statis dari branch `main` dan rewrite di
+`vercel.json` root. Build React di `app/` belum diarahkan ke konfigurasi
+Vercel.
 
 Perubahan database (policy, RPC, index, token) dicatat di
 [`db/README.md`](db/README.md) — baca itu sebelum menyentuh Supabase.
