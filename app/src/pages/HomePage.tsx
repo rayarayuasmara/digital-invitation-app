@@ -5,6 +5,7 @@ import { Badge } from '@/components/arc/badge/badge'
 import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
 import { Card, CardHeader } from '@/components/arc/card'
 import { Countdown } from '@/components/arc/countdown/countdown'
+import { UsageMeter } from '@/components/arc/usage-meter/usage-meter'
 import { NotificationCenter } from '@/components/arc/notification-center/notification-center'
 import type { NotificationItem } from '@/components/arc/notification-center/notification-center'
 import { DonutChart } from '@/components/charts/donut-chart'
@@ -170,6 +171,11 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
     [categories],
   )
 
+  // Share of confirmed guests who have already checked in, capped so walk-ins never show over 100%.
+  const checkinPct = stats.attending > 0
+    ? Math.min(100, Math.round((stats.checked_in / stats.attending) * 100))
+    : 0
+
   const sessionText = (event?.sessions ?? [])
     .filter(s => s.time_text)
     .map(s => `${s.name} ${s.time_text}`)
@@ -210,17 +216,27 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
             units={['days', 'hours', 'minutes']}
           />
         </div>
-        <p className="event-quota">
-          <b>{total}</b> dari {stats.max_quota.toLocaleString('id-ID')} kuota
-          <span className="event-quota-split"> · {stats.digital} digital · {stats.cetak} cetak</span>
-        </p>
+        <div className="event-quota">
+          <UsageMeter
+            label="Kuota tamu"
+            segments={[
+              { id: 'digital', label: 'Digital', value: stats.digital },
+              { id: 'cetak', label: 'Cetak', value: stats.cetak },
+            ]}
+            limit={stats.max_quota}
+            unit="tamu"
+            decimals={0}
+            freeLabel="Sisa"
+            overLabel="Melebihi kuota"
+          />
+        </div>
       </Card>
 
       <div className="action-grid" aria-label="Perlu tindakan">
         <button type="button" className="action-tile" onClick={() => onOpenGuests('belum_terkirim')}>
           <span className="action-tile-label">Belum terkirim</span>
           <span className="action-tile-value">{stats.unsent}</span>
-          <span className="action-tile-hint">Lihat undangan <ChevronRight size={14} aria-hidden /></span>
+          <span className="action-tile-hint">Lihat tamu <ChevronRight size={14} aria-hidden /></span>
         </button>
         <button type="button" className="action-tile" onClick={() => onOpenGuests('pending')}>
           <span className="action-tile-label">Pending</span>
@@ -274,7 +290,7 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
         <Card variant="default" padding="md" className="tile">
           <p className="stat-label">Check-in</p>
           <p className="tile-value"><AnimatedCounter value={stats.checked_in} locale="id-ID" /></p>
-          <p className="stat-note">dari {stats.attending} tamu hadir</p>
+          <p className="stat-note">{checkinPct}% dari tamu hadir</p>
         </Card>
       </div>
 
@@ -299,7 +315,7 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
             <MessageSquareText size={20} aria-hidden />
             <span>Ucapan</span>
           </>}
-          description={<span className="wish-total">{wishTotal}</span>}
+          description={`${wishTotal} ucapan masuk`}
           action={unread > 0 && (
             <button type="button" onClick={markSeen} className="wish-unread" aria-label={`${unread} ucapan belum dibaca, tandai sudah dibaca`}>
               <Badge tone="info" size="sm" pill>{unread} belum dibaca</Badge>
