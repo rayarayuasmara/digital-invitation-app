@@ -7,6 +7,7 @@ import { TabBar } from '@/components/TabBar'
 import type { Tab } from '@/components/TabBar'
 import { AccountPage } from '@/pages/AccountPage'
 import { GuestsPanel } from '@/pages/GuestsPanel'
+import type { GuestStatus } from '@/pages/GuestsPanel'
 import { ScannerScreen } from '@/pages/ScannerScreen'
 import { HomePage } from '@/pages/HomePage'
 import { InvitationPage } from '@/pages/InvitationPage'
@@ -16,6 +17,7 @@ export function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [error, setError] = useState('')
   const [tab, setTab] = useState<Tab>('beranda')
+  const [guestView, setGuestView] = useState<GuestStatus>('semua')
   const [createSignal, setCreateSignal] = useState(0)
   const [notice, setNotice] = useState<{ id: number; text: string } | null>(null)
   const [scannerOpen, setScannerOpen] = useState(false)
@@ -81,14 +83,35 @@ export function DashboardPage() {
 
   return (
     <main id="main-content" className="app" tabIndex={-1}>
-      {tab === 'beranda' && <HomePage data={data} notify={notify} />}
+      {tab === 'beranda' && (
+        <HomePage
+          data={data}
+          notify={notify}
+          onOpenGuests={status => { setGuestView(status); setTab('tamu') }}
+        />
+      )}
       {tab === 'tamu' && (
-        <GuestsPanel data={data} onChanged={load} notify={notify} createSignal={createSignal} />
+        <GuestsPanel
+          data={data}
+          onChanged={load}
+          notify={notify}
+          createSignal={createSignal}
+          initialStatus={guestView}
+        />
       )}
       {tab === 'undangan' && <InvitationPage data={data} onShare={sharePreview} onChanged={load} notify={notify} />}
       {tab === 'akun' && <AccountPage data={data} notify={notify} />}
 
-      <TabBar value={tab} onChange={setTab} onAction={onAction} />
+      <TabBar
+        value={tab}
+        onChange={next => {
+          // A tab-bar visit starts from the full list; only Beranda deep-links
+          // into a filtered guest view.
+          if (next === 'tamu') setGuestView('semua')
+          setTab(next)
+        }}
+        onAction={onAction}
+      />
 
       {notice && (
         <div className="toast-layer">

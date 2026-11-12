@@ -21,7 +21,8 @@ import { addGuest, deleteGuest, markSent, updateGuest } from '@/lib/guests'
 import type { Guest, GuestForm } from '@/lib/guests'
 import { messageFor, normalizePhone, openWhatsApp } from '@/lib/whatsapp'
 
-type Status = 'semua' | 'hadir' | 'tidak_hadir' | 'pending' | 'belum_terkirim' | 'check_in'
+export type GuestStatus = 'semua' | 'hadir' | 'tidak_hadir' | 'pending' | 'belum_terkirim' | 'check_in'
+type Status = GuestStatus
 type SortKey = 'nama' | 'dibuat' | 'diubah'
 
 const statusTabs: { value: Status; label: string }[] = [
@@ -65,13 +66,15 @@ type Props = {
   notify: (message: string) => void
   /** Increment to open the new-guest sheet, for example from the tab bar action. */
   createSignal: number
+  /** Status tab to start on, for example after tapping a metric on Beranda. */
+  initialStatus?: GuestStatus
 }
 
-export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
+export function GuestsPanel({ data, onChanged, notify, createSignal, initialStatus = 'semua' }: Props) {
   const event = data.event!
   const guests = data.guests as Guest[]
   const [query, setQuery] = useState('')
-  const [status, setStatus] = useState<Status>('semua')
+  const [status, setStatus] = useState<Status>(initialStatus)
   const [categories, setCategories] = useState<string[]>([])
   const [types, setTypes] = useState<string[]>([])
   const [sessions, setSessions] = useState<string[]>([])

@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { MessageSquareText } from 'lucide-react'
+import { ChevronRight, MapPin, MessageSquareText } from 'lucide-react'
 import { AnimatedCounter } from '@/components/arc/animated-counter/animated-counter'
 import { Badge } from '@/components/arc/badge/badge'
 import { Card, CardHeader } from '@/components/arc/card'
 import { Countdown } from '@/components/arc/countdown/countdown'
 import { NotificationCenter } from '@/components/arc/notification-center/notification-center'
 import type { NotificationItem } from '@/components/arc/notification-center/notification-center'
-import { UsageMeter } from '@/components/arc/usage-meter/usage-meter'
-import type { UsageMeterSegment } from '@/components/arc/usage-meter/usage-meter'
 import { DonutChart } from '@/components/charts/donut-chart'
 import {
   DonutChartCenter,
@@ -18,16 +16,30 @@ import { DigitSwap } from '@/components/motion/digit-swap'
 import { WishThread } from '@/components/WishThread'
 import type { DashboardData } from '@/lib/dashboard'
 import type { Guest } from '@/lib/guests'
+import type { GuestStatus } from '@/pages/GuestsPanel'
 import { fetchWishes, markWishesSeen } from '@/lib/wishes'
 import type { Wish } from '@/lib/wishes'
 
-type Props = { data: DashboardData; notify: (message: string) => void }
+type Props = {
+  data: DashboardData
+  notify: (message: string) => void
+  /** Jump to the Tamu tab with a status filter already applied. */
+  onOpenGuests: (status: GuestStatus) => void
+}
 
-const pct = (part: number, whole: number) => (whole > 0 ? (part / whole) * 100 : 0)
 const WISH_LIMIT = 50
 const NOTIF_SEEN_KEY = 'rr_notif_seen'
-/** The usage meter reads clearly with at most four segments. */
-const METER_SEGMENTS = 4
+
+function formatDate(value: string | null) {
+  if (!value) return '-'
+  return new Date(value).toLocaleDateString('id-ID', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Asia/Jakarta',
+  })
+}
 
 function timeAgo(iso: string) {
   const min = Math.floor(Math.max(0, Date.now() - new Date(iso).getTime()) / 60000)
@@ -96,10 +108,9 @@ function buildNotifications(wishes: Wish[], guests: Guest[], seen: string | null
   return items.sort((a, b) => b.at - a.at).slice(0, 40).map(x => x.item)
 }
 
-export function HomePage({ data, notify }: Props) {
+export function HomePage({ data, notify, onOpenGuests }: Props) {
   const { event, stats, categories, client, guests } = data
   const total = stats.total_guests
-  const quotaPct = pct(total, stats.max_quota)
   const eventId = event!.id
 
   const [seen, setSeen] = useState<string | null>(event?.wishes_seen_at ?? null)
@@ -153,24 +164,20 @@ export function HomePage({ data, notify }: Props) {
     { id: 'pending', name: 'Pending', value: stats.pending, color: '#e8a33d' },
   ]
 
-  /** Top categories fill the meter; the tail folds into one segment so the bar stays readable on a phone. */
-  const segments = useMemo<UsageMeterSegment[]>(() => {
-    const ordered = [...categories].sort((a, b) => b.total - a.total)
-    if (ordered.length <= METER_SEGMENTS) {
-      return ordered.map(c => ({ id: c.category, label: c.category, value: c.total }))
-    }
-    const head = ordered.slice(0, METER_SEGMENTS - 1).map(c => ({ id: c.category, label: c.category, value: c.total }))
-    const tail = ordered.slice(METER_SEGMENTS - 1)
-    return [...head, { id: '__rest', label: 'Kategori lain', value: tail.reduce((sum, c) => sum + c.total, 0) }]
-  }, [categories])
+  const orderedCategories = useMemo(
+    () => [...categories].sort((a, b) => b.total - a.total),
+    [categories],
+  )
+
+  const sessionText = (event?.sessions ?? [])
+    .filter(s => s.time_text)
+    .map(s => `${s.name} ${s.time_text}`)
+    .join(' · ')
 
   return (
     <>
       <div className="page-head">
-        <div style={{ minWidth: 0 }}>
-          <h1 className="page-title">Beranda</h1>
-          <p className="page-sub">{event?.title}</p>
-        </div>
+        <h1 className="page-title">Beranda</h1>
         <div className="page-head-actions">
           <NotificationCenter
             notifications={notifications}
@@ -180,31 +187,46 @@ export function HomePage({ data, notify }: Props) {
         </div>
       </div>
 
-      <Card variant="default" padding="md" aria-label="Hitung mundur acara">
-        <Countdown
-          target={event?.event_date ?? new Date().toISOString()}
-          timeZone="Asia/Jakarta"
-          variant="compact"
-          label="Menuju hari H"
-          completeLabel="Acara sudah berlangsung"
-          units={['days', 'hours', 'minutes']}
-        />
+      <Card variant="default" padding="md" className="event-card">
+        <p className="stat-label">Acara</p>
+        <p className="event-title">{event?.title}</p>
+        <p className="event-meta">{formatDate(event?.event_date ?? null)}</p>
+        {sessionText && <p className="event-meta">{sessionText}</p>}
+        {event?.location && (
+          <p className="event-meta event-location">
+            <MapPin size={14} strokeWidth={1.75} aria-hidden />
+            <span>{event.location}</span>
+          </p>
+        )}
+        <div className="event-countdown">
+          <span className="event-countdown-label">Menuju hari H</span>
+          <Countdown
+            target={event?.event_date ?? new Date().toISOString()}
+            timeZone="Asia/Jakarta"
+            variant="compact"
+            label="Menuju hari H"
+            completeLabel="Acara sudah berlangsung"
+            units={['days', 'hours', 'minutes']}
+          />
+        </div>
+        <p className="event-quota">
+          <b>{total}</b> dari {stats.max_quota.toLocaleString('id-ID')} kuota
+          <span className="event-quota-split"> · {stats.digital} digital · {stats.cetak} cetak</span>
+        </p>
       </Card>
 
-      <Card variant="default" padding="md" className="hero-card">
-        <p className="stat-label">Total tamu</p>
-        <div className="hero-row">
-          <span className="hero-number">{total}</span>
-          <span className="hero-of">dari {stats.max_quota.toLocaleString('id-ID')} kuota</span>
-        </div>
-        <div className="meter" role="img" aria-label={`Kuota terpakai ${Math.round(quotaPct)} persen`}>
-          <span style={{ width: `${Math.max(quotaPct, 1)}%` }} />
-        </div>
-        <div className="hero-split">
-          <span><b>{stats.digital}</b> digital</span>
-          <span><b>{stats.cetak}</b> cetak</span>
-        </div>
-      </Card>
+      <div className="action-grid" aria-label="Perlu tindakan">
+        <button type="button" className="action-tile" onClick={() => onOpenGuests('belum_terkirim')}>
+          <span className="action-tile-label">Belum terkirim</span>
+          <span className="action-tile-value">{stats.unsent}</span>
+          <span className="action-tile-hint">Lihat undangan <ChevronRight size={14} aria-hidden /></span>
+        </button>
+        <button type="button" className="action-tile" onClick={() => onOpenGuests('pending')}>
+          <span className="action-tile-label">Pending</span>
+          <span className="action-tile-value">{stats.pending}</span>
+          <span className="action-tile-hint">Lihat tamu <ChevronRight size={14} aria-hidden /></span>
+        </button>
+      </div>
 
       <Card variant="default" padding="md" style={{ marginTop: 12 }}>
         <CardHeader title="Status RSVP" description="Distribusi konfirmasi kehadiran tamu" />
@@ -224,7 +246,7 @@ export function HomePage({ data, notify }: Props) {
                         <DigitSwap value={(segment?.value ?? total).toLocaleString('id-ID')} />
                       </span>
                       <span className="donut-caption">
-                        {segment ? `${segment.name} · ${(segment.share * 100).toFixed(1)}%` : 'Total tamu'}
+                        {segment ? segment.name : 'Total tamu'}
                       </span>
                     </>
                   )}
@@ -234,7 +256,6 @@ export function HomePage({ data, notify }: Props) {
                 renderValue={segment => (
                   <span className="donut-legend-value">
                     <b>{segment.value}</b>
-                    <span> · {(segment.share * 100).toFixed(1)}%</span>
                   </span>
                 )}
               />
@@ -243,34 +264,33 @@ export function HomePage({ data, notify }: Props) {
         </div>
       </Card>
 
-      <Card variant="default" padding="md" style={{ marginTop: 12 }}>
-        <UsageMeter
-          label="Kategori tamu"
-          segments={segments}
-          limit={Math.max(stats.max_quota, total, 1)}
-          unit="tamu"
-          decimals={0}
-          freeLabel="Sisa kuota"
-        />
-      </Card>
-
-      <div className="tiles" aria-label="Ringkasan lain">
+      <div className="tiles" aria-label="Ringkasan kehadiran">
         <Card variant="default" padding="md" className="tile">
-          <p className="stat-label">Hadir orang</p>
+          <p className="stat-label">Orang hadir</p>
           <p className="tile-value"><AnimatedCounter value={stats.hadir_pax} locale="id-ID" /></p>
-          <p className="stat-note">dari tamu hadir</p>
+          <p className="stat-note">dari {stats.attending} tamu hadir</p>
         </Card>
         <Card variant="default" padding="md" className="tile">
           <p className="stat-label">Check-in</p>
           <p className="tile-value"><AnimatedCounter value={stats.checked_in} locale="id-ID" /></p>
-          <p className="stat-note">dari {stats.attending} hadir</p>
-        </Card>
-        <Card variant="default" padding="md" className="tile tile-warn">
-          <p className="stat-label">Belum terkirim</p>
-          <p className="tile-value"><AnimatedCounter value={stats.unsent} locale="id-ID" /></p>
-          <p className="stat-note">undangan</p>
+          <p className="stat-note">dari {stats.attending} tamu hadir</p>
         </Card>
       </div>
+
+      <Card variant="default" padding="md" style={{ marginTop: 12 }}>
+        <CardHeader
+          title="Kategori tamu"
+          description={`${total} tamu · ${orderedCategories.length} kategori`}
+        />
+        <ul className="cat-chips">
+          {orderedCategories.map(c => (
+            <li key={c.category} className="cat-chip">
+              <span>{c.category}</span>
+              <b>{c.total}</b>
+            </li>
+          ))}
+        </ul>
+      </Card>
 
       <Card variant="default" padding="none" style={{ marginTop: 12 }} aria-labelledby="ucapan-title">
         <CardHeader
