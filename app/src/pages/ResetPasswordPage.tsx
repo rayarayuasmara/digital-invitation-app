@@ -28,7 +28,7 @@ export function ResetPasswordPage() {
   return (
     <main style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center', padding: 24 }}>
       <div style={{ width: '100%', maxWidth: 400 }}>
-        <h1 style={{ margin: 0, fontSize: 28, fontWeight: 600 }}>Password baru</h1>
+        <h1 style={{ margin: 0, fontSize: 'var(--text-2xl)', fontWeight: 600 }}>Password baru</h1>
         <p style={{ margin: '6px 0 24px', color: 'var(--text-secondary)' }}>Buat password baru untuk akun Anda.</p>
 
         <form onSubmit={submit} style={{ display: 'grid', gap: 16 }}>

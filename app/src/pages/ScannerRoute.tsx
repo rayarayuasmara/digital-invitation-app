@@ -77,18 +77,18 @@ export function ScannerRoute() {
 
   return (
     <main className="app" style={{ display: 'grid', placeItems: 'center', minHeight: '100dvh' }}>
-      <form onSubmit={submit} className="card" style={{ width: '100%', maxWidth: 400, display: 'grid', gap: 16, padding: 24 }}>
+      <form onSubmit={submit} style={{ width: '100%', maxWidth: 400, display: 'grid', gap: 16, padding: 'var(--space-6)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-panel)', boxShadow: 'var(--shadow-resting)' }}>
         <div style={{ display: 'grid', placeItems: 'center', gap: 8, textAlign: 'center' }}>
           <span className="gate-ic"><KeyRound size={24} aria-hidden /></span>
-          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>Kode petugas</h1>
-          <p style={{ margin: 0, color: 'var(--sub)', fontSize: 14 }}>
+          <h1 style={{ margin: 0, fontSize: 'var(--text-xl)', fontWeight: 700 }}>Kode petugas</h1>
+          <p style={{ margin: 0, color: 'var(--sub)', fontSize: 'var(--text-sm)' }}>
             Masukkan kode akses acara. Minta kode ini ke pemilik undangan lewat menu Profil Acara.
           </p>
         </div>
         <Input label="Kode akses acara" value={input} onChange={e => setInput(e.target.value)} autoComplete="off" autoCapitalize="none" spellCheck={false} placeholder="16 karakter" />
         {error && <p role="alert" style={{ margin: 0, color: 'var(--red-ink)' }}>{error}</p>}
         <button type="submit" className="btn btn-primary" disabled={busy}>{busy ? 'Memeriksa…' : 'Masuk'}</button>
-        <p style={{ margin: 0, color: 'var(--sub)', fontSize: 12, textAlign: 'center' }}>
+        <p style={{ margin: 0, color: 'var(--sub)', fontSize: 'var(--text-xs)', textAlign: 'center' }}>
           Kode ini hanya membuka daftar tamu dan check-in. Tidak bisa mengubah data.
         </p>
       </form>

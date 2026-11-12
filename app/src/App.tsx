@@ -18,6 +18,7 @@ function Shell() {
 export default function App() {
   return (
     <AuthProvider>
+      <a href="#main-content" className="skip-link">Langsung ke konten utama</a>
       <Shell />
     </AuthProvider>
   )

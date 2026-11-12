@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MessageSquareText } from 'lucide-react'
 import { AnimatedCounter } from '@/components/arc/animated-counter/animated-counter'
 import { Badge } from '@/components/arc/badge/badge'
+import { Card, CardHeader } from '@/components/arc/card'
 import { Countdown } from '@/components/arc/countdown/countdown'
 import { DonutChart } from '@/components/arc/donut-chart/donut-chart'
 import { NotificationCenter } from '@/components/arc/notification-center/notification-center'
@@ -173,7 +174,7 @@ export function HomePage({ data, notify }: Props) {
         </div>
       </div>
 
-      <section className="card countdown-card" aria-label="Hitung mundur acara">
+      <Card variant="default" padding="md" aria-label="Hitung mundur acara">
         <Countdown
           target={event?.event_date ?? new Date().toISOString()}
           timeZone="Asia/Jakarta"
@@ -182,9 +183,9 @@ export function HomePage({ data, notify }: Props) {
           completeLabel="Acara sudah berlangsung"
           units={['days', 'hours', 'minutes']}
         />
-      </section>
+      </Card>
 
-      <section className="card hero">
+      <Card variant="default" padding="md" className="hero-card">
         <p className="stat-label">Total tamu</p>
         <div className="hero-row">
           <span className="hero-number">{total}</span>
@@ -197,18 +198,19 @@ export function HomePage({ data, notify }: Props) {
           <span><b>{stats.digital}</b> digital</span>
           <span><b>{stats.cetak}</b> cetak</span>
         </div>
-      </section>
+      </Card>
 
-      <section className="card" style={{ marginTop: 12 }}>
-        <p className="stat-label" style={{ marginBottom: 12 }}>Status RSVP</p>
+      <Card variant="default" padding="md" style={{ marginTop: 12 }}>
+        <CardHeader title="Status RSVP" description="Distribusi konfirmasi kehadiran tamu" />
         <DonutChart
           label="Status RSVP tamu"
           totalLabel="Tamu"
+          size={180}
           data={rsvp.map(r => ({ key: r.key, label: r.label, value: r.value, color: r.color }))}
         />
-      </section>
+      </Card>
 
-      <section className="card" style={{ marginTop: 12 }}>
+      <Card variant="default" padding="md" style={{ marginTop: 12 }}>
         <UsageMeter
           label="Kategori tamu"
           segments={segments}
@@ -217,47 +219,48 @@ export function HomePage({ data, notify }: Props) {
           decimals={0}
           freeLabel="Sisa kuota"
         />
-      </section>
+      </Card>
 
-      <section className="tiles" aria-label="Ringkasan lain">
-        <div className="card tile">
+      <div className="tiles" aria-label="Ringkasan lain">
+        <Card variant="default" padding="md" className="tile">
           <p className="stat-label">Hadir orang</p>
           <p className="tile-value"><AnimatedCounter value={stats.hadir_pax} locale="id-ID" /></p>
           <p className="stat-note">dari tamu hadir</p>
-        </div>
-        <div className="card tile">
+        </Card>
+        <Card variant="default" padding="md" className="tile">
           <p className="stat-label">Check-in</p>
           <p className="tile-value"><AnimatedCounter value={stats.checked_in} locale="id-ID" /></p>
           <p className="stat-note">dari {stats.attending} hadir</p>
-        </div>
-        <div className="card tile tile-warn">
+        </Card>
+        <Card variant="default" padding="md" className="tile tile-warn">
           <p className="stat-label">Belum terkirim</p>
           <p className="tile-value"><AnimatedCounter value={stats.unsent} locale="id-ID" /></p>
           <p className="stat-note">undangan</p>
-        </div>
-      </section>
+        </Card>
+      </div>
 
-      <section id="ucapan" className="card wish-card" style={{ marginTop: 12 }} aria-labelledby="ucapan-title">
-        <div className="wish-head">
-          <div className="wish-title">
+      <Card variant="default" padding="none" style={{ marginTop: 12 }} aria-labelledby="ucapan-title">
+        <CardHeader
+          title={<>
             <MessageSquareText size={20} aria-hidden />
-            <h2 id="ucapan-title">Ucapan</h2>
-            <span className="wish-total">{wishTotal}</span>
-          </div>
-          {unread > 0 && (
+            <span>Ucapan</span>
+          </>}
+          description={<span className="wish-total">{wishTotal}</span>}
+          action={unread > 0 && (
             <button type="button" onClick={markSeen} className="wish-unread" aria-label={`${unread} ucapan belum dibaca, tandai sudah dibaca`}>
               <Badge tone="info" size="sm" pill>{unread} belum dibaca</Badge>
             </button>
           )}
+        />
+        <div className="wish-content">
+          {error && <p role="alert" className="wish-empty" style={{ color: 'var(--red-ink)' }}>{error}</p>}
+          {!error && wishes === null && <p className="wish-empty">Memuat ucapan…</p>}
+          {wishes && wishes.length === 0 && <p className="wish-empty">Belum ada ucapan masuk.</p>}
+          {wishes && wishes.length > 0 && (
+            <WishThread wishes={wishes} guests={guests} hostName={client.name} seenAt={seen} />
+          )}
         </div>
-
-        {error && <p role="alert" className="wish-empty" style={{ color: 'var(--red-ink)' }}>{error}</p>}
-        {!error && wishes === null && <p className="wish-empty">Memuat ucapan…</p>}
-        {wishes && wishes.length === 0 && <p className="wish-empty">Belum ada ucapan masuk.</p>}
-        {wishes && wishes.length > 0 && (
-          <WishThread wishes={wishes} guests={guests} hostName={client.name} seenAt={seen} />
-        )}
-      </section>
+      </Card>
     </>
   )
 }

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '@/lib/auth'
 import { fetchDashboard } from '@/lib/dashboard'
 import type { DashboardData } from '@/lib/dashboard'
+import Toast from '@/components/arc/toast/toast'
 import { TabBar } from '@/components/TabBar'
 import type { Tab } from '@/components/TabBar'
 import { AccountPage } from '@/pages/AccountPage'
@@ -16,7 +17,7 @@ export function DashboardPage() {
   const [error, setError] = useState('')
   const [tab, setTab] = useState<Tab>('beranda')
   const [createSignal, setCreateSignal] = useState(0)
-  const [notice, setNotice] = useState('')
+  const [notice, setNotice] = useState<{ id: number; text: string } | null>(null)
   const [scannerOpen, setScannerOpen] = useState(false)
 
   const load = useCallback(async () => {
@@ -32,13 +33,7 @@ export function DashboardPage() {
     load()
   }, [load])
 
-  useEffect(() => {
-    if (!notice) return
-    const id = window.setTimeout(() => setNotice(''), 2600)
-    return () => window.clearTimeout(id)
-  }, [notice])
-
-  const notify = useCallback((message: string) => setNotice(message), [])
+  const notify = useCallback((message: string) => setNotice({ id: Date.now(), text: message }), [])
 
   const sharePreview = async () => {
     const event = data?.event
@@ -85,7 +80,7 @@ export function DashboardPage() {
   }
 
   return (
-    <main className="app">
+    <main id="main-content" className="app" tabIndex={-1}>
       {tab === 'beranda' && <HomePage data={data} notify={notify} />}
       {tab === 'tamu' && (
         <GuestsPanel data={data} onChanged={load} notify={notify} createSignal={createSignal} />
@@ -96,7 +91,15 @@ export function DashboardPage() {
       <TabBar value={tab} onChange={setTab} onAction={onAction} />
 
       {notice && (
-        <div role="status" className="toast">{notice}</div>
+        <div className="toast-layer">
+          <Toast
+            key={notice.id}
+            title={notice.text}
+            open
+            onOpenChange={open => { if (!open) setNotice(null) }}
+            duration={2600}
+          />
+        </div>
       )}
 
       {scannerOpen && data.event?.scanner_code && (

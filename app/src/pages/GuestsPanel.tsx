@@ -1,31 +1,36 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Copy, MessageCircle, Pencil, Search, Trash2, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, Copy, MessageCircle, Pencil, Search, SlidersHorizontal, Trash2, X } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
 import type { BadgeTone } from '@/components/arc/badge/badge'
+import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
 import { Dialog, DialogContent } from '@/components/arc/dialog/dialog'
+import { DropdownMenu } from '@/components/arc/dropdown-menu/dropdown-menu'
 import { Input } from '@/components/arc/input/input'
 import { MultiSelect } from '@/components/arc/multi-select/multi-select'
 import { NumberField } from '@/components/arc/number-field/number-field'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/arc/popover/popover'
 import { Select } from '@/components/arc/select/select'
+import { Switch } from '@/components/arc/switch/switch'
 import { SwipeActions, SwipeActionsRow } from '@/components/arc/swipe-actions/swipe-actions'
 import type { SwipeAction } from '@/components/arc/swipe-actions/swipe-actions'
-import { Sheet } from '@/components/Sheet'
+import { Tabs, TabsList, TabsTrigger } from '@/components/arc/tabs/tabs'
 import type { DashboardData } from '@/lib/dashboard'
 import { addGuest, deleteGuest, markSent, updateGuest } from '@/lib/guests'
 import type { Guest, GuestForm } from '@/lib/guests'
 import { messageFor, normalizePhone, openWhatsApp } from '@/lib/whatsapp'
 
-type Status = 'hadir' | 'tidak_hadir' | 'pending' | 'belum_terkirim' | 'check_in'
+type Status = 'semua' | 'hadir' | 'tidak_hadir' | 'pending' | 'belum_terkirim' | 'check_in'
 type SortKey = 'nama' | 'dibuat' | 'diubah'
 
-const statusOptions: { value: Status; label: string }[] = [
+const statusTabs: { value: Status; label: string }[] = [
+  { value: 'semua', label: 'Semua' },
   { value: 'hadir', label: 'Hadir' },
   { value: 'tidak_hadir', label: 'Tidak hadir' },
   { value: 'pending', label: 'Pending' },
   { value: 'belum_terkirim', label: 'Belum terkirim' },
-  { value: 'check_in', label: 'Sudah check-in' },
+  { value: 'check_in', label: 'Check-in' },
 ]
 
 const typeOptions = [
@@ -33,15 +38,12 @@ const typeOptions = [
   { value: 'cetak', label: 'Cetak' },
 ]
 
-const sortOptions: { value: SortKey; label: string }[] = [
-  { value: 'nama', label: 'Nama (A–Z)' },
-  { value: 'dibuat', label: 'Terbaru ditambahkan' },
-  { value: 'diubah', label: 'Terakhir diubah' },
-]
+const sortLabel: Record<SortKey, string> = { nama: 'Nama', dibuat: 'Dibuat', diubah: 'Diubah' }
 
 const emptyForm: GuestForm = { name: '', category: 'Umum', maxPax: 1, phone: '', invitationType: 'digital', session: '' }
 
 function matches(g: Guest, f: Status) {
+  if (f === 'semua') return true
   if (f === 'hadir') return g.rsvp_status === 'hadir'
   if (f === 'tidak_hadir') return g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen'
   if (f === 'pending') return (!g.rsvp_status || g.rsvp_status === 'pending') && g.is_sent
@@ -69,11 +71,13 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
   const event = data.event!
   const guests = data.guests as Guest[]
   const [query, setQuery] = useState('')
-  const [statuses, setStatuses] = useState<string[]>([])
+  const [status, setStatus] = useState<Status>('semua')
   const [categories, setCategories] = useState<string[]>([])
   const [types, setTypes] = useState<string[]>([])
   const [sessions, setSessions] = useState<string[]>([])
   const [sort, setSort] = useState<SortKey>('nama')
+  const [asc, setAsc] = useState(true)
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [sheet, setSheet] = useState<{ mode: 'new' } | { mode: 'edit'; guest: Guest } | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Guest | null>(null)
 
@@ -91,30 +95,29 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
     return [...set].filter(Boolean).map(s => ({ value: s, label: s }))
   }, [event.sessions, guests])
 
-  const filtered = statuses.length > 0 || categories.length > 0 || types.length > 0 || sessions.length > 0 || sort !== 'nama'
+  const facetCount = categories.length + types.length + sessions.length
 
-  const reset = () => {
-    setStatuses([])
+  const resetFacets = () => {
     setCategories([])
     setTypes([])
     setSessions([])
-    setSort('nama')
   }
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase()
     const list = guests
       .filter(g => g.group_name.toLowerCase().includes(q))
-      .filter(g => statuses.length === 0 || statuses.some(s => matches(g, s as Status)))
+      .filter(g => matches(g, status))
       .filter(g => categories.length === 0 || categories.includes(g.category || 'Umum'))
       .filter(g => types.length === 0 || types.includes(g.invitation_type === 'cetak' ? 'cetak' : 'digital'))
       .filter(g => sessions.length === 0 || sessions.includes(g.session ?? ''))
     const time = (iso: string | null) => (iso ? new Date(iso).getTime() : 0)
-    if (sort === 'dibuat') list.sort((a, b) => time(b.created_at) - time(a.created_at))
-    else if (sort === 'diubah') list.sort((a, b) => time(b.updated_at) - time(a.updated_at))
-    else list.sort((a, b) => a.group_name.localeCompare(b.group_name))
+    const direction = asc ? 1 : -1
+    if (sort === 'dibuat') list.sort((a, b) => direction * (time(a.created_at) - time(b.created_at)))
+    else if (sort === 'diubah') list.sort((a, b) => direction * (time(a.updated_at) - time(b.updated_at)))
+    else list.sort((a, b) => direction * a.group_name.localeCompare(b.group_name))
     return list
-  }, [guests, query, statuses, categories, types, sessions, sort])
+  }, [guests, query, status, categories, types, sessions, sort, asc])
 
   const run = async (fn: () => Promise<void>, ok: string) => {
     try {
@@ -181,72 +184,88 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
         </div>
       </div>
 
-      <label className="search">
-        <Search size={18} aria-hidden color="var(--sub)" />
-        <input
-          type="search"
-          placeholder="Cari nama tamu"
-          aria-label="Cari nama tamu"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-        />
-        {query && (
-          <button type="button" className="icon-btn" style={{ width: 26, height: 26, border: 0 }} onClick={() => setQuery('')} aria-label="Hapus pencarian">
-            <X size={14} aria-hidden />
-          </button>
-        )}
-      </label>
-
-      <div className="filter-grid">
-        <MultiSelect
-          label="Status"
-          options={statusOptions}
-          value={statuses}
-          onValueChange={setStatuses}
-          placeholder="Semua status"
-          maxVisible={1}
-        />
-        <MultiSelect
-          label="Kategori"
-          options={categoryOptions}
-          value={categories}
-          onValueChange={setCategories}
-          placeholder="Semua kategori"
-          maxVisible={1}
-        />
-        <MultiSelect
-          label="Jenis undangan"
-          options={typeOptions}
-          value={types}
-          onValueChange={setTypes}
-          placeholder="Semua jenis"
-          maxVisible={1}
-        />
-        <MultiSelect
-          label="Sesi"
-          options={sessionOptions}
-          value={sessions}
-          onValueChange={setSessions}
-          placeholder={sessionOptions.length ? 'Semua sesi' : 'Tidak ada sesi'}
-          maxVisible={1}
-          disabled={sessionOptions.length === 0}
-        />
-        <div className="filter-sort">
-          <Select
-            label="Urutkan"
-            value={sort}
-            onValueChange={v => setSort(v as SortKey)}
-            options={sortOptions}
+      <div className="search-row">
+        <label className="search">
+          <Search size={18} aria-hidden color="var(--sub)" />
+          <input
+            type="search"
+            placeholder="Cari nama tamu"
+            aria-label="Cari nama tamu"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
           />
-        </div>
+          {query && (
+            <button type="button" className="icon-btn" style={{ width: 26, height: 26, border: 0 }} onClick={() => setQuery('')} aria-label="Hapus pencarian">
+              <X size={14} aria-hidden />
+            </button>
+          )}
+        </label>
+
+        <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
+          <PopoverTrigger className="filter-btn" aria-label={facetCount > 0 ? `Filter tamu, ${facetCount} aktif` : 'Filter tamu'}>
+            <SlidersHorizontal size={18} aria-hidden />
+            {facetCount > 0 && <span className="filter-count">{facetCount}</span>}
+          </PopoverTrigger>
+          <PopoverContent align="end" sideOffset={8} className="filter-panel">
+            <div className="filter-panel-head">
+              <p>Filter tamu</p>
+              {facetCount > 0 && (
+                <button type="button" className="link-btn" onClick={resetFacets}>Reset</button>
+              )}
+            </div>
+            <MultiSelect
+              label="Kategori"
+              options={categoryOptions}
+              value={categories}
+              onValueChange={setCategories}
+              placeholder="Semua kategori"
+              maxVisible={1}
+            />
+            <MultiSelect
+              label="Jenis undangan"
+              options={typeOptions}
+              value={types}
+              onValueChange={setTypes}
+              placeholder="Semua jenis"
+              maxVisible={1}
+            />
+            <MultiSelect
+              label="Sesi"
+              options={sessionOptions}
+              value={sessions}
+              onValueChange={setSessions}
+              placeholder={sessionOptions.length ? 'Semua sesi' : 'Tidak ada sesi'}
+              maxVisible={1}
+              disabled={sessionOptions.length === 0}
+            />
+          </PopoverContent>
+        </Popover>
       </div>
 
-      {filtered && (
-        <div className="filter-summary">
-          <span>{visible.length} tamu cocok</span>
-          <button type="button" className="link-btn" onClick={reset}>Reset filter</button>
-        </div>
-      )}
+      <div className="list-controls">
+        <Tabs value={status} onValueChange={v => setStatus(v as Status)} className="status-tabs">
+          <TabsList aria-label="Filter status tamu">
+            {statusTabs.map(t => (
+              <TabsTrigger key={t.value} value={t.value}>{t.label}</TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+
+        <DropdownMenu
+          label={sortLabel[sort]}
+          icon={asc ? <ArrowUp size={14} aria-hidden /> : <ArrowDown size={14} aria-hidden />}
+          items={[
+            { label: 'Nama', onSelect: () => { setSort('nama'); setAsc(true) } },
+            { label: 'Terbaru ditambahkan', onSelect: () => { setSort('dibuat'); setAsc(false) } },
+            { label: 'Terakhir diubah', onSelect: () => { setSort('diubah'); setAsc(false) } },
+            { label: asc ? 'Balik ke menurun' : 'Balik ke menaik', separatorBefore: true, onSelect: () => setAsc(v => !v) },
+          ]}
+        />
+      </div>
+
+      <p className="result-line">
+        {visible.length} dari {guests.length} tamu
+      </p>
 
       {visible.length === 0 && <p className="empty">Tidak ada tamu yang sesuai.</p>}
 
@@ -272,10 +291,13 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
         })}
       </SwipeActions>
 
-      <Sheet
+      <BottomSheet
         open={sheet !== null}
+        onOpenChange={open => { if (!open) close() }}
         title={sheet?.mode === 'edit' ? 'Ubah tamu' : 'Tamu baru'}
-        onClose={close}
+        description={sheet?.mode === 'edit' ? sheet.guest.group_name : undefined}
+        detents={[0.94]}
+        initialDetent={0}
       >
         {sheet && (
           <GuestSheetBody
@@ -283,25 +305,18 @@ export function GuestsPanel({ data, onChanged, notify, createSignal }: Props) {
             guest={sheet.mode === 'edit' ? sheet.guest : null}
             categories={categoryOptions.map(c => c.value)}
             sessions={sessionOptions.map(s => s.value)}
-            onCancel={close}
-            onSave={async form => {
+            onSave={async (form, flags) => {
               await run(async () => {
-                if (sheet.mode === 'edit') await updateGuest(sheet.guest, event.id, form)
+                if (sheet.mode === 'edit') await updateGuest(sheet.guest, event.id, form, flags)
                 else await addGuest(event.id, form)
               }, sheet.mode === 'edit' ? 'Tamu diperbarui' : 'Tamu ditambahkan')
               close()
             }}
             onCopyLink={sheet.mode === 'edit' ? () => copyLink(sheet.guest) : undefined}
-            onSendWhatsApp={sheet.mode === 'edit' && sheet.guest.invitation_type !== 'cetak'
-              ? () => sendWhatsApp(sheet.guest).then(close)
-              : undefined}
-            onMarkSent={sheet.mode === 'edit' && !sheet.guest.is_sent && sheet.guest.invitation_type !== 'cetak'
-              ? () => run(() => markSent(sheet.guest.id), 'Ditandai terkirim').then(close)
-              : undefined}
             onDelete={sheet.mode === 'edit' ? () => setDeleteTarget(sheet.guest) : undefined}
           />
         )}
-      </Sheet>
+      </BottomSheet>
 
       <Dialog open={deleteTarget !== null} onOpenChange={open => { if (!open) setDeleteTarget(null) }}>
         {deleteTarget && (
@@ -332,15 +347,12 @@ type BodyProps = {
   guest: Guest | null
   categories: string[]
   sessions: string[]
-  onCancel: () => void
-  onSave: (form: GuestForm) => Promise<void>
+  onSave: (form: GuestForm, flags: { isSent?: boolean; isCheckedIn?: boolean }) => Promise<void>
   onCopyLink?: () => void
-  onSendWhatsApp?: () => void
-  onMarkSent?: () => void
   onDelete?: () => void
 }
 
-function GuestSheetBody({ guest, categories, sessions, onCancel, onSave, onCopyLink, onSendWhatsApp, onMarkSent, onDelete }: BodyProps) {
+function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink, onDelete }: BodyProps) {
   const [form, setForm] = useState<GuestForm>(
     guest
       ? {
@@ -353,6 +365,8 @@ function GuestSheetBody({ guest, categories, sessions, onCancel, onSave, onCopyL
         }
       : { ...emptyForm, session: sessions[0] ?? '' },
   )
+  const [sent, setSent] = useState(guest?.is_sent ?? false)
+  const [checkedIn, setCheckedIn] = useState(guest?.is_checked_in ?? false)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -365,7 +379,10 @@ function GuestSheetBody({ guest, categories, sessions, onCancel, onSave, onCopyL
     if (form.maxPax < 1) return setError('Jumlah orang minimal 1.')
     setBusy(true)
     try {
-      await onSave({ ...form, name: form.name.trim(), phone: form.phone.trim() })
+      await onSave(
+        { ...form, name: form.name.trim(), phone: form.phone.trim() },
+        guest ? { isSent: form.invitationType === 'cetak' ? true : sent, isCheckedIn: checkedIn } : {},
+      )
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Gagal menyimpan tamu.')
     } finally {
@@ -374,7 +391,7 @@ function GuestSheetBody({ guest, categories, sessions, onCancel, onSave, onCopyL
   }
 
   return (
-    <form className="sheet-body" onSubmit={submit}>
+    <form className="sheet-form" onSubmit={submit}>
       <Input label="Nama tamu" value={form.name} onChange={e => set('name', e.target.value)} required />
       <Input label="No. WhatsApp (opsional)" type="tel" inputMode="tel" value={form.phone} onChange={e => set('phone', e.target.value)} />
       <Select label="Kategori" value={form.category} onValueChange={v => set('category', v)} options={categories.map(c => ({ value: c, label: c }))} />
@@ -389,18 +406,33 @@ function GuestSheetBody({ guest, categories, sessions, onCancel, onSave, onCopyL
         <Select label="Sesi" value={form.session} onValueChange={v => set('session', v)} options={sessions.map(s => ({ value: s, label: s }))} />
       )}
 
+      {guest && (
+        <div className="switch-list">
+          <Switch
+            label="Undangan terkirim"
+            checked={form.invitationType === 'cetak' ? true : sent}
+            onCheckedChange={setSent}
+            disabled={form.invitationType === 'cetak'}
+          />
+          <Switch
+            label="Sudah check-in"
+            checked={checkedIn}
+            onCheckedChange={setCheckedIn}
+          />
+        </div>
+      )}
+
       {error && <p role="alert" style={{ margin: 0, color: 'var(--red-ink)' }}>{error}</p>}
 
-      <button type="submit" className="btn btn-primary" disabled={busy}>
-        {busy ? 'Menyimpan…' : 'Simpan'}
-      </button>
-      <button type="button" className="btn btn-secondary" onClick={onCancel}>Batal</button>
+      <div className="sheet-actions">
+        <button type="submit" className="btn btn-primary" disabled={busy}>
+          {busy ? 'Menyimpan…' : 'Simpan'}
+        </button>
+      </div>
 
-      {guest && (onCopyLink || onSendWhatsApp || onMarkSent || onDelete) && (
-        <div style={{ display: 'grid', gap: 10, borderTop: '1px solid var(--line)', paddingTop: 16 }}>
-          {onSendWhatsApp && <button type="button" className="btn btn-primary" onClick={onSendWhatsApp}>Kirim lewat WhatsApp</button>}
+      {guest && (onCopyLink || onDelete) && (
+        <div className="sheet-secondary">
           {onCopyLink && <button type="button" className="btn btn-secondary" onClick={onCopyLink}>Salin tautan undangan</button>}
-          {onMarkSent && <button type="button" className="btn btn-secondary" onClick={onMarkSent}>Tandai terkirim</button>}
           {onDelete && <button type="button" className="btn btn-danger" onClick={onDelete}>Hapus tamu</button>}
         </div>
       )}

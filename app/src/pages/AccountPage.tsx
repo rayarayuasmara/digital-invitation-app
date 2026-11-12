@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '@/lib/auth'
 import type { DashboardData } from '@/lib/dashboard'
 import { supabase } from '@/lib/supabase'
+import { Card } from '@/components/arc/card'
 
 type Props = {
   data: DashboardData
@@ -29,11 +30,11 @@ export function AccountPage({ data, notify }: Props) {
       <h1 className="page-title">Akun</h1>
       <p className="page-sub">{client.email}</p>
 
-      <div className="card">
+      <Card variant="default" padding="md">
         <div className="kv"><span>Nama</span><span>{client.name}</span></div>
         <div className="kv"><span>Paket</span><span>{tierLabel}</span></div>
         <div className="kv"><span>Kuota tamu</span><span>{stats.total_guests} / {stats.max_quota}</span></div>
-      </div>
+      </Card>
 
       <h2 className="section-title">Keamanan</h2>
       <button type="button" className="btn btn-secondary" onClick={sendReset} disabled={sending}>
