@@ -317,7 +317,7 @@ export function UsageMeter({ label, segments, limit, unit = "", decimals = 1, fr
     <div ref={legend} className={styles.legend} role="group" aria-label={`${label} by category`} onKeyDown={onLegendKey}>
       {items.map((item, index) => {
         const warning = item.id === "free" && status === "over";
-        return <button key={item.id} type="button" className={styles.item} data-highlight={active ? active === item.id ? "on" : "off" : undefined} aria-pressed={pinned === item.id} aria-label={`${item.label}, ${format(item.value)}`} tabIndex={index === roving ? 0 : -1}
+        return <button key={item.id} type="button" className={styles.item} data-highlight={active ? active === item.id ? "on" : "off" : undefined} aria-pressed={pinned === item.id} tabIndex={index === roving ? 0 : -1}
           onClick={() => { setRoving(index); setPinned(current => current === item.id ? null : item.id); }}
           onFocus={() => { setRoving(index); setFocused(item.id); }} onBlur={() => setFocused(null)}
           onPointerEnter={event => { if (event.pointerType === "mouse") setHovered(item.id); }} onPointerLeave={event => { if (event.pointerType === "mouse") setHovered(null); }}>

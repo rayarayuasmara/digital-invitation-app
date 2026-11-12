@@ -36,15 +36,13 @@ function statusOf(guest: Guest | undefined): { text: string; tone: BadgeTone } |
   return { text: 'Pending', tone: 'warning' }
 }
 
-/** Read-only transcript of guest wishes. The host cannot reply: there is no composer. */
+/** Read-only transcript of guest wishes, styled like a chat thread. */
 export function WishThread({ wishes, guests, hostName, seenAt }: Props) {
   const seen = seenAt ? new Date(seenAt).getTime() : 0
   const byId = new Map(guests.map(g => [g.id, g]))
-  // Older wishes only carry a name, so the status badge falls back to the matching guest.
   const byName = new Map(guests.map(g => [g.group_name.trim().toLowerCase(), g]))
   const listRef = useRef<HTMLDivElement>(null)
 
-  // A chat opens at the latest message, the same way it would if it had just arrived.
   useEffect(() => {
     const node = listRef.current
     if (node) node.scrollTop = node.scrollHeight
@@ -63,31 +61,45 @@ export function WishThread({ wishes, guests, hostName, seenAt }: Props) {
       >
         {wishes.map((w, i) => {
           const previous = wishes[i - 1]
+          const next = wishes[i + 1]
           const guest = (w.guest_id ? byId.get(w.guest_id) : undefined) ?? byName.get((w.guest_name ?? '').trim().toLowerCase())
           const status = statusOf(guest)
           const isNew = new Date(w.created_at).getTime() > seen
           const newDay = !previous || dayKey(previous.created_at) !== dayKey(w.created_at)
           const sameAuthor = !!previous && !newDay && (previous.guest_id ?? previous.guest_name) === (w.guest_id ?? w.guest_name)
+          const firstInGroup = !sameAuthor
+          const lastInGroup = !next || dayKey(next.created_at) !== dayKey(w.created_at) || (next.guest_id ?? next.guest_name) !== (w.guest_id ?? w.guest_name)
 
           return (
             <Fragment key={w.id}>
-              {newDay && <p className="thread-day">{dayLabel(w.created_at)}</p>}
-              <div className={sameAuthor ? 'thread-row thread-cont' : 'thread-row'}>
-                {sameAuthor ? (
-                  <span className="thread-avatar" aria-hidden />
-                ) : (
-                  <span className="thread-avatar">
-                    <Avatar name={w.guest_name || 'Tamu'} size="lg" />
-                  </span>
-                )}
-                <div className="thread-body">
-                  {!sameAuthor && <p className="thread-name">{w.guest_name || 'Tamu'}</p>}
+              {newDay && (
+                <div className="thread-day">
+                  <span>{dayLabel(w.created_at)}</span>
+                </div>
+              )}
+              <div
+                className={[
+                  'thread-row',
+                  firstInGroup ? 'thread-row-first' : 'thread-row-cont',
+                  lastInGroup ? 'thread-row-last' : '',
+                ].filter(Boolean).join(' ')}
+              >
+                <span className="thread-gutter" aria-hidden={!firstInGroup}>
+                  {firstInGroup ? <Avatar name={w.guest_name || 'Tamu'} size="sm" /> : null}
+                </span>
+                <div className="thread-stack">
+                  {firstInGroup && (
+                    <div className="thread-meta">
+                      <span className="thread-author">{w.guest_name || 'Tamu'}</span>
+                      <time className="thread-time" dateTime={w.created_at}>{clock(w.created_at)}</time>
+                    </div>
+                  )}
                   <div className="thread-bubble">
                     <p>{w.message}</p>
                     <div className="thread-foot">
                       {isNew && <Badge size="sm" tone="info" pill>Baru</Badge>}
                       {status && <Badge size="sm" tone={status.tone} pill>{status.text}</Badge>}
-                      <time dateTime={w.created_at}>{clock(w.created_at)}</time>
+                      {!firstInGroup && <time className="thread-time-inline" dateTime={w.created_at}>{clock(w.created_at)}</time>}
                     </div>
                   </div>
                 </div>
