@@ -837,28 +837,6 @@
 .dot-bad { background: var(--red-ink); }
 .dot-wait { background: #e8a33d; }
 
-.tiles {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
-  margin-top: 12px;
-}
-
-.tile {
-  min-width: 0;
-}
-
-.tile-value {
-  margin: var(--space-2) 0 0;
-  font-size: var(--text-2xl);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-}
-
-.tile-warn .tile-value {
-  color: #b7791f;
-}
 
 
 .rsvp {
