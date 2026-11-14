@@ -10,6 +10,9 @@ import './styles/app.css'
 import './styles/theme.css'
 import './styles/tailwind.css'
 import App from './App.tsx'
+import { initTheme } from './lib/theme'
+
+initTheme()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

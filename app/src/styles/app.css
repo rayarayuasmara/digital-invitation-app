@@ -684,6 +684,29 @@ button.settings-row:active {
   color: var(--text-muted);
 }
 
+/* Theme picker inside a settings group: a full-width segmented control. */
+.settings-theme {
+  padding: 2px 18px 18px;
+}
+
+.settings-theme [class*='listShell'] {
+  display: flex;
+  width: 100%;
+}
+
+.settings-theme [class*='viewport'] {
+  flex: 1;
+}
+
+.theme-tabs {
+  display: flex;
+  width: 100%;
+}
+
+.theme-tabs > button {
+  flex: 1;
+}
+
 .kv span:first-child {
   color: var(--sub);
 }
@@ -1267,7 +1290,7 @@ button.settings-row:active {
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: var(--color-neutral-black);
+  color: var(--strong-ink);
   font-size: var(--fontsize-interface-caption);
   font-weight: var(--type-font-weight-regular);
   line-height: var(--line-height-body-sm);
@@ -1300,7 +1323,7 @@ button.settings-row:active {
 .home-total [data-donut-legend] > span:first-child > span:nth-child(2) {
   min-width: 0;
   flex: 1;
-  color: var(--color-neutral-black);
+  color: var(--strong-ink);
   font-size: var(--fontsize-interface-caption);
   line-height: var(--line-height-body-sm);
   text-align: left;
@@ -1319,7 +1342,7 @@ button.settings-row:active {
 
 .home-legend-total {
   margin-left: auto;
-  color: var(--color-neutral-black);
+  color: var(--strong-ink);
   font-family: var(--font-number);
   font-size: var(--fontsize-interface-caption);
   line-height: var(--line-height-body-sm);
@@ -1378,7 +1401,7 @@ button.settings-row:active {
   flex: 1;
   flex-direction: column;
   padding: 20px;
-  border: 1px solid var(--color-neutral-50);
+  border: 1px solid var(--line);
   box-shadow: none;
 }
 
@@ -1425,10 +1448,10 @@ button.settings-row:active {
 
 .home-invites-chip {
   padding: 4px var(--size-spacing-sp-8);
-  border: 1px solid var(--color-neutral-50);
+  border: 1px solid var(--border);
   border-radius: var(--size-radius-rd-8);
-  background: var(--color-neutral-white);
-  color: var(--color-text-body-black);
+  background: var(--surface);
+  color: var(--strong-ink);
   font-size: var(--fontsize-body-sm);
   font-weight: var(--type-font-weight-medium);
   line-height: var(--line-height-body-sm);
@@ -1449,7 +1472,7 @@ button.settings-row:active {
   flex-direction: column;
   min-height: 161px;
   padding: 20px;
-  border: 1px solid var(--color-neutral-50);
+  border: 1px solid var(--line);
   box-shadow: none;
   cursor: pointer;
 }

@@ -80,6 +80,7 @@
   --bg-app: var(--color-surface-background-default);
   --card: var(--color-surface-background-primary);
   --ink: var(--color-text-heading-black);
+  --strong-ink: var(--color-neutral-black);
   --sub: var(--color-text-body-gray);
   --line: var(--color-neutral-50);
   --soft: var(--color-blue-50);
@@ -130,6 +131,7 @@
   --bg-app: var(--color-neutral-900);
   --card: var(--color-neutral-800);
   --ink: var(--color-neutral-50);
+  --strong-ink: var(--color-neutral-50);
   --sub: var(--color-neutral-200);
   --line: var(--color-neutral-700);
   --soft: var(--color-navy-800);
