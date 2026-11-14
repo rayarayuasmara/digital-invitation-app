@@ -1,16 +1,20 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "cd app && npm ci",
+  "buildCommand": "cd app && npm run build",
+  "outputDirectory": "app/dist",
   "rewrites": [
     {
-      "source": "/",
-      "destination": "/index.html"
+      "source": "/pratinjau/:slug/:token",
+      "destination": "/invitation.html"
+    },
+    {
+      "source": "/:slug/:token",
+      "destination": "/invitation.html"
     },
     {
       "source": "/dashboard",
       "destination": "/dashboard.html"
-    },
-    {
-      "source": "/scanner",
-      "destination": "/scanner.html"
     },
     {
       "source": "/login",
@@ -25,12 +29,8 @@
       "destination": "/dashboard.html"
     },
     {
-      "source": "/pratinjau/:slug/:token",
-      "destination": "/invitation.html"
-    },
-    {
-      "source": "/:slug/:token",
-      "destination": "/invitation.html"
+      "source": "/scanner",
+      "destination": "/dashboard.html"
     }
   ]
 }

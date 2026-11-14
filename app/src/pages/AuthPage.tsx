@@ -22,7 +22,9 @@ function friendlySignupError(message: string) {
 }
 
 export function AuthPage() {
-  const [mode, setMode] = useState<Mode>('login')
+  const [mode, setMode] = useState<Mode>(() => (
+    window.location.pathname === '/register' ? 'signup' : 'login'
+  ))
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')

@@ -35,9 +35,11 @@ Konfigurasi Supabase ada di `app/.env`
 | `invitation.html` | `/{slug}/{token}` | Undangan tamu |
 | `invitation.html` | `/pratinjau/{slug}/{token}` | Pratinjau undangan |
 
-Deploy live masih memakai halaman statis dari branch `main` dan rewrite di
-`vercel.json` root. Build React di `app/` belum diarahkan ke konfigurasi
-Vercel.
+Deploy memakai build React dari `app/` (lihat `vercel.json`):
+`app/dist` menjadi output Vercel. React melayani `/dashboard`, `/login`,
+`/register`, `/reset-password`, dan `/scanner`; halaman marketing `/` serta
+undangan tamu `/:slug/:token` tetap vanila dan disalin ke output oleh
+`app/scripts/copy-static.mjs`. Push ke `main` → Vercel auto-deploy.
 
 Perubahan database (policy, RPC, index, token) dicatat di
 [`db/README.md`](db/README.md) — baca itu sebelum menyentuh Supabase.

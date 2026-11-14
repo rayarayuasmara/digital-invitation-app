@@ -11,4 +11,10 @@ export default defineConfig({
       '@': path.resolve(import.meta.dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      // Built as dashboard.html so the static marketing index.html can stay at `/`.
+      input: path.resolve(import.meta.dirname, 'dashboard.html'),
+    },
+  },
 })
