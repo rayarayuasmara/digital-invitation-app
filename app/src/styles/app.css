@@ -1107,6 +1107,11 @@ button.settings-row:active {
   background: var(--surface);
 }
 
+/* Trim the panel's bottom cushion: the last row already ends the list. */
+.home-event-info [class*='panelInner'] {
+  padding-bottom: var(--spacing-12);
+}
+
 /* The expanded body reads as one list: label left, value right, hairline between. */
 .home-event-details {
   display: grid;
@@ -1124,6 +1129,10 @@ button.settings-row:active {
 .home-event-details > div:first-child {
   padding-top: 0;
   border-top: 0;
+}
+
+.home-event-details > div:last-child {
+  padding-bottom: 0;
 }
 
 .home-event-details dt {
