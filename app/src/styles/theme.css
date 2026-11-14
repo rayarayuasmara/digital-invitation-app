@@ -1,73 +1,79 @@
 /* Maps the Figma design tokens (tokens.css) onto the variable names this app
    and the Arc components already use. Loaded after app.css so the token values
-   win over the older hard-coded palette. */
+   win over any legacy palette. */
 
 :root {
   /* Type */
-  --font-sans: 'Geist Variable', 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-  --font-body: var(--font-sans);
-  --font-display: var(--font-sans);
-  --font-number: var(--font-mono);
+  --font-sans: var(--type-font-family-body);
+  --font-mono: var(--type-font-family-number);
+  --font-body: var(--type-font-family-body);
+  --font-display: var(--type-font-family-headings);
+  --font-number: var(--type-font-family-number);
 
-  --text-xs: var(--font-size-interface-caption);
-  --text-sm: var(--font-size-interface-label);
-  --text-base: var(--font-size-interface-button);
-  --text-lg: var(--font-size-interface-button-lg);
-  --text-xl: var(--font-size-headings-h5);
-  --text-2xl: var(--font-size-headings-h4);
-  --text-3xl: var(--font-size-headings-h3);
-  --text-4xl: var(--font-size-headings-h2);
-  --text-5xl: var(--font-size-headings-h1);
+  --text-xs: var(--fontsize-interface-caption);
+  --text-sm: var(--fontsize-interface-label);
+  --text-base: var(--fontsize-interface-button);
+  --text-lg: var(--fontsize-interface-button-lg);
+  --text-xl: var(--fontsize-headings-h5);
+  --text-2xl: var(--fontsize-headings-h4);
+  --text-3xl: var(--fontsize-headings-h3);
+  --text-4xl: var(--fontsize-headings-h2);
+  --text-5xl: var(--fontsize-headings-h1);
 
-  /* Numerals run in Geist Mono, sized off the heading scale. */
-  --number-lg: var(--font-size-headings-h2);
-  --number-lg-line: var(--line-height-headings-h2);
-  --number-md: var(--font-size-headings-h3);
-  --number-md-line: var(--line-height-headings-h3);
-  --number-sm: var(--font-size-headings-h6);
-  --number-sm-line: var(--line-height-body-md);
+  /* Numerals come from Body/number-* (Geist Mono). */
+  --number-lg: var(--text-body-numbrer-lg-font-size);
+  --number-lg-line: var(--text-body-numbrer-lg-line-height);
+  --number-lg-weight: var(--text-body-numbrer-lg-font-weight);
+  --number-lg-tracking: var(--text-body-numbrer-lg-letter-spacing);
+  --number-md: var(--text-body-number-md-font-size);
+  --number-md-line: 1;
+  --number-md-weight: var(--text-body-number-md-font-weight);
+  --number-md-tracking: var(--text-body-number-md-letter-spacing);
+  --number-sm: var(--text-body-number-sm-font-size);
+  --number-sm-line: var(--text-body-number-sm-line-height);
+  --number-sm-weight: var(--text-body-number-sm-font-weight);
+  --number-sm-tracking: var(--text-body-number-sm-letter-spacing);
 
-  --leading-body: 1.5; /* body/md: 24px on 16px */
-  --leading-display: 1.1; /* headings/h1: 48px on 48px */
-  --tracking-body: -0.01em;
-  --tracking-display: -0.02em; /* headings/md: -1px */
+  --leading-body: 1.25; /* body/paragraph-md: 20px on 16px */
+  --leading-display: 1.1;
+  --tracking-body: 0;
+  --tracking-display: -0.02em;
 
   /* Spacing */
-  --space-1: var(--spacing-4);
-  --space-2: var(--spacing-8);
-  --space-3: var(--spacing-12);
-  --space-4: var(--spacing-16);
+  --space-1: var(--size-spacing-sp-4);
+  --space-2: var(--size-spacing-sp-8);
+  --space-3: var(--size-spacing-sp-12);
+  --space-4: var(--size-spacing-sp-16);
   --space-5: var(--scale-20);
-  --space-6: var(--spacing-24);
-  --space-8: var(--spacing-32);
-  --space-10: var(--spacing-40);
+  --space-6: var(--size-spacing-sp-24);
+  --space-8: var(--size-spacing-sp-32);
+  --space-10: var(--size-spacing-sp-40);
   --space-12: var(--scale-48);
   --space-16: var(--scale-64);
   --space-20: var(--scale-80);
   --space-24: var(--scale-96);
 
   /* Radii */
-  --radius-control: var(--radius-16);
-  --radius-panel: var(--radius-24);
-  --radius-surface: var(--radius-32);
-  --radius-pill: var(--radius-200);
+  --radius-control: var(--size-radius-rd-16);
+  --radius-panel: var(--size-radius-rd-24);
+  --radius-surface: var(--size-radius-rd-32);
+  --radius-pill: var(--size-radius-rd-200);
 
   /* Colour roles */
   --background: var(--color-surface-background-primary);
   --surface: var(--color-surface-background-primary);
   --surface-raised: var(--color-surface-background-primary);
-  --surface-muted: var(--neutral-50);
+  --surface-muted: var(--color-neutral-50);
   --foreground: var(--color-text-heading-black);
   --text-secondary: var(--color-text-body-gray);
-  --text-muted: var(--neutral-300);
-  --border: var(--neutral-50);
-  --border-subtle: var(--neutral-50);
-  --border-strong: var(--neutral-200);
+  --text-muted: var(--color-neutral-300);
+  --border: var(--color-neutral-50);
+  --border-subtle: var(--color-neutral-50);
+  --border-strong: var(--color-neutral-200);
 
   --accent: var(--color-surface-button-button-on);
   --accent-strong: var(--color-surface-button-button-hover);
-  --accent-subtle: var(--blue-50);
+  --accent-subtle: var(--color-blue-50);
   --accent-foreground: var(--color-text-body-white);
 
   --bg-page: var(--color-surface-background-default);
@@ -75,13 +81,13 @@
   --card: var(--color-surface-background-primary);
   --ink: var(--color-text-heading-black);
   --sub: var(--color-text-body-gray);
-  --line: var(--neutral-50);
-  --soft: var(--blue-50);
+  --line: var(--color-neutral-50);
+  --soft: var(--color-blue-50);
 
   --green-ink: var(--color-text-success-dark);
-  --green-bg: var(--green-100);
+  --green-bg: var(--color-green-100);
   --red-ink: var(--color-text-error-dark);
-  --red-bg: var(--red-100);
+  --red-bg: var(--color-red-100);
 
   --success: var(--color-text-success-default);
   --warning: var(--color-text-warning-default);
@@ -91,48 +97,48 @@
   /* Elevation and glass, mixed from the palette instead of raw greys. */
   --glass: color-mix(in oklab, var(--color-surface-background-primary) 72%, transparent);
   --glass-edge: color-mix(in oklab, var(--color-surface-background-primary) 60%, transparent);
-  --shadow-resting: 0 1px 2px color-mix(in oklab, var(--navy-900) 4%, transparent);
+  --shadow-resting: 0 1px 2px color-mix(in oklab, var(--color-navy-900) 4%, transparent);
   --shadow-raised:
-    0 6px 18px color-mix(in oklab, var(--navy-900) 7%, transparent),
-    0 1px 3px color-mix(in oklab, var(--navy-900) 4%, transparent);
+    0 6px 18px color-mix(in oklab, var(--color-navy-900) 7%, transparent),
+    0 1px 3px color-mix(in oklab, var(--color-navy-900) 4%, transparent);
   --shadow-floating:
-    0 20px 48px color-mix(in oklab, var(--navy-900) 11%, transparent),
-    0 3px 10px color-mix(in oklab, var(--navy-900) 5%, transparent);
-  --shadow-float: 0 10px 30px color-mix(in oklab, var(--blue-700) 16%, transparent);
+    0 20px 48px color-mix(in oklab, var(--color-navy-900) 11%, transparent),
+    0 3px 10px color-mix(in oklab, var(--color-navy-900) 5%, transparent);
+  --shadow-float: 0 10px 30px color-mix(in oklab, var(--color-blue-700) 16%, transparent);
 }
 
 /* Dark mode draws from the same palette: navy-tinted surfaces, blue-led accents. */
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --background: var(--neutral-900);
-  --surface: var(--neutral-800);
-  --surface-raised: var(--neutral-700);
-  --surface-muted: var(--neutral-700);
-  --foreground: var(--neutral-50);
-  --text-secondary: var(--neutral-200);
-  --text-muted: var(--neutral-300);
-  --border: var(--neutral-700);
-  --border-subtle: var(--neutral-800);
-  --border-strong: var(--neutral-500);
+  --background: var(--color-neutral-900);
+  --surface: var(--color-neutral-800);
+  --surface-raised: var(--color-neutral-700);
+  --surface-muted: var(--color-neutral-700);
+  --foreground: var(--color-neutral-50);
+  --text-secondary: var(--color-neutral-200);
+  --text-muted: var(--color-neutral-300);
+  --border: var(--color-neutral-700);
+  --border-subtle: var(--color-neutral-800);
+  --border-strong: var(--color-neutral-500);
 
-  --accent: var(--blue-300);
-  --accent-strong: var(--blue-200);
-  --accent-subtle: color-mix(in oklab, var(--blue-500) 22%, transparent);
-  --accent-foreground: var(--navy-900);
+  --accent: var(--color-blue-300);
+  --accent-strong: var(--color-blue-200);
+  --accent-subtle: color-mix(in oklab, var(--color-blue-500) 22%, transparent);
+  --accent-foreground: var(--color-navy-900);
 
-  --bg-page: var(--neutral-900);
-  --bg-app: var(--neutral-900);
-  --card: var(--neutral-800);
-  --ink: var(--neutral-50);
-  --sub: var(--neutral-200);
-  --line: var(--neutral-700);
-  --soft: var(--navy-800);
+  --bg-page: var(--color-neutral-900);
+  --bg-app: var(--color-neutral-900);
+  --card: var(--color-neutral-800);
+  --ink: var(--color-neutral-50);
+  --sub: var(--color-neutral-200);
+  --line: var(--color-neutral-700);
+  --soft: var(--color-navy-800);
 
-  --green-ink: var(--green-300);
-  --green-bg: color-mix(in oklab, var(--green-500) 16%, transparent);
-  --red-ink: var(--red-300);
-  --red-bg: color-mix(in oklab, var(--red-500) 16%, transparent);
+  --green-ink: var(--color-green-300);
+  --green-bg: color-mix(in oklab, var(--color-green-500) 16%, transparent);
+  --red-ink: var(--color-red-300);
+  --red-bg: color-mix(in oklab, var(--color-red-500) 16%, transparent);
 
-  --glass: color-mix(in oklab, var(--neutral-800) 72%, transparent);
-  --glass-edge: color-mix(in oklab, var(--neutral-50) 8%, transparent);
+  --glass: color-mix(in oklab, var(--color-neutral-800) 72%, transparent);
+  --glass-edge: color-mix(in oklab, var(--color-neutral-50) 8%, transparent);
 }

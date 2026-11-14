@@ -20,7 +20,7 @@ import { addGuest, deleteGuest, markSent, updateGuest } from '@/lib/guests'
 import type { Guest, GuestForm } from '@/lib/guests'
 import { messageFor, normalizePhone, openWhatsApp } from '@/lib/whatsapp'
 
-export type GuestStatus = 'semua' | 'hadir' | 'tidak_hadir' | 'pending' | 'belum_terkirim' | 'check_in'
+export type GuestStatus = 'semua' | 'hadir' | 'tidak_hadir' | 'belum_rsvp' | 'pending' | 'belum_terkirim' | 'check_in'
 type Status = GuestStatus
 type SortKey = 'nama' | 'dibuat' | 'diubah'
 
@@ -28,6 +28,7 @@ const statusTabs: { value: Status; label: string }[] = [
   { value: 'semua', label: 'Semua' },
   { value: 'hadir', label: 'Hadir' },
   { value: 'tidak_hadir', label: 'Tidak hadir' },
+  { value: 'belum_rsvp', label: 'Belum RSVP' },
   { value: 'belum_terkirim', label: 'Belum terkirim' },
   { value: 'check_in', label: 'Check-in' },
 ]
@@ -45,6 +46,7 @@ function matches(g: Guest, f: Status) {
   if (f === 'semua') return true
   if (f === 'hadir') return g.rsvp_status === 'hadir'
   if (f === 'tidak_hadir') return g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen'
+  if (f === 'belum_rsvp') return !g.rsvp_status || g.rsvp_status === 'pending'
   if (f === 'pending') return (!g.rsvp_status || g.rsvp_status === 'pending') && g.is_sent
   if (f === 'belum_terkirim') return !g.is_sent
   return g.is_checked_in

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { BadgeCheck, ChartPie, Check, CircleArrowRight, Mail, MessageSquareText, QrCode, Ticket, X } from 'lucide-react'
+import { BadgeCheck, ChartPie, Check, CircleArrowRight, MailQuestion, MessageSquareText, QrCode, Tag, UsersRound, X } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
 import { Card, CardHeader } from '@/components/arc/card'
@@ -57,9 +57,6 @@ function timeAgo(iso: string) {
   return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', timeZone: 'Asia/Jakarta' })
 }
 
-function share(part: number, whole: number) {
-  return whole > 0 ? Math.round((part / whole) * 100) : 0
-}
 /**
  * The notification centre is the one place for everything that happened: new wishes, RSVP replies and
  * check-ins today. Order and upgrade notices will slot into the same list.
@@ -167,10 +164,10 @@ function RsvpComposition({ hadir, absen, pending }: { hadir: number; absen: numb
           className="home-total-legend"
           renderValue={segment => (
             <>
-              <span className="font-medium">
+              <span className="home-legend-pct">
                 {(segment.share * 100).toLocaleString('id-ID', { maximumFractionDigits: 0 })}%
               </span>
-              <span className="ml-2 text-muted-foreground">{segment.value.toLocaleString('id-ID')}</span>
+              <span className="home-legend-total">{segment.value.toLocaleString('id-ID')}</span>
             </>
           )}
         />
@@ -302,11 +299,10 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
   const coupleName = event?.couple_name?.trim() || event?.title || 'Acara'
   const sessionText = (event?.sessions ?? [])
     .filter(s => s.time_text)
-    .map(s => `${s.name} ${s.time_text}`)
+    .map(s => `${s.name} ${(s.time_text ?? '').replace(/\s*WIB\b/gi, '')}`)
     .join(' · ')
   const tierLabel = (stats.tier || 'trial').replace(/^\w/, letter => letter.toUpperCase())
-  const quotaFree = Math.max(0, stats.max_quota - total)
-  const quotaPct = share(total, stats.max_quota)
+  const belumRsvp = guests.filter(g => !g.rsvp_status || g.rsvp_status === 'pending').length
 
   return (
     <div className="home-page">
@@ -356,7 +352,6 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
           </div>
 
           <div className="home-hero-countdown">
-            <span className="home-hero-countdown-label">Menuju hari H</span>
             <Countdown
               target={event?.event_date ?? new Date().toISOString()}
               timeZone="Asia/Jakarta"
@@ -380,43 +375,40 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
 
           <div className="home-stats-side">
             <Card variant="default" padding="md" className="home-invites" aria-labelledby="invites-title">
-              <div className="home-tile-head">
-                <h3 id="invites-title">Total</h3>
-                <Mail size={18} strokeWidth={1.75} aria-hidden />
+              <div className="home-invites-head">
+                <div className="home-tile-head">
+                  <h3 id="invites-title">Tamu</h3>
+                  <UsersRound size={20} strokeWidth={1.75} aria-hidden />
+                </div>
+                <div className="home-invites-body">
+                  <div className="home-invites-number">
+                    <DigitSwap value={stats.hadir_pax} className="home-invites-total" />
+                    <span className="home-invites-chip">Pax</span>
+                  </div>
+                  <p className="home-invites-caption">dari RSVP Hadir</p>
+                </div>
               </div>
-              <p className="home-invites-total">
-                <DigitSwap value={total} />
-              </p>
-              <dl className="home-invites-split">
-                <div>
-                  <dt>Digital</dt>
-                  <dd>{stats.digital.toLocaleString('id-ID')}</dd>
-                </div>
-                <div>
-                  <dt>Cetak</dt>
-                  <dd>{stats.cetak.toLocaleString('id-ID')}</dd>
-                </div>
-              </dl>
             </Card>
 
-            <Card variant="default" padding="md" className="home-quota" aria-labelledby="quota-title">
-              <div className="home-tile-head">
-                <h3 id="quota-title">Kuota</h3>
-                <Ticket size={18} strokeWidth={1.75} aria-hidden />
+            <Card
+              variant="default"
+              padding="md"
+              className="home-rsvp-empty"
+              onClick={() => onOpenGuests('belum_rsvp')}
+              ariaLabel="Lihat undangan yang belum RSVP"
+            >
+              <div className="home-invites-head">
+                <div className="home-tile-head">
+                  <h3>Belum RSVP</h3>
+                  <MailQuestion size={20} strokeWidth={1.75} aria-hidden />
+                </div>
+                <div className="home-invites-body">
+                  <div className="home-invites-number">
+                    <DigitSwap value={belumRsvp} className="home-invites-total" />
+                  </div>
+                  <p className="home-invites-caption">Undangan</p>
+                </div>
               </div>
-              <p className="home-quota-free">
-                <b>{quotaFree.toLocaleString('id-ID')}</b> sisa
-              </p>
-              <div
-                className="home-quota-bar"
-                role="img"
-                aria-label={`${total} dari ${stats.max_quota} undangan terpakai`}
-              >
-                <span style={{ width: `${quotaPct}%` }} />
-              </div>
-              <p className="home-quota-note">
-                {total.toLocaleString('id-ID')} dari {stats.max_quota.toLocaleString('id-ID')} terpakai
-              </p>
             </Card>
           </div>
         </div>
@@ -466,6 +458,7 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
               decimals={0}
               composition
               caption={`tamu · ${orderedCategories.length} kategori`}
+              action={<Tag size={18} strokeWidth={1.75} aria-hidden />}
             />
           </Card>
         )}

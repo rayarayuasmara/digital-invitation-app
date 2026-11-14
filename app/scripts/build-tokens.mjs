@@ -1,133 +1,107 @@
-// Generates src/styles/tokens.css from the Figma variable exports
-// (base, alias, typography). Run with:
+// Generates src/styles/tokens.css from the Figma design-token export.
+// Run with:
 //
-//   node scripts/build-tokens.mjs [directory]
+//   node scripts/build-tokens.mjs [design-token.json]
 //
-// The directory defaults to ~/Downloads/Variable Figma.
+// The file defaults to ~/Downloads/Variable Figma/design-token.json.
 import { readFile, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join, resolve } from 'node:path'
 
-const dir = resolve(process.argv[2] ?? join(homedir(), 'Downloads', 'Variable Figma'))
+const source = resolve(process.argv[2] ?? join(homedir(), 'Downloads', 'Variable Figma', 'design-token.json'))
 const out = resolve('src/styles/tokens.css')
+const data = JSON.parse(await readFile(source, 'utf8'))
 
-const read = async name => JSON.parse(await readFile(join(dir, name), 'utf8'))
-const base = await read('base.tokens.json')
-const alias = await read('alias.tokens.json')
-const typography = await read('typhography.tokens.json')
-
-/** "font weight" -> "font-weight", "sp-4 2" -> "4", "-2" -> "neg-2". */
-const slug = value =>
-  String(value)
-    .trim()
-    .toLowerCase()
-    .replace(/\s+\d+$/, '')
-    .replace(/\s+/g, '-')
-const segment = value => {
-  const name = slug(value)
-  return name.startsWith('-') ? `neg-${name.slice(1)}` : name
+/** The export says Geist / Geist Mono; the installed fontsource packages are …Variable. */
+const fontStacks = {
+  geist: "'Geist Variable', Geist, ui-sans-serif, system-ui, -apple-system, sans-serif",
+  'geist mono': "'Geist Mono Variable', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+  'noto emoji': "'Noto Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif",
 }
-const hex = value => value.hex ?? value
+const fontStack = name => fontStacks[String(name).toLowerCase()] ?? `'${name}', sans-serif`
 
-const lines = []
-const dedupe = entries => {
-  const map = new Map()
-  for (const entry of entries) map.set(entry.split(':')[0].trim(), entry)
-  return [...map.values()]
-}
-const group = (title, entries) => {
-  if (!entries.length) return
-  lines.push('', `  /* ${title} */`, ...dedupe(entries))
+/** Figma weight words → CSS numbers. */
+const weights = { regular: '400', medium: '500', semibold: '600', bold: '700', black: '900' }
+
+const groups = new Map()
+const seen = new Set()
+const emit = (group, token, value) => {
+  // The export contains duplicate scale tokens (1 and -1); keep the first.
+  if (seen.has(token)) return
+  seen.add(token)
+  if (!groups.has(group)) groups.set(group, [])
+  groups.get(group).push(`  --${token}: ${value};`)
 }
 
-const hexOf = node => node?.$value?.hex
-
-/** Walks a nested token tree, emitting `--<prefix>-<path>: <value>;`. */
-function collect(node, path, visit) {
-  const entries = []
-  const walk = (current, trail) => {
-    if (current && typeof current === 'object' && '$value' in current) {
-      entries.push({ path: trail, token: current })
-      return
-    }
-    for (const [key, child] of Object.entries(current ?? {})) {
-      if (key === '$extensions' || key === '$type') continue
-      walk(child, [...trail, key])
-    }
-  }
-  walk(node, path)
-  return entries.map(visit).filter(Boolean)
-}
-
-const px = value => `${value}px`
-
-const colorLines = collect(base.color, [], ({ path, token }) => {
-  const name = path.map(segment).join('-')
-  return `  --${name}: ${hexOf(token)};`
-})
-
-const aliasLines = collect(alias.color, [], ({ path, token }) => {
-  const name = path.map(segment).join('-')
-  return `  --color-${name}: ${hexOf(token)};`
-})
-
-const fontFamilyLines = collect(base.type['font family'], [], ({ path, token }) =>
-  `  --font-family-${path.map(segment).join('-')}: ${token.$value};`,
-)
-const weightValue = { regular: '400', medium: '500', semibold: '600', bold: '700', black: '900' }
-const fontWeightLines = collect(base.type['font weight'], [], ({ path, token }) =>
-  `  --font-weight-${path.map(segment).join('-')}: ${weightValue[token.$value] ?? token.$value};`,
-)
-
-const fontSizeFields = [
-  ['fontsize', '--font-size', token => px(token.$value)],
-  ['line height', '--line-height', token => px(token.$value)],
-  ['paragraph spacing', '--paragraph-spacing', token => px(token.$value)],
-  ['letter spacing', '--letter-spacing', token => px(token.$value)],
+const groupOrder = [
+  'Base palette',
+  'Semantic colour aliases',
+  'Type families and weights',
+  'Type scale, leading, spacing and tracking',
+  'Raw scale',
+  'Sizes',
+  'Text styles',
 ]
 
-const typographyLines = fontSizeFields.flatMap(([key, prefix, format]) =>
-  collect(typography[key], [], ({ path, token }) => `  ${prefix}-${path.map(segment).join('-')}: ${format(token)};`),
-)
+for (const [collectionName, collection] of Object.entries(data.collections ?? {})) {
+  for (const [group, items] of Object.entries(collection.variables ?? {})) {
+    for (const item of items) {
+      if (item.type === 'color') {
+        emit(collectionName === 'base' ? 'Base palette' : 'Semantic colour aliases', item.token, item.value)
+      } else if (item.type === 'float') {
+        const bucket = item.token.startsWith('size-')
+          ? 'Sizes'
+          : item.token.startsWith('scale-')
+            ? 'Raw scale'
+            : 'Type scale, leading, spacing and tracking'
+        emit(bucket, item.token, `${item.value}px`)
+      } else if (item.type === 'string') {
+        const value = item.token.startsWith('type-font-family-')
+          ? fontStack(item.value)
+          : item.token.startsWith('type-font-weight-')
+            ? weights[item.value] ?? item.value
+            : item.value
+        emit('Type families and weights', item.token, value)
+      }
+    }
+  }
+}
 
-const scaleLines = collect(base.scale, [], ({ path, token }) =>
-  `  --scale-${path.map(segment).join('-')}: ${px(token.$value)};`,
-)
+const styles = data.styles?.textStyles ?? []
+for (const style of styles) {
+  const parts = [
+    ['font-family', fontStack(style.fontFamily)],
+    ['font-weight', style.fontWeight],
+    ['font-size', style.fontSize],
+    ['line-height', style.lineHeight],
+    ['letter-spacing', style.letterSpacing],
+  ].filter(([, value]) => value !== undefined)
+  for (const [key, value] of parts) emit('Text styles', `text-${style.token}-${key}`, value)
+}
 
-const spacingLines = collect(alias.size.spacing, [], ({ path, token }) => {
-  const key = path.map(segment).join('-')
-  const name = key.replace(/^sp-/, '')
-  return `  --spacing-${name}: ${px(token.$value)};`
-})
-
-const borderLines = collect(alias.size.border, [], ({ path, token }) => {
-  const name = path.map(segment).join('-').replace(/^br-/, '')
-  return `  --border-width-${name}: ${px(token.$value)};`
-})
-
-const radiusLines = collect(alias.size.radius, [], ({ path, token }) => {
-  const name = path.map(segment).join('-').replace(/^rd-/, '')
-  return `  --radius-${name}: ${px(token.$value)};`
-})
-
-const css = [
-  '/* Generated by scripts/build-tokens.mjs from the Figma variable exports.',
+const lines = [
+  '/* Generated by scripts/build-tokens.mjs from design-token.json.',
   '   Do not edit by hand; re-run the script after exporting new tokens. */',
   ':root {',
-  ...(() => {
-    group('Base palette', colorLines)
-    group('Semantic colour aliases', aliasLines)
-    group('Type families and weights', [...fontFamilyLines, ...fontWeightLines])
-    group('Type scale, leading, spacing and tracking', typographyLines)
-    group('Raw scale', scaleLines)
-    group('Spacing', spacingLines)
-    group('Borders', borderLines)
-    group('Radii', radiusLines)
-    return lines
-  })(),
-  '}',
-  '',
-].join('\n')
+]
+for (const group of groupOrder) {
+  const entries = groups.get(group)
+  if (!entries?.length) continue
+  lines.push('', `  /* ${group} */`, ...entries)
+}
+lines.push('}')
 
-await writeFile(out, css, 'utf8')
-console.log(`wrote ${out} (${css.split('\n').length} lines) from ${dir}`)
+lines.push('', '/* Figma text styles, usable as utility classes. */')
+for (const style of styles) {
+  const parts = [
+    ['font-family', fontStack(style.fontFamily)],
+    ['font-weight', style.fontWeight],
+    ['font-size', style.fontSize],
+    ['line-height', style.lineHeight],
+    ['letter-spacing', style.letterSpacing],
+  ].filter(([, value]) => value !== undefined)
+  lines.push(`.text-${style.token} {`, ...parts.map(([key]) => `  ${key}: var(--text-${style.token}-${key});`), '}', '')
+}
+
+await writeFile(out, lines.join('\n'), 'utf8')
+console.log(`wrote ${out} (${seen.size} variables, ${styles.length} text styles) from ${source}`)

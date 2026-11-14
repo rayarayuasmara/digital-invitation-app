@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent, type PointerEvent } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 import { AnimatePresence, animate, cancelFrame, frame, motion, motionValue, useInView, useMotionValue, useReducedMotion, useTransform, type AnimationPlaybackControls, type MotionValue, type Variants } from "motion/react";
 import { CircleAlert, TriangleAlert } from "lucide-react";
 import { motionTokens } from "../lib/motion-tokens";
@@ -48,6 +48,8 @@ export interface UsageMeterProps {
   caption?: string;
   /** Share of the limit at which the meter warns that it is almost full. */
   warnAt?: number;
+  /** Optional trailing slot on the title row, such as an icon. */
+  action?: ReactNode;
 }
 
 const { spring, duration, ease, blur } = motionTokens;
@@ -194,7 +196,7 @@ function Segment({ index, amounts, span, width, highlight }: { index: number; am
   return <motion.span className={styles.segment} data-index={index} data-highlight={highlight} style={{ x, scaleX, originX: 0 }} />;
 }
 
-export function UsageMeter({ label, segments, limit, unit = "", decimals = 1, freeLabel = "Free", overLabel = "Over limit", ofLabel = "of", usedLabel = "used", freeSuffix = "free", freeBadgeLabel, nearLabel = "Almost full", overSuffix = "over", inLabel = "in", planLabel = "of plan", composition = false, caption: captionOverride, warnAt = .9 }: UsageMeterProps) {
+export function UsageMeter({ label, segments, limit, unit = "", decimals = 1, freeLabel = "Free", overLabel = "Over limit", ofLabel = "of", usedLabel = "used", freeSuffix = "free", freeBadgeLabel, nearLabel = "Almost full", overSuffix = "over", inLabel = "in", planLabel = "of plan", composition = false, caption: captionOverride, warnAt = .9, action }: UsageMeterProps) {
   const { reduced, hydrated } = useReducedMotionSafe();
   const root = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -327,6 +329,7 @@ export function UsageMeter({ label, segments, limit, unit = "", decimals = 1, fr
     <div className={styles.top}>
       <span id={titleId} className={styles.title}>{label}</span>
       {!composition && <StatusBadge status={status} text={badge} reduced={reduced} />}
+      {action ? <span className={styles.action}>{action}</span> : null}
     </div>
     <p className={styles.total}>
       <span className={styles.srOnly}>{composition ? summary : `${format(total)} of ${limitText} used`}</span>
