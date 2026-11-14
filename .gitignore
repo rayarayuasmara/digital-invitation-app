@@ -8,3 +8,8 @@ node_modules/
 
 # Snapshot rollback berisi policy/fungsi lama yang tidak aman — lokal saja
 db/backup/
+
+# Artefak build & arsip HTML lama
+dist/
+*.legacy
+*.tsbuildinfo

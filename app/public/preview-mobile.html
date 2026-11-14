@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pratinjau mobile — RayaRayu</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: #0b0d12; font-family: system-ui, -apple-system, sans-serif; color: #fff; }
+    body { display: grid; place-items: center; overflow: hidden; }
+    .phone {
+      width: 390px; height: 844px;
+      border-radius: 46px;
+      background: #111;
+      padding: 12px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.5), inset 0 0 0 2px #2a2a2a;
+      position: relative;
+    }
+    .notch {
+      position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+      width: 120px; height: 32px; border-radius: 18px; background: #000; z-index: 2;
+    }
+    .screen {
+      width: 100%; height: 100%; border-radius: 34px; overflow: hidden;
+      background: #fff; position: relative;
+    }
+    iframe { width: 100%; height: 100%; border: 0; display: block; }
+    .hint { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #9aa; }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="screen">
+      <iframe src="/" title="RayaRayu mobile"></iframe>
+    </div>
+  </div>
+  <div class="hint">Pratinjau 390 × 844 px · gunakan DevTools device mode untuk ukuran lain</div>
+</body>
+</html>

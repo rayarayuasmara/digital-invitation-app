@@ -1,0 +1,84 @@
+/* Tailwind entry for beUI components only.
+ *
+ * The app itself stays on CSS Modules + Arc design tokens. Full preflight is
+ * intentionally left out — it would reset the typography and spacing that the
+ * existing pages rely on. Instead, theme + utilities are imported and the
+ * handful of UA defaults beUI needs are reset inside `[data-beui]` wrappers.
+ */
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+/* Bridge the app's own tokens to the shadcn names beUI components use, so a
+ * copied component inherits the RayaRayu palette instead of shipping its own. */
+@theme inline {
+  --color-background: var(--bg-app);
+  --color-foreground: var(--ink);
+  --color-card: var(--card);
+  --color-card-foreground: var(--ink);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--ink);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--accent-foreground);
+  --color-secondary: var(--soft);
+  --color-secondary-foreground: var(--ink);
+  --color-muted: var(--soft);
+  --color-muted-foreground: var(--sub);
+  --color-accent: var(--soft);
+  --color-accent-foreground: var(--accent);
+  --color-destructive: var(--red-ink);
+  --color-border: var(--line);
+  --color-input: var(--line);
+  --color-ring: var(--accent);
+  --color-success: var(--green-ink);
+  --color-warning: var(--tone-amber, #b45309);
+  --color-chart-1: var(--accent);
+  --color-chart-2: var(--green-ink);
+  --color-chart-3: var(--red-ink);
+  --color-chart-4: #b45309;
+  --color-chart-5: var(--sub);
+
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+/* Scoped reset. Utilities are in a later layer, so the component's own
+ * `text-sm`, `bg-muted` and friends still win over these declarations. */
+@layer base {
+  [data-beui] {
+    box-sizing: border-box;
+    font-family: var(--font-body);
+    color: var(--ink);
+  }
+
+  [data-beui] *,
+  [data-beui] *::before,
+  [data-beui] *::after {
+    box-sizing: border-box;
+  }
+
+  [data-beui] :where(button) {
+    appearance: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: inherit;
+    cursor: pointer;
+  }
+
+  [data-beui] :where(ul, ol) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  [data-beui] :where(p, h1, h2, h3, h4, h5, h6) {
+    margin: 0;
+  }
+
+  [data-beui] :where(svg) {
+    display: block;
+  }
+}
