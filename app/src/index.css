@@ -1,16 +1,5 @@
-:root {
-  --accent: #0a3dc2;
-  --accent-strong: #082f99;
-  --accent-subtle: #e8edfb;
-  --accent-foreground: #ffffff;
-}
-
-[data-theme='dark'] {
-  --accent: #6d8bff;
-  --accent-strong: #98aeff;
-  --accent-subtle: rgb(109 139 255 / 0.18);
-  --accent-foreground: #0d1424;
-}
+/* Brand and surface colours are design tokens: see styles/tokens.css (Figma
+   exports) and styles/theme.css (mapped onto the app's variables). */
 
 *,
 *::before,
