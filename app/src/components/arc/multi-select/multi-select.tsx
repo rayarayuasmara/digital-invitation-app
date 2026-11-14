@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { Variants } from "motion/react";
 import { ChevronDown, X } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./multi-select.module.css";
 
@@ -13,9 +14,17 @@ export interface MultiSelectOption {
   disabled?: boolean;
 }
 
+/** A titled section of options, so one select can carry several facets. */
+export interface MultiSelectGroup {
+  title: string;
+  options: MultiSelectOption[];
+}
+
 export interface MultiSelectProps {
   label: string;
-  options: MultiSelectOption[];
+  options?: MultiSelectOption[];
+  /** Titled option sections. When set, they replace the flat `options` list. */
+  groups?: MultiSelectGroup[];
   value?: string[];
   defaultValue?: string[];
   onValueChange?: (value: string[]) => void;
@@ -23,6 +32,12 @@ export interface MultiSelectProps {
   description?: string;
   maxVisible?: number;
   disabled?: boolean;
+  /** Keeps the label for assistive tech but hides it, for a select already named by its panel. */
+  hideLabel?: boolean;
+  /** Renders a square icon trigger, for sitting inside a search field. */
+  compact?: boolean;
+  /** Icon shown by the compact trigger. */
+  icon?: ReactNode;
   className?: string;
 }
 
@@ -58,17 +73,22 @@ function CheckMark({ reduce }: { reduce: boolean | null }) {
   </svg>;
 }
 
-export function MultiSelect({ label, options, value, defaultValue = [], onValueChange, placeholder = "Select options", description, maxVisible = 2, disabled = false, className }: MultiSelectProps) {
+export function MultiSelect({ label, options = [], groups, value, defaultValue = [], onValueChange, placeholder = "Select options", description, maxVisible = 2, disabled = false, hideLabel = false, compact = false, icon, className }: MultiSelectProps) {
   const id = useId();
   const labelId = `${id}-label`;
   const valueId = `${id}-value`;
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const [internal, setInternal] = useState(defaultValue);
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  // Opens upward and caps its height when the visible viewport cannot hold the whole menu,
+  // so no row is hidden behind mobile browser chrome.
+  const [menuBox, setMenuBox] = useState<{ above: boolean; maxHeight?: number }>({ above: false });
+  const allOptions = useMemo(() => groups?.length ? groups.flatMap((group) => group.options) : options, [groups, options]);
   const selected = value ?? internal;
   const selectedSet = useMemo(() => new Set(selected), [selected]);
-  const labelFor = (item: string) => options.find((option) => option.value === item)?.label ?? item;
+  const labelFor = (item: string) => allOptions.find((option) => option.value === item)?.label ?? item;
   const visible = selected.slice(0, maxVisible).map((item) => ({ value: item, label: labelFor(item) }));
   const remaining = Math.max(0, selected.length - visible.length);
   // A closed menu forgets its highlight, so the next open starts clean instead of on a stale hovered row.
@@ -84,16 +104,33 @@ export function MultiSelect({ label, options, value, defaultValue = [], onValueC
     return () => document.removeEventListener("pointerdown", close);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const measure = () => {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const viewport = window.visualViewport?.height ?? window.innerHeight;
+      const below = viewport - rect.bottom - 16;
+      const above = rect.top - 16;
+      const useAbove = below < 360 && above > below;
+      const space = useAbove ? above : below;
+      setMenuBox({ above: useAbove, maxHeight: Math.min(Math.max(space, 220), Math.round(viewport * 0.68), 620) });
+    };
+    measure();
+    window.visualViewport?.addEventListener("resize", measure);
+    return () => window.visualViewport?.removeEventListener("resize", measure);
+  }, [open]);
+
   const update = (next: string[]) => { if (value === undefined) setInternal(next); onValueChange?.(next); };
   const toggle = (option: MultiSelectOption) => {
     if (disabled || option.disabled) return;
     update(selectedSet.has(option.value) ? selected.filter((item) => item !== option.value) : [...selected, option.value]);
   };
   const clear = () => { update([]); setOpen(false); };
-  const enabled = options.map((option, index) => option.disabled ? -1 : index).filter((index) => index >= 0);
+  const enabled = allOptions.map((option, index) => option.disabled ? -1 : index).filter((index) => index >= 0);
   const onKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
     if (disabled) return;
-    if (event.key === "Enter" && open && activeIndex >= 0) { event.preventDefault(); toggle(options[activeIndex]!); return; }
+    if (event.key === "Enter" && open && activeIndex >= 0) { event.preventDefault(); toggle(allOptions[activeIndex]!); return; }
     if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setOpen((current) => !current); return; }
     if (event.key === "Escape") { setOpen(false); return; }
     if ((event.key === "ArrowDown" || event.key === "ArrowUp") && enabled.length) {
@@ -105,9 +142,20 @@ export function MultiSelect({ label, options, value, defaultValue = [], onValueC
   };
   const reduce = useReducedMotion();
 
-  return <div ref={rootRef} className={[styles.field, className].filter(Boolean).join(" ")}>
-    <span id={labelId} className={styles.label}>{label}</span>
-    <div className={styles.control}><button type="button" className={`${styles.trigger} ${selected.length ? styles.hasClear : ""}`} disabled={disabled} aria-labelledby={`${labelId} ${valueId}`} aria-haspopup="listbox" aria-expanded={open} aria-controls={`${id}-listbox`} onClick={() => setOpen((current) => !current)} onKeyDown={onKeyDown}>
+  const renderOption = (option: MultiSelectOption, index: number) => (
+    <button type="button" role="option" aria-selected={selectedSet.has(option.value)} aria-disabled={option.disabled || undefined} key={option.value} className={styles.option} data-active={activeIndex === index} disabled={option.disabled}
+      onPointerMove={() => { if (activeIndex !== index) setActiveIndex(index); }} onClick={() => toggle(option)}>
+      <span>{option.label}</span><AnimatePresence initial={false}>{selectedSet.has(option.value) && <CheckMark key="check" reduce={reduce} />}</AnimatePresence>
+    </button>
+  );
+
+  return <div ref={rootRef} className={[styles.field, compact && styles.compactField, className].filter(Boolean).join(" ")}>
+    {!compact && <span id={labelId} className={hideLabel ? styles.srOnly : styles.label}>{label}</span>}
+    <div className={styles.control}>
+    {compact ? <button ref={triggerRef} type="button" className={styles.iconTrigger} disabled={disabled} aria-label={`${label}${selected.length ? `, ${selected.length} dipilih` : ""}`} aria-haspopup="listbox" aria-expanded={open} aria-controls={`${id}-listbox`} onClick={() => setOpen((current) => !current)} onKeyDown={onKeyDown}>
+      {icon}
+      {selected.length > 0 && <span className={styles.iconBadge} aria-hidden="true">{selected.length}</span>}
+    </button> : <button ref={triggerRef} type="button" className={`${styles.trigger} ${selected.length ? styles.hasClear : ""}`} disabled={disabled} aria-labelledby={`${labelId} ${valueId}`} aria-haspopup="listbox" aria-expanded={open} aria-controls={`${id}-listbox`} onClick={() => setOpen((current) => !current)} onKeyDown={onKeyDown}>
       <span id={valueId} className={styles.srOnly}>{selected.length ? selected.map(labelFor).join(", ") : placeholder}</span>
       <span className={styles.value} aria-hidden="true">
         <AnimatePresence initial={false}>
@@ -117,20 +165,25 @@ export function MultiSelect({ label, options, value, defaultValue = [], onValueC
         </AnimatePresence>
       </span>
       <ChevronDown className={styles.chevron} size={16} aria-hidden="true" />
-    </button>
-    <AnimatePresence initial={false}>{selected.length > 0 && !disabled && <motion.button type="button" aria-label="Clear selections" className={styles.clear} onClick={clear}
+    </button>}
+    {!compact && <AnimatePresence initial={false}>{selected.length > 0 && !disabled && <motion.button type="button" aria-label="Clear selections" className={styles.clear} onClick={clear}
       initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.6, filter: `blur(${motionTokens.blur.subtle}px)` }}
       animate={{ opacity: 1, scale: 1, filter: "blur(0px)", transition: reduce ? { duration: motionTokens.duration.instant } : { ...motionTokens.spring.snappy, opacity: { duration: motionTokens.duration.fast } } }}
       exit={{ opacity: 0, ...(reduce ? {} : { scale: 0.6, filter: `blur(${motionTokens.blur.subtle}px)` }), transition: { duration: motionTokens.duration.instant, ease: standard } }}
-      whileTap={{ scale: reduce ? 1 : 0.96, transition: { duration: motionTokens.duration.instant, ease: standard } }}><X size={14} aria-hidden="true" /></motion.button>}</AnimatePresence>
+      whileTap={{ scale: reduce ? 1 : 0.96, transition: { duration: motionTokens.duration.instant, ease: standard } }}><X size={14} aria-hidden="true" /></motion.button>}</AnimatePresence>}
     <AnimatePresence initial={false}>
       {open && <motion.div id={`${id}-listbox`} className={styles.menu} role="listbox" aria-label={label} aria-multiselectable="true"
+        data-compact={compact || undefined} data-above={menuBox.above || undefined} style={menuBox.maxHeight ? { maxHeight: menuBox.maxHeight } : undefined}
         initial={reduce ? { opacity: 0 } : { opacity: 0, y: -6, scale: .97 }}
         animate={{ opacity: 1, y: 0, scale: 1, transition: reduce ? { duration: motionTokens.duration.instant } : { ...motionTokens.spring.snappy, opacity: { duration: motionTokens.duration.fast, ease: enter } } }}
         exit={{ opacity: 0, ...(reduce ? {} : { y: -4, scale: .98 }), transition: { duration: motionTokens.duration.instant, ease: standard } }}>
-        {options.map((option, index) => <button type="button" role="option" aria-selected={selectedSet.has(option.value)} aria-disabled={option.disabled || undefined} key={option.value} className={styles.option} data-active={activeIndex === index} disabled={option.disabled} onPointerMove={() => { if (activeIndex !== index) setActiveIndex(index); }} onClick={() => toggle(option)}>
-          <span>{option.label}</span><AnimatePresence initial={false}>{selectedSet.has(option.value) && <CheckMark key="check" reduce={reduce} />}</AnimatePresence>
-        </button>)}
+        {groups?.length
+          ? groups.map((group) => <div key={group.title} className={styles.group} role="presentation">
+            <div className={styles.groupTitle} aria-hidden="true">{group.title}</div>
+            {group.options.map((option) => renderOption(option, allOptions.indexOf(option)))}
+          </div>)
+          : allOptions.map((option, index) => renderOption(option, index))}
+        {compact && selected.length > 0 && <button type="button" className={styles.resetRow} onClick={clear}>Reset filter</button>}
       </motion.div>}
     </AnimatePresence>
     </div>

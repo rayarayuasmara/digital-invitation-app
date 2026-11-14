@@ -26,6 +26,26 @@ export interface UsageMeterProps {
   decimals?: number;
   freeLabel?: string;
   overLabel?: string;
+  /** Word between the used amount and the limit, such as "of". */
+  ofLabel?: string;
+  /** Word after the limit, such as "used". */
+  usedLabel?: string;
+  /** What the free amount is called in the status badge, such as "free". */
+  freeSuffix?: string;
+  /** When set, the free badge reads "<label> <amount>" instead of "<amount> free". */
+  freeBadgeLabel?: string;
+  /** Badge text when the limit is nearly reached. */
+  nearLabel?: string;
+  /** Word after the overage in the badge, such as "over". */
+  overSuffix?: string;
+  /** Word between the unit and a segment label, such as "in". */
+  inLabel?: string;
+  /** How the share of the limit is named, such as "of plan". */
+  planLabel?: string;
+  /** Pure composition: hide the free slice and the status badge, for a breakdown that has no remaining quota. */
+  composition?: boolean;
+  /** Replaces the caption under the headline number. */
+  caption?: string;
   /** Share of the limit at which the meter warns that it is almost full. */
   warnAt?: number;
 }
@@ -174,7 +194,7 @@ function Segment({ index, amounts, span, width, highlight }: { index: number; am
   return <motion.span className={styles.segment} data-index={index} data-highlight={highlight} style={{ x, scaleX, originX: 0 }} />;
 }
 
-export function UsageMeter({ label, segments, limit, unit = "", decimals = 1, freeLabel = "Free", overLabel = "Over limit", warnAt = .9 }: UsageMeterProps) {
+export function UsageMeter({ label, segments, limit, unit = "", decimals = 1, freeLabel = "Free", overLabel = "Over limit", ofLabel = "of", usedLabel = "used", freeSuffix = "free", freeBadgeLabel, nearLabel = "Almost full", overSuffix = "over", inLabel = "in", planLabel = "of plan", composition = false, caption: captionOverride, warnAt = .9 }: UsageMeterProps) {
   const { reduced, hydrated } = useReducedMotionSafe();
   const root = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -185,7 +205,7 @@ export function UsageMeter({ label, segments, limit, unit = "", decimals = 1, fr
   const round = (value: number) => Math.round(value * 10 ** decimals) / 10 ** decimals;
   const total = round(segments.reduce((sum, segment) => sum + segment.value, 0));
   const free = round(Math.max(0, limit - total)), over = round(Math.max(0, total - limit));
-  const status: Status = total > limit ? "over" : total >= limit * warnAt ? "near" : "ok";
+  const status: Status = composition ? "ok" : total > limit ? "over" : total >= limit * warnAt ? "near" : "ok";
   const format = (value: number) => `${value.toFixed(decimals)}${unit ? ` ${unit}` : ""}`;
   const limitText = format(limit).replace(/\.0+(?= |$)/, "");
 
@@ -255,7 +275,9 @@ export function UsageMeter({ label, segments, limit, unit = "", decimals = 1, fr
   const [focused, setFocused] = useState<string | null>(null);
   const [pinned, setPinned] = useState<string | null>(null);
   const [roving, setRoving] = useState(0);
-  const items = [...segments.map(segment => ({ id: segment.id, label: segment.label, value: segment.value })), { id: "free", label: status === "over" ? overLabel : freeLabel, value: status === "over" ? over : free }];
+  const items = composition
+    ? segments.map(segment => ({ id: segment.id, label: segment.label, value: segment.value }))
+    : [...segments.map(segment => ({ id: segment.id, label: segment.label, value: segment.value })), { id: "free", label: status === "over" ? overLabel : freeLabel, value: status === "over" ? over : free }];
   const active = hovered ?? focused ?? pinned;
   const activeItem = items.find(item => item.id === active) ?? null;
   const legend = useRef<HTMLDivElement>(null);
@@ -284,9 +306,18 @@ export function UsageMeter({ label, segments, limit, unit = "", decimals = 1, fr
 
   const headline = ready ? (activeItem ? activeItem.value : total) : 0;
   const share = activeItem ? Math.round((activeItem.value / limit) * 100) : 0;
-  const caption = !activeItem ? `${unit} of ${limitText} used` : activeItem.id === "free" ? `${unit} ${status === "over" ? "over the limit" : "free"}` : `${unit} in ${activeItem.label} · ${share}% of plan`;
-  const badge = status === "over" ? `${format(over)} over` : status === "near" ? "Almost full" : `${format(free)} free`;
-  const summary = `${label}: ${format(total)} of ${limitText} used. ${segments.map(segment => `${segment.label} ${format(segment.value)}`).join(", ")}. ${status === "over" ? `Over the limit by ${format(over)}.` : `${format(free)} free${status === "near" ? ", almost full" : ""}.`}`;
+  const inSegment = unit ? [unit, inLabel, activeItem?.label].filter(Boolean).join(" ") : activeItem?.label ?? "";
+  const caption = captionOverride ?? (!activeItem
+    ? [unit, ofLabel, limitText, usedLabel].filter(Boolean).join(" ")
+    : activeItem.id === "free"
+      ? [unit, status === "over" ? overLabel : freeLabel].filter(Boolean).join(" ")
+      : `${inSegment} · ${share}% ${planLabel}`);
+  const freeText = free.toFixed(decimals).replace(/\.0+(?= |$)/, "");
+  const freeBadge = freeBadgeLabel ? `${freeBadgeLabel} ${freeText}` : `${freeText} ${freeSuffix}`;
+  const badge = status === "over" ? `${format(over)} ${overSuffix}` : status === "near" ? nearLabel : freeBadge;
+  const summary = composition
+    ? `${label}: ${segments.map(segment => `${segment.label} ${format(segment.value)}`).join(", ")}.`
+    : `${label}: ${format(total)} of ${limitText} used. ${segments.map(segment => `${segment.label} ${format(segment.value)}`).join(", ")}. ${status === "over" ? `Over the limit by ${format(over)}.` : `${format(free)} free${status === "near" ? ", almost full" : ""}.`}`;
   // Status changes are announced, and so is a growing overage; routine changes inside a status stay quiet.
   const notice = status === "over" ? `over:${over}` : status;
   const [announced, setAnnounced] = useState({ notice, message: "" });
@@ -295,10 +326,10 @@ export function UsageMeter({ label, segments, limit, unit = "", decimals = 1, fr
   return <div ref={root} className={styles.meter} role="group" aria-labelledby={titleId} data-status={status}>
     <div className={styles.top}>
       <span id={titleId} className={styles.title}>{label}</span>
-      <StatusBadge status={status} text={badge} reduced={reduced} />
+      {!composition && <StatusBadge status={status} text={badge} reduced={reduced} />}
     </div>
     <p className={styles.total}>
-      <span className={styles.srOnly}>{format(total)} of {limitText} used</span>
+      <span className={styles.srOnly}>{composition ? summary : `${format(total)} of ${limitText} used`}</span>
       <span className={styles.amount} aria-hidden="true"><Ticker value={headline} decimals={decimals} reduced={reduced} /></span>
       <span className={styles.caption} aria-hidden="true"><Swap text={caption} reduced={reduced} /></span>
     </p>

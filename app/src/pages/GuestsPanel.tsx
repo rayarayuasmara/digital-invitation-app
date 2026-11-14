@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { ArrowDown, ArrowUp, Copy, MessageCircle, Pencil, Search, SlidersHorizontal, Trash2, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, Copy, MessageCircle, Pencil, Printer, Search, SlidersHorizontal, Smartphone, Trash2, X } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
 import type { BadgeTone } from '@/components/arc/badge/badge'
@@ -10,7 +10,6 @@ import { DropdownMenu } from '@/components/arc/dropdown-menu/dropdown-menu'
 import { Input } from '@/components/arc/input/input'
 import { MultiSelect } from '@/components/arc/multi-select/multi-select'
 import { NumberField } from '@/components/arc/number-field/number-field'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/arc/popover/popover'
 import { Select } from '@/components/arc/select/select'
 import { Switch } from '@/components/arc/switch/switch'
 import { SwipeActions, SwipeActionsRow } from '@/components/arc/swipe-actions/swipe-actions'
@@ -29,7 +28,6 @@ const statusTabs: { value: Status; label: string }[] = [
   { value: 'semua', label: 'Semua' },
   { value: 'hadir', label: 'Hadir' },
   { value: 'tidak_hadir', label: 'Tidak hadir' },
-  { value: 'pending', label: 'Pending' },
   { value: 'belum_terkirim', label: 'Belum terkirim' },
   { value: 'check_in', label: 'Check-in' },
 ]
@@ -80,7 +78,6 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
   const [sessions, setSessions] = useState<string[]>([])
   const [sort, setSort] = useState<SortKey>('nama')
   const [asc, setAsc] = useState(true)
-  const [filtersOpen, setFiltersOpen] = useState(false)
   const [sheet, setSheet] = useState<{ mode: 'new' } | { mode: 'edit'; guest: Guest } | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Guest | null>(null)
 
@@ -98,12 +95,23 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
     return [...set].filter(Boolean).map(s => ({ value: s, label: s }))
   }, [event.sessions, guests])
 
-  const facetCount = categories.length + types.length + sessions.length
+  // One MultiSelect carries all three facets: values are prefixed so the groups never collide.
+  const filterGroups = useMemo(() => [
+    { title: 'Kategori', options: categoryOptions.map(o => ({ value: `kategori:${o.value}`, label: o.label })) },
+    { title: 'Jenis', options: typeOptions.map(o => ({ value: `jenis:${o.value}`, label: o.label })) },
+    { title: 'Sesi', options: sessionOptions.map(o => ({ value: `sesi:${o.value}`, label: o.label })) },
+  ].filter(group => group.options.length > 0), [categoryOptions, sessionOptions])
 
-  const resetFacets = () => {
-    setCategories([])
-    setTypes([])
-    setSessions([])
+  const filterValue = [
+    ...categories.map(v => `kategori:${v}`),
+    ...types.map(v => `jenis:${v}`),
+    ...sessions.map(v => `sesi:${v}`),
+  ]
+
+  const applyFilters = (next: string[]) => {
+    setCategories(next.filter(v => v.startsWith('kategori:')).map(v => v.slice('kategori:'.length)))
+    setTypes(next.filter(v => v.startsWith('jenis:')).map(v => v.slice('jenis:'.length)))
+    setSessions(next.filter(v => v.startsWith('sesi:')).map(v => v.slice('sesi:'.length)))
   }
 
   const visible = useMemo(() => {
@@ -179,121 +187,114 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
   ]
 
   return (
-    <>
+    <div className="guests-page">
       <div className="page-head">
         <div style={{ minWidth: 0 }}>
           <h1 className="page-title">Tamu</h1>
-          <p className="page-sub">{guests.length} tamu terdaftar</p>
+          <p className="page-sub">{visible.length} dari {guests.length} tamu</p>
         </div>
       </div>
 
-      <div className="search-row">
-        <label className="search">
-          <Search size={18} aria-hidden color="var(--sub)" />
-          <input
-            type="search"
-            placeholder="Cari nama tamu"
-            aria-label="Cari nama tamu"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-          />
-          {query && (
-            <button type="button" className="icon-btn" style={{ width: 26, height: 26, border: 0 }} onClick={() => setQuery('')} aria-label="Hapus pencarian">
-              <X size={14} aria-hidden />
-            </button>
-          )}
-        </label>
-
-        <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
-          <PopoverTrigger className="filter-btn" aria-label={facetCount > 0 ? `Filter tamu, ${facetCount} aktif` : 'Filter tamu'}>
-            <SlidersHorizontal size={18} aria-hidden />
-            {facetCount > 0 && <span className="filter-count">{facetCount}</span>}
-          </PopoverTrigger>
-          <PopoverContent align="end" sideOffset={8} className="filter-panel">
-            <div className="filter-panel-head">
-              <p>Filter tamu</p>
-              {facetCount > 0 && (
-                <button type="button" className="link-btn" onClick={resetFacets}>Reset</button>
-              )}
-            </div>
-            <MultiSelect
-              label="Kategori"
-              options={categoryOptions}
-              value={categories}
-              onValueChange={setCategories}
-              placeholder="Semua kategori"
-              maxVisible={1}
+      {/* Search and filters stay pinned while the list scrolls */}
+      <div className="guests-sticky">
+        <div className="guests-toolbar">
+          <div className="search">
+            <Search size={18} aria-hidden color="var(--sub)" />
+            <input
+              type="search"
+              placeholder="Cari nama tamu…"
+              aria-label="Cari nama tamu"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
             />
-            <MultiSelect
-              label="Jenis undangan"
-              options={typeOptions}
-              value={types}
-              onValueChange={setTypes}
-              placeholder="Semua jenis"
-              maxVisible={1}
-            />
-            <MultiSelect
-              label="Sesi"
-              options={sessionOptions}
-              value={sessions}
-              onValueChange={setSessions}
-              placeholder={sessionOptions.length ? 'Semua sesi' : 'Tidak ada sesi'}
-              maxVisible={1}
-              disabled={sessionOptions.length === 0}
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-
-      <div className="list-controls">
-        <Tabs value={status} onValueChange={v => setStatus(v as Status)} className="status-tabs">
-          <TabsList aria-label="Filter status tamu">
-            {statusTabs.map(t => (
-              <TabsTrigger key={t.value} value={t.value}>{t.label}</TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-
-        <DropdownMenu
-          label={sortLabel[sort]}
-          icon={asc ? <ArrowUp size={14} aria-hidden /> : <ArrowDown size={14} aria-hidden />}
-          items={[
-            { label: 'Nama', onSelect: () => { setSort('nama'); setAsc(true) } },
-            { label: 'Terbaru ditambahkan', onSelect: () => { setSort('dibuat'); setAsc(false) } },
-            { label: 'Terakhir diubah', onSelect: () => { setSort('diubah'); setAsc(false) } },
-            { label: asc ? 'Balik ke menurun' : 'Balik ke menaik', separatorBefore: true, onSelect: () => setAsc(v => !v) },
-          ]}
-        />
-      </div>
-
-      <p className="result-line">
-        {visible.length} dari {guests.length} tamu
-      </p>
-
-      {visible.length === 0 && <p className="empty">Tidak ada tamu yang sesuai.</p>}
-
-      <SwipeActions label="Daftar tamu" className="guest-surface">
-        {visible.map(g => {
-          const status = statusOf(g)
-          const showPax = g.rsvp_status === 'hadir' && g.is_checked_in
-          return (
-            <SwipeActionsRow key={g.id} label={g.group_name} trailing={rowActions(g)}>
-              <button type="button" className="guest-main" onClick={() => setSheet({ mode: 'edit', guest: g })}>
-                <Avatar name={g.group_name} size="lg" />
-                <div className="guest-info">
-                  <p className="name">{g.group_name}</p>
-                  <div className="guest-badges">
-                    <Badge size="sm" outline pill>{g.category || 'Umum'}</Badge>
-                    <Badge size="sm" tone={status.tone} pill>{status.text}</Badge>
-                    {showPax && <Badge size="sm" tone="success" pill>{g.max_pax} pax</Badge>}
-                  </div>
-                </div>
+            {query && (
+              <button type="button" className="search-clear" onClick={() => setQuery('')} aria-label="Hapus pencarian">
+                <X size={14} aria-hidden />
               </button>
-            </SwipeActionsRow>
-          )
-        })}
-      </SwipeActions>
+            )}
 
+            <MultiSelect
+              compact
+              icon={<SlidersHorizontal size={18} aria-hidden />}
+              label="Filter tamu"
+              groups={filterGroups}
+              value={filterValue}
+              onValueChange={applyFilters}
+            />
+          </div>
+        </div>
+
+        {/* Status tabs scroll sideways; the sort control stays pinned at the right edge */}
+        <div className="list-controls">
+          <Tabs value={status} onValueChange={v => setStatus(v as Status)} className="status-tabs">
+            <TabsList aria-label="Filter status tamu">
+              {statusTabs.map(t => (
+                <TabsTrigger key={t.value} value={t.value}>{t.label}</TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+          <DropdownMenu
+            label={sortLabel[sort]}
+            icon={asc ? <ArrowUp size={14} aria-hidden /> : <ArrowDown size={14} aria-hidden />}
+            items={[
+              { label: 'Nama (A-Z)', onSelect: () => { setSort('nama'); setAsc(true) } },
+              { label: 'Nama (Z-A)', onSelect: () => { setSort('nama'); setAsc(false) } },
+              { label: 'Terbaru ditambah', onSelect: () => { setSort('dibuat'); setAsc(false) } },
+              { label: 'Terakhir diubah', onSelect: () => { setSort('diubah'); setAsc(false) } },
+            ]}
+          />
+        </div>
+      </div>
+
+      {/* Guest grid or list */}
+      {visible.length === 0 && (
+        <div className="guests-empty">
+          <p>Tidak ada tamu yang sesuai dengan filter.</p>
+        </div>
+      )}
+
+      {visible.length > 0 && (
+        <div className="guests-grid">
+          <SwipeActions label="Daftar tamu">
+            {visible.map(g => {
+              const { text: statusText, tone: statusTone } = statusOf(g)
+              const actions = rowActions(g)
+              return (
+                <SwipeActionsRow key={g.id} label={g.group_name} leading={actions.slice(0, 2)} trailing={actions.slice(2)}>
+                  <button
+                    type="button"
+                    className="guest-card"
+                    onClick={() => setSheet({ mode: 'edit', guest: g })}
+                  >
+                    <div className={`guest-avatar ${g.invitation_type === 'cetak' ? 'is-print' : 'is-digital'}`}>
+                      <Avatar name={g.group_name} size="lg" />
+                      <span
+                        className="guest-avatar-badge"
+                        role="img"
+                        aria-label={g.invitation_type === 'cetak' ? 'Undangan cetak' : 'Undangan digital'}
+                      >
+                        {g.invitation_type === 'cetak'
+                          ? <Printer size={10} aria-hidden />
+                          : <Smartphone size={10} aria-hidden />}
+                      </span>
+                    </div>
+                    <div className="guest-card-content">
+                      <p className="guest-card-name">{g.group_name}</p>
+                      <div className="guest-card-badges">
+                        <Badge size="sm" pill>{g.category || 'Umum'}</Badge>
+                        <Badge size="sm" pill tone={statusTone}>{statusText}</Badge>
+                        <Badge size="sm" pill>{g.max_pax} pax</Badge>
+                      </div>
+                    </div>
+                  </button>
+                </SwipeActionsRow>
+              )
+            })}
+          </SwipeActions>
+        </div>
+      )}
+
+      {/* Sheet untuk add/edit guest */}
       <BottomSheet
         open={sheet !== null}
         onOpenChange={open => { if (!open) close() }}
@@ -321,6 +322,7 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
         )}
       </BottomSheet>
 
+      {/* Delete confirmation dialog */}
       <Dialog open={deleteTarget !== null} onOpenChange={open => { if (!open) setDeleteTarget(null) }}>
         {deleteTarget && (
           <DialogContent title={`Hapus ${deleteTarget.group_name}?`} description="Data tamu ini akan dihapus dan tidak bisa dikembalikan.">
@@ -342,7 +344,7 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
           </DialogContent>
         )}
       </Dialog>
-    </>
+    </div>
   )
 }
 

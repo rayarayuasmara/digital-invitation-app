@@ -1,5 +1,5 @@
 /* The surface clips every row, so revealed actions never spill past its rounded corners. It hides once the last row has left. */
-.surface { overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--surface); transition: border-color var(--duration-standard) var(--ease-standard), background-color var(--duration-standard) var(--ease-standard); }
+.surface { overflow: hidden; border: 0; border-radius: var(--radius-panel); background: var(--surface); box-shadow: 0 1px 2px oklch(0% 0 0 / .04); transition: background-color var(--duration-standard) var(--ease-standard); }
 /* When the last row is on its way out, the frame fades with it instead of leaving a hairline behind. */
 .surface:not(:has(> .list > .row:not([data-removing]))) { border-color: transparent; background-color: transparent; }
 .surface:has(> .list:empty) { display: none; }

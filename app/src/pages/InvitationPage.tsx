@@ -38,8 +38,12 @@ export function InvitationPage({ data, onShare, onChanged, notify }: Props) {
 
   return (
     <>
-      <h1 className="page-title">Undangan</h1>
-      <p className="page-sub">Detail acara yang tampil di undangan tamu</p>
+      <div className="page-head">
+        <div style={{ minWidth: 0 }}>
+          <h1 className="page-title">Undangan</h1>
+          <p className="page-sub">Detail acara yang tampil di undangan tamu</p>
+        </div>
+      </div>
 
       <Card variant="default" padding="md">
         <p className="name" style={{ margin: 0, fontSize: 'var(--text-xl)', fontWeight: 700 }}>{event.couple_name || event.title}</p>

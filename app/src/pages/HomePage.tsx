@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ChevronRight, MapPin, MessageSquareText } from 'lucide-react'
+import { CalendarDays, ChevronRight, Clock, History, MapPin, MessageSquareText } from 'lucide-react'
 import { AnimatedCounter } from '@/components/arc/animated-counter/animated-counter'
+import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
-import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
 import { Card, CardHeader } from '@/components/arc/card'
 import { ChatThread } from '@/components/arc/chat-thread/chat-thread'
-import type { ChatMessage, ChatParticipant } from '@/components/arc/chat-thread/chat-thread'
-import { Countdown } from '@/components/arc/countdown/countdown'
+import { Countdown, toEpoch } from '@/components/arc/countdown/countdown'
 import { UsageMeter } from '@/components/arc/usage-meter/usage-meter'
 import { NotificationCenter } from '@/components/arc/notification-center/notification-center'
 import type { NotificationItem } from '@/components/arc/notification-center/notification-center'
@@ -42,6 +41,11 @@ function formatDate(value: string | null) {
     year: 'numeric',
     timeZone: 'Asia/Jakarta',
   })
+}
+
+/** One stable author id per guest, so a guest's wishes group into the same conversation. */
+function wishAuthor(w: Wish) {
+  return w.guest_id ?? `name:${(w.guest_name ?? 'tamu').trim().toLowerCase()}`
 }
 
 function timeAgo(iso: string) {
@@ -122,6 +126,7 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
   const [unread, setUnread] = useState(0)
   const [error, setError] = useState('')
   const [notifSeen, setNotifSeen] = useState(() => Number(localStorage.getItem(NOTIF_SEEN_KEY) || 0))
+  const [rsvpFocus, setRsvpFocus] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     try {
@@ -172,46 +177,87 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
     [categories],
   )
 
+  const wishParticipants = useMemo(() => {
+    const people = new Map<string, string>()
+    for (const w of wishes ?? []) {
+      const id = wishAuthor(w)
+      if (!people.has(id)) people.set(id, w.guest_name || 'Tamu')
+    }
+    return [...people].map(([id, name]) => ({ id, name }))
+  }, [wishes])
+
+  const wishMessages = useMemo(
+    () => (wishes ?? []).map(w => ({
+      id: w.id,
+      authorId: wishAuthor(w),
+      text: w.message,
+      createdAt: w.created_at,
+    })),
+    [wishes],
+  )
+
+  /** Every RSVP reply and check-in, newest first, for the activity feed. */
+  const activity = useMemo(() => {
+    type Activity = { id: string; kind: 'rsvp' | 'checkin'; at: string; name: string; text: string; detail: string; tone: 'success' | 'warning' | 'danger' | 'info' }
+    const items: Activity[] = []
+    for (const g of guests) {
+      if (g._rsvp_at && (g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen')) {
+        const attending = g.rsvp_status === 'hadir'
+        items.push({
+          id: `rsvp:${g.id}`,
+          kind: 'rsvp',
+          at: g._rsvp_at,
+          name: g.group_name,
+          text: attending ? 'Hadir' : 'Tidak hadir',
+          detail: `RSVP · ${g.max_pax} pax`,
+          tone: attending ? 'success' : 'danger',
+        })
+      }
+      if (g._checkin_at) {
+        items.push({
+          id: `checkin:${g.id}`,
+          kind: 'checkin',
+          at: g._checkin_at,
+          name: g.group_name,
+          text: 'Check-in',
+          detail: `Masuk · ${g.max_pax} pax`,
+          tone: 'info',
+        })
+      }
+    }
+    return items.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+  }, [guests])
+
+  // Show the latest few of each kind so check-ins are never buried under a run of RSVPs.
+  const activityFeed = useMemo(() => {
+    const rsvps = activity.filter(item => item.kind === 'rsvp').slice(0, 4)
+    const checkins = activity.filter(item => item.kind === 'checkin').slice(0, 4)
+    return [...rsvps, ...checkins].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+  }, [activity])
+
   // Share of confirmed guests who have already checked in, capped so walk-ins never show over 100%.
   const checkinPct = stats.attending > 0
     ? Math.min(100, Math.round((stats.checked_in / stats.attending) * 100))
     : 0
+
+  const quotaFree = Math.max(0, stats.max_quota - total)
+  const quotaPct = stats.max_quota > 0 ? Math.min(100, Math.round((total / stats.max_quota) * 100)) : 0
 
   const sessionText = (event?.sessions ?? [])
     .filter(s => s.time_text)
     .map(s => `${s.name} ${s.time_text}`)
     .join(' · ')
 
-  // Map wishes into Arc ChatThread's shape. Guests without a guest_id get a
-  // synthetic participant keyed by name so their name still shows as the author.
-  const chatParticipants = useMemo<ChatParticipant[]>(() => {
-    const map = new Map<string, ChatParticipant>()
-    for (const g of guests) map.set(g.id, { id: g.id, name: g.group_name })
-    for (const w of wishes ?? []) {
-      if (w.guest_id) {
-        if (!map.has(w.guest_id)) {
-          const g = guests.find(x => x.group_name.trim().toLowerCase() === (w.guest_name ?? '').trim().toLowerCase())
-          map.set(w.guest_id, { id: w.guest_id, name: g?.group_name || w.guest_name || 'Tamu' })
-        }
-      } else {
-        const key = `name:${(w.guest_name || 'Tamu').trim().toLowerCase()}`
-        if (!map.has(key)) map.set(key, { id: key, name: w.guest_name || 'Tamu' })
-      }
-    }
-    return [...map.values()]
-  }, [guests, wishes])
-
-  const chatMessages = useMemo<ChatMessage[]>(() => {
-    return (wishes ?? []).map(w => {
-      const authorId = w.guest_id
-        ? (chatParticipants.some(p => p.id === w.guest_id) ? w.guest_id : `name:${(w.guest_name || 'Tamu').trim().toLowerCase()}`)
-        : `name:${(w.guest_name || 'Tamu').trim().toLowerCase()}`
-      return { id: w.id, authorId, text: w.message, createdAt: w.created_at }
-    })
-  }, [wishes, chatParticipants])
+  // Countdown uses the same target parsing so the hero badge and the digits never disagree.
+  const msToEvent = event?.event_date
+    ? toEpoch(event.event_date, 'Asia/Jakarta') - Date.now()
+    : 0
+  const daysToEvent = Math.floor(msToEvent / 86_400_000)
+  const heroBadge = msToEvent <= 0 ? 'Selesai' : daysToEvent <= 0 ? 'Hari ini' : `H-${daysToEvent}`
+  const heroBadgeLabel = msToEvent <= 0 ? 'Acara selesai' : daysToEvent <= 0 ? 'Hari ini' : `${daysToEvent} hari lagi`
 
   return (
-    <>
+    <div className="home-page">
       <div className="page-head">
         <h1 className="page-title">Beranda</h1>
         <div className="page-head-actions">
@@ -223,181 +269,222 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
         </div>
       </div>
 
-      <Card variant="default" padding="md" className="event-card">
-        <p className="stat-label">Acara</p>
-        <p className="event-title">{event?.title}</p>
-        <p className="event-meta">{formatDate(event?.event_date ?? null)}</p>
-        {sessionText && <p className="event-meta">{sessionText}</p>}
-        {event?.location && (
-          <p className="event-meta event-location">
-            <MapPin size={14} strokeWidth={1.75} aria-hidden />
-            <span>{event.location}</span>
-          </p>
-        )}
-        <div className="event-countdown">
-          <span className="event-countdown-label">Menuju hari H</span>
-          <Countdown
-            target={event?.event_date ?? new Date().toISOString()}
-            timeZone="Asia/Jakarta"
-            variant="compact"
-            label="Menuju hari H"
-            completeLabel="Acara sudah berlangsung"
-            units={['days', 'hours', 'minutes']}
-          />
-        </div>
-        <div className="event-quota">
-          <UsageMeter
-            label="Kuota tamu"
-            segments={[
-              { id: 'digital', label: 'Digital', value: stats.digital },
-              { id: 'cetak', label: 'Cetak', value: stats.cetak },
-            ]}
-            limit={stats.max_quota}
-            unit="tamu"
-            decimals={0}
-            freeLabel="Sisa"
-            overLabel="Melebihi kuota"
-          />
-        </div>
-      </Card>
+      {/* Bento Grid Layout */}
+      <div className="bento-grid">
+        {/* Hero: one invitation-ticket panel for the event, its details and the countdown */}
+        <Card variant="default" padding="none" className="bento-hero event-hero">
+          <div className="event-hero-top">
+            <span className="event-hero-eyebrow">
+              <span className="event-hero-ping" aria-hidden />
+              Acara
+            </span>
+            <span className="event-hero-badge" aria-label={heroBadgeLabel}>{heroBadge}</span>
+          </div>
 
-      <div className="action-grid" aria-label="Perlu tindakan">
-        <button type="button" className="action-tile" onClick={() => onOpenGuests('belum_terkirim')}>
-          <span className="action-tile-label">Belum terkirim</span>
-          <span className="action-tile-value">{stats.unsent}</span>
-          <span className="action-tile-hint">Lihat tamu <ChevronRight size={14} aria-hidden /></span>
-        </button>
-        <button type="button" className="action-tile" onClick={() => onOpenGuests('pending')}>
-          <span className="action-tile-label">Pending</span>
-          <span className="action-tile-value">{stats.pending}</span>
-          <span className="action-tile-hint">Lihat tamu <ChevronRight size={14} aria-hidden /></span>
-        </button>
-      </div>
+          <h2 className="event-hero-title">{event?.title}</h2>
 
-      <Card variant="default" padding="md" style={{ marginTop: 12 }}>
-        <CardHeader title="Status RSVP" description="Distribusi konfirmasi kehadiran tamu" />
-        <div className="rsvp-chart" data-beui>
-          <DonutChart
-            segments={rsvp}
-            label="Status RSVP tamu"
-            labels={{ label: 'Status RSVP tamu', total: 'Total tamu' }}
-            formatValue={value => value.toLocaleString('id-ID')}
-          >
-            <div className="rsvp-chart-grid">
-              <DonutChartPlot>
-                <DonutChartCenter>
-                  {(segment, total) => (
-                    <>
-                      <span className="donut-value">
-                        <DigitSwap value={(segment?.value ?? total).toLocaleString('id-ID')} />
-                      </span>
-                      <span className="donut-caption">
-                        {segment ? segment.name : 'Total tamu'}
-                      </span>
-                    </>
-                  )}
-                </DonutChartCenter>
-              </DonutChartPlot>
-              <DonutChartLegend
-                renderValue={segment => (
-                  <span className="donut-legend-value">
-                    <b>{segment.value}</b>
-                  </span>
-                )}
-              />
-            </div>
-          </DonutChart>
-        </div>
-      </Card>
-
-      <div className="tiles" aria-label="Ringkasan kehadiran">
-        <Card variant="default" padding="md" className="tile">
-          <p className="stat-label">Orang hadir</p>
-          <p className="tile-value"><AnimatedCounter value={stats.hadir_pax} locale="id-ID" /></p>
-          <p className="stat-note">dari {stats.attending} tamu hadir</p>
-        </Card>
-        <Card variant="default" padding="md" className="tile">
-          <p className="stat-label">Check-in</p>
-          <p className="tile-value"><AnimatedCounter value={stats.checked_in} locale="id-ID" /></p>
-          <p className="stat-note">{checkinPct}% dari tamu hadir</p>
-        </Card>
-      </div>
-
-      <Card variant="default" padding="md" style={{ marginTop: 12 }}>
-        <CardHeader
-          title="Kategori tamu"
-          description={`${total} tamu · ${orderedCategories.length} kategori`}
-        />
-        <ul className="cat-chips">
-          {orderedCategories.map(c => (
-            <li key={c.category} className="cat-chip">
-              <span>{c.category}</span>
-              <b>{c.total}</b>
+          <ul className="event-hero-facts">
+            <li>
+              <CalendarDays size={15} strokeWidth={1.75} aria-hidden />
+              <span>{formatDate(event?.event_date ?? null)}</span>
             </li>
-          ))}
-        </ul>
-      </Card>
+            {sessionText && (
+              <li>
+                <Clock size={15} strokeWidth={1.75} aria-hidden />
+                <span>{sessionText}</span>
+              </li>
+            )}
+            {event?.location && (
+              <li>
+                <MapPin size={15} strokeWidth={1.75} aria-hidden />
+                <span>{event.location}</span>
+              </li>
+            )}
+          </ul>
 
-      <Card variant="default" padding="none" style={{ marginTop: 12 }} aria-labelledby="ucapan-title">
-        <CardHeader
-          title={<>
-            <MessageSquareText size={20} aria-hidden />
-            <span>Ucapan</span>
-          </>}
-          description={`${wishTotal} ucapan masuk`}
-          action={unread > 0 && (
-            <button type="button" onClick={markSeen} className="wish-unread" aria-label={`${unread} ucapan belum dibaca, tandai sudah dibaca`}>
-              <Badge tone="info" size="sm" pill>{unread} belum dibaca</Badge>
-            </button>
-          )}
-        />
-        <div className="wish-content">
-          {error && <p role="alert" className="wish-empty" style={{ color: 'var(--red-ink)' }}>{error}</p>}
-          {!error && wishes === null && <p className="wish-empty">Memuat ucapan…</p>}
-          {wishes && wishes.length === 0 && <p className="wish-empty">Belum ada ucapan masuk.</p>}
-          {wishes && wishes.length > 0 && (
-            <>
-              <div className="chat-preview">
-                <ChatThread
-                  participants={chatParticipants}
-                  currentUserId="host"
-                  messages={chatMessages.slice(-3)}
-                  composer={false}
-                  locale="id-ID"
-                  labels={{ unknownAuthor: 'Tamu' }}
-                  label="Ucapan tamu"
+          <div className="event-hero-countdown">
+            <span className="event-hero-countdown-label">Menuju hari H</span>
+            <Countdown
+              target={event?.event_date ?? new Date().toISOString()}
+              timeZone="Asia/Jakarta"
+              variant="large"
+              label="Menuju hari H"
+              completeLabel="Acara sudah berlangsung"
+              units={['days', 'hours', 'minutes', 'seconds']}
+            />
+          </div>
+        </Card>
+
+        {/* RSVP donut - right under the event, above the quota */}
+        <Card variant="default" padding="md" className="bento-rsvp">
+          <CardHeader title="Status RSVP" description="Konfirmasi kehadiran" />
+          <div className="rsvp-chart" data-beui>
+            <DonutChart
+              segments={rsvp}
+              label="Status RSVP tamu"
+              labels={{ label: 'Status RSVP tamu', total: 'Total tamu' }}
+              formatValue={value => value.toLocaleString('id-ID')}
+              activeId={rsvpFocus}
+              onActiveChange={setRsvpFocus}
+              selectedId={rsvpFocus}
+              onSelect={id => setRsvpFocus(current => current === id ? null : id)}
+            >
+              <div className="rsvp-chart-grid">
+                <DonutChartPlot>
+                  <DonutChartCenter>
+                    {(segment, total) => (
+                      <>
+                        <span className="donut-value">
+                          <DigitSwap value={(segment?.value ?? total).toLocaleString('id-ID')} />
+                        </span>
+                        <span className="donut-caption">
+                          {segment ? segment.name : 'Total tamu'}
+                        </span>
+                      </>
+                    )}
+                  </DonutChartCenter>
+                </DonutChartPlot>
+                <DonutChartLegend
+                  renderValue={segment => (
+                    <span className="donut-legend-value">
+                      <b>{Math.round(segment.share * 100)}%</b>
+                      <span>{segment.value}</span>
+                    </span>
+                  )}
                 />
               </div>
-              {wishTotal > 3 && (
-                <div className="wish-more-wrap">
-                  <BottomSheet
-                    trigger={
-                      <button type="button" className="wish-more" aria-label={`Lihat semua ${wishTotal} ucapan`}>
-                        Lihat semua {wishTotal} ucapan
-                      </button>
-                    }
-                    title="Ucapan"
-                    description={`${wishTotal} ucapan masuk`}
-                    detents={[0.92]}
-                  >
-                    <div className="chat-sheet">
-                      <ChatThread
-                        participants={chatParticipants}
-                        currentUserId="host"
-                        messages={chatMessages}
-                        composer={false}
-                        locale="id-ID"
-                        labels={{ unknownAuthor: 'Tamu' }}
-                        label="Ucapan tamu"
-                      />
-                    </div>
-                  </BottomSheet>
-                </div>
-              )}
-            </>
+            </DonutChart>
+          </div>
+        </Card>
+
+        {/* Quota meter - spans 2 columns */}
+        <Card variant="default" padding="md" className="bento-quota quota-card">
+          <div className="quota-head">
+            <p className="stat-label">Kuota undangan</p>
+            <Badge size="sm" pill>Sisa {quotaFree.toLocaleString('id-ID')}</Badge>
+          </div>
+          <p className="quota-used">
+            <AnimatedCounter value={total} locale="id-ID" />
+            <span>dari {stats.max_quota.toLocaleString('id-ID')} terpakai</span>
+          </p>
+          <div className="quota-bar" role="img" aria-label={`${total} dari ${stats.max_quota} undangan terpakai`}>
+            <span style={{ width: `${quotaPct}%` }} />
+          </div>
+          <div className="quota-split">
+            <span>Digital <b>{stats.digital}</b></span>
+            <span>Cetak <b>{stats.cetak}</b></span>
+          </div>
+        </Card>
+
+        {/* Action tiles - compact, side by side */}
+        {stats.unsent > 0 && (
+          <button type="button" className="bento-action" onClick={() => onOpenGuests('belum_terkirim')}>
+            <span className="bento-action-label">Belum terkirim</span>
+            <span className="bento-action-value">{stats.unsent}</span>
+            <ChevronRight size={16} className="bento-action-icon" aria-hidden />
+          </button>
+        )}
+        {stats.pending > 0 && (
+          <button type="button" className="bento-action" onClick={() => onOpenGuests('pending')}>
+            <span className="bento-action-label">Pending</span>
+            <span className="bento-action-value">{stats.pending}</span>
+            <ChevronRight size={16} className="bento-action-icon" aria-hidden />
+          </button>
+        )}
+
+        {/* Attendance metrics - 2 tiles */}
+        <Card variant="default" padding="md" className="bento-stat">
+          <p className="stat-label">Orang hadir</p>
+          <p className="bento-stat-value"><AnimatedCounter value={stats.hadir_pax} locale="id-ID" /></p>
+          <p className="stat-note">dari {stats.attending} tamu</p>
+        </Card>
+        <Card variant="default" padding="md" className="bento-stat">
+          <p className="stat-label">Check-in</p>
+          <p className="bento-stat-value"><AnimatedCounter value={stats.checked_in} locale="id-ID" /></p>
+          <p className="stat-note">{checkinPct}% tamu hadir</p>
+        </Card>
+
+        {/* RSVP and check-in history */}
+        <Card variant="default" padding="md" className="bento-activity" aria-labelledby="activity-title">
+          <CardHeader
+            title={
+              <span className="wish-title">
+                <History size={20} aria-hidden />
+                <span id="activity-title">Riwayat tamu</span>
+              </span>
+            }
+            description={`${activity.filter(item => item.kind === 'rsvp').length} RSVP · ${activity.filter(item => item.kind === 'checkin').length} check-in`}
+          />
+          {activity.length === 0 ? (
+            <p className="activity-empty">Belum ada tamu yang RSVP atau check-in.</p>
+          ) : (
+            <ol className="activity-list">
+              {activityFeed.map(item => (
+                <li key={item.id} className="activity-item">
+                  <Avatar name={item.name} size="sm" />
+                  <div className="activity-copy">
+                    <p className="activity-name">{item.name}</p>
+                    <p className="activity-detail">{item.detail} · {timeAgo(item.at)}</p>
+                  </div>
+                  <Badge size="sm" pill tone={item.tone}>{item.text}</Badge>
+                </li>
+              ))}
+            </ol>
           )}
-        </div>
-      </Card>
-    </>
+        </Card>
+
+        {/* Categories - full width */}
+        {orderedCategories.length > 0 && (
+          <Card variant="default" padding="md" className="bento-categories">
+            <UsageMeter
+              label="Kategori tamu"
+              segments={orderedCategories.map(c => ({ id: c.category, label: c.category, value: c.total }))}
+              limit={total}
+              unit="tamu"
+              decimals={0}
+              composition
+              caption={`${total} tamu · ${orderedCategories.length} kategori`}
+            />
+          </Card>
+        )}
+
+        {/* Wishes - compact card grid */}
+        <Card variant="default" padding="md" className="bento-wishes" aria-labelledby="ucapan-title">
+          <CardHeader
+            title={
+              <span className="wish-title">
+                <MessageSquareText size={20} aria-hidden />
+                <span>Ucapan</span>
+              </span>
+            }
+            description={`${wishTotal} ucapan masuk`}
+            action={unread > 0 && (
+              <button type="button" onClick={markSeen} className="wish-unread" aria-label={`${unread} ucapan belum dibaca, tandai sudah dibaca`}>
+                <Badge tone="info" size="sm" pill>{unread} belum dibaca</Badge>
+              </button>
+            )}
+          />
+          <div className="wish-chat">
+            {error && <p role="alert" className="wish-empty" style={{ color: 'var(--red-ink)' }}>{error}</p>}
+            {!error && wishes === null && <p className="wish-empty">Memuat ucapan…</p>}
+            {wishes && wishes.length === 0 && <p className="wish-empty">Belum ada ucapan masuk.</p>}
+            {wishes && wishes.length > 0 && (
+              <ChatThread
+                participants={wishParticipants}
+                currentUserId="host"
+                messages={wishMessages}
+                composer={false}
+                allowAttachments={false}
+                reactions={[]}
+                locale="id-ID"
+                label="Ucapan tamu"
+                labels={{ addReaction: 'Beri reaksi' }}
+                className="wish-chat-thread"
+              />
+            )}
+          </div>
+        </Card>
+      </div>
+    </div>
   )
 }

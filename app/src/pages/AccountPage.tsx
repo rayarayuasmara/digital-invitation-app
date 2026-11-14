@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ChevronRight } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
 import type { DashboardData } from '@/lib/dashboard'
 import { supabase } from '@/lib/supabase'
@@ -27,22 +28,40 @@ export function AccountPage({ data, notify }: Props) {
 
   return (
     <>
-      <h1 className="page-title">Akun</h1>
-      <p className="page-sub">{client.email}</p>
+      <div className="page-head">
+        <div style={{ minWidth: 0 }}>
+          <h1 className="page-title">Akun</h1>
+          <p className="page-sub">{client.email}</p>
+        </div>
+      </div>
 
-      <Card variant="default" padding="md">
-        <div className="kv"><span>Nama</span><span>{client.name}</span></div>
-        <div className="kv"><span>Paket</span><span>{tierLabel}</span></div>
-        <div className="kv"><span>Kuota tamu</span><span>{stats.total_guests} / {stats.max_quota}</span></div>
+      <Card variant="default" padding="none" className="settings-group">
+        <div className="settings-row">
+          <span>Nama</span>
+          <span className="settings-value">{client.name}</span>
+        </div>
+        <div className="settings-row">
+          <span>Paket</span>
+          <span className="settings-value">{tierLabel}</span>
+        </div>
+        <div className="settings-row">
+          <span>Kuota tamu</span>
+          <span className="settings-value">{stats.total_guests} / {stats.max_quota}</span>
+        </div>
       </Card>
 
-      <h2 className="section-title">Keamanan</h2>
-      <button type="button" className="btn btn-secondary" onClick={sendReset} disabled={sending}>
-        {sending ? 'Mengirim…' : 'Ubah password'}
-      </button>
+      <Card variant="default" padding="none" className="settings-group">
+        <button type="button" className="settings-row settings-action" onClick={sendReset} disabled={sending}>
+          <span>{sending ? 'Mengirim…' : 'Ubah password'}</span>
+          <ChevronRight size={18} strokeWidth={2} className="settings-chevron" aria-hidden />
+        </button>
+      </Card>
 
-      <h2 className="section-title">Sesi</h2>
-      <button type="button" className="btn btn-danger" onClick={() => signOut()}>Keluar</button>
+      <Card variant="default" padding="none" className="settings-group">
+        <button type="button" className="settings-row settings-action is-danger" onClick={() => signOut()}>
+          <span>Keluar</span>
+        </button>
+      </Card>
     </>
   )
 }
