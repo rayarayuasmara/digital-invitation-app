@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { ArrowDown, ArrowUp, Copy, MessageCircle, Pencil, Printer, Search, SlidersHorizontal, Smartphone, Trash2, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, Copy, MessageCircle, Pencil, Printer, Search, SlidersHorizontal, Smartphone, Trash2 } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
 import type { BadgeTone } from '@/components/arc/badge/badge'
@@ -14,7 +14,8 @@ import { Select } from '@/components/arc/select/select'
 import { Switch } from '@/components/arc/switch/switch'
 import { SwipeActions, SwipeActionsRow } from '@/components/arc/swipe-actions/swipe-actions'
 import type { SwipeAction } from '@/components/arc/swipe-actions/swipe-actions'
-import { Tabs, TabsList, TabsTrigger } from '@/components/arc/tabs/tabs'
+import { Input as GlassInput } from 'glisse'
+import { Tabs, TabsList, TabsTrigger } from '@/components/motion/tabs'
 import type { DashboardData } from '@/lib/dashboard'
 import { addGuest, deleteGuest, markSent, updateGuest } from '@/lib/guests'
 import type { Guest, GuestForm } from '@/lib/guests'
@@ -200,41 +201,40 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
       {/* Search and filters stay pinned while the list scrolls */}
       <div className="guests-sticky">
         <div className="guests-toolbar">
-          <div className="search">
-            <Search size={18} aria-hidden color="var(--sub)" />
-            <input
-              type="search"
-              placeholder="Cari nama tamu…"
-              aria-label="Cari nama tamu"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-            />
-            {query && (
-              <button type="button" className="search-clear" onClick={() => setQuery('')} aria-label="Hapus pencarian">
-                <X size={14} aria-hidden />
-              </button>
-            )}
-
-            <MultiSelect
-              compact
-              icon={<SlidersHorizontal size={18} aria-hidden />}
-              label="Filter tamu"
-              groups={filterGroups}
-              value={filterValue}
-              onValueChange={applyFilters}
-            />
-          </div>
+          <GlassInput
+            type="search"
+            className="guests-search"
+            aria-label="Cari nama tamu"
+            placeholder="Cari nama tamu…"
+            icon={<Search size={16} aria-hidden />}
+            value={query}
+            onValueChange={setQuery}
+          />
+          <MultiSelect
+            compact
+            icon={<SlidersHorizontal size={18} aria-hidden />}
+            label="Filter tamu"
+            groups={filterGroups}
+            value={filterValue}
+            onValueChange={applyFilters}
+          />
         </div>
 
         {/* Status tabs scroll sideways; the sort control stays pinned at the right edge */}
         <div className="list-controls">
-          <Tabs value={status} onValueChange={v => setStatus(v as Status)} className="status-tabs">
-            <TabsList aria-label="Filter status tamu">
-              {statusTabs.map(t => (
-                <TabsTrigger key={t.value} value={t.value}>{t.label}</TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+          <div className="status-tabs" data-beui>
+            <Tabs
+              value={status}
+              onValueChange={v => setStatus(v as Status)}
+              variant="segment"
+            >
+              <TabsList aria-label="Filter status tamu">
+                {statusTabs.map(t => (
+                  <TabsTrigger key={t.value} value={t.value} className="min-h-10">{t.label}</TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
           <DropdownMenu
             label={sortLabel[sort]}
             icon={asc ? <ArrowUp size={14} aria-hidden /> : <ArrowDown size={14} aria-hidden />}

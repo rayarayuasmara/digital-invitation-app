@@ -424,6 +424,13 @@ body {
   background: linear-gradient(to bottom, transparent 0%, var(--bg-page) 48%);
 }
 
+/* Glisse tab bar: four tabs plus the FAB share the bottom rail. */
+.home-tabbar {
+  pointer-events: auto;
+  --lg-fill: var(--accent);
+  --lg-tab-width: clamp(52px, calc((min(100vw, 480px) - 96px) / 4), 76px);
+}
+
 .tabbar {
   pointer-events: auto;
   flex: 1;
@@ -1181,6 +1188,60 @@ button.settings-row:active {
   text-align: right;
 }
 
+.home-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--size-spacing-sp-8);
+  margin-top: 14px;
+}
+
+.home-live {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--green-bg);
+  color: var(--green-ink);
+  font-size: var(--fontsize-interface-caption);
+  font-weight: var(--type-font-weight-semibold);
+  line-height: 1;
+}
+
+.home-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px color-mix(in oklab, currentColor 22%, transparent);
+}
+
+.home-hero-action {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 var(--size-spacing-sp-12);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fontsize-interface-caption);
+  font-weight: var(--type-font-weight-medium);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+@media (hover: hover) {
+  .home-hero-action:hover {
+    background: var(--surface-muted);
+  }
+}
+
 .home-hero-countdown {
   --text-muted: var(--sub);
   display: grid;
@@ -1310,7 +1371,8 @@ button.settings-row:active {
   order: -2;
   align-self: stretch;
   width: 3px;
-  min-height: 16px;
+  height: auto;
+  min-height: 0;
   border-radius: var(--radius-pill);
 }
 
@@ -1485,6 +1547,78 @@ button.settings-row:active {
   display: flex;
   flex: 1;
   flex-direction: column;
+}
+
+/* Plan quota, package and upgrade */
+.home-stack .home-quota-card {
+  padding: 20px;
+}
+
+.home-quota-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--size-spacing-sp-8);
+}
+
+.home-quota-card-head h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--text-heading-h6-font-size);
+  font-weight: var(--text-heading-h6-font-weight);
+  line-height: var(--text-heading-h6-line-height);
+  letter-spacing: var(--text-heading-h6-letter-spacing);
+}
+
+.home-quota-card-line {
+  margin: 10px 0 0;
+  color: var(--sub);
+  font-size: var(--fontsize-interface-caption);
+}
+
+.home-quota-card-line b {
+  color: var(--accent);
+  font-family: var(--font-number);
+  font-size: var(--number-md);
+  font-weight: var(--number-md-weight);
+  line-height: var(--number-md-line);
+  letter-spacing: var(--number-md-tracking);
+  font-variant-numeric: tabular-nums;
+}
+
+.home-quota-card-track {
+  height: 6px;
+  margin-top: 12px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--soft);
+}
+
+.home-quota-card-track span {
+  display: block;
+  min-width: 6px;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 0.6s var(--ease-standard);
+}
+
+.home-quota-upgrade {
+  width: 100%;
+  height: 40px;
+  margin-top: 14px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font: inherit;
+  font-size: var(--fontsize-interface-button);
+  font-weight: var(--type-font-weight-semibold);
+  cursor: pointer;
+}
+
+.home-quota-upgrade:active {
+  opacity: 0.9;
 }
 
 /* History */
@@ -2429,7 +2563,7 @@ button.settings-row:active {
 .list-controls {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--size-spacing-sp-4);
   margin-bottom: 8px;
 }
 
@@ -2823,9 +2957,9 @@ button.settings-row:active {
   gap: var(--space-2);
 }
 
-/* The toolbar centres both controls on the same 44px line. */
-.guests-toolbar .search {
-  margin-bottom: 0;
+.guests-toolbar .guests-search {
+  flex: 1;
+  max-width: none;
 }
 
 /* Search and the status/sort row pin to the top while the guest list scrolls. */
@@ -2841,7 +2975,7 @@ button.settings-row:active {
 }
 
 .guests-sticky .list-controls {
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 @media (prefers-reduced-transparency: reduce) {

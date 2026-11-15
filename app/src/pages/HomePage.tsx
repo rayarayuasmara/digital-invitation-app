@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { BadgeCheck, ChartPie, Check, CircleArrowRight, MailQuestion, MessageSquareText, QrCode, Tag, UsersRound, X } from 'lucide-react'
+import { BadgeCheck, ChartPie, Check, CircleArrowRight, ExternalLink, MailQuestion, MessageSquareText, QrCode, Share2, Tag, UsersRound, X } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
 import { Card, CardHeader } from '@/components/arc/card'
@@ -296,6 +296,25 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
     [categories],
   )
 
+  const previewUrl = event?.preview_token
+    ? `${window.location.origin}/pratinjau/${event.slug}/${event.preview_token}`
+    : ''
+
+  const openPreview = () => {
+    if (!previewUrl) return notify('Tautan pratinjau belum tersedia.')
+    window.open(previewUrl, '_blank', 'noopener,noreferrer')
+  }
+
+  const copyPreview = async () => {
+    if (!previewUrl) return notify('Tautan pratinjau belum tersedia.')
+    try {
+      await navigator.clipboard.writeText(previewUrl)
+      notify('Tautan pratinjau disalin')
+    } catch {
+      notify('Gagal menyalin tautan.')
+    }
+  }
+
   const coupleName = event?.couple_name?.trim() || event?.title || 'Acara'
   const sessionText = (event?.sessions ?? [])
     .filter(s => s.time_text)
@@ -303,6 +322,8 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
     .join(' · ')
   const tierLabel = (stats.tier || 'trial').replace(/^\w/, letter => letter.toUpperCase())
   const belumRsvp = guests.filter(g => !g.rsvp_status || g.rsvp_status === 'pending').length
+  const quotaFree = Math.max(0, stats.max_quota - total)
+  const quotaPct = stats.max_quota > 0 ? Math.min(100, Math.round((total / stats.max_quota) * 100)) : 0
 
   return (
     <div className="home-page">
@@ -349,6 +370,21 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
                 </div>
               </dl>
             </ExpandableCard>
+          </div>
+
+          <div className="home-hero-actions">
+            <span className="home-live">
+              <span className="home-live-dot" aria-hidden />
+              Live
+            </span>
+            <button type="button" className="home-hero-action" onClick={openPreview}>
+              <ExternalLink size={14} strokeWidth={2} aria-hidden />
+              Pratinjau
+            </button>
+            <button type="button" className="home-hero-action" onClick={copyPreview}>
+              <Share2 size={14} strokeWidth={2} aria-hidden />
+              Bagikan
+            </button>
           </div>
 
           <div className="home-hero-countdown">
@@ -412,6 +448,28 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
             </Card>
           </div>
         </div>
+
+        {/* Plan quota, with the current package and an upgrade path. */}
+        <Card variant="default" padding="md" className="home-quota-card" aria-labelledby="quota-card-title">
+          <div className="home-quota-card-head">
+            <h3 id="quota-card-title">Kuota undangan</h3>
+            <Badge size="sm" pill>{tierLabel}</Badge>
+          </div>
+          <p className="home-quota-card-line">
+            <b>{quotaFree.toLocaleString('id-ID')}</b> tersisa
+            <span> · {total.toLocaleString('id-ID')} dari {stats.max_quota.toLocaleString('id-ID')} terpakai</span>
+          </p>
+          <div
+            className="home-quota-card-track"
+            role="img"
+            aria-label={`${total} dari ${stats.max_quota} undangan terpakai`}
+          >
+            <span style={{ width: `${quotaPct}%` }} />
+          </div>
+          <button type="button" className="home-quota-upgrade" onClick={() => notify('Hubungi admin untuk upgrade paket.')}>
+            Upgrade paket
+          </button>
+        </Card>
 
         {/* Latest RSVP replies and check-ins. */}
         <Card variant="default" padding="md" className="home-history" aria-labelledby="history-title">
