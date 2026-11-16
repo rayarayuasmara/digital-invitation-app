@@ -3,6 +3,7 @@ import { BadgeCheck, ChartPie, Check, CircleArrowRight, ExternalLink, MailQuesti
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
 import { Card, CardHeader } from '@/components/arc/card'
+import { Gauge } from '@/components/arc/gauge/gauge'
 import { ChatThread } from '@/components/arc/chat-thread/chat-thread'
 import { Countdown } from '@/components/arc/countdown/countdown'
 import { ExpandableCard } from '@/components/arc/expandable-card/expandable-card'
@@ -323,7 +324,7 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
   const tierLabel = (stats.tier || 'trial').replace(/^\w/, letter => letter.toUpperCase())
   const belumRsvp = guests.filter(g => !g.rsvp_status || g.rsvp_status === 'pending').length
   const quotaFree = Math.max(0, stats.max_quota - total)
-  const quotaPct = stats.max_quota > 0 ? Math.min(100, Math.round((total / stats.max_quota) * 100)) : 0
+  const isLive = Boolean(event?.slug)
 
   return (
     <div className="home-page">
@@ -346,9 +347,9 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
               <p className="home-hero-halo">Halo</p>
               <h2 className="home-hero-title">{coupleName}</h2>
             </div>
-            <span className="home-tier">
-              <BadgeCheck size={14} strokeWidth={2} aria-hidden />
-              {tierLabel}
+            <span className={`home-tier ${isLive ? 'is-live' : 'is-draft'}`}>
+              <span className="home-tier-dot" aria-hidden />
+              {isLive ? 'Live' : 'Belum live'}
             </span>
           </div>
           <div className="home-event-info">
@@ -373,10 +374,6 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
           </div>
 
           <div className="home-hero-actions">
-            <span className="home-live">
-              <span className="home-live-dot" aria-hidden />
-              Live
-            </span>
             <button type="button" className="home-hero-action" onClick={openPreview}>
               <ExternalLink size={14} strokeWidth={2} aria-hidden />
               Pratinjau
@@ -453,22 +450,36 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
         <Card variant="default" padding="md" className="home-quota-card" aria-labelledby="quota-card-title">
           <div className="home-quota-card-head">
             <h3 id="quota-card-title">Kuota undangan</h3>
-            <Badge size="sm" pill>{tierLabel}</Badge>
+            <Badge
+              size="md"
+              pill
+              className="home-tier-badge"
+              icon={<BadgeCheck size={14} strokeWidth={2} aria-hidden />}
+            >
+              {tierLabel}
+            </Badge>
           </div>
-          <p className="home-quota-card-line">
-            <b>{quotaFree.toLocaleString('id-ID')}</b> tersisa
-            <span> · {total.toLocaleString('id-ID')} dari {stats.max_quota.toLocaleString('id-ID')} terpakai</span>
-          </p>
-          <div
-            className="home-quota-card-track"
-            role="img"
-            aria-label={`${total} dari ${stats.max_quota} undangan terpakai`}
-          >
-            <span style={{ width: `${quotaPct}%` }} />
+          <div className="home-quota-card-body">
+            <div className="home-quota-card-gauge">
+              <Gauge
+                value={total}
+                max={stats.max_quota}
+                label="Kuota undangan"
+                detail={`${total.toLocaleString('id-ID')} dari ${stats.max_quota.toLocaleString('id-ID')}`}
+              />
+            </div>
+            <div className="home-quota-card-copy">
+              <p className="home-quota-card-line">
+                <b>{quotaFree.toLocaleString('id-ID')}</b> tersisa
+              </p>
+              <p className="home-quota-card-note">
+                {total.toLocaleString('id-ID')} dari {stats.max_quota.toLocaleString('id-ID')} terpakai
+              </p>
+              <button type="button" className="home-quota-upgrade" onClick={() => notify('Hubungi admin untuk upgrade paket.')}>
+                Upgrade paket
+              </button>
+            </div>
           </div>
-          <button type="button" className="home-quota-upgrade" onClick={() => notify('Hubungi admin untuk upgrade paket.')}>
-            Upgrade paket
-          </button>
         </Card>
 
         {/* Latest RSVP replies and check-ins. */}

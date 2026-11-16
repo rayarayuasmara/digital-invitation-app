@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { ArrowDown, ArrowUp, Copy, MessageCircle, Pencil, Printer, Search, SlidersHorizontal, Smartphone, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, Copy, MessageCircle, Pencil, Printer, SlidersHorizontal, Smartphone, Trash2 } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
 import type { BadgeTone } from '@/components/arc/badge/badge'
@@ -9,12 +9,12 @@ import { Dialog, DialogContent } from '@/components/arc/dialog/dialog'
 import { DropdownMenu } from '@/components/arc/dropdown-menu/dropdown-menu'
 import { Input } from '@/components/arc/input/input'
 import { MultiSelect } from '@/components/arc/multi-select/multi-select'
+import { SearchField } from '@/components/arc/search-field/search-field'
 import { NumberField } from '@/components/arc/number-field/number-field'
 import { Select } from '@/components/arc/select/select'
 import { Switch } from '@/components/arc/switch/switch'
 import { SwipeActions, SwipeActionsRow } from '@/components/arc/swipe-actions/swipe-actions'
 import type { SwipeAction } from '@/components/arc/swipe-actions/swipe-actions'
-import { Input as GlassInput } from 'glisse'
 import { Tabs, TabsList, TabsTrigger } from '@/components/motion/tabs'
 import type { DashboardData } from '@/lib/dashboard'
 import { addGuest, deleteGuest, markSent, updateGuest } from '@/lib/guests'
@@ -201,15 +201,15 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
       {/* Search and filters stay pinned while the list scrolls */}
       <div className="guests-sticky">
         <div className="guests-toolbar">
-          <GlassInput
-            type="search"
-            className="guests-search"
-            aria-label="Cari nama tamu"
-            placeholder="Cari nama tamu…"
-            icon={<Search size={16} aria-hidden />}
-            value={query}
-            onValueChange={setQuery}
-          />
+          <div className="guests-search-field">
+            <SearchField
+              label="Cari nama tamu"
+              className="guests-search"
+              placeholder="Cari nama tamu…"
+              value={query}
+              onValueChange={setQuery}
+            />
+          </div>
           <MultiSelect
             compact
             icon={<SlidersHorizontal size={18} aria-hidden />}
@@ -218,6 +218,18 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
             value={filterValue}
             onValueChange={applyFilters}
           />
+          <div className="sort-trigger">
+            <DropdownMenu
+              label={sortLabel[sort]}
+              icon={asc ? <ArrowUp size={16} aria-hidden /> : <ArrowDown size={16} aria-hidden />}
+              items={[
+                { label: 'Nama (A-Z)', onSelect: () => { setSort('nama'); setAsc(true) } },
+                { label: 'Nama (Z-A)', onSelect: () => { setSort('nama'); setAsc(false) } },
+                { label: 'Terbaru ditambah', onSelect: () => { setSort('dibuat'); setAsc(false) } },
+                { label: 'Terakhir diubah', onSelect: () => { setSort('diubah'); setAsc(false) } },
+              ]}
+            />
+          </div>
         </div>
 
         {/* Status tabs scroll sideways; the sort control stays pinned at the right edge */}
@@ -228,23 +240,24 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
               onValueChange={v => setStatus(v as Status)}
               variant="segment"
             >
-              <TabsList aria-label="Filter status tamu">
+              <TabsList
+                aria-label="Filter status tamu"
+                className="rounded-full"
+                wrapperClassName="rounded-full"
+              >
                 {statusTabs.map(t => (
-                  <TabsTrigger key={t.value} value={t.value} className="min-h-10">{t.label}</TabsTrigger>
+                  <TabsTrigger
+                    key={t.value}
+                    value={t.value}
+                    className="min-h-10 rounded-full text-interface-label"
+                    indicatorClassName="rounded-full"
+                  >
+                    {t.label}
+                  </TabsTrigger>
                 ))}
               </TabsList>
             </Tabs>
           </div>
-          <DropdownMenu
-            label={sortLabel[sort]}
-            icon={asc ? <ArrowUp size={14} aria-hidden /> : <ArrowDown size={14} aria-hidden />}
-            items={[
-              { label: 'Nama (A-Z)', onSelect: () => { setSort('nama'); setAsc(true) } },
-              { label: 'Nama (Z-A)', onSelect: () => { setSort('nama'); setAsc(false) } },
-              { label: 'Terbaru ditambah', onSelect: () => { setSort('dibuat'); setAsc(false) } },
-              { label: 'Terakhir diubah', onSelect: () => { setSort('diubah'); setAsc(false) } },
-            ]}
-          />
         </div>
       </div>
 
