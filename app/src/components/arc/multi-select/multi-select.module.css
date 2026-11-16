@@ -41,7 +41,7 @@
 .menu[data-compact] { right: 0; left: auto; width: min(17rem, calc(100vw - 40px)); transform-origin: calc(100% - 18px) top; }
 /* Sections give one select several facets without a second trigger. */
 .group + .group { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--border-subtle); }
-.groupTitle { padding: 11px 12px 6px; color: var(--text-muted); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.groupTitle { padding: 11px 12px 6px; color: var(--text-muted); font-size: var(--fontsize-interface-caption); font-weight: var(--type-font-weight-regular); letter-spacing: 0; text-transform: none; }
 /* Arrow keys move the highlight often, so it changes almost instantly. Selection is shown by the check, not by weight, so labels never reflow. */
 .option { display: flex; width: 100%; min-height: 44px; align-items: center; justify-content: space-between; gap: 12px; border: 0; border-radius: 11px; padding: 0 12px; background: transparent; color: var(--foreground); font: inherit; font-size: 15px; text-align: left; cursor: pointer; transition: background-color 80ms var(--ease-standard), color 80ms var(--ease-standard); }
 .option > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

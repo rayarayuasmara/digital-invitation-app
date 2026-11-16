@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { KeyRound } from 'lucide-react'
+import { Button } from '@/components/arc/button/button'
 import { Input } from '@/components/arc/input/input'
 import { cleanToken, verifyScannerCode } from '@/lib/scanner'
 import { ScannerScreen } from '@/pages/ScannerScreen'
@@ -87,7 +88,7 @@ export function ScannerRoute() {
         </div>
         <Input label="Kode akses acara" value={input} onChange={e => setInput(e.target.value)} autoComplete="off" autoCapitalize="none" spellCheck={false} placeholder="16 karakter" />
         {error && <p role="alert" style={{ margin: 0, color: 'var(--red-ink)' }}>{error}</p>}
-        <button type="submit" className="btn btn-primary" disabled={busy}>{busy ? 'Memeriksa…' : 'Masuk'}</button>
+        <Button type="submit" variant="accent" size="xl" fullWidth disabled={busy}>{busy ? 'Memeriksa…' : 'Masuk'}</Button>
         <p style={{ margin: 0, color: 'var(--sub)', fontSize: 'var(--text-xs)', textAlign: 'center' }}>
           Kode ini hanya membuka daftar tamu dan check-in. Tidak bisa mengubah data.
         </p>

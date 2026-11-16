@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { DashboardData } from '@/lib/dashboard'
 import { DEFAULT_TEMPLATE, TEMPLATE_VARIABLES, categoriesOf, saveTemplates } from '@/lib/whatsapp'
 import type { Templates } from '@/lib/whatsapp'
+import { Button } from '@/components/arc/button/button'
 import { Card } from '@/components/arc/card'
 
 type Props = {
@@ -58,7 +59,7 @@ export function InvitationPage({ data, onShare, onChanged, notify }: Props) {
       </Card>
 
       <h2 className="section-title">Bagikan</h2>
-      <button type="button" className="btn btn-primary" onClick={onShare}>Salin tautan pratinjau</button>
+      <Button type="button" variant="accent" size="xl" fullWidth onClick={onShare}>Salin tautan pratinjau</Button>
 
       <h2 className="section-title">Template WhatsApp</h2>
       <p className="page-sub" style={{ margin: '0 4px 12px' }}>
@@ -91,9 +92,9 @@ export function InvitationPage({ data, onShare, onChanged, notify }: Props) {
                       onChange={e => setTemplates(t => ({ ...t, [c]: e.target.value }))}
                       style={{ width: '100%', font: 'inherit', fontSize: 'var(--text-base)', lineHeight: 1.45, padding: 'var(--space-3)', borderRadius: 'var(--radius-control)', border: '1px solid var(--line)', background: 'var(--bg-app)', color: 'var(--ink)', resize: 'vertical' }}
                     />
-                    <button type="button" className="btn btn-secondary" style={{ minHeight: 44 }} onClick={() => setTemplates(t => { const n = { ...t }; delete n[c]; return n })}>
+                    <Button type="button" variant="accentOutline" size="md" fullWidth onClick={() => setTemplates(t => { const n = { ...t }; delete n[c]; return n })}>
                       Pakai template Umum
-                    </button>
+                    </Button>
                   </div>
                 )}
               </Card>
@@ -102,9 +103,9 @@ export function InvitationPage({ data, onShare, onChanged, notify }: Props) {
         })}
       </ul>
 
-      <button type="button" className="btn btn-primary" style={{ marginTop: 16 }} onClick={save} disabled={saving}>
+      <Button type="button" variant="accent" size="xl" fullWidth style={{ marginTop: 16 }} onClick={save} disabled={saving}>
         {saving ? 'Menyimpan…' : 'Simpan template'}
-      </button>
+      </Button>
     </>
   )
 }

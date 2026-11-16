@@ -48,7 +48,7 @@ export function AccountPage({ data, notify }: Props) {
   return (
     <>
       <div className="page-head">
-        <div style={{ minWidth: 0 }}>
+        <div className="page-head-copy">
           <h1 className="page-title">Akun</h1>
           <p className="page-sub">{client.email}</p>
         </div>

@@ -7,13 +7,15 @@ import type { TargetAndTransition, Variants } from "motion/react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./button.module.css";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
-export type ButtonSize = "sm" | "md" | "lg";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "accent" | "accentOutline" | "dangerSoft";
+export type ButtonSize = "sm" | "md" | "lg" | "xl";
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onDrag" | "onDragEnd" | "onDragStart" | "onAnimationStart"> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
+  /** Fills the parent's width, for form and dialog actions. */
+  fullWidth?: boolean;
 }
 
 /** Icon buttons press a little deeper, wide buttons a little less, so every size reads as the same push. */
@@ -78,7 +80,7 @@ function LabelPhase({ children, icon, reduced, ref }: { children: ReactNode; ico
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { className, variant = "primary", size = "md", loading = false, disabled, children, onClick, ...props },
+  { className, variant = "primary", size = "md", loading = false, fullWidth = false, disabled, children, onClick, ...props },
   ref,
 ) {
   const reduceMotion = useReducedMotion() ?? false;
@@ -95,7 +97,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   const popup = props["aria-haspopup"];
   const anchorsLayer = (popup !== undefined && popup !== false && popup !== "false") || props.role === "combobox" || (props as Record<string, unknown>)["data-state"] !== undefined;
   const inert = disabled || loading || props["aria-disabled"] === true || props["aria-disabled"] === "true";
-  const classes = [styles.button, styles[variant], styles[size], className].filter(Boolean).join(" ");
+  const classes = [styles.button, styles[variant], styles[size], fullWidth ? styles.fullWidth : "", className].filter(Boolean).join(" ");
 
   return (
     <motion.button

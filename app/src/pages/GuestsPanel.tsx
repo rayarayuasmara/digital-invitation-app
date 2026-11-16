@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { ArrowDown, ArrowUp, Copy, MessageCircle, Pencil, Printer, SlidersHorizontal, Smartphone, Trash2 } from 'lucide-react'
+import { Copy, MessageCircle, Pencil, Printer, RotateCcw, SlidersHorizontal, Smartphone, Trash2 } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
 import type { BadgeTone } from '@/components/arc/badge/badge'
 import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
+import { Button } from '@/components/arc/button/button'
 import { Dialog, DialogContent } from '@/components/arc/dialog/dialog'
-import { DropdownMenu } from '@/components/arc/dropdown-menu/dropdown-menu'
 import { Input } from '@/components/arc/input/input'
-import { MultiSelect } from '@/components/arc/multi-select/multi-select'
 import { SearchField } from '@/components/arc/search-field/search-field'
 import { NumberField } from '@/components/arc/number-field/number-field'
 import { Select } from '@/components/arc/select/select'
@@ -16,6 +15,12 @@ import { Switch } from '@/components/arc/switch/switch'
 import { SwipeActions, SwipeActionsRow } from '@/components/arc/swipe-actions/swipe-actions'
 import type { SwipeAction } from '@/components/arc/swipe-actions/swipe-actions'
 import { Tabs, TabsList, TabsTrigger } from '@/components/motion/tabs'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/motion/dropdown-menu'
 import type { DashboardData } from '@/lib/dashboard'
 import { addGuest, deleteGuest, markSent, updateGuest } from '@/lib/guests'
 import type { Guest, GuestForm } from '@/lib/guests'
@@ -39,7 +44,11 @@ const typeOptions = [
   { value: 'cetak', label: 'Cetak' },
 ]
 
-const sortLabel: Record<SortKey, string> = { nama: 'Nama', dibuat: 'Dibuat', diubah: 'Diubah' }
+const sortFields: { value: SortKey; label: string; asc: string; desc: string }[] = [
+  { value: 'nama', label: 'Nama', asc: 'A–Z', desc: 'Z–A' },
+  { value: 'dibuat', label: 'Ditambahkan', asc: 'Terlama dulu', desc: 'Terbaru dulu' },
+  { value: 'diubah', label: 'Update', asc: 'Terlama dulu', desc: 'Terbaru dulu' },
+]
 
 const emptyForm: GuestForm = { name: '', category: 'Umum', maxPax: 1, phone: '', invitationType: 'digital', session: '' }
 
@@ -98,23 +107,29 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
     return [...set].filter(Boolean).map(s => ({ value: s, label: s }))
   }, [event.sessions, guests])
 
-  // One MultiSelect carries all three facets: values are prefixed so the groups never collide.
-  const filterGroups = useMemo(() => [
-    { title: 'Kategori', options: categoryOptions.map(o => ({ value: `kategori:${o.value}`, label: o.label })) },
-    { title: 'Jenis', options: typeOptions.map(o => ({ value: `jenis:${o.value}`, label: o.label })) },
-    { title: 'Sesi', options: sessionOptions.map(o => ({ value: `sesi:${o.value}`, label: o.label })) },
-  ].filter(group => group.options.length > 0), [categoryOptions, sessionOptions])
+  /**
+   * Tapping the active sort field flips its direction instead of re-selecting it,
+   * so one row covers both A–Z and Z–A.
+   */
+  const pickSort = (next: SortKey) => {
+    if (sort === next) {
+      setAsc(!asc)
+      return
+    }
+    setSort(next)
+    setAsc(next === 'nama')
+  }
 
-  const filterValue = [
-    ...categories.map(v => `kategori:${v}`),
-    ...types.map(v => `jenis:${v}`),
-    ...sessions.map(v => `sesi:${v}`),
-  ]
+  const toggleFilter = (list: string[], setList: (next: string[]) => void, value: string, on: boolean) => {
+    setList(on ? [...list, value] : list.filter(item => item !== value))
+  }
 
-  const applyFilters = (next: string[]) => {
-    setCategories(next.filter(v => v.startsWith('kategori:')).map(v => v.slice('kategori:'.length)))
-    setTypes(next.filter(v => v.startsWith('jenis:')).map(v => v.slice('jenis:'.length)))
-    setSessions(next.filter(v => v.startsWith('sesi:')).map(v => v.slice('sesi:'.length)))
+  const activeFilters = categories.length + types.length + sessions.length
+
+  const resetFilters = () => {
+    setCategories([])
+    setTypes([])
+    setSessions([])
   }
 
   const visible = useMemo(() => {
@@ -192,7 +207,7 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
   return (
     <div className="guests-page">
       <div className="page-head">
-        <div style={{ minWidth: 0 }}>
+        <div className="page-head-copy">
           <h1 className="page-title">Tamu</h1>
           <p className="page-sub">{visible.length} dari {guests.length} tamu</p>
         </div>
@@ -210,26 +225,104 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
               onValueChange={setQuery}
             />
           </div>
-          <MultiSelect
-            compact
-            icon={<SlidersHorizontal size={18} aria-hidden />}
-            label="Filter tamu"
-            groups={filterGroups}
-            value={filterValue}
-            onValueChange={applyFilters}
-          />
-          <div className="sort-trigger">
-            <DropdownMenu
-              label={sortLabel[sort]}
-              icon={asc ? <ArrowUp size={16} aria-hidden /> : <ArrowDown size={16} aria-hidden />}
-              items={[
-                { label: 'Nama (A-Z)', onSelect: () => { setSort('nama'); setAsc(true) } },
-                { label: 'Nama (Z-A)', onSelect: () => { setSort('nama'); setAsc(false) } },
-                { label: 'Terbaru ditambah', onSelect: () => { setSort('dibuat'); setAsc(false) } },
-                { label: 'Terakhir diubah', onSelect: () => { setSort('diubah'); setAsc(false) } },
-              ]}
-            />
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <button
+                type="button"
+                className="guests-filter"
+                aria-label={`Filter tamu${activeFilters ? `, ${activeFilters} aktif` : ''}`}
+              >
+                <SlidersHorizontal size={18} aria-hidden />
+                {activeFilters > 0 && <span className="guests-filter-count" aria-hidden>{activeFilters}</span>}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="beui-menu guests-filter-menu fm-sheet">
+              <div className="fm-scroll">
+                <section className="fm-section">
+                  <p className="fm-header">Urutan</p>
+                  <div className="fm-group">
+                    {sortFields.map(option => {
+                      const active = sort === option.value
+                      return (
+                        <DropdownMenuCheckboxItem
+                          key={option.value}
+                          className="fm-row fm-row-sort"
+                          checked={active}
+                          onCheckedChange={() => pickSort(option.value)}
+                        >
+                          <span className="fm-row-text">
+                            <span>{option.label}</span>
+                            {active && (
+                              <span className="fm-row-sub">{asc ? option.asc : option.desc}</span>
+                            )}
+                          </span>
+                        </DropdownMenuCheckboxItem>
+                      )
+                    })}
+                  </div>
+                </section>
+
+                <section className="fm-section">
+                  <p className="fm-header">Kategori</p>
+                  <div className="fm-group">
+                    {categoryOptions.map(option => (
+                      <DropdownMenuCheckboxItem
+                        key={option.value}
+                        className="fm-row"
+                        checked={categories.includes(option.value)}
+                        onCheckedChange={on => toggleFilter(categories, setCategories, option.value, on)}
+                      >
+                        {option.label}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="fm-section">
+                  <p className="fm-header">Jenis undangan</p>
+                  <div className="fm-group">
+                    {typeOptions.map(option => (
+                      <DropdownMenuCheckboxItem
+                        key={option.value}
+                        className="fm-row"
+                        checked={types.includes(option.value)}
+                        onCheckedChange={on => toggleFilter(types, setTypes, option.value, on)}
+                      >
+                        {option.label}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                  </div>
+                </section>
+
+                {sessionOptions.length > 0 && (
+                  <section className="fm-section">
+                    <p className="fm-header">Sesi acara</p>
+                    <div className="fm-group">
+                      {sessionOptions.map(option => (
+                        <DropdownMenuCheckboxItem
+                          key={option.value}
+                          className="fm-row"
+                          checked={sessions.includes(option.value)}
+                          onCheckedChange={on => toggleFilter(sessions, setSessions, option.value, on)}
+                        >
+                          {option.label}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </div>
+
+              {activeFilters > 0 && (
+                <div className="fm-footer">
+                  <button type="button" className="fm-btn fm-btn-reset" onClick={resetFilters}>
+                    <RotateCcw size={15} aria-hidden />
+                    Reset filter
+                  </button>
+                </div>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Status tabs scroll sideways; the sort control stays pinned at the right edge */}
@@ -341,10 +434,12 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
       <Dialog open={deleteTarget !== null} onOpenChange={open => { if (!open) setDeleteTarget(null) }}>
         {deleteTarget && (
           <DialogContent title={`Hapus ${deleteTarget.group_name}?`} description="Data tamu ini akan dihapus dan tidak bisa dikembalikan.">
-            <div style={{ display: 'grid', gap: 10 }}>
-              <button
+            <div className="dialog-actions">
+              <Button
                 type="button"
-                className="btn btn-danger"
+                variant="dangerSoft"
+                size="xl"
+                fullWidth
                 onClick={() => {
                   const target = deleteTarget
                   setDeleteTarget(null)
@@ -353,8 +448,8 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
                 }}
               >
                 Ya, hapus
-              </button>
-              <button type="button" className="btn btn-secondary" onClick={() => setDeleteTarget(null)}>Batal</button>
+              </Button>
+              <Button type="button" variant="accentOutline" size="xl" fullWidth onClick={() => setDeleteTarget(null)}>Batal</Button>
             </div>
           </DialogContent>
         )}
@@ -442,18 +537,18 @@ function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink, onDel
         </div>
       )}
 
-      {error && <p role="alert" style={{ margin: 0, color: 'var(--red-ink)' }}>{error}</p>}
+      {error && <p role="alert" className="form-error">{error}</p>}
 
       <div className="sheet-actions">
-        <button type="submit" className="btn btn-primary" disabled={busy}>
+        <Button type="submit" variant="accent" size="xl" fullWidth disabled={busy}>
           {busy ? 'Menyimpan…' : 'Simpan'}
-        </button>
+        </Button>
       </div>
 
       {guest && (onCopyLink || onDelete) && (
         <div className="sheet-secondary">
-          {onCopyLink && <button type="button" className="btn btn-secondary" onClick={onCopyLink}>Salin tautan undangan</button>}
-          {onDelete && <button type="button" className="btn btn-danger" onClick={onDelete}>Hapus tamu</button>}
+          {onCopyLink && <Button type="button" variant="accentOutline" size="xl" fullWidth onClick={onCopyLink}>Salin tautan undangan</Button>}
+          {onDelete && <Button type="button" variant="dangerSoft" size="xl" fullWidth onClick={onDelete}>Hapus tamu</Button>}
         </div>
       )}
     </form>

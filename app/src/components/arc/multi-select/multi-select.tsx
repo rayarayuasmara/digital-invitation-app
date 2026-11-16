@@ -38,6 +38,8 @@ export interface MultiSelectProps {
   compact?: boolean;
   /** Icon shown by the compact trigger. */
   icon?: ReactNode;
+  /** Values that should not count as an active filter, such as a sort choice. */
+  countIgnore?: (value: string) => boolean;
   className?: string;
 }
 
@@ -73,7 +75,7 @@ function CheckMark({ reduce }: { reduce: boolean | null }) {
   </svg>;
 }
 
-export function MultiSelect({ label, options = [], groups, value, defaultValue = [], onValueChange, placeholder = "Select options", description, maxVisible = 2, disabled = false, hideLabel = false, compact = false, icon, className }: MultiSelectProps) {
+export function MultiSelect({ label, options = [], groups, value, defaultValue = [], onValueChange, placeholder = "Select options", description, maxVisible = 2, disabled = false, hideLabel = false, compact = false, icon, countIgnore, className }: MultiSelectProps) {
   const id = useId();
   const labelId = `${id}-label`;
   const valueId = `${id}-value`;
@@ -87,6 +89,7 @@ export function MultiSelect({ label, options = [], groups, value, defaultValue =
   const [menuBox, setMenuBox] = useState<{ above: boolean; maxHeight?: number }>({ above: false });
   const allOptions = useMemo(() => groups?.length ? groups.flatMap((group) => group.options) : options, [groups, options]);
   const selected = value ?? internal;
+  const activeCount = selected.filter(item => !countIgnore?.(item)).length;
   const selectedSet = useMemo(() => new Set(selected), [selected]);
   const labelFor = (item: string) => allOptions.find((option) => option.value === item)?.label ?? item;
   const visible = selected.slice(0, maxVisible).map((item) => ({ value: item, label: labelFor(item) }));
@@ -152,9 +155,9 @@ export function MultiSelect({ label, options = [], groups, value, defaultValue =
   return <div ref={rootRef} className={[styles.field, compact && styles.compactField, className].filter(Boolean).join(" ")}>
     {!compact && <span id={labelId} className={hideLabel ? styles.srOnly : styles.label}>{label}</span>}
     <div className={styles.control}>
-    {compact ? <button ref={triggerRef} type="button" className={styles.iconTrigger} disabled={disabled} aria-label={`${label}${selected.length ? `, ${selected.length} dipilih` : ""}`} aria-haspopup="listbox" aria-expanded={open} aria-controls={`${id}-listbox`} onClick={() => setOpen((current) => !current)} onKeyDown={onKeyDown}>
+    {compact ? <button ref={triggerRef} type="button" className={styles.iconTrigger} disabled={disabled} aria-label={`${label}${activeCount ? `, ${activeCount} dipilih` : ""}`} aria-haspopup="listbox" aria-expanded={open} aria-controls={`${id}-listbox`} onClick={() => setOpen((current) => !current)} onKeyDown={onKeyDown}>
       {icon}
-      {selected.length > 0 && <span className={styles.iconBadge} aria-hidden="true">{selected.length}</span>}
+      {activeCount > 0 && <span className={styles.iconBadge} aria-hidden="true">{activeCount}</span>}
     </button> : <button ref={triggerRef} type="button" className={`${styles.trigger} ${selected.length ? styles.hasClear : ""}`} disabled={disabled} aria-labelledby={`${labelId} ${valueId}`} aria-haspopup="listbox" aria-expanded={open} aria-controls={`${id}-listbox`} onClick={() => setOpen((current) => !current)} onKeyDown={onKeyDown}>
       <span id={valueId} className={styles.srOnly}>{selected.length ? selected.map(labelFor).join(", ") : placeholder}</span>
       <span className={styles.value} aria-hidden="true">

@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { BadgeCheck, ChartPie, Check, CircleArrowRight, ExternalLink, MailQuestion, MessageSquareText, QrCode, Share2, Tag, UsersRound, X } from 'lucide-react'
+import { BadgeCheck, ChartPie, Check, CircleArrowRight, ExternalLink, MailQuestion, MessageSquareText, QrCode, Tag, UsersRound, X } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
 import { Card, CardHeader } from '@/components/arc/card'
+import { CopyButton } from '@/components/arc/copy-button/copy-button'
 import { Gauge } from '@/components/arc/gauge/gauge'
 import { ChatThread } from '@/components/arc/chat-thread/chat-thread'
 import { Countdown } from '@/components/arc/countdown/countdown'
@@ -306,16 +307,6 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
     window.open(previewUrl, '_blank', 'noopener,noreferrer')
   }
 
-  const copyPreview = async () => {
-    if (!previewUrl) return notify('Tautan pratinjau belum tersedia.')
-    try {
-      await navigator.clipboard.writeText(previewUrl)
-      notify('Tautan pratinjau disalin')
-    } catch {
-      notify('Gagal menyalin tautan.')
-    }
-  }
-
   const coupleName = event?.couple_name?.trim() || event?.title || 'Acara'
   const sessionText = (event?.sessions ?? [])
     .filter(s => s.time_text)
@@ -344,7 +335,7 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
         <Card variant="default" padding="md" className="home-hero">
           <div className="home-hero-top">
             <div className="home-hero-copy">
-              <p className="home-hero-halo">Halo</p>
+              <p className="home-hero-halo">Hari Berbahagia</p>
               <h2 className="home-hero-title">{coupleName}</h2>
             </div>
             <span className={`home-tier ${isLive ? 'is-live' : 'is-draft'}`}>
@@ -370,18 +361,18 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
                   <dd>{event?.location || '-'}</dd>
                 </div>
               </dl>
+              <div className="home-event-actions">
+                <CopyButton
+                  value={previewUrl}
+                  label="Salin tautan"
+                  onCopied={() => notify('Tautan pratinjau disalin')}
+                />
+                <button type="button" className="home-event-preview" onClick={openPreview}>
+                  <ExternalLink size={14} strokeWidth={2} aria-hidden />
+                  Preview
+                </button>
+              </div>
             </ExpandableCard>
-          </div>
-
-          <div className="home-hero-actions">
-            <button type="button" className="home-hero-action" onClick={openPreview}>
-              <ExternalLink size={14} strokeWidth={2} aria-hidden />
-              Pratinjau
-            </button>
-            <button type="button" className="home-hero-action" onClick={copyPreview}>
-              <Share2 size={14} strokeWidth={2} aria-hidden />
-              Bagikan
-            </button>
           </div>
 
           <div className="home-hero-countdown">
@@ -448,27 +439,9 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
 
         {/* Plan quota, with the current package and an upgrade path. */}
         <Card variant="default" padding="md" className="home-quota-card" aria-labelledby="quota-card-title">
-          <div className="home-quota-card-head">
-            <h3 id="quota-card-title">Kuota undangan</h3>
-            <Badge
-              size="md"
-              pill
-              className="home-tier-badge"
-              icon={<BadgeCheck size={14} strokeWidth={2} aria-hidden />}
-            >
-              {tierLabel}
-            </Badge>
-          </div>
           <div className="home-quota-card-body">
-            <div className="home-quota-card-gauge">
-              <Gauge
-                value={total}
-                max={stats.max_quota}
-                label="Kuota undangan"
-                detail={`${total.toLocaleString('id-ID')} dari ${stats.max_quota.toLocaleString('id-ID')}`}
-              />
-            </div>
             <div className="home-quota-card-copy">
+              <h3 id="quota-card-title">Kuota undangan</h3>
               <p className="home-quota-card-line">
                 <b>{quotaFree.toLocaleString('id-ID')}</b> tersisa
               </p>
@@ -478,6 +451,22 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
               <button type="button" className="home-quota-upgrade" onClick={() => notify('Hubungi admin untuk upgrade paket.')}>
                 Upgrade paket
               </button>
+            </div>
+            <div className="home-quota-card-side">
+              <Gauge
+                value={total}
+                max={stats.max_quota}
+                label="Kuota undangan"
+                detail={`${total.toLocaleString('id-ID')} dari ${stats.max_quota.toLocaleString('id-ID')}`}
+              />
+              <Badge
+                size="md"
+                pill
+                className="home-tier-badge"
+                icon={<BadgeCheck size={14} strokeWidth={2} aria-hidden />}
+              >
+                {tierLabel}
+              </Badge>
             </div>
           </div>
         </Card>
@@ -494,7 +483,7 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
           {historyFeed.length === 0 ? (
             <p className="home-history-empty">Belum ada tamu yang RSVP atau check-in.</p>
           ) : (
-            <ScrollArea className="home-history-scroll" maxHeight={340} label="Histori RSVP">
+            <ScrollArea className="home-history-scroll" maxHeight={518} label="Histori RSVP">
               <ol className="home-history-list">
                 {historyFeed.map(item => (
                   <li key={item.id} className="home-history-row">
@@ -549,7 +538,7 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
             )}
           />
           <div className="wish-chat">
-            {error && <p role="alert" className="wish-empty" style={{ color: 'var(--red-ink)' }}>{error}</p>}
+            {error && <p role="alert" className="wish-empty wish-error">{error}</p>}
             {!error && wishes === null && <p className="wish-empty">Memuat ucapan…</p>}
             {wishes && wishes.length === 0 && <p className="wish-empty">Belum ada ucapan masuk.</p>}
             {wishes && wishes.length > 0 && (

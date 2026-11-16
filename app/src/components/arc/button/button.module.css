@@ -14,6 +14,10 @@
 .secondary { color: var(--foreground); background: var(--surface); border-color: var(--border); }
 .ghost { color: var(--text-secondary); background: transparent; border-color: transparent; }
 .danger { color: var(--danger); background: var(--surface); border-color: var(--border); }
+/* App-level variants: the legacy .btn palette, expressed once here instead of in page CSS. */
+.accent { color: var(--accent-foreground); background: var(--accent); border-color: var(--accent); }
+.accentOutline { color: var(--accent); background: var(--card); border-color: var(--line); box-shadow: var(--shadow-resting); }
+.dangerSoft { color: var(--red-ink); background: var(--red-bg); border-color: transparent; }
 /* A disabled outlined button keeps its shape and fades only its label, so it still reads as a button that is off, not as plain text. */
 .secondary:disabled, .danger:disabled { opacity: 1; color: var(--text-muted); background: var(--surface-muted); border-color: var(--border); }
 .danger:disabled { color: color-mix(in oklab, var(--danger) 55%, var(--surface-muted)); }
@@ -31,6 +35,8 @@
 .sm { min-height: var(--control-height-sm); padding-inline: var(--space-3); font-size: var(--text-sm); }
 .md { min-height: var(--control-height-md); }
 .lg { min-height: var(--control-height-lg); padding-inline: var(--space-5); font-size: var(--text-sm); }
+.xl { min-height: var(--control-height-xl); font-size: var(--text-base); font-weight: var(--weight-semibold); }
+.fullWidth { width: 100%; }
 .loader { position: absolute; left: 50%; top: 50%; display: grid; width: var(--space-4); height: var(--space-4); margin: calc(var(--space-4) / -2); }
 .spinner { border: 1.5px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; }
 .loadingLabel { opacity: 0; }

@@ -1,7 +1,6 @@
 import { CircleHelp, House, Plus, ScanLine, Share2, Sparkles, UserRound, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
-import { TabBar as GlassTabBar } from 'glisse'
 
 export type Tab = 'beranda' | 'tamu' | 'undangan' | 'akun'
 
@@ -32,20 +31,24 @@ export function TabBar({ value, onChange, onAction }: Props) {
 
   return (
     <nav className="tabbar-wrap" aria-label="Menu utama">
-      <GlassTabBar
-        className="home-tabbar"
-        aria-label="Menu utama"
-        value={value}
-        onValueChange={next => onChange(next as Tab)}
-        items={tabs.map(t => {
+      <div className="ios-tabbar">
+        {tabs.map(t => {
           const Icon = t.icon
-          return {
-            value: t.value,
-            label: t.label,
-            icon: <Icon size={26} strokeWidth={2} aria-hidden />,
-          }
+          const active = t.value === value
+          return (
+            <button
+              key={t.value}
+              type="button"
+              className={`ios-tab ${active ? 'is-active' : ''}`}
+              aria-current={active ? 'page' : undefined}
+              onClick={() => onChange(t.value)}
+            >
+              <Icon size={24} strokeWidth={active ? 2.4 : 2} aria-hidden />
+              <span>{t.label}</span>
+            </button>
+          )
         })}
-      />
+      </div>
       <motion.button
         key={value}
         type="button"

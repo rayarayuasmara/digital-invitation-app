@@ -20,6 +20,28 @@
   --text-4xl: var(--fontsize-headings-h2);
   --text-5xl: var(--fontsize-headings-h1);
 
+  /* Roles the app CSS uses so it never calls the generated Figma names directly. */
+  --text-body-sm: var(--fontsize-body-sm);
+  --leading-body-sm: var(--line-height-body-sm);
+  --leading-label: var(--text-interface-label-line-height);
+  --font-h6: var(--text-heading-h6-font-family);
+  --text-h6: var(--text-heading-h6-font-size);
+  --leading-h6: var(--text-heading-h6-line-height);
+  --tracking-h6: var(--text-heading-h6-letter-spacing);
+  --weight-h6: var(--text-heading-h6-font-weight);
+  --weight-regular: var(--type-font-weight-regular);
+  --weight-medium: var(--type-font-weight-medium);
+  --weight-semibold: var(--type-font-weight-semibold);
+  --weight-bold: var(--type-font-weight-bold);
+
+  /* Display roles for page headers. */
+  --text-page-title: 2.125rem;
+  --leading-page-title: 1.12;
+  --tracking-page-title: -0.035em;
+  --text-hero-title: 2.25rem;
+  --leading-hero-title: 1.02;
+  --tracking-hero-title: -0.045em;
+
   /* Numerals come from Body/number-* (Geist Mono). */
   --number-lg: var(--text-body-numbrer-lg-font-size);
   --number-lg-line: var(--text-body-numbrer-lg-line-height);
@@ -57,6 +79,7 @@
   --radius-control: var(--size-radius-rd-16);
   --radius-panel: var(--size-radius-rd-24);
   --radius-surface: var(--size-radius-rd-32);
+  --radius-chip: var(--size-radius-rd-8);
   --radius-pill: var(--size-radius-rd-200);
 
   /* Colour roles */
@@ -90,6 +113,12 @@
   --red-ink: var(--color-text-error-dark);
   --red-bg: var(--color-red-100);
 
+  /* Solid status fills for dots and badges; the glyph on top stays white in both themes. */
+  --success-solid: var(--color-green-600);
+  --danger-solid: var(--color-red-600);
+  --warning-solid: var(--color-yellow-600);
+  --on-solid: var(--color-text-body-white);
+
   --success: var(--color-text-success-default);
   --warning: var(--color-text-warning-default);
   --danger: var(--color-text-error-default);
@@ -106,6 +135,24 @@
     0 20px 48px color-mix(in oklab, var(--color-navy-900) 11%, transparent),
     0 3px 10px color-mix(in oklab, var(--color-navy-900) 5%, transparent);
   --shadow-float: 0 10px 30px color-mix(in oklab, var(--color-blue-700) 16%, transparent);
+  --shadow-chrome: 0 8px 24px -12px color-mix(in oklab, var(--color-navy-900) 40%, transparent);
+  --shadow-sheet: 0 -8px 30px color-mix(in oklab, var(--color-navy-900) 12%, transparent);
+  --scrim: color-mix(in oklab, var(--color-navy-900) 40%, transparent);
+
+  /* Glass chrome: tab bar and the iOS-style filter sheet. */
+  --glass-chrome: color-mix(in oklab, var(--surface) 55%, transparent);
+  --glass-chrome-shadow:
+    inset 0 0 0 0.5px color-mix(in oklab, var(--on-solid) 85%, transparent),
+    0 0 0 0.5px color-mix(in oklab, var(--color-neutral-black) 7%, transparent),
+    0 10px 30px -8px color-mix(in oklab, var(--color-neutral-black) 20%, transparent);
+  --glass-pill: color-mix(in oklab, var(--color-neutral-black) 7%, transparent);
+  --glass-sheet: color-mix(in oklab, var(--surface) 60%, transparent);
+  --glass-sheet-shadow:
+    0 0 0 0.5px color-mix(in oklab, var(--color-neutral-black) 8%, transparent),
+    inset 0 0 0 0.5px color-mix(in oklab, var(--on-solid) 85%, transparent),
+    var(--shadow-floating);
+  --glass-sep: color-mix(in oklab, var(--foreground) 14%, transparent);
+  --glass-press: color-mix(in oklab, var(--color-neutral-black) 6%, transparent);
 }
 
 /* Dark mode draws from the same palette: navy-tinted surfaces, blue-led accents. */
@@ -143,4 +190,18 @@
 
   --glass: color-mix(in oklab, var(--color-neutral-800) 72%, transparent);
   --glass-edge: color-mix(in oklab, var(--color-neutral-50) 8%, transparent);
+
+  --glass-chrome: color-mix(in oklab, var(--surface-raised) 55%, transparent);
+  --glass-chrome-shadow:
+    inset 0 0 0 0.5px color-mix(in oklab, var(--on-solid) 14%, transparent),
+    0 0 0 0.5px color-mix(in oklab, var(--color-neutral-black) 40%, transparent),
+    0 10px 30px -8px color-mix(in oklab, var(--color-neutral-black) 55%, transparent);
+  --glass-pill: color-mix(in oklab, var(--on-solid) 12%, transparent);
+  --glass-sheet: color-mix(in oklab, var(--surface-raised) 60%, transparent);
+  --glass-sheet-shadow:
+    0 0 0 0.5px color-mix(in oklab, var(--color-neutral-black) 40%, transparent),
+    inset 0 0 0 0.5px color-mix(in oklab, var(--on-solid) 14%, transparent),
+    var(--shadow-floating);
+  --glass-sep: color-mix(in oklab, var(--text-muted) 30%, transparent);
+  --glass-press: color-mix(in oklab, var(--on-solid) 8%, transparent);
 }

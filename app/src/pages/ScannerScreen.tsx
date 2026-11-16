@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { CheckCircle2, LogOut, RefreshCw, ScanLine, Search, SwitchCamera, Ticket, UserCheck, UserRound, XCircle } from 'lucide-react'
+import { Button } from '@/components/arc/button/button'
 import { Gauge } from '@/components/arc/gauge/gauge'
 import { Sheet } from '@/components/Sheet'
 import { checkIn, listScanGuests, tokenFromScan } from '@/lib/scanner'
@@ -312,7 +313,7 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
                     onKeyDown={e => { if (e.key === 'Enter') submitToken() }}
                   />
                 </label>
-                <button type="button" className="btn btn-primary" style={{ width: 'auto', minWidth: 96, minHeight: 44 }} onClick={submitToken}>Proses</button>
+                <Button type="button" variant="accent" size="md" style={{ minWidth: 96 }} onClick={submitToken}>Proses</Button>
               </div>
             </div>
           </section>
@@ -357,18 +358,20 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
             {sheet.ok ? <CheckCircle2 size={56} color="var(--green-ink)" aria-hidden /> : sheet.dup ? <UserCheck size={56} color="var(--accent)" aria-hidden /> : <XCircle size={56} color="var(--red-ink)" aria-hidden />}
             <p style={{ margin: 0, color: 'var(--sub)' }}>{sheet.subtitle}</p>
             {sheet.guest && <GuestDetail guest={sheet.guest} />}
-            <button type="button" className="btn btn-primary" onClick={closeSheet}>
+            <Button type="button" variant="accent" size="xl" fullWidth onClick={closeSheet}>
               {sheet.source === 'scan' ? 'Pindai tiket berikutnya' : 'Selesai'}
-            </button>
+            </Button>
           </div>
         )}
         {sheet?.kind === 'confirm' && (
           <div className="sheet-body">
             <p style={{ margin: 0, color: 'var(--sub)' }}>Pastikan tamu sudah ada di depan Anda.</p>
             <GuestDetail guest={sheet.guest} />
-            <button
+            <Button
               type="button"
-              className="btn btn-primary"
+              variant="accent"
+              size="xl"
+              fullWidth
               onClick={() => {
                 const ref = sheet.guest.ref
                 setSheet(null)
@@ -376,14 +379,14 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
               }}
             >
               Check-in sekarang
-            </button>
-            <button type="button" className="btn btn-secondary" onClick={closeSheet}>Batal</button>
+            </Button>
+            <Button type="button" variant="accentOutline" size="xl" fullWidth onClick={closeSheet}>Batal</Button>
           </div>
         )}
         {sheet?.kind === 'checked' && (
           <div className="sheet-body">
             <p style={{ margin: 0, color: 'var(--sub)' }}>{sheet.guest.group_name} sudah diverifikasi sebelumnya.</p>
-            <button type="button" className="btn btn-secondary" onClick={closeSheet}>Tutup</button>
+            <Button type="button" variant="accentOutline" size="xl" fullWidth onClick={closeSheet}>Tutup</Button>
           </div>
         )}
       </Sheet>

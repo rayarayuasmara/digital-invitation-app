@@ -44,7 +44,8 @@
 /* Scoped reset. Utilities are in a later layer, so the component's own
  * `text-sm`, `bg-muted` and friends still win over these declarations. */
 @layer base {
-  [data-beui] {
+  [data-beui],
+  .beui-menu {
     box-sizing: border-box;
     font-family: var(--font-body);
     color: var(--ink);
@@ -52,11 +53,15 @@
 
   [data-beui] *,
   [data-beui] *::before,
-  [data-beui] *::after {
+  [data-beui] *::after,
+  .beui-menu *,
+  .beui-menu *::before,
+  .beui-menu *::after {
     box-sizing: border-box;
   }
 
-  [data-beui] :where(button) {
+  [data-beui] :where(button),
+  .beui-menu :where(button) {
     appearance: none;
     margin: 0;
     padding: 0;
@@ -68,17 +73,20 @@
     cursor: pointer;
   }
 
-  [data-beui] :where(ul, ol) {
+  [data-beui] :where(ul, ol),
+  .beui-menu :where(ul, ol) {
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  [data-beui] :where(p, h1, h2, h3, h4, h5, h6) {
+  [data-beui] :where(p, h1, h2, h3, h4, h5, h6),
+  .beui-menu :where(p, h1, h2, h3, h4, h5, h6) {
     margin: 0;
   }
 
-  [data-beui] :where(svg) {
+  [data-beui] :where(svg),
+  .beui-menu :where(svg) {
     display: block;
   }
 }

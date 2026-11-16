@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '@/lib/auth'
+import { Button } from '@/components/arc/button/button'
 import { fetchDashboard } from '@/lib/dashboard'
 import type { DashboardData } from '@/lib/dashboard'
 import Toast from '@/components/arc/toast/toast'
@@ -61,9 +62,9 @@ export function DashboardPage() {
 
   if (error) {
     return (
-      <main className="app" style={{ display: 'grid', placeItems: 'center', alignContent: 'center', gap: 16 }}>
-        <p role="alert" style={{ color: 'var(--red-ink)', textAlign: 'center' }}>{error}</p>
-        <button type="button" className="btn btn-secondary" style={{ maxWidth: 240 }} onClick={() => signOut()}>Keluar</button>
+      <main className="app app-state">
+        <p role="alert" className="app-state-error">{error}</p>
+        <Button type="button" variant="accentOutline" size="xl" fullWidth className="app-state-action" onClick={() => signOut()}>Keluar</Button>
       </main>
     )
   }
@@ -74,9 +75,9 @@ export function DashboardPage() {
 
   if (!data.event) {
     return (
-      <main className="app" style={{ display: 'grid', placeItems: 'center', alignContent: 'center', gap: 16 }}>
+      <main className="app app-state">
         <p className="empty">Belum ada acara. Onboarding akan menyusul di tahap berikutnya.</p>
-        <button type="button" className="btn btn-secondary" style={{ maxWidth: 240 }} onClick={() => signOut()}>Keluar</button>
+        <Button type="button" variant="accentOutline" size="xl" fullWidth className="app-state-action" onClick={() => signOut()}>Keluar</Button>
       </main>
     )
   }
