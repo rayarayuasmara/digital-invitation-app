@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { BadgeCheck, ChartPie, CircleArrowRight, ExternalLink, MailQuestion, Tag, UsersRound } from 'lucide-react'
+import { BadgeCheck, ChartPie, Check, CircleArrowRight, ExternalLink, MailQuestion, Printer, QrCode, Smartphone, Tag, UsersRound, X } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
 import { Card } from '@/components/arc/card'
@@ -106,9 +106,7 @@ type HistoryItem = {
   kind: 'checkin' | 'hadir' | 'absen'
   at: string
   name: string
-  category?: string
-  status: string
-  pax: number
+  detail: string
   invitation_type: 'digital' | 'cetak'
 }
 
@@ -128,9 +126,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
           kind: attending ? 'hadir' : 'absen',
           at: g._rsvp_at,
           name: g.group_name,
-          category: g.category || 'Umum',
-          status: attending ? 'Hadir' : 'Tidak hadir',
-          pax: g.max_pax,
+          detail: `${attending ? 'Konfirmasi hadir' : 'Tidak bisa hadir'} · ${g.max_pax} pax`,
           invitation_type: g.invitation_type === 'cetak' ? 'cetak' : 'digital',
         })
       }
@@ -140,9 +136,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
           kind: 'checkin',
           at: g._checkin_at,
           name: g.group_name,
-          category: g.category || 'Umum',
-          status: 'Check-in',
-          pax: g.max_pax,
+          detail: `Check-in di pintu · ${g.max_pax} pax`,
           invitation_type: g.invitation_type === 'cetak' ? 'cetak' : 'digital',
         })
       }
@@ -335,26 +329,30 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
           ) : (
             <ScrollArea className="home-history-scroll" maxHeight={518} label="Histori RSVP">
               <ol className="home-history-list">
-                {historyFeed.map(item => {
-                  const statusTone = item.kind === 'checkin' ? 'info' : item.kind === 'hadir' ? 'success' : 'danger'
-                  const showPax = item.kind !== 'absen'
-                  return (
-                    <li key={item.id} className="home-history-row">
-                      <span className="home-history-avatar">
-                        <Avatar name={item.name} size="lg" />
+                {historyFeed.map(item => (
+                  <li key={item.id} className="home-history-row">
+                    <span className="home-history-avatar">
+                      <Avatar name={item.name} size="lg" />
+                      <span className={`home-history-badge is-${item.kind}`} aria-hidden>
+                        {item.kind === 'checkin' ? <QrCode size={9} strokeWidth={2.4} /> : item.kind === 'hadir' ? <Check size={10} strokeWidth={3} /> : <X size={10} strokeWidth={3} />}
                       </span>
-                      <div className="home-history-copy">
-                        <p className="home-history-name">{item.name}</p>
-                        <div className="home-history-badges">
-                          <Badge size="sm" pill>{item.category}</Badge>
-                          <Badge size="sm" pill tone={statusTone}>{item.status}</Badge>
-                          {showPax && <Badge size="sm" pill>{item.pax} pax</Badge>}
-                        </div>
-                      </div>
-                      <span className="home-history-time">{timeAgo(item.at)}</span>
-                    </li>
-                  )
-                })}
+                      <span
+                        className="home-history-type-badge"
+                        role="img"
+                        aria-label={item.invitation_type === 'cetak' ? 'Undangan cetak' : 'Undangan digital'}
+                      >
+                        {item.invitation_type === 'cetak'
+                          ? <Printer size={9} aria-hidden />
+                          : <Smartphone size={9} aria-hidden />}
+                      </span>
+                    </span>
+                    <div className="home-history-copy">
+                      <p className="home-history-name">{item.name}</p>
+                      <p className="home-history-detail">{item.detail}</p>
+                    </div>
+                    <span className="home-history-time">{timeAgo(item.at)}</span>
+                  </li>
+                ))}
               </ol>
             </ScrollArea>
           )}
