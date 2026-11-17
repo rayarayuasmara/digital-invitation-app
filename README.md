@@ -5,10 +5,11 @@ Undangan pernikahan digital RayaRayu. Repo ini punya dua lapis:
 | Lapis | Lokasi | Status |
 |---|---|---|
 | **React (aktif)** | `app/` | Migrasi yang dilanjutkan. Vite + React + Arc UI |
-| HTML vanila (acuan) | root: `index.html`, `dashboard.html`, `invitation.html`, `scanner.html` | Versi live saat ini, disimpan sebagai acuan migrasi |
+| HTML vanila | root: `index.html`, `invitation.html` | Halaman publik yang tetap vanila; disalin ke output oleh `app/scripts/copy-static.mjs` |
 
-Arsip HTML lama tambahan ada di `index.html.legacy` dan
-`dashboard.html.legacy` (lokal, tidak masuk git).
+Arsip HTML lama (`index.html.legacy`, `dashboard.html.legacy`) disimpan
+lokal dan tidak masuk git. Versi dashboard dan scanner yang berada di root
+sudah dihapus; sumber kebenarannya sekarang `app/src/`.
 
 ## Menjalankan app React
 
@@ -20,20 +21,19 @@ npm run build   # cek tipe + build produksi
 ```
 
 Konfigurasi Supabase ada di `app/.env`
-(`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`).
+(`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`). Contoh isinya ada di
+`app/.env.example`.
 
-## Acuan HTML vanila
+## Halaman HTML vanila
 
 | File | URL | Isi |
 |---|---|---|
 | `index.html` | `/` | Landing page |
-| `dashboard.html` | `/dashboard` | Panel klien (login) |
-| `dashboard.html` | `/login` | Form masuk |
-| `dashboard.html` | `/register` | Form daftar |
-| `dashboard.html` | `/reset-password` | Form password baru (dari email reset) |
-| `scanner.html` | `/scanner` | Check-in petugas (kode akses) |
 | `invitation.html` | `/{slug}/{token}` | Undangan tamu |
 | `invitation.html` | `/pratinjau/{slug}/{token}` | Pratinjau undangan |
+
+Dashboard (`/dashboard`, `/login`, `/register`, `/reset-password`) dan
+check-in petugas (`/scanner`) sekarang dilayani React dari `app/`.
 
 Deploy memakai build React dari `app/` (lihat `vercel.json`):
 `app/dist` menjadi output Vercel. React melayani `/dashboard`, `/login`,

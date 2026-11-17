@@ -5,8 +5,8 @@ Project Supabase: `awwraxmftlbekclwdrix`
 Folder ini mencatat semua perubahan skema dan kebijakan akses. Tujuannya: kalau
 suatu saat perlu mengulang, memeriksa, atau membatalkan perubahan, ada jejaknya.
 
-Aplikasi ini statis (4 file HTML di root). Tidak ada build step. Frontend
-memanggil Supabase langsung lewat `supabase-js`, jadi **setiap RPC di bawah ini
+Frontend dashboard adalah app React di `app/` (Vite). Frontend memanggil
+Supabase langsung lewat `supabase-js`, jadi **setiap RPC di bawah ini
 adalah bagian dari kontrak API**. Mengubah nama atau parameter fungsi akan
 memutus halaman tanpa error build.
 
@@ -88,9 +88,9 @@ Tidak ada yang bisa membaca tabel langsung.
 | `send_wish(token, message)` | `invitation.html` | token undangan |
 | `get_event_wishes(token)` | `invitation.html` | token undangan |
 | `get_event_rsvp_summary(token)` | `invitation.html` | token undangan |
-| `scanner_event_info(kode)` | `scanner.html` | kode petugas acara |
-| `scanner_list_guests(kode)` | `scanner.html` | kode petugas acara |
-| `scanner_check_in(kode, input)` | `scanner.html` | kode petugas acara |
+| `scanner_event_info(kode)` | `app/src/lib/scanner.ts` | kode petugas acara |
+| `scanner_list_guests(kode)` | `app/src/lib/scanner.ts` | kode petugas acara |
+| `scanner_check_in(kode, input)` | `app/src/lib/scanner.ts` | kode petugas acara |
 
 ### RPC pemilik acara (wajib login)
 
@@ -349,7 +349,7 @@ penambahan baru yang diblokir.
 
 ### Pendaftaran klien
 
-Klien mendaftar sendiri lewat `dashboard.html`. Trigger `on_auth_user_created`
+Klien mendaftar sendiri lewat halaman `/register` (React, `app/`). Trigger `on_auth_user_created`
 membuat baris `public.clients` otomatis: nama dari metadata `name`, slug dari
 nama (huruf kecil, tanda hubung), ditambah `-2`, `-3`, ... kalau bentrok.
 
