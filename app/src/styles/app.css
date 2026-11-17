@@ -1617,45 +1617,6 @@ body {
   font-weight: 600;
 }
 
-.home-history-badge {
-  position: absolute;
-  right: -2px;
-  bottom: -2px;
-  display: grid;
-  width: 19px;
-  height: 19px;
-  place-items: center;
-  border: 2px solid var(--card);
-  border-radius: 50%;
-  color: var(--on-solid);
-}
-
-.home-history-badge.is-checkin {
-  background: var(--accent);
-}
-
-.home-history-badge.is-hadir {
-  background: var(--success-solid);
-}
-
-.home-history-badge.is-absen {
-  background: var(--danger-solid);
-}
-
-.home-history-type-badge {
-  position: absolute;
-  left: -2px;
-  bottom: -2px;
-  display: grid;
-  width: 19px;
-  height: 19px;
-  place-items: center;
-  border: 2px solid var(--card);
-  border-radius: 50%;
-  background: var(--warning-solid);
-  color: var(--on-solid);
-}
-
 .home-history-copy {
   min-width: 0;
   flex: 1;

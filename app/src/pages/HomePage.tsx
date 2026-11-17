@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { BadgeCheck, ChartPie, Check, CircleArrowRight, ExternalLink, MailQuestion, Printer, QrCode, Smartphone, Tag, UsersRound, X } from 'lucide-react'
+import { BadgeCheck, ChartPie, CircleArrowRight, ExternalLink, MailQuestion, Tag, UsersRound } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
 import { Card } from '@/components/arc/card'
@@ -126,7 +126,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
           kind: attending ? 'hadir' : 'absen',
           at: g._rsvp_at,
           name: g.group_name,
-          detail: `${attending ? 'Konfirmasi hadir' : 'Tidak bisa hadir'} · ${g.max_pax} pax`,
+          detail: `${attending ? 'Hadir' : 'Tidak hadir'} · ${g.max_pax} pax`,
           invitation_type: g.invitation_type === 'cetak' ? 'cetak' : 'digital',
         })
       }
@@ -136,7 +136,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
           kind: 'checkin',
           at: g._checkin_at,
           name: g.group_name,
-          detail: `Check-in di pintu · ${g.max_pax} pax`,
+          detail: `Check-in · ${g.max_pax} pax`,
           invitation_type: g.invitation_type === 'cetak' ? 'cetak' : 'digital',
         })
       }
@@ -333,18 +333,6 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
                   <li key={item.id} className="home-history-row">
                     <span className="home-history-avatar">
                       <Avatar name={item.name} size="lg" />
-                      <span className={`home-history-badge is-${item.kind}`} aria-hidden>
-                        {item.kind === 'checkin' ? <QrCode size={9} strokeWidth={2.4} /> : item.kind === 'hadir' ? <Check size={10} strokeWidth={3} /> : <X size={10} strokeWidth={3} />}
-                      </span>
-                      <span
-                        className="home-history-type-badge"
-                        role="img"
-                        aria-label={item.invitation_type === 'cetak' ? 'Undangan cetak' : 'Undangan digital'}
-                      >
-                        {item.invitation_type === 'cetak'
-                          ? <Printer size={9} aria-hidden />
-                          : <Smartphone size={9} aria-hidden />}
-                      </span>
                     </span>
                     <div className="home-history-copy">
                       <p className="home-history-name">{item.name}</p>
