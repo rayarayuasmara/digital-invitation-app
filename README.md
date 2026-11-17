@@ -16,13 +16,16 @@ sudah dihapus; sumber kebenarannya sekarang `app/src/`.
 ```bash
 cd app
 npm install
+cp .env.example .env   # lalu isi dua nilai Supabase
 npm run dev     # http://localhost:5173
 npm run build   # cek tipe + build produksi
 ```
 
-Konfigurasi Supabase ada di `app/.env`
-(`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`). Contoh isinya ada di
-`app/.env.example`.
+Konfigurasi Supabase dibaca dari dua variabel: `VITE_SUPABASE_URL` dan
+`VITE_SUPABASE_PUBLISHABLE_KEY`. Nilai untuk deploy diset di Vercel
+(Production, Preview, Development) — mengubahnya di sana butuh redeploy.
+Untuk lokal, salin `app/.env.example` menjadi `app/.env` lalu isi nilainya
+dari dashboard Supabase. `app/.env` tidak dilacak git.
 
 ## Halaman HTML vanila
 

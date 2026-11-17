@@ -1,5 +1,20 @@
 # React + TypeScript + Vite
 
+## Environment
+
+Semua halaman dashboard membaca konfigurasi Supabase dari `app/.env`:
+
+```bash
+cp .env.example .env
+# isi VITE_SUPABASE_URL dan VITE_SUPABASE_PUBLISHABLE_KEY
+```
+
+File `.env` tidak dilacak git. Untuk deploy, kedua variabel diset di Vercel
+untuk environment Production, Preview, dan Development; setelah mengubahnya,
+deployment harus di-redeploy.
+
+## Template notes
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:
