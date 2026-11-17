@@ -2,6 +2,7 @@
   /* The palette now comes from the Figma design tokens in tokens.css, mapped
      onto these names by theme.css. Only layout-scoped literals live here. */
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --page-bar-h: calc(env(safe-area-inset-top, 0px) + 64px);
 }
 
 body {
@@ -36,6 +37,150 @@ body {
   margin: 0 auto;
   padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(120px + var(--safe-bottom));
   position: relative;
+}
+
+/* Tab header. --p (0 at the top, 1 after 44px of scroll) is set by useCollapseProgress.
+   The title glides from the left edge to the centre and shrinks; the avatar stays at the right. */
+.page-head {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  height: var(--page-bar-h);
+  margin: calc(-1 * (env(safe-area-inset-top, 0px) + var(--space-4))) calc(-1 * var(--space-4)) var(--space-4);
+  padding: 0 var(--space-4);
+}
+
+.page-head.is-static {
+  position: relative;
+}
+
+.page-head .page-title {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 18px + 4.5px * var(--p, 0));
+  left: calc(var(--space-4) + (50% - var(--space-4)) * var(--p, 0));
+  translate: calc(-50% * var(--p, 0)) 0;
+  font-size: calc(var(--text-page-title) - 1.0625rem * var(--p, 0));
+  font-weight: var(--weight-bold);
+  line-height: 1.12;
+  white-space: nowrap;
+}
+
+.page-head-avatar {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  right: var(--space-4);
+  display: grid;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  box-shadow: var(--shadow-chrome);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.page-head-avatar:active {
+  transform: scale(0.94);
+}
+
+.page-head-sub {
+  margin: calc(-1 * var(--space-3)) 0 var(--space-4);
+}
+
+.page-head-sub .page-sub {
+  margin: 0;
+}
+
+/* Progressive blur, shared by the tab header and the sticky guest toolbar.
+   The blur radius and tint follow --p, so nothing shows at rest and the glass fades in with scroll.
+   Several eased mask stops keep the falloff smooth instead of a visible band. */
+.progressive-blur {
+  position: absolute;
+  inset: 0 0 calc(-1 * var(--blur-fade, 48px)) 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.progressive-blur::before,
+.progressive-blur::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+}
+
+.progressive-blur::before {
+  -webkit-backdrop-filter: blur(calc(20px * var(--p, 0))) saturate(160%);
+  backdrop-filter: blur(calc(20px * var(--p, 0))) saturate(160%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 30%, rgb(0 0 0 / 0.82) 45%, rgb(0 0 0 / 0.45) 65%, rgb(0 0 0 / 0.14) 84%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 30%, rgb(0 0 0 / 0.82) 45%, rgb(0 0 0 / 0.45) 65%, rgb(0 0 0 / 0.14) 84%, transparent 100%);
+}
+
+.progressive-blur::after {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--bg-page) calc(90% * var(--p, 0)), transparent) 0%,
+    color-mix(in oklab, var(--bg-page) calc(70% * var(--p, 0)), transparent) 40%,
+    color-mix(in oklab, var(--bg-page) calc(30% * var(--p, 0)), transparent) 72%,
+    transparent 100%
+  );
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .progressive-blur::before {
+    display: none;
+  }
+
+  .progressive-blur::after {
+    background: linear-gradient(to bottom, var(--bg-page) 70%, transparent);
+  }
+}
+
+.page-title {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 9px + 9.5px * var(--p));
+  left: calc(var(--space-4) + (50% - var(--space-4)) * var(--p));
+  translate: calc(-50% * var(--p)) 0;
+  font-size: calc(var(--text-page-title) - 1.0625rem * var(--p));
+  font-weight: var(--weight-bold);
+  line-height: 1.12;
+  white-space: nowrap;
+}
+
+.page-head-avatar {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 8px);
+  right: var(--space-4);
+  display: grid;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  box-shadow: var(--shadow-chrome);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.page-head-avatar:active {
+  transform: scale(0.94);
+}
+
+.page-head-sub {
+  margin: calc(-1 * var(--space-3)) 0 var(--space-4);
+}
+
+.page-head-sub .page-sub {
+  margin: 0;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .page-head::before {
+    opacity: 1;
+    background: var(--bg-page);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
 .page-title {
@@ -345,22 +490,6 @@ body {
   pointer-events: none;
 }
 
-.ios-tabbar {
-  pointer-events: auto;
-  display: grid;
-  flex: 1;
-  min-width: 0;
-  height: 64px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  align-items: center;
-  padding: var(--space-1);
-  border-radius: var(--radius-pill);
-  background: var(--ios-glass);
-  box-shadow: var(--ios-glass-shadow);
-  -webkit-backdrop-filter: saturate(180%) blur(28px);
-  backdrop-filter: saturate(180%) blur(28px);
-}
-
 .ios-tab {
   display: flex;
   height: 100%;
@@ -399,34 +528,6 @@ body {
 
 /* Glisse tab bar: four tabs plus the FAB share the bottom rail. */
 /* One white thumb slides behind the active tab, like the legacy pillnav. */
-.fab {
-  --fab-glow: color-mix(in oklab, var(--accent) 50%, transparent);
-  pointer-events: auto;
-  width: 64px;
-  height: 64px;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 50%;
-  /* Brand blue under a liquid-glass highlight, so it reads as tinted glass rather than flat paint. */
-  background:
-    radial-gradient(120% 90% at 28% 12%, color-mix(in oklab, var(--on-solid) 42%, transparent), transparent 58%),
-    linear-gradient(155deg, color-mix(in oklab, var(--accent) 72%, var(--on-solid)), var(--accent) 62%);
-  color: var(--on-solid);
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, var(--on-solid) 45%, transparent),
-    inset 0 -6px 14px color-mix(in oklab, var(--color-neutral-black) 18%, transparent),
-    0 0 0 0.5px color-mix(in oklab, var(--accent) 35%, transparent),
-    0 10px 26px -6px var(--fab-glow);
-  cursor: pointer;
-  transition: transform var(--duration-fast) var(--ease-spring);
-}
-
-.fab:active {
-  transform: scale(0.9);
-}
-
 /* Bottom sheet */
 .sheet-backdrop {
   position: fixed;
@@ -897,36 +998,12 @@ button.settings-row:active {
   padding: var(--space-4) 16px 12px;
 }
 
-.page-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin: 0 0 var(--space-4);
-}
-
-.page-head-copy {
-  min-width: 0;
-}
-
 .home-page {
   display: flex;
   flex-direction: column;
 }
 
 /* ---------- Beranda: event ticket, attendance tiles, history ---------- */
-
-.home-head {
-  align-items: center;
-  margin-bottom: var(--space-4);
-}
-
-.home-title {
-  color: var(--accent);
-  font-size: var(--text-hero-title);
-  font-weight: 800;
-  letter-spacing: var(--tracking-hero-title);
-}
 
 .home-stack {
   display: flex;
@@ -2335,23 +2412,7 @@ button.settings-row:active {
   font-variant-numeric: tabular-nums;
 }
 
-.page-head-actions {
-  flex: 0 0 auto;
-  margin-top: 2px;
-}
-
 /* Circular glass controls, like the top-right actions in iOS 27 settings. */
-.page-head-actions button {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid var(--glass-edge);
-  background: var(--glass);
-  box-shadow: var(--shadow-chrome);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
-}
-
 @media (prefers-reduced-transparency: reduce) {
   .page-head-actions button {
     background: var(--surface);
@@ -2897,23 +2958,13 @@ button.settings-row:active {
   top: 0;
   z-index: 20;
   margin: 0 calc(var(--space-4) * -1);
-  padding: var(--space-2) var(--space-4) var(--space-2);
-  background: color-mix(in oklab, var(--bg-page) 92%, transparent);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
+  padding: calc(env(safe-area-inset-top, 0px) + var(--space-2)) var(--space-4) var(--space-2);
 }
 
 .guests-sticky .list-controls {
   margin-top: var(--space-2);
 }
 
-@media (prefers-reduced-transparency: reduce) {
-  .guests-sticky {
-    background: var(--bg-page);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-}
 
 .search {
   flex: 1;
@@ -3104,3 +3155,193 @@ button.settings-row:active {
   gap: var(--space-2);
 }
 
+
+/* Notifications sheet */
+.notif-list {
+  display: grid;
+  gap: 0;
+  padding-bottom: var(--space-4);
+}
+
+.notif-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-6) 0;
+  color: var(--sub);
+}
+
+.notif-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.notif-row:last-child {
+  border-bottom: 0;
+}
+
+.notif-icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-muted);
+  color: var(--accent);
+}
+
+.notif-icon.is-success {
+  color: var(--success);
+}
+
+.notif-icon.is-warning {
+  color: var(--warning);
+}
+
+.notif-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.notif-title {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.notif-row.is-unread .notif-title {
+  color: var(--ink);
+  font-weight: var(--weight-bold);
+}
+
+.notif-desc {
+  margin: var(--space-1) 0 0;
+  overflow: hidden;
+  color: var(--sub);
+  font-size: var(--text-body-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notif-time {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: var(--text-body-sm);
+  white-space: nowrap;
+}
+
+/* Speed-dial: brand button with a white logo, shortcuts fanned out in an arc. */
+.fab-wrap {
+  position: relative;
+  flex: 0 0 auto;
+  pointer-events: auto;
+}
+
+.fab {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--brand);
+  color: var(--on-solid);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--on-solid) 28%, transparent),
+    0 12px 28px -8px color-mix(in oklab, var(--brand) 60%, transparent);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fab-glyph {
+  display: grid;
+  place-items: center;
+}
+
+.fab-menu-item {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  display: grid;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--brand-ink);
+  box-shadow: var(--shadow-floating);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The tab bar steps aside while the speed-dial is open. */
+.ios-tabbar {
+  pointer-events: auto;
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  height: 64px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: center;
+  padding: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--ios-glass);
+  box-shadow: var(--ios-glass-shadow);
+  -webkit-backdrop-filter: saturate(180%) blur(28px);
+  backdrop-filter: saturate(180%) blur(28px);
+  transition:
+    opacity var(--duration-standard) var(--ease-standard),
+    transform var(--duration-standard) var(--ease-standard);
+}
+
+.ios-tabbar.is-hidden {
+  opacity: 0;
+  transform: translateY(12px) scale(0.96);
+  pointer-events: none;
+}
+
+/* Radial progressive blur: strongest at its origin (the button that opened the menu), fading outward. */
+.radial-blur {
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+}
+
+.radial-blur::before,
+.radial-blur::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+}
+
+.radial-blur::before {
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-mask-image: radial-gradient(circle at var(--ox) var(--oy), #000 0%, rgb(0 0 0 / 0.85) 22%, rgb(0 0 0 / 0.4) 46%, transparent 72%);
+  mask-image: radial-gradient(circle at var(--ox) var(--oy), #000 0%, rgb(0 0 0 / 0.85) 22%, rgb(0 0 0 / 0.4) 46%, transparent 72%);
+}
+
+.radial-blur::after {
+  background: radial-gradient(
+    circle at var(--ox) var(--oy),
+    color-mix(in oklab, var(--color-neutral-black) 26%, transparent) 0%,
+    color-mix(in oklab, var(--color-neutral-black) 10%, transparent) 40%,
+    transparent 72%
+  );
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .radial-blur::before {
+    display: none;
+  }
+}

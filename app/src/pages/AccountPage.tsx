@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/auth'
 import type { DashboardData } from '@/lib/dashboard'
 import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/arc/card'
+import { PageHeader } from '@/components/PageHeader'
 import { Tabs, TabsList, TabsTrigger } from '@/components/arc/tabs/tabs'
 import { readThemeMode, setThemeMode, subscribeThemeMode } from '@/lib/theme'
 import type { ThemeMode } from '@/lib/theme'
@@ -47,12 +48,7 @@ export function AccountPage({ data, notify }: Props) {
 
   return (
     <>
-      <div className="page-head">
-        <div className="page-head-copy">
-          <h1 className="page-title">Akun</h1>
-          <p className="page-sub">{client.email}</p>
-        </div>
-      </div>
+      <PageHeader title="Akun" subtitle={<p className="page-sub">{client.email}</p>} />
 
       <Card variant="default" padding="none" className="settings-group">
         <div className="settings-row">

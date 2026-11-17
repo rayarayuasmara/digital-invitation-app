@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { AnimatePresence } from 'motion/react'
 import type { FormEvent } from 'react'
 import { Copy, MessageCircle, Pencil, Printer, RotateCcw, SlidersHorizontal, Smartphone, Trash2 } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
@@ -9,6 +10,8 @@ import { Button } from '@/components/arc/button/button'
 import { Dialog, DialogContent } from '@/components/arc/dialog/dialog'
 import { Input } from '@/components/arc/input/input'
 import { SearchField } from '@/components/arc/search-field/search-field'
+import { PageHeader } from '@/components/PageHeader'
+import { RadialBlur } from '@/components/RadialBlur'
 import { NumberField } from '@/components/arc/number-field/number-field'
 import { Select } from '@/components/arc/select/select'
 import { Switch } from '@/components/arc/switch/switch'
@@ -25,6 +28,7 @@ import type { DashboardData } from '@/lib/dashboard'
 import { addGuest, deleteGuest, markSent, updateGuest } from '@/lib/guests'
 import type { Guest, GuestForm } from '@/lib/guests'
 import { messageFor, normalizePhone, openWhatsApp } from '@/lib/whatsapp'
+import { useCollapseProgress } from '@/lib/hooks/use-collapse-progress'
 
 export type GuestStatus = 'semua' | 'hadir' | 'tidak_hadir' | 'belum_rsvp' | 'pending' | 'belum_terkirim' | 'check_in'
 type Status = GuestStatus
@@ -74,13 +78,15 @@ type Props = {
   data: DashboardData
   onChanged: () => Promise<void>
   notify: (message: string) => void
-  /** Increment to open the new-guest sheet, for example from the tab bar action. */
-  createSignal: number
+  /** Non-zero asks for the new-guest sheet. The panel calls onCreateHandled to reset it. */
+  createRequest: number
+  onCreateHandled: () => void
   /** Status tab to start on, for example after tapping a metric on Beranda. */
   initialStatus?: GuestStatus
+  onOpenAccount: () => void
 }
 
-export function GuestsPanel({ data, onChanged, notify, createSignal, initialStatus = 'semua' }: Props) {
+export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHandled, initialStatus = 'semua', onOpenAccount }: Props) {
   const event = data.event!
   const guests = data.guests as Guest[]
   const [query, setQuery] = useState('')
@@ -92,10 +98,16 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
   const [asc, setAsc] = useState(true)
   const [sheet, setSheet] = useState<{ mode: 'new' } | { mode: 'edit'; guest: Guest } | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Guest | null>(null)
+  const stickyRef = useRef<HTMLDivElement>(null)
+  const [filterOpen, setFilterOpen] = useState(false)
+  const [filterOrigin, setFilterOrigin] = useState<{ x: number; y: number } | null>(null)
+  useCollapseProgress(stickyRef)
 
   useEffect(() => {
-    if (createSignal > 0) setSheet({ mode: 'new' })
-  }, [createSignal])
+    if (createRequest === 0) return
+    setSheet({ mode: 'new' })
+    onCreateHandled()
+  }, [createRequest, onCreateHandled])
 
   const categoryOptions = useMemo(() => {
     const set = new Set(['Keluarga', 'Teman', 'Umum', 'VIP', 'Artis', 'Tetangga', ...guests.map(g => g.category)])
@@ -125,6 +137,14 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
   }
 
   const activeFilters = categories.length + types.length + sessions.length
+
+  const onFilterOpenChange = (open: boolean) => {
+    if (open) {
+      const rect = document.querySelector('.guests-filter')?.getBoundingClientRect()
+      if (rect) setFilterOrigin({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
+    }
+    setFilterOpen(open)
+  }
 
   const resetFilters = () => {
     setCategories([])
@@ -206,15 +226,16 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
 
   return (
     <div className="guests-page">
-      <div className="page-head">
-        <div className="page-head-copy">
-          <h1 className="page-title">Tamu</h1>
-          <p className="page-sub">{visible.length} dari {guests.length} tamu</p>
-        </div>
-      </div>
+      <PageHeader
+        sticky={false}
+        title="Tamu"
+        subtitle={<p className="page-sub">{visible.length} dari {guests.length} tamu</p>}
+        account={{ name: data.client.name, onOpen: onOpenAccount }}
+      />
 
       {/* Search and filters stay pinned while the list scrolls */}
-      <div className="guests-sticky">
+      <div className="guests-sticky" ref={stickyRef}>
+        <span className="progressive-blur" aria-hidden="true" />
         <div className="guests-toolbar">
           <div className="guests-search-field">
             <SearchField
@@ -225,7 +246,7 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
               onValueChange={setQuery}
             />
           </div>
-          <DropdownMenu>
+          <DropdownMenu open={filterOpen} onOpenChange={onFilterOpenChange}>
             <DropdownMenuTrigger>
               <button
                 type="button"
@@ -353,6 +374,10 @@ export function GuestsPanel({ data, onChanged, notify, createSignal, initialStat
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {filterOpen && filterOrigin && <RadialBlur key="filter-blur" origin={filterOrigin} />}
+      </AnimatePresence>
 
       {/* Guest grid or list */}
       {visible.length === 0 && (

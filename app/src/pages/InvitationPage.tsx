@@ -3,6 +3,7 @@ import type { DashboardData } from '@/lib/dashboard'
 import { DEFAULT_TEMPLATE, TEMPLATE_VARIABLES, categoriesOf, saveTemplates } from '@/lib/whatsapp'
 import type { Templates } from '@/lib/whatsapp'
 import { Button } from '@/components/arc/button/button'
+import { PageHeader } from '@/components/PageHeader'
 import { Card } from '@/components/arc/card'
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
   onShare: () => void
   onChanged: () => Promise<void>
   notify: (message: string) => void
+  onOpenAccount: () => void
 }
 
 function formatDate(value: string | null) {
@@ -17,7 +19,7 @@ function formatDate(value: string | null) {
   return new Date(value).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })
 }
 
-export function InvitationPage({ data, onShare, onChanged, notify }: Props) {
+export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount }: Props) {
   const event = data.event!
   const categories = categoriesOf(data)
   const [templates, setTemplates] = useState<Templates>(() => ({ ...(event.wa_templates ?? {}) }))
@@ -39,12 +41,11 @@ export function InvitationPage({ data, onShare, onChanged, notify }: Props) {
 
   return (
     <>
-      <div className="page-head">
-        <div style={{ minWidth: 0 }}>
-          <h1 className="page-title">Undangan</h1>
-          <p className="page-sub">Detail acara yang tampil di undangan tamu</p>
-        </div>
-      </div>
+      <PageHeader
+        title="Undangan"
+        subtitle={<p className="page-sub">Detail acara yang tampil di undangan tamu</p>}
+        account={{ name: data.client.name, onOpen: onOpenAccount }}
+      />
 
       <Card variant="default" padding="md">
         <p className="name" style={{ margin: 0, fontSize: 'var(--text-xl)', fontWeight: 700 }}>{event.couple_name || event.title}</p>

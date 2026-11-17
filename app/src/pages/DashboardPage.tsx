@@ -12,6 +12,7 @@ import type { GuestStatus } from '@/pages/GuestsPanel'
 import { ScannerScreen } from '@/pages/ScannerScreen'
 import { HomePage } from '@/pages/HomePage'
 import { InvitationPage } from '@/pages/InvitationPage'
+import { NotificationsSheet } from '@/components/NotificationsSheet'
 
 export function DashboardPage() {
   const { signOut } = useAuth()
@@ -19,9 +20,10 @@ export function DashboardPage() {
   const [error, setError] = useState('')
   const [tab, setTab] = useState<Tab>('beranda')
   const [guestView, setGuestView] = useState<GuestStatus>('semua')
-  const [createSignal, setCreateSignal] = useState(0)
+  const [createRequest, setCreateRequest] = useState(0)
   const [notice, setNotice] = useState<{ id: number; text: string } | null>(null)
   const [scannerOpen, setScannerOpen] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
 
   const load = useCallback(async () => {
     try {
@@ -50,14 +52,17 @@ export function DashboardPage() {
     }
   }
 
-  const onAction = () => {
-    if (tab === 'tamu') setCreateSignal(n => n + 1)
-    else if (tab === 'undangan') sharePreview()
-    else if (tab === 'beranda') {
-      if (data?.event?.scanner_code) setScannerOpen(true)
-      else notify('Kode scanner belum tersedia.')
-    }
-    else notify('Bantuan akan tersedia pada pembaruan berikutnya.')
+  const handleCreateRequest = useCallback(() => setCreateRequest(0), [])
+
+  const openScanner = () => {
+    if (data?.event?.scanner_code) setScannerOpen(true)
+    else notify('Kode scanner belum tersedia.')
+  }
+
+  const addGuest = () => {
+    setGuestView('semua')
+    setTab('tamu')
+    setCreateRequest(n => n + 1)
   }
 
   if (error) {
@@ -89,6 +94,7 @@ export function DashboardPage() {
           data={data}
           notify={notify}
           onOpenGuests={status => { setGuestView(status); setTab('tamu') }}
+          onOpenAccount={() => setTab('akun')}
         />
       )}
       {tab === 'tamu' && (
@@ -96,11 +102,13 @@ export function DashboardPage() {
           data={data}
           onChanged={load}
           notify={notify}
-          createSignal={createSignal}
+          createRequest={createRequest}
+          onCreateHandled={handleCreateRequest}
           initialStatus={guestView}
+          onOpenAccount={() => setTab('akun')}
         />
       )}
-      {tab === 'undangan' && <InvitationPage data={data} onShare={sharePreview} onChanged={load} notify={notify} />}
+      {tab === 'undangan' && <InvitationPage data={data} onShare={sharePreview} onChanged={load} notify={notify} onOpenAccount={() => setTab('akun')} />}
       {tab === 'akun' && <AccountPage data={data} notify={notify} />}
 
       <TabBar
@@ -111,8 +119,14 @@ export function DashboardPage() {
           if (next === 'tamu') setGuestView('semua')
           setTab(next)
         }}
-        onAction={onAction}
+        onScanner={openScanner}
+        onAddGuest={addGuest}
+        onNotifications={() => setNotifOpen(true)}
       />
+
+      {data.event && (
+        <NotificationsSheet open={notifOpen} data={data} onClose={() => setNotifOpen(false)} />
+      )}
 
       {notice && (
         <div className="toast-layer">

@@ -10,8 +10,6 @@ import { Countdown } from '@/components/arc/countdown/countdown'
 import { ExpandableCard } from '@/components/arc/expandable-card/expandable-card'
 import { ScrollArea } from '@/components/arc/scroll-area/scroll-area'
 import { UsageMeter } from '@/components/arc/usage-meter/usage-meter'
-import { NotificationCenter } from '@/components/arc/notification-center/notification-center'
-import type { NotificationItem } from '@/components/arc/notification-center/notification-center'
 import {
   DonutChart,
   DonutChartCenter,
@@ -19,8 +17,9 @@ import {
   DonutChartPlot,
 } from '@/components/charts/donut-chart'
 import { DigitSwap } from '@/components/motion/digit-swap'
+import { PageHeader } from '@/components/PageHeader'
 import type { DashboardData } from '@/lib/dashboard'
-import type { Guest } from '@/lib/guests'
+import { timeAgo } from '@/lib/notifications'
 import type { GuestStatus } from '@/pages/GuestsPanel'
 import { fetchWishes, markWishesSeen } from '@/lib/wishes'
 import type { Wish } from '@/lib/wishes'
@@ -30,10 +29,10 @@ type Props = {
   notify: (message: string) => void
   /** Jump to the Tamu tab with a status filter already applied. */
   onOpenGuests: (status: GuestStatus) => void
+  onOpenAccount: () => void
 }
 
 const WISH_LIMIT = 50
-const NOTIF_SEEN_KEY = 'rr_notif_seen'
 
 function formatDate(value: string | null) {
   if (!value) return '-'
@@ -48,73 +47,6 @@ function formatDate(value: string | null) {
 /** One stable author id per guest, so a guest's wishes group into the same conversation. */
 function wishAuthor(w: Wish) {
   return w.guest_id ?? `name:${(w.guest_name ?? 'tamu').trim().toLowerCase()}`
-}
-
-function timeAgo(iso: string) {
-  const min = Math.floor(Math.max(0, Date.now() - new Date(iso).getTime()) / 60000)
-  if (min < 1) return 'Baru saja'
-  if (min < 60) return `${min} menit lalu`
-  const hr = Math.floor(min / 60)
-  if (hr < 24) return `${hr} jam lalu`
-  return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', timeZone: 'Asia/Jakarta' })
-}
-
-/**
- * The notification centre is the one place for everything that happened: new wishes, RSVP replies and
- * check-ins today. Order and upgrade notices will slot into the same list.
- */
-function buildNotifications(wishes: Wish[], guests: Guest[], seen: string | null, notifSeen: number): NotificationItem[] {
-  const seenWish = seen ? new Date(seen).getTime() : 0
-  const items: { at: number; item: NotificationItem }[] = []
-
-  for (const w of wishes) {
-    const at = new Date(w.created_at).getTime()
-    items.push({
-      at,
-      item: {
-        id: `wish:${w.id}`,
-        title: `Ucapan baru dari ${w.guest_name || 'Tamu'}`,
-        description: w.message.length > 80 ? `${w.message.slice(0, 80)}…` : w.message,
-        time: timeAgo(w.created_at),
-        read: at <= seenWish,
-        tone: 'info',
-      },
-    })
-  }
-
-  for (const g of guests) {
-    if (g._rsvp_at && (g.rsvp_status === 'hadir' || g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen')) {
-      const at = new Date(g._rsvp_at).getTime()
-      const attending = g.rsvp_status === 'hadir'
-      items.push({
-        at,
-        item: {
-          id: `rsvp:${g.id}`,
-          title: `${g.group_name} ${attending ? 'akan hadir' : 'tidak bisa hadir'}`,
-          description: `Konfirmasi RSVP · ${g.max_pax} orang`,
-          time: timeAgo(g._rsvp_at),
-          read: at <= notifSeen,
-          tone: attending ? 'success' : 'warning',
-        },
-      })
-    }
-    if (g._checkin_at) {
-      const at = new Date(g._checkin_at).getTime()
-      items.push({
-        at,
-        item: {
-          id: `checkin:${g.id}`,
-          title: `${g.group_name} sudah check-in`,
-          description: `${g.max_pax} orang masuk`,
-          time: timeAgo(g._checkin_at),
-          read: at <= notifSeen,
-          tone: 'success',
-        },
-      })
-    }
-  }
-
-  return items.sort((a, b) => b.at - a.at).slice(0, 40).map(x => x.item)
 }
 
 /** beUI donut: how guest RSVP replies split between attending, absent and pending. */
@@ -186,7 +118,7 @@ type HistoryItem = {
   detail: string
 }
 
-export function HomePage({ data, notify, onOpenGuests }: Props) {
+export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
   const { event, stats, guests, categories } = data
   const total = stats.total_guests
   const eventId = event!.id
@@ -196,7 +128,6 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
   const [wishTotal, setWishTotal] = useState(0)
   const [unread, setUnread] = useState(0)
   const [error, setError] = useState('')
-  const [notifSeen, setNotifSeen] = useState(() => Number(localStorage.getItem(NOTIF_SEEN_KEY) || 0))
   const wishScroll = useRef<HTMLDivElement>(null)
 
   const load = useCallback(async () => {
@@ -231,18 +162,6 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
     } catch (e) {
       notify(e instanceof Error ? e.message : 'Gagal menandai ucapan.')
     }
-  }
-
-  const notifications = useMemo(
-    () => buildNotifications(wishes ?? [], guests, seen, notifSeen),
-    [wishes, guests, seen, notifSeen],
-  )
-
-  const onNotificationsOpen = (open: boolean) => {
-    if (!open) return
-    const now = Date.now()
-    localStorage.setItem(NOTIF_SEEN_KEY, String(now))
-    setNotifSeen(now)
   }
 
   const wishParticipants = useMemo(() => {
@@ -319,16 +238,7 @@ export function HomePage({ data, notify, onOpenGuests }: Props) {
 
   return (
     <div className="home-page">
-      <div className="page-head home-head">
-        <h1 className="page-title home-title">Beranda</h1>
-        <div className="page-head-actions">
-          <NotificationCenter
-            notifications={notifications}
-            label="Notifikasi"
-            onOpenChange={onNotificationsOpen}
-          />
-        </div>
-      </div>
+      <PageHeader title="Beranda" account={{ name: data.client.name, onOpen: onOpenAccount }} />
 
       <div className="home-stack">
         {/* Hero: who the day is for, plus the two facts a host checks most. */}

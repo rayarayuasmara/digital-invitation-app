@@ -113,6 +113,10 @@
   --red-ink: var(--color-text-error-dark);
   --red-bg: var(--color-red-100);
 
+  /* Brand: the monogram blue, and a lighter ink of it for icons on dark surfaces. */
+  --brand: var(--color-blue-500);
+  --brand-ink: var(--color-blue-500);
+
   /* Solid status fills for dots and badges; the glyph on top stays white in both themes. */
   --success-solid: var(--color-green-600);
   --danger-solid: var(--color-red-600);
@@ -187,6 +191,8 @@
   --green-bg: color-mix(in oklab, var(--color-green-500) 16%, transparent);
   --red-ink: var(--color-red-300);
   --red-bg: color-mix(in oklab, var(--color-red-500) 16%, transparent);
+
+  --brand-ink: var(--color-blue-300);
 
   --glass: color-mix(in oklab, var(--color-neutral-800) 72%, transparent);
   --glass-edge: color-mix(in oklab, var(--color-neutral-50) 8%, transparent);
