@@ -1637,9 +1637,9 @@ body {
   display: -webkit-box;
   margin: 3px 0 0;
   overflow: hidden;
-  color: var(--sub);
-  font-size: 0.8125rem;
-  line-height: 1.35;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
