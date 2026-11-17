@@ -106,7 +106,9 @@ type HistoryItem = {
   kind: 'checkin' | 'hadir' | 'absen'
   at: string
   name: string
-  detail: string
+  category?: string
+  status: string
+  pax: number
   invitation_type: 'digital' | 'cetak'
 }
 
@@ -126,7 +128,9 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
           kind: attending ? 'hadir' : 'absen',
           at: g._rsvp_at,
           name: g.group_name,
-          detail: `${attending ? 'Hadir' : 'Tidak hadir'} · ${g.max_pax} pax`,
+          category: g.category || 'Umum',
+          status: attending ? 'Hadir' : 'Tidak hadir',
+          pax: g.max_pax,
           invitation_type: g.invitation_type === 'cetak' ? 'cetak' : 'digital',
         })
       }
@@ -136,7 +140,9 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
           kind: 'checkin',
           at: g._checkin_at,
           name: g.group_name,
-          detail: `Check-in · ${g.max_pax} pax`,
+          category: g.category || 'Umum',
+          status: 'Check-in',
+          pax: g.max_pax,
           invitation_type: g.invitation_type === 'cetak' ? 'cetak' : 'digital',
         })
       }
@@ -329,18 +335,25 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
           ) : (
             <ScrollArea className="home-history-scroll" maxHeight={518} label="Histori RSVP">
               <ol className="home-history-list">
-                {historyFeed.map(item => (
-                  <li key={item.id} className="home-history-row">
-                    <span className="home-history-avatar">
-                      <Avatar name={item.name} size="lg" />
-                    </span>
-                    <div className="home-history-copy">
-                      <p className="home-history-name">{item.name}</p>
-                      <p className="home-history-detail">{item.detail}</p>
-                    </div>
-                    <span className="home-history-time">{timeAgo(item.at)}</span>
-                  </li>
-                ))}
+                {historyFeed.map(item => {
+                  const statusTone = item.kind === 'checkin' ? 'info' : item.kind === 'hadir' ? 'success' : 'danger'
+                  return (
+                    <li key={item.id} className="home-history-row">
+                      <span className="home-history-avatar">
+                        <Avatar name={item.name} size="lg" />
+                      </span>
+                      <div className="home-history-copy">
+                        <p className="home-history-name">{item.name}</p>
+                        <div className="home-history-badges">
+                          <Badge size="sm" pill>{item.category}</Badge>
+                          <Badge size="sm" pill tone={statusTone}>{item.status}</Badge>
+                          <Badge size="sm" pill>{item.pax} pax</Badge>
+                        </div>
+                      </div>
+                      <span className="home-history-time">{timeAgo(item.at)}</span>
+                    </li>
+                  )
+                })}
               </ol>
             </ScrollArea>
           )}
