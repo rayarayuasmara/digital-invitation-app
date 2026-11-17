@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from '@/lib/auth'
 import { Button } from '@/components/arc/button/button'
 import { fetchDashboard } from '@/lib/dashboard'
@@ -29,25 +29,34 @@ export function DashboardPage() {
   const [accountOpen, setAccountOpen] = useState(false)
   const [unreadWishes, setUnreadWishes] = useState(0)
 
+  // Mirrors `data` for the load callback, which is stable and must not depend on it.
+  const hasDataRef = useRef(false)
+
+  const notify = useCallback((message: string) => setNotice({ id: Date.now(), text: message }), [])
+
   const load = useCallback(async () => {
     try {
       const next = await fetchDashboard()
+      hasDataRef.current = true
       setData(next)
       setError('')
+      // The unread badge is not essential: fetch it in the background and let it fail quietly.
       if (next.event) {
-        const summary = await fetchWishes(next.event.id, next.event.wishes_seen_at ?? null, 1)
-        setUnreadWishes(summary.unread)
+        fetchWishes(next.event.id, next.event.wishes_seen_at ?? null, 1)
+          .then(summary => setUnreadWishes(summary.unread))
+          .catch(() => setUnreadWishes(0))
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Gagal memuat data.')
+      const message = e instanceof Error ? e.message : 'Gagal memuat data.'
+      // Keep what is on screen. A failed refresh should not replace a working dashboard.
+      if (hasDataRef.current) notify('Gagal memperbarui data. Coba lagi.')
+      else setError(message)
     }
-  }, [])
+  }, [notify])
 
   useEffect(() => {
     load()
   }, [load])
-
-  const notify = useCallback((message: string) => setNotice({ id: Date.now(), text: message }), [])
 
   const sharePreview = async () => {
     const event = data?.event
@@ -78,6 +87,15 @@ export function DashboardPage() {
     return (
       <main className="app app-state">
         <p role="alert" className="app-state-error">{error}</p>
+        <Button
+          variant="accent"
+          size="xl"
+          fullWidth
+          className="app-state-action"
+          onClick={() => { setError(''); load() }}
+        >
+          Coba lagi
+        </Button>
         <Button variant="accentOutline" size="xl" fullWidth className="app-state-action" onClick={() => signOut()}>Keluar</Button>
       </main>
     )
@@ -90,7 +108,7 @@ export function DashboardPage() {
   if (!data.event) {
     return (
       <main className="app app-state">
-        <p className="empty">Belum ada acara. Onboarding akan menyusul di tahap berikutnya.</p>
+        <p className="empty">Belum ada acara di akun ini.</p>
         <Button variant="accentOutline" size="xl" fullWidth className="app-state-action" onClick={() => signOut()}>Keluar</Button>
       </main>
     )
