@@ -28,7 +28,8 @@
 
 /* Each tab is exactly as wide as its slot, so idle icons keep one even gap between them.
    The track spreads the tabs evenly, which also gives the lens equal margins at both ends.
-   Tabs fill the track's content height, so the lens and the inverted row match them exactly. */
+   Tabs fill the track's content height, so the lens and the inverted row match them exactly.
+   The mirror of this layout lives in .invertedRow below. Keep the two in sync. */
 .tab {
   position: relative;
   z-index: 1;
@@ -158,6 +159,9 @@
 
 /* Sits at the track's content box, in track coordinates, so it lines up with the real tabs.
    Each cell mirrors a tab's flex sizing, and the slot inside it mirrors the tab's slot. */
+/* Mirrors .track exactly (same width, same space-evenly), so every inverted icon sits
+   on top of its real counterpart. Earlier this used equal-width cells, which drifted
+   away from the real tabs as soon as the selected label opened. */
 .invertedRow {
   position: absolute;
   top: -6px;
@@ -165,20 +169,21 @@
   display: flex;
   height: calc(100% + 12px);
   align-items: stretch;
+  justify-content: space-evenly;
   color: var(--accent-foreground);
 }
 
 .invTab {
   display: flex;
   height: 100%;
-  min-width: 0;
-  flex: 1 1 0;
+  flex: 0 0 auto;
   align-items: stretch;
   justify-content: center;
 }
 
-.invActive {
-  flex: 0 0 auto;
+/* Same growth rule as .tab.active in the 'none' layout. */
+.bar[data-labels='none'] .invActive {
+  flex: 1 1 0;
 }
 
 .invertedRow .badge {

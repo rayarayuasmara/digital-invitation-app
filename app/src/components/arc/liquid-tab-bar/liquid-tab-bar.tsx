@@ -29,10 +29,6 @@ export function liquidTabId(id: string, value: string) {
   return `${id}-tab-${value}`
 }
 
-export function liquidPanelId(id: string, value: string) {
-  return `${id}-panel-${value}`
-}
-
 /** Inset between the bar's edge and the tabs. The lens and the inverted copy use the same inset. */
 const PAD = 6
 const spring = { type: 'spring', stiffness: 480, damping: 42, mass: 0.9 } as const
@@ -75,9 +71,8 @@ const BaseTab = forwardRef<HTMLButtonElement, {
   active: boolean
   showLabel: boolean
   id: string
-  controls: string
   onPick: () => void
-}>(function BaseTab({ tab, active, showLabel, id, controls, onPick }, ref) {
+}>(function BaseTab({ tab, active, showLabel, id, onPick }, ref) {
   const fill = useMotionValue(active ? 1 : 0)
   useEffect(() => {
     fill.set(active ? 1 : 0)
@@ -89,7 +84,6 @@ const BaseTab = forwardRef<HTMLButtonElement, {
       type="button"
       role="tab"
       aria-selected={active}
-      aria-controls={controls}
       tabIndex={active ? 0 : -1}
       className={`${styles.tab}${active ? ' ' + styles.active : ''}`}
       onClick={onPick}
@@ -200,12 +194,14 @@ export function LiquidTabBar({ tabs, value, onValueChange, labels = 'active', la
   }
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    // Every new press starts with a clean slate. A drag that ended on the track
+    // (pointer capture) never fires a click to clear the flag, so reset it here.
+    suppressClick.current = false
     if (event.button !== 0 || !trackRef.current) return
     const local = event.clientX - trackRef.current.getBoundingClientRect().left
     // Only the lens itself is grabbable, so taps on other tabs still act as taps.
     if (local < x.get() || local > x.get() + width.get()) return
     trackRef.current.setPointerCapture(event.pointerId)
-    suppressClick.current = false
     drag.current = { startX: event.clientX, origin: x.get(), moved: false, samples: [{ x: event.clientX, t: performance.now() }] }
   }
 
@@ -223,10 +219,22 @@ export function LiquidTabBar({ tabs, value, onValueChange, labels = 'active', la
     x.set(Math.min(Math.max(state.origin + dx, min), max))
   }
 
+  const releaseDrag = (pointerId: number) => {
+    drag.current = null
+    if (trackRef.current?.hasPointerCapture(pointerId)) trackRef.current.releasePointerCapture(pointerId)
+  }
+
+  // The system cancelled the gesture (scroll takeover, incoming call...). Snap back to the
+  // selected tab and do not change the selection.
+  const onPointerCancel = (event: PointerEvent<HTMLDivElement>) => {
+    const state = drag.current
+    releaseDrag(event.pointerId)
+    if (state?.moved) place(valueRef.current)
+  }
+
   const onPointerUp = (event: PointerEvent<HTMLDivElement>) => {
     const state = drag.current
-    drag.current = null
-    if (trackRef.current?.hasPointerCapture(event.pointerId)) trackRef.current.releasePointerCapture(event.pointerId)
+    releaseDrag(event.pointerId)
     if (!state?.moved) return
 
     suppressClick.current = true
@@ -286,7 +294,7 @@ export function LiquidTabBar({ tabs, value, onValueChange, labels = 'active', la
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
+        onPointerCancel={onPointerCancel}
       >
         {tabs.map(tab => {
           const active = tab.value === value
@@ -298,7 +306,6 @@ export function LiquidTabBar({ tabs, value, onValueChange, labels = 'active', la
               active={active}
               showLabel={labels === 'always' || (labels === 'active' && active)}
               id={liquidTabId(baseId, tab.value)}
-              controls={liquidPanelId(baseId, tab.value)}
               onPick={() => onTabClick(tab.value)}
             />
           )

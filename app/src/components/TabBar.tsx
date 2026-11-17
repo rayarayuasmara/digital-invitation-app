@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { Bell, House, ScanLine, Sparkles, UserPlus, Users, X } from 'lucide-react'
+import { Bell, House, MailOpen, ScanLine, UserPlus, Users, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { BrandMark } from '@/components/BrandMark'
 import { ChatBubbleIcon } from '@/components/ChatBubbleIcon'
@@ -9,6 +9,9 @@ import { LiquidTabBar } from '@/components/arc/liquid-tab-bar/liquid-tab-bar'
 import { motionTokens } from '@/components/arc/motion-tokens'
 
 export type Tab = 'beranda' | 'tamu' | 'ucapan' | 'undangan'
+
+/** Shared stroke for every tab icon, so they read as one family. */
+const ICON_STROKE = 1.9
 
 const ARC_DEGREES = [90, 135, 180]
 const ARC_RADIUS = 92
@@ -59,18 +62,19 @@ export function TabBar({ value, onChange, onScanner, onAddGuest, onNotifications
 
   const spring = reduce ? { duration: 0 } : motionTokens.spring.snappy
 
+  // One outline style for every tab. The lens already marks the selected tab by inverting it,
+  // so the icons never swap to solid shapes (solid lucide glyphs look blobby next to outlines).
   const tabs = [
-    { value: 'beranda', label: 'Beranda', icon: <House />, activeIcon: <House fill="currentColor" /> },
-    { value: 'tamu', label: 'Tamu', icon: <Users />, activeIcon: <Users fill="currentColor" /> },
+    { value: 'beranda', label: 'Beranda', icon: <House strokeWidth={ICON_STROKE} /> },
+    { value: 'tamu', label: 'Tamu', icon: <Users strokeWidth={ICON_STROKE} /> },
     {
       value: 'ucapan',
       label: 'Ucapan',
-      icon: <ChatBubbleIcon />,
-      activeIcon: <ChatBubbleIcon filled />,
+      icon: <ChatBubbleIcon strokeWidth={ICON_STROKE} />,
       badge: unreadWishes,
       badgeLabel: `${unreadWishes} ucapan belum dibaca`,
     },
-    { value: 'undangan', label: 'Undangan', icon: <Sparkles />, activeIcon: <Sparkles fill="currentColor" /> },
+    { value: 'undangan', label: 'Undangan', icon: <MailOpen strokeWidth={ICON_STROKE} /> },
   ]
 
   return (
