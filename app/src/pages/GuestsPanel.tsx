@@ -11,7 +11,7 @@ import { Dialog, DialogContent } from '@/components/arc/dialog/dialog'
 import { Input } from '@/components/arc/input/input'
 import { SearchField } from '@/components/arc/search-field/search-field'
 import { PageHeader } from '@/components/PageHeader'
-import { RadialBlur } from '@/components/RadialBlur'
+import { Scrim } from '@/components/Scrim'
 import { NumberField } from '@/components/arc/number-field/number-field'
 import { Select } from '@/components/arc/select/select'
 import { Switch } from '@/components/arc/switch/switch'
@@ -100,7 +100,6 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
   const [deleteTarget, setDeleteTarget] = useState<Guest | null>(null)
   const stickyRef = useRef<HTMLDivElement>(null)
   const [filterOpen, setFilterOpen] = useState(false)
-  const [filterOrigin, setFilterOrigin] = useState<{ x: number; y: number } | null>(null)
   useCollapseProgress(stickyRef)
 
   useEffect(() => {
@@ -138,13 +137,6 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
 
   const activeFilters = categories.length + types.length + sessions.length
 
-  const onFilterOpenChange = (open: boolean) => {
-    if (open) {
-      const rect = document.querySelector('.guests-filter')?.getBoundingClientRect()
-      if (rect) setFilterOrigin({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
-    }
-    setFilterOpen(open)
-  }
 
   const resetFilters = () => {
     setCategories([])
@@ -234,7 +226,7 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
       />
 
       {/* Search and filters stay pinned while the list scrolls */}
-      <div className="guests-sticky" ref={stickyRef}>
+      <div className={`guests-sticky${filterOpen ? ' is-raised' : ''}`} ref={stickyRef}>
         <span className="progressive-blur" aria-hidden="true" />
         <div className="guests-toolbar">
           <div className="guests-search-field">
@@ -246,7 +238,7 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
               onValueChange={setQuery}
             />
           </div>
-          <DropdownMenu open={filterOpen} onOpenChange={onFilterOpenChange}>
+          <DropdownMenu open={filterOpen} onOpenChange={setFilterOpen}>
             <DropdownMenuTrigger>
               <button
                 type="button"
@@ -376,7 +368,7 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
       </div>
 
       <AnimatePresence>
-        {filterOpen && filterOrigin && <RadialBlur key="filter-blur" origin={filterOrigin} />}
+        {filterOpen && <Scrim key="filter-scrim" />}
       </AnimatePresence>
 
       {/* Guest grid or list */}

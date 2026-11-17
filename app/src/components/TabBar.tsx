@@ -1,23 +1,17 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { Bell, House, ScanLine, Sparkles, UserPlus, UserRound, Users, X } from 'lucide-react'
+import { Bell, House, ScanLine, Sparkles, UserPlus, Users, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { BrandMark } from '@/components/BrandMark'
-import { RadialBlur } from '@/components/RadialBlur'
+import { ChatBubbleIcon } from '@/components/ChatBubbleIcon'
+import { Scrim } from '@/components/Scrim'
+import { LiquidTabBar } from '@/components/arc/liquid-tab-bar/liquid-tab-bar'
 import { motionTokens } from '@/components/arc/motion-tokens'
 
-export type Tab = 'beranda' | 'tamu' | 'undangan' | 'akun'
+export type Tab = 'beranda' | 'tamu' | 'ucapan' | 'undangan'
 
-const tabs: { value: Tab; label: string; icon: LucideIcon }[] = [
-  { value: 'beranda', label: 'Beranda', icon: House },
-  { value: 'tamu', label: 'Tamu', icon: Users },
-  { value: 'undangan', label: 'Undangan', icon: Sparkles },
-  { value: 'akun', label: 'Akun', icon: UserRound },
-]
-
-/** Shortcuts fan out along a quarter circle above the button, as in the speed-dial reference. */
 const ARC_DEGREES = [90, 135, 180]
-const ARC_RADIUS = 112
+const ARC_RADIUS = 92
 
 function arcOffset(index: number) {
   const angle = (ARC_DEGREES[index] * Math.PI) / 180
@@ -30,13 +24,13 @@ type Props = {
   onScanner: () => void
   onAddGuest: () => void
   onNotifications: () => void
+  /** Wishes the host has not read yet, shown on the Ucapan tab. */
+  unreadWishes?: number
 }
 
-export function TabBar({ value, onChange, onScanner, onAddGuest, onNotifications }: Props) {
+export function TabBar({ value, onChange, onScanner, onAddGuest, onNotifications, unreadWishes = 0 }: Props) {
   const reduce = useReducedMotion()
   const [open, setOpen] = useState(false)
-  const [origin, setOrigin] = useState({ x: 0, y: 0 })
-  const fabRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (!open) return
@@ -53,14 +47,6 @@ export function TabBar({ value, onChange, onScanner, onAddGuest, onNotifications
     { label: 'Notifikasi', icon: Bell, run: onNotifications },
   ]
 
-  const toggle = () => {
-    if (!open && fabRef.current) {
-      const rect = fabRef.current.getBoundingClientRect()
-      setOrigin({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
-    }
-    setOpen(o => !o)
-  }
-
   const pick = (run: () => void) => {
     setOpen(false)
     run()
@@ -73,30 +59,29 @@ export function TabBar({ value, onChange, onScanner, onAddGuest, onNotifications
 
   const spring = reduce ? { duration: 0 } : motionTokens.spring.snappy
 
+  const tabs = [
+    { value: 'beranda', label: 'Beranda', icon: <House />, activeIcon: <House fill="currentColor" /> },
+    { value: 'tamu', label: 'Tamu', icon: <Users />, activeIcon: <Users fill="currentColor" /> },
+    {
+      value: 'ucapan',
+      label: 'Ucapan',
+      icon: <ChatBubbleIcon />,
+      activeIcon: <ChatBubbleIcon filled />,
+      badge: unreadWishes,
+      badgeLabel: `${unreadWishes} ucapan belum dibaca`,
+    },
+    { value: 'undangan', label: 'Undangan', icon: <Sparkles />, activeIcon: <Sparkles fill="currentColor" /> },
+  ]
+
   return (
     <>
       <AnimatePresence>
-        {open && <RadialBlur key="fab-blur" origin={origin} onDismiss={() => setOpen(false)} />}
+        {open && <Scrim key="fab-scrim" onDismiss={() => setOpen(false)} />}
       </AnimatePresence>
 
       <nav className="tabbar-wrap" aria-label="Menu utama">
-        <div className={`ios-tabbar${open ? ' is-hidden' : ''}`}>
-          {tabs.map(t => {
-            const Icon = t.icon
-            const active = t.value === value
-            return (
-              <button
-                key={t.value}
-                type="button"
-                className={`ios-tab ${active ? 'is-active' : ''}`}
-                aria-current={active ? 'page' : undefined}
-                onClick={() => changeTab(t.value)}
-              >
-                <Icon size={24} strokeWidth={active ? 2.4 : 2} aria-hidden />
-                <span>{t.label}</span>
-              </button>
-            )
-          })}
+        <div className={`tabbar-shell${open ? ' is-hidden' : ''}`}>
+          <LiquidTabBar tabs={tabs} value={value} onValueChange={tab => changeTab(tab as Tab)} label="Menu utama" />
         </div>
 
         <div className="fab-wrap">
@@ -118,19 +103,18 @@ export function TabBar({ value, onChange, onScanner, onAddGuest, onNotifications
                   transition={reduce ? { duration: 0 } : { ...spring, delay: index * 0.035 }}
                   whileTap={reduce ? undefined : { scale: 0.92 }}
                 >
-                  <Icon size={22} strokeWidth={2.1} aria-hidden />
+                  <Icon size={24} strokeWidth={2.1} aria-hidden />
                 </motion.button>
               )
             })}
           </AnimatePresence>
 
           <motion.button
-            ref={fabRef}
             type="button"
             className="fab"
             aria-label={open ? 'Tutup pintasan' : 'Buka pintasan'}
             aria-expanded={open}
-            onClick={toggle}
+            onClick={() => setOpen(o => !o)}
             whileTap={reduce ? undefined : { scale: 0.94 }}
             initial={reduce ? false : { scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}

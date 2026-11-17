@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import type { ReactNode } from 'react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { useCollapseProgress } from '@/lib/hooks/use-collapse-progress'
+import { initialsName } from '@/lib/text'
 
 type Props = {
   title: string
@@ -28,7 +29,7 @@ export function PageHeader({ title, subtitle, account, sticky = true }: Props) {
         <h1 className="page-title">{title}</h1>
         {account && (
           <button type="button" className="page-head-avatar" onClick={account.onOpen} aria-label={`Akun ${account.name}`}>
-            <Avatar name={account.name.replace(/[^\p{L}\s]/gu, ' ')} size="md" />
+            <Avatar name={initialsName(account.name)} size="md" />
           </button>
         )}
       </header>

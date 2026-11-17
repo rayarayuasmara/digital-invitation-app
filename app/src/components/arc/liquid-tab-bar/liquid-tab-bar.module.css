@@ -1,0 +1,202 @@
+/* Bar: the glass shell. Track: the padded row that holds the tabs and the lens.
+   Every position inside the track is measured from its padding box, so the lens,
+   the tabs and the inverted copy all share one coordinate system. */
+.bar {
+  position: relative;
+  height: 60px;
+  box-sizing: border-box;
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-pill);
+  background: var(--glass-chrome);
+  box-shadow: var(--glass-chrome-shadow);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.track {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 6px;
+  touch-action: pan-y;
+}
+
+/* Each tab is exactly as wide as its slot, so idle icons keep one even gap between them.
+   The track spreads the tabs evenly, which also gives the lens equal margins at both ends.
+   Tabs fill the track's content height, so the lens and the inverted row match them exactly. */
+.tab {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 100%;
+  flex: 0 0 auto;
+  align-items: stretch;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Pads the hit area out into the gap, so a tap between two icons still picks the nearer tab. */
+.tab::before {
+  position: absolute;
+  inset: 0 -11px;
+  content: '';
+}
+
+.bar[data-labels='none'] .tab.active {
+  flex: 1 1 0;
+}
+
+.tab.active {
+  flex: 0 0 auto;
+  color: var(--foreground);
+}
+
+/* Slot: the shared layout for a tab's icon and label. Both the tabs and the inverted copy render it. */
+.slot {
+  display: inline-flex;
+  height: 100%;
+  min-width: 48px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-3);
+  white-space: nowrap;
+}
+
+.icon {
+  position: relative;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  place-items: center;
+}
+
+.icon svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.fillLayer {
+  will-change: opacity;
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -9px;
+  display: grid;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--danger-solid);
+  color: var(--on-solid);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Only the selected tab opens its label; the others stay icon-only. */
+.labelSlot {
+  display: grid;
+  grid-template-columns: 0fr;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    grid-template-columns var(--duration-standard) var(--ease-spring),
+    opacity var(--duration-fast) var(--ease-standard);
+}
+
+.labeled .labelSlot {
+  grid-template-columns: 1fr;
+  /* Leaves room for a badge on the icon's top-right corner. */
+  margin-left: var(--space-3);
+  opacity: 1;
+}
+
+.labelText {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+/* The lens paints the accent. Its inverted copy is clipped to the same rounded shape. */
+.lens {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+  z-index: 2;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  pointer-events: none;
+}
+
+/* Sits at the track's content box, in track coordinates, so it lines up with the real tabs.
+   Each cell mirrors a tab's flex sizing, and the slot inside it mirrors the tab's slot. */
+.invertedRow {
+  position: absolute;
+  top: -6px;
+  left: 6px;
+  display: flex;
+  height: calc(100% + 12px);
+  align-items: stretch;
+  color: var(--accent-foreground);
+}
+
+.invTab {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  flex: 1 1 0;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.invActive {
+  flex: 0 0 auto;
+}
+
+.invertedRow .badge {
+  background: var(--accent-foreground);
+  color: var(--accent);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .labelSlot {
+    transition: none;
+  }
+}

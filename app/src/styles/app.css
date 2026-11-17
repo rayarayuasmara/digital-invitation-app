@@ -52,6 +52,30 @@ body {
 
 .page-head.is-static {
   position: relative;
+  display: flex;
+  height: auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+}
+
+.page-head.is-static .page-title {
+  position: static;
+  translate: none;
+  font-size: var(--text-page-title);
+  line-height: var(--leading-page-title);
+  letter-spacing: var(--tracking-page-title);
+}
+
+.page-head.is-static .page-head-avatar {
+  position: static;
+  flex: 0 0 auto;
+}
+
+.page-head.is-static + .page-head-sub {
+  margin: calc(-1 * var(--space-3)) 0 0;
 }
 
 .page-head .page-title {
@@ -228,7 +252,6 @@ body {
 .tiles .tile-warn .tile-value {
   color: var(--color-yellow-700);
 }
-
 
 /* Wish content */
 .wish-content {
@@ -490,42 +513,6 @@ body {
   pointer-events: none;
 }
 
-.ios-tab {
-  display: flex;
-  height: 100%;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  min-width: 0;
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: none;
-  color: var(--sub);
-  font: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition:
-    color var(--duration-fast) var(--ease-standard),
-    background-color var(--duration-fast) var(--ease-standard);
-}
-
-.ios-tab.is-active {
-  background: var(--ios-pill);
-  color: var(--accent);
-}
-
-.ios-tab svg {
-  transition: transform var(--duration-fast) var(--ease-spring);
-}
-
-.ios-tab.is-active svg {
-  transform: translateY(-1px) scale(1.05);
-}
-
 /* Glisse tab bar: four tabs plus the FAB share the bottom rail. */
 /* One white thumb slides behind the active tab, like the legacy pillnav. */
 /* Bottom sheet */
@@ -548,7 +535,7 @@ body {
   overflow-y: auto;
   z-index: 51;
   padding: var(--space-3) var(--space-4) calc(var(--space-5) + var(--safe-bottom));
-  background: var(--bg-app);
+  background: var(--surface);
   border-radius: var(--radius-surface) var(--radius-surface) 0 0;
   box-shadow: var(--shadow-sheet);
   touch-action: pan-y;
@@ -607,79 +594,7 @@ body {
 }
 
 /* Settings-style grouped rows: one white inset card per group, hairline separators. */
-.settings-group {
-  margin-bottom: var(--space-4);
-  overflow: hidden;
-}
-
-.settings-row {
-  display: flex;
-  width: 100%;
-  min-height: 54px;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: 0 var(--space-4);
-  border: 0;
-  border-top: 1px solid var(--line);
-  border-radius: 0;
-  background: none;
-  color: var(--ink);
-  font: inherit;
-  font-size: 1.0625rem;
-  text-align: left;
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-.settings-row:first-child {
-  border-top: 0;
-}
-
-button.settings-row {
-  cursor: pointer;
-}
-
-button.settings-row:active {
-  background: var(--surface-muted);
-}
-
-.settings-value {
-  overflow: hidden;
-  color: var(--sub);
-  font-size: 0.9375rem;
-  text-align: right;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.settings-action {
-  color: var(--accent);
-}
-
-.settings-action.is-danger {
-  color: var(--red-ink);
-}
-
-.settings-chevron {
-  flex: 0 0 auto;
-  color: var(--text-muted);
-}
-
 /* Theme picker inside a settings group: a full-width segmented control. */
-.settings-theme {
-  padding: var(--space-1) var(--space-4) var(--space-4);
-}
-
-.settings-theme [class*='listShell'] {
-  display: flex;
-  width: 100%;
-}
-
-.settings-theme [class*='viewport'] {
-  flex: 1;
-}
-
 .theme-tabs {
   display: flex;
   width: 100%;
@@ -940,7 +855,6 @@ button.settings-row:active {
 .dot-bad { background: var(--red-ink); }
 .dot-wait { background: var(--warning); }
 
-
 .rsvp {
   display: grid;
   justify-items: center;
@@ -1199,7 +1113,6 @@ button.settings-row:active {
   text-align: center;
 }
 
-
 /* Countdown numerals follow the number type token. */
 .home-hero-countdown .countdown[data-variant='large'] .units {
   font-family: var(--font-number);
@@ -1394,7 +1307,6 @@ button.settings-row:active {
 .home-total-chart.is-pinned [data-donut-legend]:hover {
   opacity: 1;
 }
-
 
 /* The wish thread bleeds to the card edge, so it follows the 20px inset. */
 .home-stack .bento-wishes .wish-chat {
@@ -1811,7 +1723,6 @@ button.settings-row:active {
 .home-stack .bento-wishes .wish-chat-thread [data-chat-scroller] {
   overflow: visible;
 }
-
 
 /* Bento Grid Layout - mobile first, asymmetric, breathable */
 .bento-grid {
@@ -2692,7 +2603,6 @@ button.settings-row:active {
   padding-top: var(--space-1);
 }
 
-
 /* beUI donut pilot. The component is copied source, so its internal layout is
    Tailwind; this wrapper only handles spacing and keeps the ring compact on a
    phone-sized shell. */
@@ -2961,10 +2871,14 @@ button.settings-row:active {
   padding: calc(env(safe-area-inset-top, 0px) + var(--space-2)) var(--space-4) var(--space-2);
 }
 
+/* While the filter menu is open the toolbar sits above the scrim, so its button stays bright. */
+.guests-sticky.is-raised {
+  z-index: 30;
+}
+
 .guests-sticky .list-controls {
   margin-top: var(--space-2);
 }
-
 
 .search {
   flex: 1;
@@ -3057,7 +2971,6 @@ button.settings-row:active {
   line-height: 20px;
   text-align: center;
 }
-
 
 /* Empty state */
 .guests-empty {
@@ -3154,7 +3067,6 @@ button.settings-row:active {
   align-items: center;
   gap: var(--space-2);
 }
-
 
 /* Notifications sheet */
 .notif-list {
@@ -3268,14 +3180,14 @@ button.settings-row:active {
 
 .fab-menu-item {
   position: absolute;
-  top: 4px;
-  left: 4px;
+  top: 2px;
+  left: 2px;
   display: grid;
-  width: 56px;
-  height: 56px;
+  width: 60px;
+  height: 60px;
   place-items: center;
   padding: 0;
-  border: 0;
+  border: 1.5px solid var(--border-strong);
   border-radius: 50%;
   background: var(--surface);
   color: var(--brand-ink);
@@ -3285,63 +3197,515 @@ button.settings-row:active {
 }
 
 /* The tab bar steps aside while the speed-dial is open. */
-.ios-tabbar {
-  pointer-events: auto;
-  display: grid;
+/* Flat dim behind an open menu. Cheap to paint, and enough contrast for the controls on top. */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+  background: var(--scrim);
+}
+
+/* Tab bar shell: the liquid bar plus the brand speed-dial beside it. */
+.tabbar-shell {
   flex: 1;
   min-width: 0;
-  height: 64px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  align-items: center;
-  padding: var(--space-1);
-  border-radius: var(--radius-pill);
-  background: var(--ios-glass);
-  box-shadow: var(--ios-glass-shadow);
-  -webkit-backdrop-filter: saturate(180%) blur(28px);
-  backdrop-filter: saturate(180%) blur(28px);
+  /* The wrap switches pointer events off so empty space above the bar never blocks the page.
+     The bar itself has to switch them back on. */
+  pointer-events: auto;
   transition:
     opacity var(--duration-standard) var(--ease-standard),
     transform var(--duration-standard) var(--ease-standard);
 }
 
-.ios-tabbar.is-hidden {
+.tabbar-shell.is-hidden {
   opacity: 0;
   transform: translateY(12px) scale(0.96);
   pointer-events: none;
 }
 
-/* Radial progressive blur: strongest at its origin (the button that opened the menu), fading outward. */
-.radial-blur {
-  position: fixed;
-  inset: 0;
-  z-index: 29;
+/* Account sheet: large avatar, grouped rows, and a themed segmented control. */
+.account-sheet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 0 calc(var(--space-5) + var(--safe-bottom));
 }
 
-.radial-blur::before,
-.radial-blur::after {
+.account-close {
+  align-self: flex-end;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.account-close:active {
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+.account-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: var(--space-1);
+}
+
+.account-avatar {
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 0 0 5px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.account-name {
+  margin: var(--space-4) 0 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-display);
+  text-align: center;
+}
+
+.account-email {
+  margin: 2px 0 0;
+  color: var(--sub);
+  font-size: var(--text-sm);
+}
+
+.account-tier {
+  display: inline-flex;
+  height: 24px;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--space-3);
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+
+.account-section {
+  align-self: stretch;
+  margin: var(--space-6) 0 var(--space-2) var(--space-1);
+  color: var(--text-muted);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.account-group {
+  align-self: stretch;
+  overflow: hidden;
+  border-radius: var(--radius-panel);
+  background: color-mix(in srgb, var(--ink) 4%, var(--surface));
+}
+
+.account-row {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 54px;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-4);
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-base);
+  text-align: left;
+}
+
+/* Hairline starts at the content edge, like an inset grouped list. */
+.account-row + .account-row::before {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: var(--space-4);
+  left: var(--space-4);
+  height: 1px;
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
   content: '';
 }
 
-.radial-blur::before {
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-mask-image: radial-gradient(circle at var(--ox) var(--oy), #000 0%, rgb(0 0 0 / 0.85) 22%, rgb(0 0 0 / 0.4) 46%, transparent 72%);
-  mask-image: radial-gradient(circle at var(--ox) var(--oy), #000 0%, rgb(0 0 0 / 0.85) 22%, rgb(0 0 0 / 0.4) 46%, transparent 72%);
+.account-row-label {
+  flex: 1;
+  min-width: 0;
 }
 
-.radial-blur::after {
-  background: radial-gradient(
-    circle at var(--ox) var(--oy),
-    color-mix(in oklab, var(--color-neutral-black) 26%, transparent) 0%,
-    color-mix(in oklab, var(--color-neutral-black) 10%, transparent) 40%,
-    transparent 72%
-  );
+.account-row-value {
+  color: var(--sub);
+  font-variant-numeric: tabular-nums;
 }
 
-@media (prefers-reduced-transparency: reduce) {
-  .radial-blur::before {
-    display: none;
+.account-row-note {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.account-row-action {
+  cursor: pointer;
+}
+
+.account-row-action:active {
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+.account-row-action:disabled {
+  opacity: 0.6;
+}
+
+.account-row-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+.account-chevron {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+}
+
+.account-row-quota {
+  padding-block: 10px;
+}
+
+.account-row-main {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.account-row-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.account-meter {
+  display: block;
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--ink) 9%, transparent);
+}
+
+.account-meter-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.account-row-danger {
+  color: var(--red-ink);
+  cursor: pointer;
+}
+
+.account-row-danger:active {
+  background: color-mix(in srgb, var(--red-ink) 8%, transparent);
+}
+
+.account-row-danger .account-row-icon {
+  background: color-mix(in srgb, var(--red-ink) 14%, transparent);
+  color: var(--red-ink);
+}
+
+.account-group-signout {
+  margin-top: var(--space-6);
+}
+
+.account-group-theme {
+  padding: var(--space-2);
+}
+
+/* Ucapan page: day-grouped feed of guest wishes. */
+.wishes-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* The sticky header and its subtitle sit in the page's flex stack, so the gap alone decides the rhythm. */
+.wishes-page > .page-head {
+  margin-bottom: 0;
+}
+
+.wishes-page > .page-head-sub {
+  margin-top: calc(-1 * var(--space-2));
+  margin-bottom: 0;
+}
+
+.wishes-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.wishes-filter {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+.wishes-pill {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.wishes-pill.is-active {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--color-neutral-black) 12%, transparent);
+}
+
+.wishes-pill-count {
+  display: grid;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.wishes-pill.is-active .wishes-pill-count {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+}
+
+.wishes-day {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.wishes-day-label {
+  margin: 0 0 0 var(--space-1);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.wishes-list {
+  overflow: hidden;
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+}
+
+.wish-item {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.wish-item + .wish-item {
+  border-top: 1px solid var(--line);
+}
+
+.wish-item.is-unread {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.wish-item-avatar {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.wish-item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.wish-item-meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.wish-item-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wish-item-time {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+.wish-item-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  margin-left: auto;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.wish-item-message {
+  margin: 4px 0 0;
+  color: var(--sub);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.wishes-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-10) var(--space-4);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  text-align: center;
+}
+
+.wishes-empty-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  margin-bottom: var(--space-1);
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+.wishes-empty-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.wishes-empty-copy {
+  max-width: 30ch;
+  margin: 0;
+  color: var(--sub);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.wishes-loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.wishes-skeleton {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+}
+
+.wishes-skeleton-avatar {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--surface-muted);
+}
+
+.wishes-skeleton-lines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 3px;
+}
+
+.wishes-skeleton-lines span {
+  height: 9px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-muted);
+}
+
+.wishes-skeleton-lines span:first-child {
+  width: 38%;
+}
+
+.wishes-skeleton-lines span:last-child {
+  width: 82%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wishes-skeleton-avatar,
+  .wishes-skeleton-lines span {
+    animation: wishes-pulse 1.4s ease-in-out infinite;
   }
+}
+
+@keyframes wishes-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.wishes-more {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  text-align: center;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

@@ -3,16 +3,18 @@ import { useAuth } from '@/lib/auth'
 import { Button } from '@/components/arc/button/button'
 import { fetchDashboard } from '@/lib/dashboard'
 import type { DashboardData } from '@/lib/dashboard'
+import { fetchWishes } from '@/lib/wishes'
 import Toast from '@/components/arc/toast/toast'
 import { TabBar } from '@/components/TabBar'
 import type { Tab } from '@/components/TabBar'
-import { AccountPage } from '@/pages/AccountPage'
+import { AccountSheet } from '@/components/AccountSheet'
+import { NotificationsSheet } from '@/components/NotificationsSheet'
 import { GuestsPanel } from '@/pages/GuestsPanel'
 import type { GuestStatus } from '@/pages/GuestsPanel'
 import { ScannerScreen } from '@/pages/ScannerScreen'
 import { HomePage } from '@/pages/HomePage'
 import { InvitationPage } from '@/pages/InvitationPage'
-import { NotificationsSheet } from '@/components/NotificationsSheet'
+import { WishesPage } from '@/pages/WishesPage'
 
 export function DashboardPage() {
   const { signOut } = useAuth()
@@ -24,11 +26,18 @@ export function DashboardPage() {
   const [notice, setNotice] = useState<{ id: number; text: string } | null>(null)
   const [scannerOpen, setScannerOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
+  const [unreadWishes, setUnreadWishes] = useState(0)
 
   const load = useCallback(async () => {
     try {
-      setData(await fetchDashboard())
+      const next = await fetchDashboard()
+      setData(next)
       setError('')
+      if (next.event) {
+        const summary = await fetchWishes(next.event.id, next.event.wishes_seen_at ?? null, 1)
+        setUnreadWishes(summary.unread)
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Gagal memuat data.')
     }
@@ -69,7 +78,7 @@ export function DashboardPage() {
     return (
       <main className="app app-state">
         <p role="alert" className="app-state-error">{error}</p>
-        <Button type="button" variant="accentOutline" size="xl" fullWidth className="app-state-action" onClick={() => signOut()}>Keluar</Button>
+        <Button variant="accentOutline" size="xl" fullWidth className="app-state-action" onClick={() => signOut()}>Keluar</Button>
       </main>
     )
   }
@@ -82,7 +91,7 @@ export function DashboardPage() {
     return (
       <main className="app app-state">
         <p className="empty">Belum ada acara. Onboarding akan menyusul di tahap berikutnya.</p>
-        <Button type="button" variant="accentOutline" size="xl" fullWidth className="app-state-action" onClick={() => signOut()}>Keluar</Button>
+        <Button variant="accentOutline" size="xl" fullWidth className="app-state-action" onClick={() => signOut()}>Keluar</Button>
       </main>
     )
   }
@@ -94,7 +103,7 @@ export function DashboardPage() {
           data={data}
           notify={notify}
           onOpenGuests={status => { setGuestView(status); setTab('tamu') }}
-          onOpenAccount={() => setTab('akun')}
+          onOpenAccount={() => setAccountOpen(true)}
         />
       )}
       {tab === 'tamu' && (
@@ -105,11 +114,27 @@ export function DashboardPage() {
           createRequest={createRequest}
           onCreateHandled={handleCreateRequest}
           initialStatus={guestView}
-          onOpenAccount={() => setTab('akun')}
+          onOpenAccount={() => setAccountOpen(true)}
         />
       )}
-      {tab === 'undangan' && <InvitationPage data={data} onShare={sharePreview} onChanged={load} notify={notify} onOpenAccount={() => setTab('akun')} />}
-      {tab === 'akun' && <AccountPage data={data} notify={notify} />}
+      {tab === 'ucapan' && (
+        <WishesPage
+          data={data}
+          notify={notify}
+          onOpenAccount={() => setAccountOpen(true)}
+          onChanged={load}
+          onSeen={() => setUnreadWishes(0)}
+        />
+      )}
+      {tab === 'undangan' && (
+        <InvitationPage
+          data={data}
+          onShare={sharePreview}
+          onChanged={load}
+          notify={notify}
+          onOpenAccount={() => setAccountOpen(true)}
+        />
+      )}
 
       <TabBar
         value={tab}
@@ -122,11 +147,11 @@ export function DashboardPage() {
         onScanner={openScanner}
         onAddGuest={addGuest}
         onNotifications={() => setNotifOpen(true)}
+        unreadWishes={unreadWishes}
       />
 
-      {data.event && (
-        <NotificationsSheet open={notifOpen} data={data} onClose={() => setNotifOpen(false)} />
-      )}
+      <AccountSheet open={accountOpen} data={data} notify={notify} onClose={() => setAccountOpen(false)} />
+      <NotificationsSheet open={notifOpen} data={data} onClose={() => setNotifOpen(false)} />
 
       {notice && (
         <div className="toast-layer">

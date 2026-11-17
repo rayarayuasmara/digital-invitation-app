@@ -8,11 +8,13 @@ type Props = {
   title: string
   onClose: () => void
   children: ReactNode
+  /** Hide the built-in title bar when the content brings its own close control. */
+  showHead?: boolean
 }
 
 const spring = { type: 'spring', stiffness: 380, damping: 40, mass: 0.9 } as const
 
-export function Sheet({ open, title, onClose, children }: Props) {
+export function Sheet({ open, title, onClose, children, showHead = true }: Props) {
   const reduce = useReducedMotion()
 
   useEffect(() => {
@@ -55,12 +57,14 @@ export function Sheet({ open, title, onClose, children }: Props) {
             }}
           >
             <div className="sheet-grab" aria-hidden />
-            <div className="sheet-head">
-              <h2>{title}</h2>
-              <button type="button" className="icon-btn" onClick={onClose} aria-label="Tutup">
-                <X size={16} aria-hidden />
-              </button>
-            </div>
+            {showHead && (
+              <div className="sheet-head">
+                <h2>{title}</h2>
+                <button type="button" className="icon-btn" onClick={onClose} aria-label="Tutup">
+                  <X size={16} aria-hidden />
+                </button>
+              </div>
+            )}
             {children}
           </motion.div>
         </>

@@ -1,14 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { BadgeCheck, ChartPie, Check, CircleArrowRight, ExternalLink, MailQuestion, MessageSquareText, QrCode, Tag, UsersRound, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { BadgeCheck, ChartPie, Check, CircleArrowRight, ExternalLink, MailQuestion, QrCode, Tag, UsersRound, X } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
-import { Card, CardHeader } from '@/components/arc/card'
+import { Card } from '@/components/arc/card'
 import { CopyButton } from '@/components/arc/copy-button/copy-button'
 import { Gauge } from '@/components/arc/gauge/gauge'
-import { ChatThread } from '@/components/arc/chat-thread/chat-thread'
+import { ScrollArea } from '@/components/arc/scroll-area/scroll-area'
 import { Countdown } from '@/components/arc/countdown/countdown'
 import { ExpandableCard } from '@/components/arc/expandable-card/expandable-card'
-import { ScrollArea } from '@/components/arc/scroll-area/scroll-area'
 import { UsageMeter } from '@/components/arc/usage-meter/usage-meter'
 import {
   DonutChart,
@@ -21,8 +20,6 @@ import { PageHeader } from '@/components/PageHeader'
 import type { DashboardData } from '@/lib/dashboard'
 import { timeAgo } from '@/lib/notifications'
 import type { GuestStatus } from '@/pages/GuestsPanel'
-import { fetchWishes, markWishesSeen } from '@/lib/wishes'
-import type { Wish } from '@/lib/wishes'
 
 type Props = {
   data: DashboardData
@@ -32,7 +29,6 @@ type Props = {
   onOpenAccount: () => void
 }
 
-const WISH_LIMIT = 50
 
 function formatDate(value: string | null) {
   if (!value) return '-'
@@ -42,11 +38,6 @@ function formatDate(value: string | null) {
     year: 'numeric',
     timeZone: 'Asia/Jakarta',
   })
-}
-
-/** One stable author id per guest, so a guest's wishes group into the same conversation. */
-function wishAuthor(w: Wish) {
-  return w.guest_id ?? `name:${(w.guest_name ?? 'tamu').trim().toLowerCase()}`
 }
 
 /** beUI donut: how guest RSVP replies split between attending, absent and pending. */
@@ -121,67 +112,7 @@ type HistoryItem = {
 export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
   const { event, stats, guests, categories } = data
   const total = stats.total_guests
-  const eventId = event!.id
 
-  const [seen, setSeen] = useState<string | null>(event?.wishes_seen_at ?? null)
-  const [wishes, setWishes] = useState<Wish[] | null>(null)
-  const [wishTotal, setWishTotal] = useState(0)
-  const [unread, setUnread] = useState(0)
-  const [error, setError] = useState('')
-  const wishScroll = useRef<HTMLDivElement>(null)
-
-  const load = useCallback(async () => {
-    try {
-      const summary = await fetchWishes(eventId, seen, WISH_LIMIT)
-      setWishes([...summary.wishes].reverse())
-      setWishTotal(summary.total)
-      setUnread(summary.unread)
-      setError('')
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Ucapan belum bisa dimuat.')
-    }
-  }, [eventId, seen])
-
-  useEffect(() => {
-    load()
-  }, [load])
-
-  // The thread reads newest-last, so park the scroll area at the latest wish.
-  useEffect(() => {
-    const node = wishScroll.current
-    if (!node) return
-    node.scrollTop = node.scrollHeight
-    node.dispatchEvent(new Event('scroll'))
-  }, [wishes])
-
-  const markSeen = async () => {
-    try {
-      await markWishesSeen(eventId)
-      setSeen(new Date().toISOString())
-      notify('Ucapan ditandai sudah dibaca')
-    } catch (e) {
-      notify(e instanceof Error ? e.message : 'Gagal menandai ucapan.')
-    }
-  }
-
-  const wishParticipants = useMemo(() => {
-    const people = new Map<string, string>()
-    for (const w of wishes ?? []) {
-      const id = wishAuthor(w)
-      if (!people.has(id)) people.set(id, w.guest_name || 'Tamu')
-    }
-    return [...people].map(([id, name]) => ({ id, name }))
-  }, [wishes])
-
-  const wishMessages = useMemo(
-    () => (wishes ?? []).map(w => ({
-      id: w.id,
-      authorId: wishAuthor(w),
-      text: w.message,
-      createdAt: w.created_at,
-    })),
-    [wishes],
-  )
 
   /** Every RSVP reply and check-in, newest first, for the history list. */
   const history = useMemo(() => {
@@ -431,49 +362,6 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
           </Card>
         )}
 
-        {/* Ucapan - a read-only chat thread so guest messages read as one conversation. */}
-        <Card variant="default" padding="md" className="bento-wishes" aria-labelledby="ucapan-title">
-          <CardHeader
-            title={
-              <span className="wish-title">
-                <MessageSquareText size={20} aria-hidden />
-                <span>Ucapan</span>
-              </span>
-            }
-            description={`${wishTotal} ucapan masuk`}
-            action={unread > 0 && (
-              <button type="button" onClick={markSeen} className="wish-unread" aria-label={`${unread} ucapan belum dibaca, tandai sudah dibaca`}>
-                <Badge tone="info" size="sm" pill>{unread} belum dibaca</Badge>
-              </button>
-            )}
-          />
-          <div className="wish-chat">
-            {error && <p role="alert" className="wish-empty wish-error">{error}</p>}
-            {!error && wishes === null && <p className="wish-empty">Memuat ucapan…</p>}
-            {wishes && wishes.length === 0 && <p className="wish-empty">Belum ada ucapan masuk.</p>}
-            {wishes && wishes.length > 0 && (
-              <ScrollArea
-                className="wish-scroll"
-                maxHeight={340}
-                viewportRef={wishScroll}
-                label="Ucapan tamu"
-              >
-                <ChatThread
-                  participants={wishParticipants}
-                  currentUserId="host"
-                  messages={wishMessages}
-                  composer={false}
-                  allowAttachments={false}
-                  reactions={[]}
-                  locale="id-ID"
-                  label="Ucapan tamu"
-                  labels={{ addReaction: 'Beri reaksi' }}
-                  className="wish-chat-thread"
-                />
-              </ScrollArea>
-            )}
-          </div>
-        </Card>
       </div>
     </div>
   )
