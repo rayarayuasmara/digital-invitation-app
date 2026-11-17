@@ -1612,8 +1612,8 @@ body {
 
 .home-history-avatar > span {
   border: 0;
-  background: var(--soft);
-  color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 12%, var(--surface));
+  color: var(--accent-strong);
   font-weight: 600;
 }
 
@@ -1640,6 +1640,20 @@ body {
 
 .home-history-badge.is-absen {
   background: var(--danger-solid);
+}
+
+.home-history-type-badge {
+  position: absolute;
+  left: -2px;
+  bottom: -2px;
+  display: grid;
+  width: 19px;
+  height: 19px;
+  place-items: center;
+  border: 2px solid var(--card);
+  border-radius: 50%;
+  background: var(--warning-solid);
+  color: var(--on-solid);
 }
 
 .home-history-copy {
