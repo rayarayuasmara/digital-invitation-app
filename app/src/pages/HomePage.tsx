@@ -337,6 +337,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
               <ol className="home-history-list">
                 {historyFeed.map(item => {
                   const statusTone = item.kind === 'checkin' ? 'info' : item.kind === 'hadir' ? 'success' : 'danger'
+                  const showPax = item.kind !== 'absen'
                   return (
                     <li key={item.id} className="home-history-row">
                       <span className="home-history-avatar">
@@ -347,7 +348,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
                         <div className="home-history-badges">
                           <Badge size="sm" pill>{item.category}</Badge>
                           <Badge size="sm" pill tone={statusTone}>{item.status}</Badge>
-                          <Badge size="sm" pill>{item.pax} pax</Badge>
+                          {showPax && <Badge size="sm" pill>{item.pax} pax</Badge>}
                         </div>
                       </div>
                       <span className="home-history-time">{timeAgo(item.at)}</span>

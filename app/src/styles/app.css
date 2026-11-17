@@ -1542,7 +1542,7 @@ body {
 
 /* History */
 .home-stack .home-history {
-  padding: var(--space-5);
+  padding: var(--space-4);
 }
 
 .home-card-head {
@@ -1550,6 +1550,9 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border);
 }
 
 .home-card-head h3 {
@@ -1586,9 +1589,8 @@ body {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3);
-  border: 0;
-  border-radius: 0;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
   background: transparent;
   cursor: pointer;
   font: inherit;
@@ -1597,10 +1599,13 @@ body {
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
+.home-history-row:last-child {
+  border-bottom: 0;
+}
+
 @media (hover: hover) {
   .home-history-row:hover {
-    background: var(--surface);
-    box-shadow: 0 2px 8px color-mix(in oklab, var(--accent) 8%, transparent);
+    background: var(--surface-muted);
   }
 }
 
