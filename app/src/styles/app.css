@@ -1590,22 +1590,24 @@ body {
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--border);
+  border: 0;
   background: transparent;
   cursor: pointer;
   font: inherit;
   color: inherit;
   text-align: left;
-  transition: background-color var(--duration-fast) var(--ease-standard);
+  transition: background-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
 }
 
 .home-history-row:last-child {
   border-bottom: 0;
+  margin-bottom: 0;
 }
 
 @media (hover: hover) {
   .home-history-row:hover {
-    background: var(--surface-muted);
+    background: var(--surface);
+    box-shadow: 0 2px 8px color-mix(in oklab, var(--accent) 8%, transparent);
   }
 }
 
