@@ -2857,7 +2857,7 @@ body {
   border-radius: var(--radius-pill);
   background: var(--accent);
   color: var(--accent-foreground);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1;
 }
@@ -2916,6 +2916,7 @@ body {
 }
 
 .search-clear {
+  position: relative;
   flex: 0 0 auto;
   width: 28px;
   height: 28px;
@@ -2927,6 +2928,12 @@ body {
   cursor: pointer;
   border-radius: var(--radius-pill);
   transition: all var(--duration-fast) var(--ease-standard);
+}
+/* Visual stays 28px; the tap area grows to 44px. */
+.search-clear::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
 }
 
 .search-clear:hover {
@@ -2949,6 +2956,12 @@ body {
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 }
+/* Visual stays 36px; the tap area grows to 44px. */
+.filter-trigger::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
 
 .filter-trigger:hover,
 .filter-trigger[data-state='open'] {
@@ -2966,7 +2979,7 @@ body {
   border-radius: var(--radius-pill);
   background: var(--accent);
   color: var(--accent-foreground);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 20px;
   text-align: center;
@@ -3232,6 +3245,7 @@ body {
 }
 
 .account-close {
+  position: relative;
   align-self: flex-end;
   display: grid;
   width: 36px;
@@ -3244,6 +3258,12 @@ body {
   color: var(--text-secondary);
   cursor: pointer;
   transition: background var(--duration-fast) var(--ease-standard);
+}
+/* Visual stays 36px; the tap area grows to 44px. */
+.account-close::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
 }
 
 .account-close:active {
@@ -3505,7 +3525,7 @@ body {
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--ink) 8%, transparent);
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: var(--weight-bold);
   font-variant-numeric: tabular-nums;
 }

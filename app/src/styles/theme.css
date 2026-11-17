@@ -169,8 +169,9 @@
   --surface-raised: color-mix(in srgb, var(--color-neutral-white) 17%, var(--color-neutral-black));
   --surface-muted: color-mix(in srgb, var(--color-neutral-white) 23%, var(--color-neutral-black));
   --foreground: var(--color-neutral-white);
-  --text-secondary: color-mix(in oklab, #ebebf5 60%, transparent);
-  --text-muted: color-mix(in oklab, #ebebf5 30%, transparent);
+  /* Dark-mode text is kept at WCAG AA (4.5:1) on every surface. Secondary keeps a clear step above muted. */
+  --text-secondary: color-mix(in oklab, #ebebf5 72%, transparent);
+  --text-muted: color-mix(in oklab, #ebebf5 60%, transparent);
   --border: color-mix(in srgb, var(--color-neutral-white) 20%, var(--color-neutral-black));
   --border-subtle: color-mix(in srgb, var(--color-neutral-white) 12%, var(--color-neutral-black));
   --border-strong: color-mix(in srgb, var(--color-neutral-white) 32%, var(--color-neutral-black));
