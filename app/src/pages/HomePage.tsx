@@ -17,7 +17,6 @@ import {
 } from '@/components/charts/donut-chart'
 import { DigitSwap } from '@/components/motion/digit-swap'
 import { PageHeader } from '@/components/PageHeader'
-import { GuestCard } from './guests/GuestCard'
 import type { DashboardData } from '@/lib/dashboard'
 import { timeAgo } from '@/lib/notifications'
 import type { GuestStatus } from '@/pages/GuestsPanel'
@@ -312,27 +311,6 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
             </div>
           </div>
         </Card>
-
-        {/* Guests awaiting RSVP response. */}
-        {belumRsvp > 0 && (
-          <Card variant="default" padding="md" className="home-pending" aria-labelledby="pending-title">
-            <div className="home-card-head">
-              <h3 id="pending-title">Belum konfirmasi ({belumRsvp})</h3>
-              <button type="button" className="home-link" onClick={() => onOpenGuests('belum_rsvp')}>
-                Lihat semua
-                <CircleArrowRight size={16} strokeWidth={1.9} aria-hidden />
-              </button>
-            </div>
-            <div className="home-pending-list">
-              {guests
-                .filter(g => !g.rsvp_status || g.rsvp_status === 'pending')
-                .slice(0, 5)
-                .map(g => (
-                  <GuestCard key={g.id} guest={g} variant="compact" onClick={() => onOpenGuests('belum_rsvp')} />
-                ))}
-            </div>
-          </Card>
-        )}
 
         {/* Latest RSVP replies and check-ins. */}
         <Card variant="default" padding="md" className="home-history" aria-labelledby="history-title">
