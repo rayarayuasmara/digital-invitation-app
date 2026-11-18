@@ -1593,6 +1593,18 @@ body {
   font-size: var(--text-sm);
 }
 
+/* Same chip as the invitation badge on a guest avatar, shown inline in Histori. */
+.history-type-badge {
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
 .home-history-time {
   flex: 0 0 auto;
   padding-top: 3px;
@@ -2617,6 +2629,17 @@ body {
   font-size: var(--text-sm);
 }
 
+/* A printed invitation locks the RSVP control to Hadir. */
+.ios-segment-field {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.ios-segment-field:disabled {
+  opacity: 0.55;
+}
 /* A row whose control sits under its label. */
 .ios-row-stack {
   display: grid;
@@ -3730,15 +3753,6 @@ body {
   padding: var(--space-2);
 }
 
-/* Status filter tabs fill their row and share it equally. */
-.status-tabs [role="tablist"] > div {
-  flex: 1 1 0 !important;
-  min-width: 0;
-}
-
-.status-tabs [role="tablist"] > div > button {
-  width: 100%;
-}
 /* Ucapan page: day-grouped feed of guest wishes. */
 .wishes-page {
   display: flex;

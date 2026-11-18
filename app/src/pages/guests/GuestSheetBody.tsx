@@ -5,15 +5,15 @@ import { Button } from '@/components/arc/button/button'
 import { Input } from '@/components/arc/input/input'
 import { Select } from '@/components/arc/select/select'
 import { Switch } from '@/components/arc/switch/switch'
+import SegmentedControl from '@/components/arc/segmented-control/segmented-control'
 import { AdaptiveStepper, AdaptiveStepperDecrement, AdaptiveStepperIncrement, AdaptiveStepperValue } from '@/components/motion/adaptive-stepper'
-import { Tabs, TabsList, TabsTrigger } from '@/components/motion/tabs'
 import type { Guest, GuestForm } from '@/lib/guests'
 import { emptyForm } from './guest-helpers'
 
 /** The three RSVP states a client can set by hand; `pending` clears the RSVP row. */
 export type RsvpChoice = 'hadir' | 'tidak_hadir' | 'pending'
 
-/** What the status tabs show: the RSVP itself plus the invitation's delivery state. */
+/** What the status control shows: the RSVP itself plus the invitation's delivery state. */
 type StatusChoice = 'belum_terkirim' | 'pending' | 'hadir' | 'tidak_hadir'
 
 export type SaveFlags = { isSent?: boolean; isCheckedIn?: boolean; rsvpStatus?: RsvpChoice }
@@ -194,22 +194,16 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
           <div className="ios-group-body">
             <div className="ios-row ios-row-stack">
               <span className="ios-row-label" id={`${fieldId}-status`}>Status RSVP</span>
-              <div data-beui className="w-full">
-                <Tabs value={status} onValueChange={v => pickStatus(v as StatusChoice)} variant="segment">
-                  <TabsList aria-label="Status tamu" className="w-full rounded-full" wrapperClassName="rounded-full">
-                    {statusChoices.map(choice => (
-                      <TabsTrigger
-                        key={choice.value}
-                        value={choice.value}
-                        disabled={isPrint}
-                        className="min-h-9 rounded-full text-xs font-medium"
-                        indicatorClassName="rounded-full"
-                      >
-                        {choice.label}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </Tabs>
+              <div className="w-full">
+                <fieldset disabled={isPrint} className="ios-segment-field">
+                  <SegmentedControl
+                    label="Status RSVP"
+                    fullWidth
+                    value={status}
+                    onValueChange={v => pickStatus(v as StatusChoice)}
+                    options={statusChoices}
+                  />
+                </fieldset>
               </div>
             </div>
             <div className="ios-row">

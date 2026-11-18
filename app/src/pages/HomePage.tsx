@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { BadgeCheck, ChartPie, CircleArrowRight, ExternalLink, MailQuestion, Tag, UsersRound } from 'lucide-react'
+import { BadgeCheck, ChartPie, CircleArrowRight, ExternalLink, MailQuestion, Printer, Smartphone, Tag, UsersRound } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
 import type { BadgeTone } from '@/components/arc/badge/badge'
@@ -341,7 +341,15 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
                     <div className="home-history-meta">
                       <Badge size="sm" pill tone={historyTone[item.kind]}>{historyLabel[item.kind]}</Badge>
                       <Badge size="sm" pill>{item.pax} pax</Badge>
-                      <Badge size="sm" pill>{item.invitation_type === 'cetak' ? 'Cetak' : 'Digital'}</Badge>
+                      <span
+                        className="history-type-badge"
+                        role="img"
+                        aria-label={item.invitation_type === 'cetak' ? 'Undangan cetak' : 'Undangan digital'}
+                      >
+                        {item.invitation_type === 'cetak'
+                          ? <Printer size={11} aria-hidden />
+                          : <Smartphone size={11} aria-hidden />}
+                      </span>
                     </div>
                   </div>
                   <time className="home-history-time" dateTime={item.at}>{timeAgo(item.at)}</time>
