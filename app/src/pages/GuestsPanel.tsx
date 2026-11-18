@@ -199,14 +199,14 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
             >
               <TabsList
                 aria-label="Filter status tamu"
-                className="rounded-full"
+                className="!w-full rounded-full"
                 wrapperClassName="rounded-full"
               >
                 {statusTabs.map(t => (
                   <TabsTrigger
                     key={t.value}
                     value={t.value}
-                    className="min-h-10 rounded-full text-interface-label"
+                    className="min-h-10 flex-1 rounded-full text-interface-label"
                     indicatorClassName="rounded-full"
                   >
                     {t.label}

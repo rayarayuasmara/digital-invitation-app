@@ -2627,7 +2627,7 @@ body {
 /* The beUI stepper has a fixed 216px footprint, so it is centred under its label. */
 .ios-stepper-wrap {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   padding-inline: var(--space-1);
 }
 
@@ -2765,7 +2765,7 @@ body {
 }
 
 /* beUI donut pilot. The component is copied source, so its internal layout is
-   Tailwind; this wrapper only handles spacing and keeps the ring compact on a
+   handled by Tailwind; this wrapper only handles spacing and keeps the ring compact on a
    phone-sized shell. */
 .rsvp-chart {
   margin-top: var(--space-3);
@@ -3199,9 +3199,9 @@ body {
 /* Quick actions: icon-only, stacked on the right of the card. */
 .guest-card-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-2);
   flex: 0 0 auto;
 }
 
@@ -3727,6 +3727,15 @@ body {
   padding: var(--space-2);
 }
 
+/* Status filter tabs fill their row and share it equally. */
+.status-tabs [role="tablist"] > div {
+  flex: 1 1 0 !important;
+  min-width: 0;
+}
+
+.status-tabs [role="tablist"] > div > button {
+  width: 100%;
+}
 /* Ucapan page: day-grouped feed of guest wishes. */
 .wishes-page {
   display: flex;

@@ -58,7 +58,6 @@ export function GuestCard({ guest, variant = 'grid', onClick, onCopyLink, onSend
           <div className="guest-card-badges">
             <Badge size="sm" pill>{guest.category || 'Umum'}</Badge>
             <Badge size="sm" pill tone={statusTone}>{statusText}</Badge>
-            <Badge size="sm" pill>{guest.max_pax} pax</Badge>
           </div>
         </div>
       </button>

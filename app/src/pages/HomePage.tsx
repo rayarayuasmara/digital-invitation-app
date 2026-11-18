@@ -147,7 +147,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
     return items.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
   }, [guests])
 
-  const historyFeed = useMemo(() => history.slice(0, 5), [history])
+  const historyFeed = useMemo(() => history.slice(0, 10), [history])
 
   const orderedCategories = useMemo(
     () => [...categories].sort((a, b) => b.total - a.total),
@@ -340,7 +340,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
                     <p className="home-history-name">{item.name}</p>
                     <div className="home-history-meta">
                       <Badge size="sm" pill tone={historyTone[item.kind]}>{historyLabel[item.kind]}</Badge>
-                      <span>{item.detail}</span>
+                      <Badge size="sm" pill>{item.detail}</Badge>
                     </div>
                   </div>
                   <time className="home-history-time" dateTime={item.at}>{timeAgo(item.at)}</time>

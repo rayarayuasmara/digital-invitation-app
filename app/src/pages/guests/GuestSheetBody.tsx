@@ -193,7 +193,7 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
         <section className="ios-group" aria-label="Status tamu">
           <div className="ios-group-body">
             <div className="ios-row ios-row-stack">
-              <span className="ios-row-label" id={`${fieldId}-status`}>Status tamu</span>
+              <span className="ios-row-label" id={`${fieldId}-status`}>Status RSVP</span>
               <div data-beui className="w-full">
                 <Tabs value={status} onValueChange={v => pickStatus(v as StatusChoice)} variant="segment">
                   <TabsList aria-label="Status tamu" className="w-full rounded-full" wrapperClassName="rounded-full">
