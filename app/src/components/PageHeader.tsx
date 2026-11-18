@@ -24,7 +24,6 @@ export function PageHeader({ title, subtitle, account, sticky = true }: Props) {
   return (
     <>
       <header ref={ref} className={sticky ? 'page-head' : 'page-head is-static'}>
-        <span className="progressive-blur" aria-hidden="true" />
         <h1 className="page-title">{title}</h1>
         {account && (
           <button type="button" className="page-head-avatar" onClick={account.onOpen} aria-label={`Akun ${account.name}`}>

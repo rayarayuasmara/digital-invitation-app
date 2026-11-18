@@ -180,7 +180,6 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
       <div className="home-stack">
         {/* Hero: who the day is for, plus the two facts a host checks most. */}
         <Card variant="default" padding="md" className="home-hero">
-          <span className="home-hero-fade" aria-hidden />
           <div className="home-hero-top">
             <div className="home-hero-copy">
               <p className="home-hero-halo">Hari Berbahagia</p>
@@ -334,7 +333,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
             <ol className="home-history-list">
               {historyFeed.map(item => (
                 <li key={item.id} className="home-history-row">
-                  <span className="home-history-avatar">
+                  <span className={`home-history-avatar${item.invitation_type === 'cetak' ? ' is-print' : ''}`}>
                     <Avatar name={item.name} size="lg" />
                     <span
                       className="guest-avatar-badge"

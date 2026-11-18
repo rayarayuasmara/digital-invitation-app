@@ -121,54 +121,15 @@ body {
   }
 }
 
-/* Black progressive fades: the hero softens into the header, the page into the tab bar. */
-.home-hero-fade {
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 72px;
-  z-index: 0;
-  pointer-events: none;
-  background: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / 0.8) 45%, rgb(0 0 0 / 0.32) 74%, transparent 100%);
-  -webkit-backdrop-filter: blur(10px) saturate(140%);
-  backdrop-filter: blur(10px) saturate(140%);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / 0.7) 55%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / 0.7) 55%, transparent 100%);
-}
-
-.home-stack .home-hero {
-  position: relative;
-  overflow: hidden;
-}
-
-.home-hero > *:not(.home-hero-fade) {
-  position: relative;
-  z-index: 1;
-}
-
-.page-bottom-fade {
+/* The header's glass sits behind it at the root, so it reads as coming from
+   behind the bar instead of being painted inside it. */
+.app-top-fade {
   position: fixed;
-  bottom: 0;
-  left: 50%;
+  inset: 0 auto auto 50%;
   width: min(100%, 480px);
-  height: 120px;
+  height: calc(var(--page-bar-h) + var(--blur-fade, 48px));
   translate: -50% 0;
-  z-index: 4;
-  pointer-events: none;
-  background: linear-gradient(to top, #000 0%, rgb(0 0 0 / 0.86) 38%, rgb(0 0 0 / 0.35) 70%, transparent 100%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-mask-image: linear-gradient(to top, #000 0%, rgb(0 0 0 / 0.75) 45%, transparent 100%);
-  mask-image: linear-gradient(to top, #000 0%, rgb(0 0 0 / 0.75) 45%, transparent 100%);
-}
-
-@media (prefers-reduced-transparency: reduce) {
-  .home-hero-fade,
-  .page-bottom-fade {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
+  z-index: 24;
 }
 
 .page-title {
@@ -544,6 +505,16 @@ body {
   padding: 0 var(--space-3) calc(var(--space-2) + var(--safe-bottom));
   transform: translateX(-50%);
   pointer-events: none;
+}
+
+/* When a sheet locks scrolling, Radix reserves the scrollbar with a body margin.
+   The centred app moves by half that margin; keep the fixed rails in step. */
+body[data-scroll-locked] .tabbar-wrap {
+  translate: calc(-1 * var(--removed-body-scroll-bar-size, 0px) / 2) 0;
+}
+
+body[data-scroll-locked] .app-top-fade {
+  translate: calc(-50% - var(--removed-body-scroll-bar-size, 0px) / 2) 0;
 }
 
 /* Glisse tab bar: four tabs plus the FAB share the bottom rail. */
@@ -1598,11 +1569,16 @@ body {
   flex: 0 0 auto;
 }
 
-.home-history-avatar > span {
+.home-history-avatar > span:first-child {
   border: 0;
   background: color-mix(in oklab, var(--accent) 12%, var(--surface));
   color: var(--accent-strong);
   font-weight: 600;
+}
+
+.home-history-avatar.is-print .guest-avatar-badge {
+  background: var(--warning-solid);
+  color: var(--on-solid);
 }
 
 /* The link keeps its compact visual; the tap area grows to 44px without moving the title. */
