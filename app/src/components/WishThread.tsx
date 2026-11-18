@@ -31,8 +31,8 @@ function statusOf(guest: Guest | undefined): { text: string; tone: BadgeTone } |
   if (!guest) return null
   if (guest.is_checked_in) return { text: 'Check-in', tone: 'info' }
   if (guest.rsvp_status === 'hadir') return { text: 'Hadir', tone: 'success' }
-  if (guest.rsvp_status === 'tidak_hadir' || guest.rsvp_status === 'absen') return { text: 'Tidak hadir', tone: 'danger' }
-  if (!guest.is_sent) return { text: 'Belum terkirim', tone: 'neutral' }
+  if (guest.rsvp_status === 'tidak_hadir' || guest.rsvp_status === 'absen') return { text: 'Absen', tone: 'danger' }
+  if (!guest.is_sent) return { text: 'Unsent', tone: 'neutral' }
   return { text: 'Pending', tone: 'warning' }
 }
 

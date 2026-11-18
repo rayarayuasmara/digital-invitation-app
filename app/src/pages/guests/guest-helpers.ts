@@ -1,16 +1,16 @@
 import type { BadgeTone } from '@/components/arc/badge/badge'
 import type { Guest, GuestForm } from '@/lib/guests'
 
-export type GuestStatus = 'semua' | 'hadir' | 'tidak_hadir' | 'belum_rsvp' | 'pending' | 'belum_terkirim' | 'check_in'
+export type GuestStatus = 'semua' | 'hadir' | 'tidak_hadir' | 'pending' | 'belum_terkirim' | 'check_in'
 export type Status = GuestStatus
 export type SortKey = 'nama' | 'dibuat' | 'diubah'
 
 export const statusTabs: { value: Status; label: string }[] = [
   { value: 'semua', label: 'Semua' },
   { value: 'hadir', label: 'Hadir' },
-  { value: 'tidak_hadir', label: 'Tidak hadir' },
-  { value: 'belum_rsvp', label: 'Belum RSVP' },
-  { value: 'belum_terkirim', label: 'Belum terkirim' },
+  { value: 'tidak_hadir', label: 'Absen' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'belum_terkirim', label: 'Unsent' },
   { value: 'check_in', label: 'Check-in' },
 ]
 
@@ -31,7 +31,6 @@ export function matches(g: Guest, f: Status) {
   if (f === 'semua') return true
   if (f === 'hadir') return g.rsvp_status === 'hadir'
   if (f === 'tidak_hadir') return g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen'
-  if (f === 'belum_rsvp') return !g.rsvp_status || g.rsvp_status === 'pending'
   if (f === 'pending') return (!g.rsvp_status || g.rsvp_status === 'pending') && g.is_sent
   if (f === 'belum_terkirim') return !g.is_sent
   return g.is_checked_in
@@ -40,7 +39,7 @@ export function matches(g: Guest, f: Status) {
 export function statusOf(g: Guest): { text: string; tone: BadgeTone } {
   if (g.is_checked_in) return { text: 'Check-in', tone: 'info' }
   if (g.rsvp_status === 'hadir') return { text: 'Hadir', tone: 'success' }
-  if (g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen') return { text: 'Tidak hadir', tone: 'danger' }
-  if (!g.is_sent) return { text: 'Belum terkirim', tone: 'neutral' }
+  if (g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen') return { text: 'Absen', tone: 'danger' }
+  if (!g.is_sent) return { text: 'Unsent', tone: 'neutral' }
   return { text: 'Pending', tone: 'warning' }
 }

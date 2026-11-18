@@ -30,7 +30,7 @@ type Props = {
 }
 
 
-const historyLabel: Record<string, string> = { checkin: 'Check-in', hadir: 'Hadir', absen: 'Tidak hadir' }
+const historyLabel: Record<string, string> = { checkin: 'Check-in', hadir: 'Hadir', absen: 'Absen' }
 const historyTone: Record<string, BadgeTone> = { checkin: 'info', hadir: 'success', absen: 'danger' }
 
 function formatDate(value: string | null) {
@@ -50,7 +50,7 @@ function RsvpComposition({ hadir, absen, pending }: { hadir: number; absen: numb
   const wrap = useRef<HTMLDivElement>(null)
   const segments = [
     { id: 'hadir', name: 'Hadir', value: hadir, color: 'var(--rsvp-hadir)' },
-    { id: 'tidak', name: 'Tidak hadir', value: absen, color: 'var(--rsvp-tidak)' },
+    { id: 'tidak', name: 'Absen', value: absen, color: 'var(--rsvp-tidak)' },
     { id: 'pending', name: 'Pending', value: pending, color: 'var(--rsvp-pending)' },
   ]
 
@@ -265,12 +265,12 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
               variant="default"
               padding="md"
               className="home-rsvp-empty"
-              onClick={() => onOpenGuests('belum_rsvp')}
+              onClick={() => onOpenGuests('pending')}
               ariaLabel="Lihat undangan yang belum RSVP"
             >
               <div className="home-invites-head">
                 <div className="home-tile-head">
-                  <h3>Belum RSVP</h3>
+                  <h3>Pending</h3>
                   <MailQuestion size={20} strokeWidth={1.75} aria-hidden />
                 </div>
                 <div className="home-invites-body">

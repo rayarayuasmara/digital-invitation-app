@@ -3,17 +3,18 @@ import type { FormEvent } from 'react'
 import { Copy, Trash2 } from 'lucide-react'
 import { Button } from '@/components/arc/button/button'
 import { Input } from '@/components/arc/input/input'
-import { NumberField } from '@/components/arc/number-field/number-field'
 import { Select } from '@/components/arc/select/select'
 import { Switch } from '@/components/arc/switch/switch'
+import { AdaptiveStepper, AdaptiveStepperDecrement, AdaptiveStepperIncrement, AdaptiveStepperValue } from '@/components/motion/adaptive-stepper'
+import { Tabs, TabsList, TabsTrigger } from '@/components/motion/tabs'
 import type { Guest, GuestForm } from '@/lib/guests'
 import { emptyForm } from './guest-helpers'
 
 /** The three RSVP states a client can set by hand; `pending` clears the RSVP row. */
 export type RsvpChoice = 'hadir' | 'tidak_hadir' | 'pending'
 
-/** What the status dropdown shows: the RSVP itself plus the invitation's delivery state. */
-type StatusChoice = 'belum_terkirim' | 'belum_rsvp' | 'hadir' | 'tidak_hadir'
+/** What the status tabs show: the RSVP itself plus the invitation's delivery state. */
+type StatusChoice = 'belum_terkirim' | 'pending' | 'hadir' | 'tidak_hadir'
 
 export type SaveFlags = { isSent?: boolean; isCheckedIn?: boolean; rsvpStatus?: RsvpChoice }
 
@@ -27,10 +28,10 @@ export type BodyProps = {
 }
 
 const statusChoices: { value: StatusChoice; label: string }[] = [
-  { value: 'belum_terkirim', label: 'Belum terkirim' },
-  { value: 'belum_rsvp', label: 'Belum RSVP' },
+  { value: 'belum_terkirim', label: 'Unsent' },
+  { value: 'pending', label: 'Pending' },
   { value: 'hadir', label: 'Hadir' },
-  { value: 'tidak_hadir', label: 'Tidak hadir' },
+  { value: 'tidak_hadir', label: 'Absen' },
 ]
 
 function rsvpOf(guest: Guest | null): RsvpChoice {
@@ -73,10 +74,10 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
     : !sent
       ? 'belum_terkirim'
       : rsvp === 'pending'
-        ? 'belum_rsvp'
+        ? 'pending'
         : rsvp
 
-  /** One dropdown drives all three switches, so the states can never contradict each other. */
+  /** One control drives all three switches, so the states can never contradict each other. */
   const pickStatus = (next: StatusChoice) => {
     if (next === 'belum_terkirim') {
       setSent(false)
@@ -85,8 +86,8 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
       return
     }
     setSent(true)
-    // "Belum RSVP" means the invitation arrived but has not been answered yet.
-    setRsvp(next === 'belum_rsvp' ? 'pending' : next)
+    // "Pending" means the invitation arrived but has not been answered yet.
+    setRsvp(next === 'pending' ? 'pending' : next)
     // Only "Hadir" can sit next to a check-in; the other states have not arrived.
     if (next !== 'hadir') setCheckedIn(false)
   }
@@ -151,8 +152,21 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
           <div className="ios-row">
             <Select label="Kategori" value={form.category} onValueChange={v => set('category', v)} options={categories.map(c => ({ value: c, label: c }))} />
           </div>
-          <div className="ios-row ios-row-number">
-            <NumberField label="Jumlah orang" value={form.maxPax} min={1} max={50} onValueChange={v => set('maxPax', v)} />
+          <div className="ios-row ios-row-stack">
+            <span className="ios-row-label" id={`${fieldId}-pax`}>Jumlah orang</span>
+            <div data-beui className="ios-stepper-wrap">
+              <AdaptiveStepper
+                value={form.maxPax}
+                min={1}
+                max={50}
+                onValueChange={v => set('maxPax', v)}
+                aria-label="Jumlah orang"
+              >
+                <AdaptiveStepperDecrement />
+                <AdaptiveStepperValue />
+                <AdaptiveStepperIncrement />
+              </AdaptiveStepper>
+            </div>
           </div>
         </div>
       </section>
@@ -178,14 +192,25 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
       {guest && (
         <section className="ios-group" aria-label="Status tamu">
           <div className="ios-group-body">
-            <div className="ios-row">
-              <Select
-                label="Status tamu"
-                value={status}
-                disabled={isPrint}
-                onValueChange={v => pickStatus(v as StatusChoice)}
-                options={statusChoices}
-              />
+            <div className="ios-row ios-row-stack">
+              <span className="ios-row-label" id={`${fieldId}-status`}>Status tamu</span>
+              <div data-beui className="w-full">
+                <Tabs value={status} onValueChange={v => pickStatus(v as StatusChoice)} variant="segment">
+                  <TabsList aria-label="Status tamu" className="w-full rounded-full" wrapperClassName="rounded-full">
+                    {statusChoices.map(choice => (
+                      <TabsTrigger
+                        key={choice.value}
+                        value={choice.value}
+                        disabled={isPrint}
+                        className="min-h-9 rounded-full text-xs font-medium"
+                        indicatorClassName="rounded-full"
+                      >
+                        {choice.label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
+              </div>
             </div>
             <div className="ios-row">
               <span className="ios-row-label" id={`${fieldId}-sent`}>Undangan terkirim</span>

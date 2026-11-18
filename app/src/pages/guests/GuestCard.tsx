@@ -72,15 +72,13 @@ export function GuestCard({ guest, variant = 'grid', onClick, onCopyLink, onSend
               aria-label={`Salin tautan undangan ${guest.group_name}`}
               onClick={onCopyLink}
             >
-              <Link2 size={14} strokeWidth={1.9} aria-hidden />
-              Salin tautan
+              <Link2 size={16} strokeWidth={1.9} aria-hidden />
             </button>
           )}
           {onSendWhatsApp && (
             <button
               type="button"
               className="guest-card-action is-wa"
-              // Filled once the invitation has been sent; clearing "Undangan terkirim" resets it.
               data-sent={guest.is_sent || undefined}
               aria-pressed={guest.is_sent}
               aria-label={guest.is_sent
@@ -88,8 +86,9 @@ export function GuestCard({ guest, variant = 'grid', onClick, onCopyLink, onSend
                 : `Kirim WhatsApp ke ${guest.group_name}`}
               onClick={onSendWhatsApp}
             >
-              {guest.is_sent ? <Check size={14} strokeWidth={2.2} aria-hidden /> : <MessageCircle size={14} strokeWidth={1.9} aria-hidden />}
-              Kirim WA
+              {guest.is_sent
+                ? <Check size={16} strokeWidth={2.2} aria-hidden />
+                : <MessageCircle size={16} strokeWidth={1.9} aria-hidden />}
             </button>
           )}
         </div>
