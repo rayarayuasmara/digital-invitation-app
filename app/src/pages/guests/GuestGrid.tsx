@@ -14,7 +14,7 @@ type Props = {
 export function GuestGrid({ guests, actionsFor, onOpen }: Props) {
   return (
     <div className="guests-grid">
-      <SwipeActions label="Daftar tamu">
+      <SwipeActions label="Daftar tamu" className="guests-surface">
         {guests.map(g => {
           const actions = actionsFor(g)
           return (

@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { BadgeCheck, ChartPie, Check, CircleArrowRight, ExternalLink, MailQuestion, Printer, QrCode, Smartphone, Tag, UsersRound, X } from 'lucide-react'
+import { BadgeCheck, ChartPie, CircleArrowRight, ExternalLink, MailQuestion, Tag, UsersRound } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
+import type { BadgeTone } from '@/components/arc/badge/badge'
 import { Card } from '@/components/arc/card'
 import { CopyButton } from '@/components/arc/copy-button/copy-button'
 import { Gauge } from '@/components/arc/gauge/gauge'
-import { ScrollArea } from '@/components/arc/scroll-area/scroll-area'
 import { Countdown } from '@/components/arc/countdown/countdown'
 import { ExpandableCard } from '@/components/arc/expandable-card/expandable-card'
 import { UsageMeter } from '@/components/arc/usage-meter/usage-meter'
@@ -29,6 +29,9 @@ type Props = {
   onOpenAccount: () => void
 }
 
+
+const historyLabel: Record<string, string> = { checkin: 'Check-in', hadir: 'Hadir', absen: 'Tidak hadir' }
+const historyTone: Record<string, BadgeTone> = { checkin: 'info', hadir: 'success', absen: 'danger' }
 
 function formatDate(value: string | null) {
   if (!value) return '-'
@@ -126,7 +129,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
           kind: attending ? 'hadir' : 'absen',
           at: g._rsvp_at,
           name: g.group_name,
-          detail: `${attending ? 'Konfirmasi hadir' : 'Tidak bisa hadir'} · ${g.max_pax} pax`,
+          detail: `${g.max_pax} pax · ${g.invitation_type === 'cetak' ? 'Cetak' : 'Digital'}`,
           invitation_type: g.invitation_type === 'cetak' ? 'cetak' : 'digital',
         })
       }
@@ -136,7 +139,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
           kind: 'checkin',
           at: g._checkin_at,
           name: g.group_name,
-          detail: `Check-in di pintu · ${g.max_pax} pax`,
+          detail: `${g.max_pax} pax · ${g.invitation_type === 'cetak' ? 'Cetak' : 'Digital'}`,
           invitation_type: g.invitation_type === 'cetak' ? 'cetak' : 'digital',
         })
       }
@@ -144,7 +147,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
     return items.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
   }, [guests])
 
-  const historyFeed = useMemo(() => history.slice(0, 10), [history])
+  const historyFeed = useMemo(() => history.slice(0, 5), [history])
 
   const orderedCategories = useMemo(
     () => [...categories].sort((a, b) => b.total - a.total),
@@ -319,7 +322,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
         <Card variant="default" padding="md" className="home-history" aria-labelledby="history-title">
           <div className="home-card-head">
             <h3 id="history-title">Histori RSVP</h3>
-            <button type="button" className="home-link" onClick={() => onOpenGuests('semua')}>
+            <button type="button" className="home-link home-history-more" onClick={() => onOpenGuests('semua')}>
               Lihat semua
               <CircleArrowRight size={16} strokeWidth={1.9} aria-hidden />
             </button>
@@ -327,34 +330,23 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
           {historyFeed.length === 0 ? (
             <p className="home-history-empty">Belum ada tamu yang RSVP atau check-in.</p>
           ) : (
-            <ScrollArea className="home-history-scroll" maxHeight={518} label="Histori RSVP">
-              <ol className="home-history-list">
-                {historyFeed.map(item => (
-                  <li key={item.id} className="home-history-row">
-                    <span className="home-history-avatar">
-                      <Avatar name={item.name} size="lg" />
-                      <span className={`home-history-badge is-${item.kind}`} aria-hidden>
-                        {item.kind === 'checkin' ? <QrCode size={9} strokeWidth={2.4} /> : item.kind === 'hadir' ? <Check size={10} strokeWidth={3} /> : <X size={10} strokeWidth={3} />}
-                      </span>
-                      <span
-                        className="home-history-type-badge"
-                        role="img"
-                        aria-label={item.invitation_type === 'cetak' ? 'Undangan cetak' : 'Undangan digital'}
-                      >
-                        {item.invitation_type === 'cetak'
-                          ? <Printer size={9} aria-hidden />
-                          : <Smartphone size={9} aria-hidden />}
-                      </span>
-                    </span>
-                    <div className="home-history-copy">
-                      <p className="home-history-name">{item.name}</p>
-                      <p className="home-history-detail">{item.detail}</p>
+            <ol className="home-history-list">
+              {historyFeed.map(item => (
+                <li key={item.id} className="home-history-row">
+                  <span className="home-history-avatar">
+                    <Avatar name={item.name} size="lg" />
+                  </span>
+                  <div className="home-history-copy">
+                    <p className="home-history-name">{item.name}</p>
+                    <div className="home-history-meta">
+                      <Badge size="sm" pill tone={historyTone[item.kind]}>{historyLabel[item.kind]}</Badge>
+                      <span>{item.detail}</span>
                     </div>
-                    <span className="home-history-time">{timeAgo(item.at)}</span>
-                  </li>
-                ))}
-              </ol>
-            </ScrollArea>
+                  </div>
+                  <time className="home-history-time" dateTime={item.at}>{timeAgo(item.at)}</time>
+                </li>
+              ))}
+            </ol>
           )}
         </Card>
 
