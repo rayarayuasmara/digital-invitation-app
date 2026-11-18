@@ -5,12 +5,20 @@ import { Button } from '@/components/arc/button/button'
 import { ChatBubbleIcon } from '@/components/ChatBubbleIcon'
 import { PageHeader } from '@/components/PageHeader'
 import type { DashboardData } from '@/lib/dashboard'
-import { timeAgo } from '@/lib/notifications'
 import { initialsName } from '@/lib/text'
 import { fetchWishes, markWishesSeen } from '@/lib/wishes'
 import type { Wish } from '@/lib/wishes'
 
 const WISH_LIMIT = 100
+
+/** Only the clock time, in the event's time zone — the day already has its own heading. */
+const timeOfDay = (iso: string) =>
+  new Date(iso).toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    timeZone: 'Asia/Jakarta',
+  })
 
 type Props = {
   data: DashboardData
@@ -207,7 +215,7 @@ export function WishesPage({ data, notify, onOpenAccount, onChanged, onSeen }: P
                   <div className="wish-item-body">
                     <div className="wish-item-meta">
                       <span className="wish-item-name">{name}</span>
-                      <time className="wish-item-time" dateTime={wish.created_at}>{timeAgo(wish.created_at)}</time>
+                      <time className="wish-item-time" dateTime={wish.created_at}>{timeOfDay(wish.created_at)}</time>
                       {fresh && (
                         <>
                           <span className="wish-item-dot" aria-hidden />

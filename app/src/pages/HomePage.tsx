@@ -180,6 +180,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
       <div className="home-stack">
         {/* Hero: who the day is for, plus the two facts a host checks most. */}
         <Card variant="default" padding="md" className="home-hero">
+          <span className="home-hero-fade" aria-hidden />
           <div className="home-hero-top">
             <div className="home-hero-copy">
               <p className="home-hero-halo">Hari Berbahagia</p>
@@ -335,21 +336,21 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
                 <li key={item.id} className="home-history-row">
                   <span className="home-history-avatar">
                     <Avatar name={item.name} size="lg" />
+                    <span
+                      className="guest-avatar-badge"
+                      role="img"
+                      aria-label={item.invitation_type === 'cetak' ? 'Undangan cetak' : 'Undangan digital'}
+                    >
+                      {item.invitation_type === 'cetak'
+                        ? <Printer size={10} aria-hidden />
+                        : <Smartphone size={10} aria-hidden />}
+                    </span>
                   </span>
                   <div className="home-history-copy">
                     <p className="home-history-name">{item.name}</p>
                     <div className="home-history-meta">
                       <Badge size="sm" pill tone={historyTone[item.kind]}>{historyLabel[item.kind]}</Badge>
                       <Badge size="sm" pill>{item.pax} pax</Badge>
-                      <span
-                        className="history-type-badge"
-                        role="img"
-                        aria-label={item.invitation_type === 'cetak' ? 'Undangan cetak' : 'Undangan digital'}
-                      >
-                        {item.invitation_type === 'cetak'
-                          ? <Printer size={11} aria-hidden />
-                          : <Smartphone size={11} aria-hidden />}
-                      </span>
                     </div>
                   </div>
                   <time className="home-history-time" dateTime={item.at}>{timeAgo(item.at)}</time>

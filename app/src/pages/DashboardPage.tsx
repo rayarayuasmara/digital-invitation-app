@@ -157,6 +157,7 @@ export function DashboardPage() {
 
   return (
     <main id="main-content" className="app" tabIndex={-1}>
+      <span className="page-bottom-fade" aria-hidden />
       {tab === 'beranda' && (
         <HomePage
           data={data}
