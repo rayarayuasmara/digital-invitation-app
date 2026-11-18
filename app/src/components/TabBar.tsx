@@ -159,7 +159,7 @@ export function TabBar({ value, onChange, onScanner, onAddGuest, notifications, 
                 {open ? <X size={26} strokeWidth={2.2} aria-hidden /> : <BrandMark size={26} />}
               </motion.span>
             </AnimatePresence>
-            {!open && unreadNotifications > 0 && <span className="fab-badge" aria-hidden>{unreadNotifications > 99 ? '99+' : unreadNotifications}</span>}
+            {!open && unreadNotifications > 0 && <span className="fab-badge" aria-hidden>{unreadNotifications > 9 ? '9+' : unreadNotifications}</span>}
           </motion.button>
         </div>
       </nav>

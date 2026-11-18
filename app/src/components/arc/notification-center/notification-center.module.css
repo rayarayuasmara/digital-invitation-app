@@ -75,5 +75,23 @@
 @keyframes panel-open { from { opacity: 0; transform: translate(var(--panel-x), var(--panel-y)) scale(.97); } }
 @keyframes panel-close { to { opacity: 0; transform: translate(calc(var(--panel-x) / 2), calc(var(--panel-y) / 2)) scale(.98); } }
 @keyframes item-in { from { opacity: 0; transform: translateY(4px); } }
-@media (max-width: 380px) { .header { padding: 20px 16px 16px; } .heading h2 { font-size: var(--text-lg); } .toolbar { align-items: flex-start; padding: 0 12px 12px; } .list { padding: 8px 5px; } .item { padding-inline: 7px; } .itemMain { gap: 7px; } .details { padding-left: 43px; } .itemActions { gap: 5px; } .itemActions button { padding-inline: 7px; } .markAll span { display: none; } .footer { padding-inline: 16px; } }
+/* On a phone the toolbar keeps two rows: the views first, the bulk action under them,
+   so the button never crowds or covers the list. */
+@media (max-width: 640px) {
+  .toolbar { align-items: stretch; }
+  .viewSwitch { align-self: flex-start; }
+  .markAll { width: 100%; justify-content: flex-end; }
+}
+@media (max-width: 380px) {
+  .header { padding: 20px 16px 16px; }
+  .heading h2 { font-size: var(--text-lg); }
+  .toolbar { align-items: flex-start; padding: 0 12px 12px; }
+  .list { padding: 8px 5px; }
+  .item { padding-inline: 7px; }
+  .itemMain { gap: 7px; }
+  .details { padding-left: 43px; }
+  .itemActions { gap: 5px; }
+  .itemActions button { padding-inline: 7px; }
+  .footer { padding-inline: 16px; }
+}
 @media (prefers-reduced-motion: reduce) { .panel[data-state], .trigger, .close, .viewSwitch button, .markAll, .item, .itemActions button, .footer button { animation: none; transition-duration: 0ms; } .close:active, .markAll:active, .itemActions button:active, .footer button:active { transform: none; } }

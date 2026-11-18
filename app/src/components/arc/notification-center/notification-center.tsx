@@ -171,7 +171,7 @@ export function NotificationCenter({ notifications: initial, label = "Notifikasi
   return <PopoverPrimitive.Root open={isOpen} onOpenChange={setOpen}>
     <PopoverPrimitive.Trigger asChild>
       {/* The trigger anchors the panel, so it gives press feedback with color only; scaling it would shift the panel. */}
-      <button className={styles.trigger} type="button" aria-label={`${label}${unreadCount ? `, ${unreadCount} unread` : ""}`}>
+      <button className={styles.trigger} type="button" aria-label={`${label}${unreadCount ? `, ${unreadCount} belum dibaca` : ""}`}>
         <motion.span animate={{ rotate: isOpen && !reduce ? -12 : 0 }} transition={reduce ? instant : motionTokens.spring.snappy}><Bell size={19} strokeWidth={1.75} aria-hidden="true" /></motion.span>
         <AnimatePresence initial={false}>{unreadCount > 0 && <motion.span key="badge" className={styles.badge} aria-hidden="true" initial={reduce ? { opacity: 0 } : { opacity: 0, scale: .6 }} animate={{ opacity: 1, scale: 1 }} exit={reduce ? fadeOut : { opacity: 0, scale: .6, transition: exitFast }} transition={reduce ? instant : motionTokens.spring.snappy}><RollingCount value={unreadCount} display={unreadCount > 9 ? "9+" : String(unreadCount)} reduce={reduce} /></motion.span>}</AnimatePresence>
       </button>
@@ -231,7 +231,7 @@ export function NotificationCenter({ notifications: initial, label = "Notifikasi
         </div>
 
         <AnimatePresence initial={false}>{readCount > 0 && <motion.div key="footer" className={styles.footerFrame} initial={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={reduce ? fadeOut : { height: 0, opacity: 0, transition: { height: motionTokens.spring.smooth, opacity: exitFast } }} transition={height}>
-          <div className={styles.footer}><span><RollingCount value={readCount} reduce={reduce} /> read</span><button type="button" onClick={clearRead}>Clear read</button></div>
+          <div className={styles.footer}><span><RollingCount value={readCount} reduce={reduce} /> dibaca</span><button type="button" onClick={clearRead}>Hapus yang dibaca</button></div>
         </motion.div>}</AnimatePresence>
       </PopoverPrimitive.Content>
     </PopoverPrimitive.Portal>

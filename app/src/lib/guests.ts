@@ -53,7 +53,7 @@ export async function updateGuest(
   guest: Guest,
   eventId: string,
   form: GuestForm,
-  flags?: { isSent?: boolean; isCheckedIn?: boolean },
+  flags?: { isSent?: boolean; isCheckedIn?: boolean; rsvpStatus?: string },
 ) {
   const isPrint = form.invitationType === 'cetak'
   const { data, error } = await supabase.rpc('update_guest_by_client', {
@@ -62,7 +62,7 @@ export async function updateGuest(
     p_category: form.category,
     p_max_pax: form.maxPax,
     p_phone: form.phone,
-    p_rsvp_status: isPrint ? 'hadir' : (guest.rsvp_status ?? 'pending'),
+    p_rsvp_status: isPrint ? 'hadir' : (flags?.rsvpStatus ?? guest.rsvp_status ?? 'pending'),
     p_is_checked_in: flags?.isCheckedIn ?? guest.is_checked_in,
     p_is_sent: isPrint ? true : (flags?.isSent ?? guest.is_sent),
     p_invitation_type: form.invitationType,
