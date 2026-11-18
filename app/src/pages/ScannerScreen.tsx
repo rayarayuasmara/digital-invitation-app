@@ -3,7 +3,7 @@ import { Html5Qrcode } from 'html5-qrcode'
 import { CheckCircle2, LogOut, RefreshCw, ScanLine, Search, SwitchCamera, Ticket, UserCheck, UserRound, XCircle } from 'lucide-react'
 import { Button } from '@/components/arc/button/button'
 import { Gauge } from '@/components/arc/gauge/gauge'
-import { Sheet } from '@/components/Sheet'
+import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
 import { checkIn, listScanGuests, tokenFromScan } from '@/lib/scanner'
 import type { CheckInResult, ScanGuest } from '@/lib/scanner'
 
@@ -352,7 +352,7 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
         </ul>
       </div>
 
-      <Sheet open={sheet !== null} title={sheetTitle} onClose={closeSheet}>
+      <BottomSheet open={sheet !== null} onOpenChange={next => { if (!next) closeSheet() }} title={sheetTitle} detents={[.6]}>
         {sheet?.kind === 'result' && (
           <div className="sheet-body" style={{ justifyItems: 'center', textAlign: 'center' }}>
             {sheet.ok ? <CheckCircle2 size={56} color="var(--green-ink)" aria-hidden /> : sheet.dup ? <UserCheck size={56} color="var(--accent)" aria-hidden /> : <XCircle size={56} color="var(--red-ink)" aria-hidden />}
@@ -389,7 +389,7 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
             <Button type="button" variant="accentOutline" size="xl" fullWidth onClick={closeSheet}>Tutup</Button>
           </div>
         )}
-      </Sheet>
+      </BottomSheet>
 
       {notice && <div role="status" className="toast">{notice}</div>}
     </div>

@@ -123,7 +123,27 @@ export function DashboardPage() {
   }
 
   if (!data) {
-    return <main className="app"><p className="empty">Memuat…</p></main>
+    return (
+      <main className="app" aria-busy="true">
+        <div className="home-skeleton" aria-hidden>
+          <div className="home-skeleton-head">
+            <span className="home-skeleton-title" />
+            <span className="home-skeleton-avatar" />
+          </div>
+          <div className="home-skeleton-card home-skeleton-hero">
+            <span className="home-skeleton-line is-short" />
+            <span className="home-skeleton-line is-title" />
+          </div>
+          <div className="home-skeleton-grid">
+            <div className="home-skeleton-card home-skeleton-tall" />
+            <div className="home-skeleton-card" />
+            <div className="home-skeleton-card" />
+          </div>
+          <div className="home-skeleton-card" />
+        </div>
+        <p className="sr-only">Memuat…</p>
+      </main>
+    )
   }
 
   if (!data.event) {

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ChevronRight, LogOut, Mail, ShieldCheck, Sparkles, Users, X } from 'lucide-react'
+import { ChevronRight, LogOut, Mail, ShieldCheck, Sparkles, Users } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
+import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
 import { Tabs, TabsList, TabsTrigger } from '@/components/arc/tabs/tabs'
-import { Sheet } from '@/components/Sheet'
 import { useAuth } from '@/lib/auth'
 import type { DashboardData } from '@/lib/dashboard'
 import { supabase } from '@/lib/supabase'
@@ -54,12 +54,8 @@ export function AccountSheet({ open, data, notify, onClose }: Props) {
   const percent = quota > 0 ? Math.round((used / quota) * 100) : 0
 
   return (
-    <Sheet open={open} title="Akun" onClose={onClose} showHead={false}>
+    <BottomSheet open={open} onOpenChange={next => { if (!next) onClose() }} title="Akun" detents={[.92]}>
       <div className="account-sheet">
-        <button type="button" className="account-close" onClick={onClose} aria-label="Tutup">
-          <X size={18} strokeWidth={2.2} aria-hidden />
-        </button>
-
         <div className="account-identity">
           <Avatar name={initialsName(client.name)} size="xl" className="account-avatar" />
           <h2 className="account-name">{client.name}</h2>
@@ -127,6 +123,6 @@ export function AccountSheet({ open, data, notify, onClose }: Props) {
           </button>
         </div>
       </div>
-    </Sheet>
+    </BottomSheet>
   )
 }

@@ -499,61 +499,6 @@ body {
 /* Glisse tab bar: four tabs plus the FAB share the bottom rail. */
 /* One white thumb slides behind the active tab, like the legacy pillnav. */
 /* Bottom sheet */
-.sheet-backdrop {
-  position: fixed;
-  inset: 0;
-  background: var(--scrim);
-  z-index: 50;
-}
-
-.sheet {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin: 0 auto;
-  width: 100%;
-  max-width: 480px;
-  max-height: 88dvh;
-  overflow-y: auto;
-  z-index: 51;
-  padding: var(--space-3) var(--space-4) calc(var(--space-5) + var(--safe-bottom));
-  background: var(--surface);
-  border-radius: var(--radius-surface) var(--radius-surface) 0 0;
-  box-shadow: var(--shadow-sheet);
-  touch-action: pan-y;
-}
-
-.sheet-grab {
-  width: 40px;
-  height: 5px;
-  margin: 0 auto var(--space-4);
-  position: relative;
-  touch-action: none;
-  border-radius: var(--radius-pill);
-  background: var(--line);
-}
-
-.sheet-grab::before {
-  position: absolute;
-  inset: -12px -48px;
-  content: '';
-}
-
-.sheet-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin: 0 var(--space-1) var(--space-4);
-}
-
-.sheet-head h2 {
-  margin: 0;
-  font-size: var(--text-xl);
-  font-weight: 700;
-}
-
 .sheet-body {
   display: grid;
   gap: var(--space-4);
@@ -1660,6 +1605,79 @@ body {
   margin: var(--space-2) 0 0;
   color: var(--sub);
   font-size: var(--text-sm);
+}
+
+/* Loading placeholder shaped like Beranda: same card surface and rhythm, static blocks only, so it costs nothing to paint. */
+.home-skeleton {
+  display: grid;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+}
+
+.home-skeleton-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+}
+
+.home-skeleton-title {
+  width: 128px;
+  height: 34px;
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+}
+
+.home-skeleton-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--surface-muted);
+}
+
+.home-skeleton-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  min-height: 120px;
+  padding: var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+}
+
+.home-skeleton-hero {
+  min-height: 160px;
+}
+
+.home-skeleton-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.home-skeleton-grid > .home-skeleton-card:first-child {
+  grid-row: span 2;
+}
+
+.home-skeleton-tall {
+  min-height: 280px;
+}
+
+.home-skeleton-line {
+  width: 70%;
+  height: 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-muted);
+}
+
+.home-skeleton-line.is-short {
+  width: 40%;
+}
+
+.home-skeleton-line.is-title {
+  width: 60%;
+  height: 28px;
 }
 
 /* Guest categories sit on the standard card surface. */
@@ -3318,32 +3336,6 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 0 0 calc(var(--space-5) + var(--safe-bottom));
-}
-
-.account-close {
-  position: relative;
-  align-self: flex-end;
-  display: grid;
-  width: 36px;
-  height: 36px;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--ink) 7%, transparent);
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: background var(--duration-fast) var(--ease-standard);
-}
-/* Visual stays 36px; the tap area grows to 44px. */
-.account-close::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-}
-
-.account-close:active {
-  background: color-mix(in srgb, var(--ink) 12%, transparent);
 }
 
 .account-identity {
