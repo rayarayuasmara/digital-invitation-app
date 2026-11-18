@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '@/lib/auth'
 import { Button } from '@/components/arc/button/button'
 import { fetchDashboard } from '@/lib/dashboard'
@@ -8,13 +8,19 @@ import Toast from '@/components/arc/toast/toast'
 import { TabBar } from '@/components/TabBar'
 import type { Tab } from '@/components/TabBar'
 import { AccountSheet } from '@/components/AccountSheet'
-import { NotificationsSheet } from '@/components/NotificationsSheet'
+import type { NotificationItem } from '@/components/arc/notification-center/notification-center'
+import { buildNotifications } from '@/lib/notifications'
+import type { Guest } from '@/lib/guests'
+import type { Wish } from '@/lib/wishes'
 import { GuestsPanel } from '@/pages/GuestsPanel'
 import type { GuestStatus } from '@/pages/GuestsPanel'
 import { ScannerScreen } from '@/pages/ScannerScreen'
 import { HomePage } from '@/pages/HomePage'
 import { InvitationPage } from '@/pages/InvitationPage'
 import { WishesPage } from '@/pages/WishesPage'
+
+const NOTIF_SEEN_KEY = 'rr_notif_seen'
+const WISH_LIMIT = 50
 
 export function DashboardPage() {
   const { signOut } = useAuth()
@@ -25,14 +31,29 @@ export function DashboardPage() {
   const [createRequest, setCreateRequest] = useState(0)
   const [notice, setNotice] = useState<{ id: number; text: string } | null>(null)
   const [scannerOpen, setScannerOpen] = useState(false)
-  const [notifOpen, setNotifOpen] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
   const [unreadWishes, setUnreadWishes] = useState(0)
+  const [wishes, setWishes] = useState<Wish[]>([])
+  const [notifSeen, setNotifSeen] = useState(() => Number(localStorage.getItem(NOTIF_SEEN_KEY) || 0))
 
   // Mirrors `data` for the load callback, which is stable and must not depend on it.
   const hasDataRef = useRef(false)
 
   const notify = useCallback((message: string) => setNotice({ id: Date.now(), text: message }), [])
+
+  const notifications = useMemo<NotificationItem[]>(() => data?.event
+    ? buildNotifications(wishes, data.guests as Guest[], data.event.wishes_seen_at ?? null, notifSeen)
+    : [], [data, wishes, notifSeen])
+  const unreadNotifications = notifications.filter(n => !n.read).length
+  const notifKey = `${notifSeen}:${wishes.length}:${notifications.length}`
+
+  // The panel marks everything seen when it closes, so its items stay styled as they were while it is open.
+  const onNotificationsOpenChange = (open: boolean) => {
+    if (open) return
+    const now = Date.now()
+    localStorage.setItem(NOTIF_SEEN_KEY, String(now))
+    setNotifSeen(now)
+  }
 
   const load = useCallback(async () => {
     try {
@@ -42,9 +63,9 @@ export function DashboardPage() {
       setError('')
       // The unread badge is not essential: fetch it in the background and let it fail quietly.
       if (next.event) {
-        fetchWishes(next.event.id, next.event.wishes_seen_at ?? null, 1)
-          .then(summary => setUnreadWishes(summary.unread))
-          .catch(() => setUnreadWishes(0))
+        fetchWishes(next.event.id, next.event.wishes_seen_at ?? null, WISH_LIMIT)
+          .then(summary => { setWishes(summary.wishes); setUnreadWishes(summary.unread) })
+          .catch(() => { setWishes([]); setUnreadWishes(0) })
       }
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Gagal memuat data.'
@@ -102,15 +123,7 @@ export function DashboardPage() {
   }
 
   if (!data) {
-    return (
-      <main className="app">
-        <div className="app-loading" aria-hidden>
-          <span className="app-loading-block" />
-          <span className="app-loading-block" />
-        </div>
-        <p className="sr-only">Memuat…</p>
-      </main>
-    )
+    return <main className="app"><p className="empty">Memuat…</p></main>
   }
 
   if (!data.event) {
@@ -172,12 +185,14 @@ export function DashboardPage() {
         }}
         onScanner={openScanner}
         onAddGuest={addGuest}
-        onNotifications={() => setNotifOpen(true)}
+        notifications={notifications}
+        notifKey={notifKey}
+        onNotificationsOpenChange={onNotificationsOpenChange}
+        unreadNotifications={unreadNotifications}
         unreadWishes={unreadWishes}
       />
 
       <AccountSheet open={accountOpen} data={data} notify={notify} onClose={() => setAccountOpen(false)} />
-      <NotificationsSheet open={notifOpen} data={data} onClose={() => setNotifOpen(false)} />
 
       {notice && (
         <div className="toast-layer">

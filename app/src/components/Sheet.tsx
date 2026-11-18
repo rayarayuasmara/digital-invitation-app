@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { X } from 'lucide-react'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { AnimatePresence, motion, useDragControls, useReducedMotion } from 'motion/react'
 
 type Props = {
   open: boolean
@@ -16,6 +16,8 @@ const spring = { type: 'spring', stiffness: 380, damping: 40, mass: 0.9 } as con
 
 export function Sheet({ open, title, onClose, children, showHead = true }: Props) {
   const reduce = useReducedMotion()
+  // Dragging starts only from the grab bar, so a swipe inside the content scrolls it instead of moving the sheet.
+  const dragControls = useDragControls()
 
   useEffect(() => {
     if (!open) return
@@ -50,13 +52,15 @@ export function Sheet({ open, title, onClose, children, showHead = true }: Props
             exit={{ y: '105%' }}
             transition={reduce ? { duration: 0.15 } : spring}
             drag="y"
+            dragListener={false}
+            dragControls={dragControls}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.5 }}
             onDragEnd={(_, info) => {
               if (info.offset.y > 120 || info.velocity.y > 600) onClose()
             }}
           >
-            <div className="sheet-grab" aria-hidden />
+            <div className="sheet-grab" aria-hidden onPointerDown={event => dragControls.start(event)} />
             {showHead && (
               <div className="sheet-head">
                 <h2>{title}</h2>

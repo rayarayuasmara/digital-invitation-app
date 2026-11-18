@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { Bell, House, MailOpen, ScanLine, UserPlus, Users, X } from 'lucide-react'
+import { House, MailOpen, ScanLine, UserPlus, Users, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { BrandMark } from '@/components/BrandMark'
 import { ChatBubbleIcon } from '@/components/ChatBubbleIcon'
 import { Scrim } from '@/components/Scrim'
 import { LiquidTabBar } from '@/components/arc/liquid-tab-bar/liquid-tab-bar'
+import { NotificationCenter } from '@/components/arc/notification-center/notification-center'
+import type { NotificationItem } from '@/components/arc/notification-center/notification-center'
 import { motionTokens } from '@/components/arc/motion-tokens'
 
 export type Tab = 'beranda' | 'tamu' | 'ucapan' | 'undangan'
@@ -26,12 +28,17 @@ type Props = {
   onChange: (tab: Tab) => void
   onScanner: () => void
   onAddGuest: () => void
-  onNotifications: () => void
+  /** Notifications for the speed-dial's bell; the panel is the beUI notification center. */
+  notifications: NotificationItem[]
+  /** Changes when the list must be rebuilt, so the panel shows fresh items. */
+  notifKey: string
+  onNotificationsOpenChange: (open: boolean) => void
+  unreadNotifications: number
   /** Wishes the host has not read yet, shown on the Ucapan tab. */
   unreadWishes?: number
 }
 
-export function TabBar({ value, onChange, onScanner, onAddGuest, onNotifications, unreadWishes = 0 }: Props) {
+export function TabBar({ value, onChange, onScanner, onAddGuest, notifications, notifKey, onNotificationsOpenChange, unreadNotifications, unreadWishes = 0 }: Props) {
   const reduce = useReducedMotion()
   const [open, setOpen] = useState(false)
 
@@ -47,7 +54,6 @@ export function TabBar({ value, onChange, onScanner, onAddGuest, onNotifications
   const shortcuts: { label: string; icon: LucideIcon; run: () => void }[] = [
     { label: 'Scanner', icon: ScanLine, run: onScanner },
     { label: 'Tambah tamu', icon: UserPlus, run: onAddGuest },
-    { label: 'Notifikasi', icon: Bell, run: onNotifications },
   ]
 
   const pick = (run: () => void) => {
@@ -111,12 +117,29 @@ export function TabBar({ value, onChange, onScanner, onAddGuest, onNotifications
                 </motion.button>
               )
             })}
+            {open && (
+              <motion.div
+                key="notifikasi"
+                className="fab-menu-item fab-menu-notif"
+                initial={reduce ? false : { x: 0, y: 0, opacity: 0, scale: 0.4 }}
+                animate={{ x: arcOffset(2).x, y: arcOffset(2).y, opacity: 1, scale: 1 }}
+                exit={reduce ? { opacity: 0 } : { x: 0, y: 0, opacity: 0, scale: 0.4 }}
+                transition={reduce ? { duration: 0 } : { ...spring, delay: 2 * 0.035 }}
+              >
+                <NotificationCenter
+                  key={notifKey}
+                  notifications={notifications}
+                  label="Notifikasi"
+                  onOpenChange={onNotificationsOpenChange}
+                />
+              </motion.div>
+            )}
           </AnimatePresence>
 
           <motion.button
             type="button"
             className="fab"
-            aria-label={open ? 'Tutup pintasan' : 'Buka pintasan'}
+            aria-label={open ? 'Tutup pintasan' : unreadNotifications ? `Buka pintasan, ${unreadNotifications} notifikasi baru` : 'Buka pintasan'}
             aria-expanded={open}
             onClick={() => setOpen(o => !o)}
             whileTap={reduce ? undefined : { scale: 0.94 }}
@@ -136,6 +159,7 @@ export function TabBar({ value, onChange, onScanner, onAddGuest, onNotifications
                 {open ? <X size={26} strokeWidth={2.2} aria-hidden /> : <BrandMark size={26} />}
               </motion.span>
             </AnimatePresence>
+            {!open && unreadNotifications > 0 && <span className="fab-badge" aria-hidden>{unreadNotifications > 99 ? '99+' : unreadNotifications}</span>}
           </motion.button>
         </div>
       </nav>
