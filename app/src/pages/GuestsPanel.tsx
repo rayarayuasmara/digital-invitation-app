@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence } from 'motion/react'
-import { Copy, MessageCircle, Pencil, Trash2 } from 'lucide-react'
 import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
 import { Button } from '@/components/arc/button/button'
 import { Dialog, DialogContent } from '@/components/arc/dialog/dialog'
@@ -8,7 +7,6 @@ import { SearchField } from '@/components/arc/search-field/search-field'
 import { PageHeader } from '@/components/PageHeader'
 import { Scrim } from '@/components/Scrim'
 import { Tabs, TabsList, TabsTrigger } from '@/components/motion/tabs'
-import type { SwipeAction } from '@/components/arc/swipe-actions/swipe-actions'
 import type { DashboardData } from '@/lib/dashboard'
 import { addGuest, deleteGuest, markSent, updateGuest } from '@/lib/guests'
 import type { Guest } from '@/lib/guests'
@@ -150,16 +148,6 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
 
   const close = () => setSheet(null)
 
-  /** Same actions on the swipe and in the row menu, in the order people reach for them. */
-  const rowActions = (g: Guest): SwipeAction[] => [
-    { label: 'Copy link', icon: <Copy size={18} aria-hidden />, onSelect: () => copyLink(g) },
-    ...(g.invitation_type !== 'cetak'
-      ? [{ label: 'Kirim WA', icon: <MessageCircle size={18} aria-hidden />, tone: 'accent' as const, onSelect: () => sendWhatsApp(g) }]
-      : []),
-    { label: 'Edit', icon: <Pencil size={18} aria-hidden />, onSelect: () => setSheet({ mode: 'edit', guest: g }) },
-    { label: 'Hapus', icon: <Trash2 size={18} aria-hidden />, tone: 'danger' as const, onSelect: () => setDeleteTarget(g) },
-  ]
-
   return (
     <div className="guests-page">
       <PageHeader
@@ -244,8 +232,10 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
       {visible.length > 0 && (
         <GuestGrid
           guests={visible}
-          actionsFor={rowActions}
           onOpen={guest => setSheet({ mode: 'edit', guest })}
+          onCopyLink={copyLink}
+          onSendWhatsApp={sendWhatsApp}
+          onDelete={setDeleteTarget}
         />
       )}
 

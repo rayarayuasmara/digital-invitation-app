@@ -9,8 +9,11 @@ import { Switch } from '@/components/arc/switch/switch'
 import type { Guest, GuestForm } from '@/lib/guests'
 import { emptyForm } from './guest-helpers'
 
-/** The three states a client can set by hand; `pending` clears the RSVP row. */
+/** The three RSVP states a client can set by hand; `pending` clears the RSVP row. */
 export type RsvpChoice = 'hadir' | 'tidak_hadir' | 'pending'
+
+/** What the status dropdown shows: the RSVP itself plus the invitation's delivery state. */
+type StatusChoice = 'belum_terkirim' | 'belum_rsvp' | 'hadir' | 'tidak_hadir'
 
 export type SaveFlags = { isSent?: boolean; isCheckedIn?: boolean; rsvpStatus?: RsvpChoice }
 
@@ -23,9 +26,10 @@ export type BodyProps = {
   onDelete?: () => void
 }
 
-const rsvpChoices: { value: RsvpChoice; label: string }[] = [
+const statusChoices: { value: StatusChoice; label: string }[] = [
+  { value: 'belum_terkirim', label: 'Belum terkirim' },
+  { value: 'belum_rsvp', label: 'Belum RSVP' },
   { value: 'hadir', label: 'Hadir' },
-  { value: 'pending', label: 'Belum RSVP' },
   { value: 'tidak_hadir', label: 'Tidak hadir' },
 ]
 
@@ -40,7 +44,7 @@ function rsvpOf(guest: Guest | null): RsvpChoice {
  * hairline dividers, and the status rows last so a mistaken RSVP can be corrected.
  */
 export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink, onDelete }: BodyProps) {
-  const rsvpGroupId = useId()
+  const fieldId = useId()
   const [form, setForm] = useState<GuestForm>(
     guest
       ? {
@@ -63,7 +67,45 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
 
   // A printed invitation always counts as sent and present, as the RPC enforces.
   const isPrint = form.invitationType === 'cetak'
-  const shownRsvp: RsvpChoice = isPrint ? 'hadir' : rsvp
+  // A checked-in guest has clearly arrived, even when the RSVP row was never written.
+  const status: StatusChoice = isPrint || checkedIn
+    ? 'hadir'
+    : !sent
+      ? 'belum_terkirim'
+      : rsvp === 'pending'
+        ? 'belum_rsvp'
+        : rsvp
+
+  /** One dropdown drives all three switches, so the states can never contradict each other. */
+  const pickStatus = (next: StatusChoice) => {
+    if (next === 'belum_terkirim') {
+      setSent(false)
+      setRsvp('pending')
+      setCheckedIn(false)
+      return
+    }
+    setSent(true)
+    // "Belum RSVP" means the invitation arrived but has not been answered yet.
+    setRsvp(next === 'belum_rsvp' ? 'pending' : next)
+    // Only "Hadir" can sit next to a check-in; the other states have not arrived.
+    if (next !== 'hadir') setCheckedIn(false)
+  }
+
+  // Clearing the delivery state resets the guest: no RSVP and no check-in yet.
+  const changeSent = (next: boolean) => {
+    setSent(next)
+    if (next) return
+    setRsvp('pending')
+    setCheckedIn(false)
+  }
+
+  // Someone who is checked in must have arrived, so the RSVP and the delivery follow.
+  const changeCheckedIn = (next: boolean) => {
+    setCheckedIn(next)
+    if (!next) return
+    setRsvp('hadir')
+    setSent(true)
+  }
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -78,7 +120,7 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
           ? {
               isSent: isPrint ? true : sent,
               isCheckedIn: checkedIn,
-              rsvpStatus: isPrint ? 'hadir' : rsvp,
+              rsvpStatus: isPrint || checkedIn ? 'hadir' : rsvp,
             }
           : {},
       )
@@ -91,8 +133,7 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
 
   return (
     <form className="ios-form" onSubmit={submit}>
-      <section className="ios-group" aria-labelledby={`${rsvpGroupId}-data`}>
-        <h3 className="ios-group-title" id={`${rsvpGroupId}-data`}>Data tamu</h3>
+      <section className="ios-group" aria-label="Data tamu">
         <div className="ios-group-body">
           <div className="ios-row">
             <Input label="Nama tamu" value={form.name} onChange={e => set('name', e.target.value)} required />
@@ -116,8 +157,7 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
         </div>
       </section>
 
-      <section className="ios-group" aria-labelledby={`${rsvpGroupId}-invitation`}>
-        <h3 className="ios-group-title" id={`${rsvpGroupId}-invitation`}>Konfigurasi undangan</h3>
+      <section className="ios-group" aria-label="Konfigurasi undangan">
         <div className="ios-group-body">
           <div className="ios-row">
             <Select
@@ -136,50 +176,38 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
       </section>
 
       {guest && (
-        <section className="ios-group" aria-labelledby={`${rsvpGroupId}-status`}>
-          <h3 className="ios-group-title" id={`${rsvpGroupId}-status`}>Status tamu</h3>
+        <section className="ios-group" aria-label="Status tamu">
           <div className="ios-group-body">
-            <div className="ios-row ios-row-stack">
-              <span className="ios-row-label" id={`${rsvpGroupId}-rsvp`}>Status RSVP</span>
-              <div className="ios-segment" role="radiogroup" aria-labelledby={`${rsvpGroupId}-rsvp`}>
-                {rsvpChoices.map(choice => (
-                  <label key={choice.value} className="ios-segment-option" data-checked={shownRsvp === choice.value || undefined}>
-                    <input
-                      type="radio"
-                      name={`${rsvpGroupId}-rsvp`}
-                      value={choice.value}
-                      checked={shownRsvp === choice.value}
-                      disabled={isPrint}
-                      onChange={() => setRsvp(choice.value)}
-                    />
-                    <span>{choice.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
             <div className="ios-row">
-              <span className="ios-row-label" id={`${rsvpGroupId}-sent`}>Undangan terkirim</span>
-              <Switch
-                aria-labelledby={`${rsvpGroupId}-sent`}
-                checked={isPrint || sent}
+              <Select
+                label="Status tamu"
+                value={status}
                 disabled={isPrint}
-                onCheckedChange={setSent}
+                onValueChange={v => pickStatus(v as StatusChoice)}
+                options={statusChoices}
               />
             </div>
             <div className="ios-row">
-              <span className="ios-row-label" id={`${rsvpGroupId}-checkin`}>Sudah check-in</span>
+              <span className="ios-row-label" id={`${fieldId}-sent`}>Undangan terkirim</span>
               <Switch
-                aria-labelledby={`${rsvpGroupId}-checkin`}
+                aria-labelledby={`${fieldId}-sent`}
+                checked={isPrint || sent}
+                disabled={isPrint}
+                onCheckedChange={changeSent}
+              />
+            </div>
+            <div className="ios-row">
+              <span className="ios-row-label" id={`${fieldId}-checkin`}>Sudah check-in</span>
+              <Switch
+                aria-labelledby={`${fieldId}-checkin`}
                 checked={checkedIn}
-                onCheckedChange={setCheckedIn}
+                onCheckedChange={changeCheckedIn}
               />
             </div>
           </div>
-          <p className="ios-group-note">
-            {isPrint
-              ? 'Undangan cetak otomatis tercatat terkirim dan hadir.'
-              : 'Ubah status di sini untuk mengoreksi RSVP yang tidak sengaja, misalnya saat mencoba undangan.'}
-          </p>
+          {isPrint && (
+            <p className="ios-group-note">Undangan cetak otomatis tercatat terkirim dan hadir.</p>
+          )}
         </section>
       )}
 
