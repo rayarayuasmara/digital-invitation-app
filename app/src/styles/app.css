@@ -2624,11 +2624,14 @@ body {
   padding-block: var(--space-3);
 }
 
-/* The beUI stepper has a fixed 216px footprint, so it is centred under its label. */
-.ios-stepper-wrap {
-  display: flex;
-  justify-content: flex-end;
-  padding-inline: var(--space-1);
+/* The beUI stepper is 216px wide; scale it to sit on the right of a normal row. */
+.ios-stepper-scale {
+  flex: 0 0 auto;
+  zoom: 0.7;
+}
+
+.ios-row-stepper .ios-row-label {
+  white-space: nowrap;
 }
 
 /* Fields lose their own box and share the row: label left, value right. */

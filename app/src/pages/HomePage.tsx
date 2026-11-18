@@ -109,7 +109,7 @@ type HistoryItem = {
   kind: 'checkin' | 'hadir' | 'absen'
   at: string
   name: string
-  detail: string
+  pax: number
   invitation_type: 'digital' | 'cetak'
 }
 
@@ -129,7 +129,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
           kind: attending ? 'hadir' : 'absen',
           at: g._rsvp_at,
           name: g.group_name,
-          detail: `${g.max_pax} pax · ${g.invitation_type === 'cetak' ? 'Cetak' : 'Digital'}`,
+          pax: g.max_pax,
           invitation_type: g.invitation_type === 'cetak' ? 'cetak' : 'digital',
         })
       }
@@ -139,7 +139,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
           kind: 'checkin',
           at: g._checkin_at,
           name: g.group_name,
-          detail: `${g.max_pax} pax · ${g.invitation_type === 'cetak' ? 'Cetak' : 'Digital'}`,
+          pax: g.max_pax,
           invitation_type: g.invitation_type === 'cetak' ? 'cetak' : 'digital',
         })
       }
@@ -340,7 +340,8 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
                     <p className="home-history-name">{item.name}</p>
                     <div className="home-history-meta">
                       <Badge size="sm" pill tone={historyTone[item.kind]}>{historyLabel[item.kind]}</Badge>
-                      <Badge size="sm" pill>{item.detail}</Badge>
+                      <Badge size="sm" pill>{item.pax} pax</Badge>
+                      <Badge size="sm" pill>{item.invitation_type === 'cetak' ? 'Cetak' : 'Digital'}</Badge>
                     </div>
                   </div>
                   <time className="home-history-time" dateTime={item.at}>{timeAgo(item.at)}</time>

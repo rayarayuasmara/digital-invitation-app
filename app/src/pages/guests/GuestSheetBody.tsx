@@ -152,9 +152,9 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
           <div className="ios-row">
             <Select label="Kategori" value={form.category} onValueChange={v => set('category', v)} options={categories.map(c => ({ value: c, label: c }))} />
           </div>
-          <div className="ios-row ios-row-stack">
+          <div className="ios-row ios-row-stepper">
             <span className="ios-row-label" id={`${fieldId}-pax`}>Jumlah orang</span>
-            <div data-beui className="ios-stepper-wrap">
+            <div data-beui className="ios-stepper-scale">
               <AdaptiveStepper
                 value={form.maxPax}
                 min={1}
