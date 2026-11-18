@@ -102,7 +102,15 @@ export function DashboardPage() {
   }
 
   if (!data) {
-    return <main className="app"><p className="empty">Memuat…</p></main>
+    return (
+      <main className="app">
+        <div className="app-loading" aria-hidden>
+          <span className="app-loading-block" />
+          <span className="app-loading-block" />
+        </div>
+        <p className="sr-only">Memuat…</p>
+      </main>
+    )
   }
 
   if (!data.event) {
