@@ -129,7 +129,7 @@ body {
   width: min(100%, 480px);
   height: calc(var(--page-bar-h) + var(--blur-fade, 48px));
   translate: -50% 0;
-  z-index: 24;
+  z-index: 18;
 }
 
 .page-title {
@@ -3863,40 +3863,27 @@ body[data-scroll-locked] .app-top-fade {
 }
 
 .wishes-list {
-  overflow: hidden;
-  border-radius: var(--radius-panel);
-  background: var(--surface);
+  display: grid;
+  gap: var(--space-2);
 }
 
 .wish-item {
-  position: relative;
   display: flex;
+  align-items: flex-start;
   gap: var(--space-3);
-  padding: var(--space-4);
-}
-
-/* Divider lines up with the name and runs to the right edge of the card. */
-.wish-item + .wish-item {
-  border-top: 0;
-}
-
-.wish-item + .wish-item::before {
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: calc(var(--space-4) + 36px + var(--space-3));
-  height: 1px;
-  background: var(--line);
-  content: '';
 }
 
 .wish-item.is-unread {
-  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface-raised));
 }
 
-.wish-item-avatar {
+/* Same tinted avatar as the RSVP history on Beranda. */
+.wish-item .wish-item-avatar {
   flex: 0 0 auto;
-  margin-top: 2px;
+  border: 0;
+  background: color-mix(in oklab, var(--accent) 12%, var(--surface));
+  color: var(--accent-strong);
+  font-weight: 600;
 }
 
 .wish-item-body {
@@ -3925,7 +3912,7 @@ body[data-scroll-locked] .app-top-fade {
   flex: 0 0 auto;
   margin-left: auto;
   color: var(--text-muted);
-  font-size: var(--text-xs);
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
 

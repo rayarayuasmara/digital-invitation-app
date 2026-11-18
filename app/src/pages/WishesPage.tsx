@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { CheckCheck, RefreshCw } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Button } from '@/components/arc/button/button'
+import { Card } from '@/components/arc/card'
 import { ChatBubbleIcon } from '@/components/ChatBubbleIcon'
 import { PageHeader } from '@/components/PageHeader'
 import type { DashboardData } from '@/lib/dashboard'
@@ -210,8 +211,14 @@ export function WishesPage({ data, notify, onOpenAccount, onChanged, onSeen }: P
               const name = wish.guest_name?.trim() || 'Tamu'
               const fresh = isUnread(wish)
               return (
-                <article key={wish.id} className={`wish-item${fresh ? ' is-unread' : ''}`}>
-                  <Avatar name={initialsName(name)} size="md" className="wish-item-avatar" />
+                <Card
+                  key={wish.id}
+                  variant="raised"
+                  padding="md"
+                  role="article"
+                  className={`wish-item${fresh ? ' is-unread' : ''}`}
+                >
+                  <Avatar name={initialsName(name)} size="lg" className="wish-item-avatar" />
                   <div className="wish-item-body">
                     <div className="wish-item-meta">
                       <span className="wish-item-name">{name}</span>
@@ -225,7 +232,7 @@ export function WishesPage({ data, notify, onOpenAccount, onChanged, onSeen }: P
                     </div>
                     <p className="wish-item-message">{wish.message}</p>
                   </div>
-                </article>
+                </Card>
               )
             })}
           </div>
