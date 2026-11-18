@@ -2571,6 +2571,13 @@ body {
   padding-inline: var(--space-3);
 }
 
+/* Touch screens scroll the chips with a swipe; the edge chevrons would sit over the last label. */
+@media (pointer: coarse) {
+  .status-tabs button[aria-controls] {
+    display: none;
+  }
+}
+
 /* The sort trigger borrows the tabs' height so the row reads as one control group. */
 .list-controls > button {
   align-self: stretch;

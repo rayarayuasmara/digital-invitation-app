@@ -113,9 +113,11 @@ export function WishesPage({ data, notify, onOpenAccount, onChanged, onSeen }: P
         title="Ucapan"
         subtitle={
           <p className="page-sub">
-            {total === 0
-              ? 'Belum ada ucapan masuk'
-              : `${total} ucapan${unread > 0 ? ` · ${unread} belum dibaca` : ' · semua sudah dibaca'}`}
+            {wishes === null
+              ? 'Memuat ucapan…'
+              : total === 0
+                ? 'Belum ada ucapan masuk'
+                : `${total} ucapan${unread > 0 ? ` · ${unread} belum dibaca` : ' · semua sudah dibaca'}`}
           </p>
         }
         account={{ name: data.client.name, onOpen: onOpenAccount }}
