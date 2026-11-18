@@ -42,13 +42,30 @@ Project ref `awwraxmftlbekclwdrix`. Riwayat migrasi di `db/` (p0–p11) dan **`d
 
 Hampir semua write lewat RPC `SECURITY DEFINER`, bukan write langsung ke tabel. **Mengubah nama atau parameter RPC memutus frontend tanpa error build** — cari dulu pemanggilnya di `app/src` sebelum menyentuh SQL.
 
+## Preview lokal (gerbang utama)
+
+```bash
+cd app
+npm run dev -- --host      # wajib `--host`, bukan `npm run dev` saja
+```
+
+- Di Mac: `http://localhost:5173/dashboard`
+- Di HP (Wi-Fi yang sama): `http://<IP-LAN-Mac>:5173/dashboard`, contoh `http://192.168.1.6:5173/dashboard`.
+  Cek IP dengan `ipconfig getifaddr en0`; ganti kalau berubah.
+- macOS akan meminta izin firewall untuk `node` saat pertama kali — harus diizinkan.
+- Kalau HP tidak bisa membuka, biasanya Wi-Fi tamu mengisolasi antar klien. Pakai jaringan yang sama.
+- **Kamera QR tidak bisa diuji lewat `http://192.168.x.x`.** `getUserMedia` butuh secure context; untuk scanner pakai preview Vercel (HTTPS).
+- Dev server **tidak** melakukan typecheck; error tipe baru muncul saat `npm run build`.
+
 ## Alur kerja
 
 1. Audit dulu, usul kemudian, ubah terakhir. Jangan refactor yang tidak diminta.
-2. Setiap perubahan lewat branch → push → preview Vercel.
-3. **Jangan push ke `main` sebelum pengguna bilang preview aman.** Setelah itu merge `--ff-only`.
-4. Perubahan docs-only tanpa dampak build boleh langsung merge setelah dijelaskan.
-5. Temuan harus konkret: path file, nomor baris, angka.
+2. Setiap perubahan lewat branch. Verifikasi di **lokal** (dan HP) dulu, bukan Vercel.
+3. **Jangan merge ke `main` sebelum pengguna bilang "aman"** setelah mencoba di lokal. Merge dengan `--ff-only`.
+4. Sebelum merge, `npm run build` **wajib lolos** — hanya langkah ini yang menjalankan `tsc`.
+5. Preview Vercel hanya diperlukan kalau: mengubah `vercel.json`/env/build, menyentuh fitur yang butuh HTTPS (kamera QR scanner), atau satu cek akhir sebelum perubahan besar. Untuk perubahan kecil, cukup lokal + build.
+6. Perubahan docs-only tanpa dampak build boleh langsung merge setelah dijelaskan.
+7. Temuan harus konkret: path file, nomor baris, angka.
 
 ## Commit
 
