@@ -3863,18 +3863,32 @@ body[data-scroll-locked] .app-top-fade {
 }
 
 .wishes-list {
-  display: grid;
-  gap: var(--space-2);
+  overflow: hidden;
+  border-radius: var(--radius-panel);
+  background: var(--surface);
 }
 
 .wish-item {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+/* Divider lines up with the name and runs to the right edge of the card. */
+.wish-item + .wish-item::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: calc(var(--space-4) + 48px + var(--space-3));
+  height: 1px;
+  background: var(--line);
+  content: '';
 }
 
 .wish-item.is-unread {
-  background: color-mix(in srgb, var(--accent) 6%, var(--surface-raised));
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
 }
 
 /* Same tinted avatar as the RSVP history on Beranda. */
