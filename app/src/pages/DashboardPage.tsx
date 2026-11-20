@@ -18,6 +18,7 @@ import { ScannerScreen } from '@/pages/ScannerScreen'
 import { HomePage } from '@/pages/HomePage'
 import { InvitationPage } from '@/pages/InvitationPage'
 import { WishesPage } from '@/pages/WishesPage'
+import { EventOnboarding } from '@/pages/EventOnboarding'
 
 const NOTIF_SEEN_KEY = 'rr_notif_seen'
 const WISH_LIMIT = 50
@@ -55,25 +56,40 @@ export function DashboardPage() {
     setNotifSeen(now)
   }
 
+  const applyDashboard = useCallback((next: DashboardData) => {
+    hasDataRef.current = true
+    setData(next)
+    setError('')
+    // The unread badge is not essential: fetch it in the background and let it fail quietly.
+    if (next.event) {
+      fetchWishes(next.event.id, next.event.wishes_seen_at ?? null, WISH_LIMIT)
+        .then(summary => { setWishes(summary.wishes); setUnreadWishes(summary.unread) })
+        .catch(() => { setWishes([]); setUnreadWishes(0) })
+    }
+  }, [])
+
   const load = useCallback(async () => {
     try {
-      const next = await fetchDashboard()
-      hasDataRef.current = true
-      setData(next)
-      setError('')
-      // The unread badge is not essential: fetch it in the background and let it fail quietly.
-      if (next.event) {
-        fetchWishes(next.event.id, next.event.wishes_seen_at ?? null, WISH_LIMIT)
-          .then(summary => { setWishes(summary.wishes); setUnreadWishes(summary.unread) })
-          .catch(() => { setWishes([]); setUnreadWishes(0) })
-      }
+      applyDashboard(await fetchDashboard())
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Gagal memuat data.'
       // Keep what is on screen. A failed refresh should not replace a working dashboard.
       if (hasDataRef.current) notify('Gagal memperbarui data. Coba lagi.')
       else setError(message)
     }
-  }, [notify])
+  }, [notify, applyDashboard])
+
+  const loadFirstEvent = async () => {
+    const next = await fetchDashboard()
+    if (!next.event) return false
+    applyDashboard(next)
+    notify('Acara siap. Mulai dengan menambah tamu pertama.')
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: 'instant' })
+      document.getElementById('main-content')?.focus({ preventScroll: true })
+    })
+    return true
+  }
 
   useEffect(() => {
     load()
@@ -147,12 +163,7 @@ export function DashboardPage() {
   }
 
   if (!data.event) {
-    return (
-      <main className="app app-state">
-        <p className="empty">Belum ada acara di akun ini.</p>
-        <Button variant="accentOutline" size="xl" fullWidth className="app-state-action" onClick={() => signOut()}>Keluar</Button>
-      </main>
-    )
+    return <EventOnboarding onExit={signOut} onLoadEvent={loadFirstEvent} />
   }
 
   return (
@@ -163,6 +174,7 @@ export function DashboardPage() {
           notify={notify}
           onOpenGuests={status => { setGuestView(status); setTab('tamu') }}
           onOpenAccount={() => setAccountOpen(true)}
+          onAddFirstGuest={data.stats.total_guests === 0 ? addGuest : undefined}
         />
       )}
       {tab === 'tamu' && (

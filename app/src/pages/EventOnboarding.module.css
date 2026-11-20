@@ -1,0 +1,140 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-bottom: calc(var(--space-8) + var(--safe-bottom));
+}
+
+.top,
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.top { justify-content: space-between; }
+.brand { color: var(--brand-ink); font-weight: var(--weight-bold); }
+
+.intro {
+  display: grid;
+  gap: var(--space-3);
+  margin-block: clamp(var(--space-8), 12svh, var(--space-24)) var(--space-8);
+}
+
+.envelope {
+  display: grid;
+  width: var(--space-16);
+  height: var(--space-16);
+  margin-bottom: var(--space-2);
+  place-items: center;
+  border-radius: var(--radius-panel);
+  background: var(--accent-subtle);
+  color: var(--brand-ink);
+}
+
+.intro h1,
+.wizardTitle {
+  margin: 0;
+  font-size: var(--text-page-title);
+  line-height: var(--leading-page-title);
+  letter-spacing: var(--tracking-page-title);
+  font-weight: var(--weight-bold);
+}
+
+.intro p,
+.heading p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.intro p { max-width: 36ch; }
+.intro > button { margin-top: var(--space-3); }
+
+.wizard { display: grid; gap: var(--space-4); }
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.steps li > span {
+  display: grid;
+  flex: none;
+  width: var(--space-6);
+  height: var(--space-6);
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--surface-muted);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.steps li[data-complete] > span { background: var(--accent-subtle); color: var(--brand-ink); }
+.steps li[aria-current='step'] { color: var(--foreground); font-weight: var(--weight-semibold); }
+.steps li[aria-current='step'] > span { background: var(--accent); color: var(--accent-foreground); }
+
+.form,
+.fields,
+.heading,
+.sessions {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-3);
+}
+
+.form { gap: var(--space-5); }
+.heading { justify-items: start; gap: var(--space-2); }
+.heading h2 { margin: 0; font-size: var(--text-2xl); line-height: var(--leading-display); }
+.heading p { font-size: var(--text-sm); }
+.fields { gap: var(--space-4); }
+.fields input { min-width: 0; min-height: var(--space-12); font-size: var(--text-base); }
+
+.link,
+.hint,
+.error {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.link { margin-top: calc(-1 * var(--space-2)); overflow-wrap: anywhere; }
+.link samp, .summary samp { font-family: var(--font-number); }
+.hint { padding: var(--space-3); border-radius: var(--radius-control); background: var(--surface-muted); }
+.error { color: var(--red-ink); }
+
+.sessions {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+}
+
+.sessions legend { padding: 0 var(--space-1); color: var(--foreground); font-size: var(--text-sm); font-weight: var(--weight-semibold); }
+.sessions legend span { margin-left: var(--space-1); color: var(--text-secondary); font-weight: var(--weight-regular); }
+.session { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+.remove, .addSession { justify-self: start; min-height: var(--space-12); }
+.remove { min-width: var(--space-12); }
+
+.summary { display: grid; margin: 0; gap: var(--space-3); }
+.summary > div { display: grid; gap: var(--space-1); padding-bottom: var(--space-2); border-bottom: 1px solid var(--border); }
+.summary dt { color: var(--text-secondary); font-size: var(--text-sm); }
+.summary dd { margin: 0; overflow-wrap: anywhere; color: var(--foreground); }
+.summary ul { margin: 0; padding-inline-start: var(--space-5); }
+
+.actions { display: flex; gap: var(--space-2); }
+.actions > button { min-height: var(--space-12); }
+.actions > button:first-child { white-space: nowrap; }

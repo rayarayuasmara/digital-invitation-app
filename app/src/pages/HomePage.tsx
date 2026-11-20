@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { BadgeCheck, ChartPie, CircleArrowRight, ExternalLink, MailQuestion, Printer, Smartphone, Tag, UsersRound } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
+import { Button } from '@/components/arc/button/button'
 import type { BadgeTone } from '@/components/arc/badge/badge'
 import { Card } from '@/components/arc/card'
 import { CopyButton } from '@/components/arc/copy-button/copy-button'
@@ -27,6 +28,7 @@ type Props = {
   /** Jump to the Tamu tab with a status filter already applied. */
   onOpenGuests: (status: GuestStatus) => void
   onOpenAccount: () => void
+  onAddFirstGuest?: () => void
 }
 
 
@@ -113,7 +115,7 @@ type HistoryItem = {
   invitation_type: 'digital' | 'cetak'
 }
 
-export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
+export function HomePage({ data, notify, onOpenGuests, onOpenAccount, onAddFirstGuest }: Props) {
   const { event, stats, guests, categories } = data
   const total = stats.total_guests
 
@@ -171,7 +173,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
   const tierLabel = (stats.tier || 'trial').replace(/^\w/, letter => letter.toUpperCase())
   const belumRsvp = guests.filter(g => !g.rsvp_status || g.rsvp_status === 'pending').length
   const quotaFree = Math.max(0, stats.max_quota - total)
-  const isLive = Boolean(event?.slug)
+  const publishedAt = event?.published_at
 
   return (
     <div className="home-page">
@@ -185,10 +187,12 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
               <p className="home-hero-halo">Hari Berbahagia</p>
               <h2 className="home-hero-title">{coupleName}</h2>
             </div>
-            <span className={`home-tier ${isLive ? 'is-live' : 'is-draft'}`}>
-              <span className="home-tier-dot" aria-hidden />
-              {isLive ? 'Live' : 'Belum live'}
-            </span>
+            {publishedAt !== undefined && (
+              <span className={`home-tier ${publishedAt ? 'is-live' : 'is-draft'}`}>
+                <span className="home-tier-dot" aria-hidden />
+                {publishedAt ? 'Terbit' : 'Draf'}
+              </span>
+            )}
           </div>
           <div className="home-event-info">
             <ExpandableCard
@@ -233,6 +237,10 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount }: Props) {
             />
           </div>
         </Card>
+
+        {onAddFirstGuest && (
+          <Button type="button" variant="accent" size="xl" fullWidth onClick={onAddFirstGuest}>Tambah tamu pertama</Button>
+        )}
 
         {/* RSVP split and the invitation quota at a glance. */}
         <div className="home-stats">

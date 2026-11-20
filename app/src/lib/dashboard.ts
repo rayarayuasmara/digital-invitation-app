@@ -38,6 +38,7 @@ export type DashboardEvent = {
   event_date: string | null
   scanner_code: string | null
   preview_token: string | null
+  published_at?: string | null
   wa_templates: Templates | null
   wishes_seen_at: string | null
 }
