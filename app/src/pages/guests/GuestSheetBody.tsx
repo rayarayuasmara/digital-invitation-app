@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Copy, Trash2 } from 'lucide-react'
+import { Check, Copy, Printer, Smartphone, Trash2 } from 'lucide-react'
 import { Button } from '@/components/arc/button/button'
 import { Input } from '@/components/arc/input/input'
 import { Select } from '@/components/arc/select/select'
@@ -33,6 +33,11 @@ const statusChoices: { value: StatusChoice; label: string }[] = [
   { value: 'hadir', label: 'Hadir' },
   { value: 'tidak_hadir', label: 'Absen' },
 ]
+
+const invitationTypes = [
+  { value: 'digital', label: 'Digital', Icon: Smartphone },
+  { value: 'cetak', label: 'Cetak', Icon: Printer },
+] as const
 
 function rsvpOf(guest: Guest | null): RsvpChoice {
   if (guest?.rsvp_status === 'hadir') return 'hadir'
@@ -171,23 +176,38 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
         </div>
       </section>
 
-      <section className="ios-group" aria-label="Konfigurasi undangan">
-        <div className="ios-group-body">
-          <div className="ios-row">
-            <Select
-              label="Jenis undangan"
-              value={form.invitationType}
-              onValueChange={v => set('invitationType', v as 'digital' | 'cetak')}
-              options={[{ value: 'digital', label: 'Digital' }, { value: 'cetak', label: 'Cetak' }]}
-            />
-          </div>
-          {sessions.length > 0 && (
+      <fieldset className="invitation-type-choice">
+        <legend className="ios-row-label">Jenis undangan</legend>
+        <div className="invitation-type-options">
+          {invitationTypes.map(({ value, label, Icon }) => (
+            <label key={value} className="invitation-type-option">
+              <input
+                className="sr-only"
+                type="radio"
+                name={`${fieldId}-invitation-type`}
+                value={value}
+                checked={form.invitationType === value}
+                onChange={() => set('invitationType', value)}
+              />
+              <span className="invitation-type-preview" aria-hidden="true">
+                <Icon size={28} />
+              </span>
+              <span>{label}</span>
+              <span className="invitation-type-check" aria-hidden="true"><Check size={12} strokeWidth={3} /></span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      {sessions.length > 0 && (
+        <section className="ios-group" aria-label="Sesi undangan">
+          <div className="ios-group-body">
             <div className="ios-row">
               <Select label="Sesi" value={form.session} onValueChange={v => set('session', v)} options={sessions.map(s => ({ value: s, label: s }))} />
             </div>
-          )}
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
       {guest && (
         <section className="ios-group" aria-label="Status tamu">

@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { CheckCheck, RefreshCw } from 'lucide-react'
 import { Avatar } from '@/components/arc/avatar/avatar'
+import { Badge } from '@/components/arc/badge/badge'
 import { Button } from '@/components/arc/button/button'
 import { ChatBubbleIcon } from '@/components/ChatBubbleIcon'
 import { PageHeader } from '@/components/PageHeader'
+import { Tabs, TabsList, TabsTrigger } from '@/components/motion/tabs'
 import type { DashboardData } from '@/lib/dashboard'
 import { initialsName } from '@/lib/text'
 import { fetchWishes, markWishesSeen } from '@/lib/wishes'
@@ -132,25 +134,17 @@ export function WishesPage({ data, notify, onOpenAccount, onChanged, onSeen }: P
       />
 
       <div className="wishes-toolbar">
-        <div className="wishes-filter" role="group" aria-label="Saring ucapan">
-          <button
-            type="button"
-            className={`wishes-pill${filter === 'semua' ? ' is-active' : ''}`}
-            aria-pressed={filter === 'semua'}
-            onClick={() => setFilter('semua')}
-          >
-            Semua
-            <span className="wishes-pill-count">{total}</span>
-          </button>
-          <button
-            type="button"
-            className={`wishes-pill${filter === 'baru' ? ' is-active' : ''}`}
-            aria-pressed={filter === 'baru'}
-            onClick={() => setFilter('baru')}
-          >
-            Belum dibaca
-            {unread > 0 && <span className="wishes-pill-count">{unread}</span>}
-          </button>
+        <div className="status-tabs wishes-filter" data-beui>
+          <Tabs value={filter} onValueChange={value => setFilter(value === 'baru' ? 'baru' : 'semua')} variant="segment">
+            <TabsList aria-label="Saring ucapan" className="rounded-full" wrapperClassName="rounded-full">
+              <TabsTrigger value="semua" className="min-h-10 rounded-full text-interface-label" indicatorClassName="rounded-full">
+                Semua <Badge size="sm" pill>{total}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="baru" className="min-h-10 rounded-full text-interface-label" indicatorClassName="rounded-full">
+                Belum dibaca{unread > 0 && <> <Badge size="sm" pill>{unread}</Badge></>}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         {unread > 0 && (
@@ -210,7 +204,7 @@ export function WishesPage({ data, notify, onOpenAccount, onChanged, onSeen }: P
               const name = wish.guest_name?.trim() || 'Tamu'
               const fresh = isUnread(wish)
               return (
-                <article key={wish.id} className={`wish-item${fresh ? ' is-unread' : ''}`}>
+                 <article key={wish.id} className="wish-item">
                   <Avatar name={initialsName(name)} size="lg" className="wish-item-avatar" />
                   <div className="wish-item-body">
                     <div className="wish-item-meta">

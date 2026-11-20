@@ -71,7 +71,7 @@ const BaseTab = forwardRef<HTMLButtonElement, {
   active: boolean
   showLabel: boolean
   id: string
-  onPick: () => void
+  onPick: (fromPointer: boolean) => void
 }>(function BaseTab({ tab, active, showLabel, id, onPick }, ref) {
   const fill = useMotionValue(active ? 1 : 0)
   useEffect(() => {
@@ -84,12 +84,12 @@ const BaseTab = forwardRef<HTMLButtonElement, {
       type="button"
       role="tab"
       aria-selected={active}
+      aria-label={tab.badge ? `${tab.label}, ${tab.badgeLabel ?? tab.badge}` : tab.label}
       tabIndex={active ? 0 : -1}
       className={`${styles.tab}${active ? ' ' + styles.active : ''}`}
-      onClick={onPick}
+      onClick={event => onPick(event.detail !== 0)}
     >
       <Slot tab={tab} showLabel={showLabel} fill={fill} />
-      {tab.badge ? <span className={styles.srOnly}>{tab.badgeLabel ?? `${tab.badge} new`}</span> : null}
     </button>
   )
 })
@@ -120,10 +120,15 @@ export function LiquidTabBar({ tabs, value, onValueChange, labels = 'active', la
   const geometry = useRef(new Map<string, Geometry>())
   const valueRef = useRef(value)
   const suppressClick = useRef(false)
-  const drag = useRef<{ startX: number; origin: number; moved: boolean; samples: { x: number; t: number }[] } | null>(null)
+  const drag = useRef<{ pointerId: number; tab: string; startX: number; origin: number; moved: boolean; samples: { x: number; t: number }[] } | null>(null)
+  const settleTimer = useRef<number | undefined>(undefined)
 
   const x = useMotionValue(0)
   const width = useMotionValue(0)
+  const lift = useMotionValue(0)
+  const scaleX = useTransform(lift, [0, 1], [1, 1.18])
+  const scaleY = useTransform(lift, [0, 1], [1, 1.15])
+  const reflection = useTransform(lift, [0, 1], [0, 1])
   const innerX = useTransform(x, v => -v)
   const [innerWidth, setInnerWidth] = useState(0)
 
@@ -185,6 +190,16 @@ export function LiquidTabBar({ tabs, value, onValueChange, labels = 'active', la
     return () => observer.disconnect()
   }, [tabKey, labels, measure, place])
 
+  useEffect(() => () => window.clearTimeout(settleTimer.current), [])
+
+  const lowerLens = (delay = 0) => {
+    window.clearTimeout(settleTimer.current)
+    if (reduce) return
+    const lower = () => animate(lift, 0, spring)
+    if (delay) settleTimer.current = window.setTimeout(lower, delay)
+    else lower()
+  }
+
   const bounds = () => {
     const order = tabs.map(t => geometry.current.get(t.value)).filter((g): g is Geometry => !!g)
     if (order.length === 0) return { min: 0, max: 0 }
@@ -196,27 +211,37 @@ export function LiquidTabBar({ tabs, value, onValueChange, labels = 'active', la
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     // Every new press starts with a clean slate. A drag that ended on the track
     // (pointer capture) never fires a click to clear the flag, so reset it here.
+    if (event.button !== 0 || !event.isPrimary || drag.current) return
     suppressClick.current = false
-    if (event.button !== 0 || !trackRef.current) return
-    const local = event.clientX - trackRef.current.getBoundingClientRect().left
-    // Only the lens itself is grabbable, so taps on other tabs still act as taps.
-    if (local < x.get() || local > x.get() + width.get()) return
-    trackRef.current.setPointerCapture(event.pointerId)
-    drag.current = { startX: event.clientX, origin: x.get(), moved: false, samples: [{ x: event.clientX, t: performance.now() }] }
+    const button = (event.target as Element).closest('[role="tab"]')
+    const tab = tabs.find(item => tabRefs.current.get(item.value) === button)
+    if (!tab) return
+    window.clearTimeout(settleTimer.current)
+    drag.current = { pointerId: event.pointerId, tab: tab.value, startX: event.clientX, origin: x.get(), moved: false, samples: [{ x: event.clientX, t: performance.now() }] }
+    if (!reduce) {
+      animate(lift, 1, spring)
+      place(tab.value)
+    }
   }
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     const state = drag.current
-    if (!state) return
-    const dx = event.clientX - state.startX
-    if (!state.moved && Math.abs(dx) > DRAG_SLOP) state.moved = true
+    if (!state || state.pointerId !== event.pointerId) return
+    if (!state.moved && Math.abs(event.clientX - state.startX) > DRAG_SLOP) {
+      x.stop()
+      width.stop()
+      state.origin = x.get()
+      state.startX = event.clientX
+      state.moved = true
+      trackRef.current?.setPointerCapture(event.pointerId)
+    }
     if (!state.moved) return
     const now = performance.now()
     state.samples.push({ x: event.clientX, t: now })
     // Only the last 100ms count, so a pause before release reads as a stop, not a flick.
     while (state.samples.length > 2 && now - state.samples[0].t > 100) state.samples.shift()
     const { min, max } = bounds()
-    x.set(Math.min(Math.max(state.origin + dx, min), max))
+    x.set(Math.min(Math.max(state.origin + event.clientX - state.startX, min), max))
   }
 
   const releaseDrag = (pointerId: number) => {
@@ -227,15 +252,23 @@ export function LiquidTabBar({ tabs, value, onValueChange, labels = 'active', la
   // The system cancelled the gesture (scroll takeover, incoming call...). Snap back to the
   // selected tab and do not change the selection.
   const onPointerCancel = (event: PointerEvent<HTMLDivElement>) => {
-    const state = drag.current
+    if (drag.current?.pointerId !== event.pointerId) return
     releaseDrag(event.pointerId)
-    if (state?.moved) place(valueRef.current)
+    lowerLens()
+    place(valueRef.current)
   }
 
   const onPointerUp = (event: PointerEvent<HTMLDivElement>) => {
     const state = drag.current
+    if (!state || state.pointerId !== event.pointerId) return
     releaseDrag(event.pointerId)
-    if (!state?.moved) return
+    lowerLens(state.moved ? 0 : 85)
+    if (!state.moved) {
+      // A native click commits the tab; a release outside simply restores selection.
+      const target = (event.target as Element).closest('[role="tab"]')
+      if (tabRefs.current.get(state.tab) !== target) place(valueRef.current)
+      return
+    }
 
     suppressClick.current = true
     const first = state.samples[0]
@@ -262,12 +295,13 @@ export function LiquidTabBar({ tabs, value, onValueChange, labels = 'active', la
     place(nearest)
   }
 
-  const onTabClick = (key: string) => {
-    if (suppressClick.current) {
+  const onTabClick = (key: string, fromPointer: boolean) => {
+    if (suppressClick.current && fromPointer) {
       suppressClick.current = false
       return
     }
     onValueChange(key)
+    place(key)
   }
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -295,6 +329,10 @@ export function LiquidTabBar({ tabs, value, onValueChange, labels = 'active', la
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerCancel}
+        onLostPointerCapture={onPointerCancel}
+        onPointerLeave={event => {
+          if (!drag.current?.moved) onPointerCancel(event)
+        }}
       >
         {tabs.map(tab => {
           const active = tab.value === value
@@ -306,13 +344,14 @@ export function LiquidTabBar({ tabs, value, onValueChange, labels = 'active', la
               active={active}
               showLabel={labels === 'always' || (labels === 'active' && active)}
               id={liquidTabId(baseId, tab.value)}
-              onPick={() => onTabClick(tab.value)}
+              onPick={fromPointer => onTabClick(tab.value, fromPointer)}
             />
           )
         })}
 
         {/* The lens: an inverted copy of the row, clipped to the moving shape. */}
-        <motion.div className={styles.lens} aria-hidden style={{ x, width }}>
+        <motion.div className={styles.lens} aria-hidden style={{ x, width, scaleX, scaleY }}>
+          <motion.div className={styles.reflection} style={{ opacity: reflection }} />
           <motion.div className={styles.invertedRow} style={{ x: innerX, width: innerWidth }}>
             {tabs.map(tab => {
               const active = tab.value === value

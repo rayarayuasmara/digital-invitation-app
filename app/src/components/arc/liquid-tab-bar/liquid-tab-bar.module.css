@@ -2,16 +2,36 @@
    Every position inside the track is measured from its padding box, so the lens,
    the tabs and the inverted copy all share one coordinate system. */
 .bar {
+  --lens-surface: color-mix(in oklab, var(--bg-page) 88%, var(--brand-ink));
   position: relative;
-  height: 60px;
+  height: var(--nav-control-size, 68px);
   box-sizing: border-box;
-  border: 1px solid var(--glass-edge);
+  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
   border-radius: var(--radius-pill);
-  background: var(--glass-chrome);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
+  background: var(--surface-raised);
+  box-shadow: inset 0 1px 2px var(--glass-edge), var(--shadow-raised);
   -webkit-user-select: none;
   user-select: none;
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .bar {
+    background:
+      linear-gradient(180deg, color-mix(in oklab, var(--on-solid) 8%, transparent), transparent 24% 78%, color-mix(in oklab, var(--on-solid) 5%, transparent)),
+      color-mix(in oklab, var(--surface) 88%, transparent);
+  }
+}
+
+.bar::before {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 1px color-mix(in oklab, var(--on-solid) 22%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  /* The material sits behind the icons, never over the text. */
+  pointer-events: none;
+  content: '';
 }
 
 .track {
@@ -40,7 +60,7 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--text-secondary);
+  color: var(--foreground);
   font: inherit;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -59,7 +79,43 @@
 
 .tab.active {
   flex: 0 0 auto;
-  color: var(--foreground);
+  color: var(--brand-ink);
+}
+
+.tab:focus-visible {
+  z-index: 3;
+  border-radius: var(--radius-pill);
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.bar[data-labels='always'] :is(.tab, .invTab) {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.bar[data-labels='always'] .tab::before {
+  inset-inline: 0;
+}
+
+.bar[data-labels='always'] .slot {
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-inline: 1px;
+}
+
+.bar[data-labels='always'] .labelSlot {
+  margin-left: 0;
+  max-width: 100%;
+}
+
+.bar[data-labels='always'] .labelText {
+  font-size: 0.75rem;
+  font-weight: var(--weight-medium);
+  line-height: 1.15;
+  text-overflow: ellipsis;
 }
 
 /* Slot: the shared layout for a tab's icon and label. Both the tabs and the inverted copy render it. */
@@ -143,7 +199,7 @@
   font-weight: var(--weight-semibold);
 }
 
-/* The lens paints the accent. Its inverted copy is clipped to the same rounded shape. */
+/* The lens redraws the icon and label in brand ink inside its raised glass shape. */
 .lens {
   position: absolute;
   top: 6px;
@@ -152,8 +208,16 @@
   z-index: 2;
   overflow: hidden;
   border-radius: var(--radius-pill);
-  background: var(--accent);
+  background: var(--lens-surface);
   pointer-events: none;
+}
+
+.reflection {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(155deg, color-mix(in oklab, var(--on-solid) 24%, transparent), transparent 42% 72%, var(--glass-edge));
+  box-shadow: inset 0 1px 1px var(--glass-edge), inset 0 -1px 2px color-mix(in oklab, var(--accent) 42%, transparent);
 }
 
 /* Sits at the track's content box, in track coordinates, so it lines up with the real tabs.
@@ -169,7 +233,15 @@
   height: calc(100% + 12px);
   align-items: stretch;
   justify-content: space-evenly;
-  color: var(--accent-foreground);
+  color: var(--brand-ink);
+}
+
+.invertedRow .labelText {
+  font-weight: var(--weight-semibold);
+}
+
+:global([data-theme='dark']) .bar {
+  --lens-surface: color-mix(in oklab, var(--bg-page) 96%, var(--surface));
 }
 
 .invTab {
@@ -185,18 +257,31 @@
   flex: 1 1 0;
 }
 
-.invertedRow .badge {
-  background: var(--accent-foreground);
-  color: var(--accent);
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .bar {
+    background: var(--surface-raised);
+    border-color: var(--border-strong);
+  }
+
+  .bar::before {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .lens {
+    background: var(--lens-surface);
+    box-shadow: inset 0 0 0 1px var(--brand-ink);
+  }
+
+  .reflection {
+    display: none;
+  }
 }
 
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+@media (forced-colors: active) {
+  .lens {
+    border: 1px solid Highlight;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

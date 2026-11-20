@@ -150,7 +150,12 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
 
   const handleToken = async (input: string, source: 'scan' | 'manual') => {
     processing.current = true
-    const res: CheckInResult = await checkIn(code, input)
+    let res: CheckInResult
+    try {
+      res = await checkIn(code, input)
+    } catch {
+      res = { success: false, message: 'Tidak dapat menghubungi server. Periksa sinyal lalu coba lagi.' }
+    }
 
     if (res.success) {
       const g = res.guest ?? null

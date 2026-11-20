@@ -22,6 +22,8 @@ export interface NotificationItem {
 export interface NotificationCenterProps {
   notifications: NotificationItem[];
   label?: string;
+  triggerClassName?: string;
+  triggerIcon?: ReactNode;
   onReadChange?: (notification: NotificationItem, read: boolean) => void;
   onDismiss?: (notification: NotificationItem) => void;
   open?: boolean;
@@ -106,7 +108,7 @@ function NotificationVisual({ item }: { item: NotificationItem }) {
   </span>;
 }
 
-export function NotificationCenter({ notifications: initial, label = "Notifikasi", onReadChange, onDismiss, open, onOpenChange, avoidCollisions = true }: NotificationCenterProps) {
+export function NotificationCenter({ notifications: initial, label = "Notifikasi", triggerClassName, triggerIcon, onReadChange, onDismiss, open, onOpenChange, avoidCollisions = true }: NotificationCenterProps) {
   const reduce = useReducedMotion();
   const layoutId = useId();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -171,8 +173,8 @@ export function NotificationCenter({ notifications: initial, label = "Notifikasi
   return <PopoverPrimitive.Root open={isOpen} onOpenChange={setOpen}>
     <PopoverPrimitive.Trigger asChild>
       {/* The trigger anchors the panel, so it gives press feedback with color only; scaling it would shift the panel. */}
-      <button className={styles.trigger} type="button" aria-label={`${label}${unreadCount ? `, ${unreadCount} belum dibaca` : ""}`}>
-        <motion.span animate={{ rotate: isOpen && !reduce ? -12 : 0 }} transition={reduce ? instant : motionTokens.spring.snappy}><Bell size={19} strokeWidth={1.75} aria-hidden="true" /></motion.span>
+      <button className={triggerClassName ?? styles.trigger} type="button" aria-label={`${label}${unreadCount ? `, ${unreadCount} belum dibaca` : ""}`}>
+        <motion.span animate={{ rotate: isOpen && !reduce ? -12 : 0 }} transition={reduce ? instant : motionTokens.spring.snappy}>{triggerIcon ?? <Bell size={19} strokeWidth={1.75} aria-hidden="true" />}</motion.span>
         <AnimatePresence initial={false}>{unreadCount > 0 && <motion.span key="badge" className={styles.badge} aria-hidden="true" initial={reduce ? { opacity: 0 } : { opacity: 0, scale: .6 }} animate={{ opacity: 1, scale: 1 }} exit={reduce ? fadeOut : { opacity: 0, scale: .6, transition: exitFast }} transition={reduce ? instant : motionTokens.spring.snappy}><RollingCount value={unreadCount} display={unreadCount > 9 ? "9+" : String(unreadCount)} reduce={reduce} /></motion.span>}</AnimatePresence>
       </button>
     </PopoverPrimitive.Trigger>
