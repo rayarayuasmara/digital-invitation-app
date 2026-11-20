@@ -57,6 +57,25 @@ npm run dev -- --host      # wajib `--host`, bukan `npm run dev` saja
 - **Kamera QR tidak bisa diuji lewat `http://192.168.x.x`.** `getUserMedia` butuh secure context; untuk scanner pakai preview Vercel (HTTPS).
 - Dev server **tidak** melakukan typecheck; error tipe baru muncul saat `npm run build`.
 
+### Workspace Wonder
+
+Wonder menjalankan repo dari **clone sendiri**, bukan dari folder kerja utama:
+`~/wonder/workspaces/digital-invitation-app/<nama-workspace>/`.
+
+Clone itu tidak punya `app/.env` karena file tersebut diabaikan git, sehingga
+halaman menampilkan pesan "Konfigurasi Supabase belum lengkap". Salin dulu:
+
+```bash
+cp ~/Documents/RAYA\ RAYU/OPENCODE/digital-invitation-app/app/.env \
+   ~/wonder/workspaces/digital-invitation-app/<nama-workspace>/app/.env
+```
+
+- Vite otomatis restart setelah file itu muncul; tidak perlu klik Run ulang.
+- Kalau port 5173 sudah dipakai, Wonder memakai 5174.
+- Workspace Wonder bisa berada di **branch lain** daripada `main`. Cek dengan
+  `git -C <path> log --oneline -1` sebelum menyimpulkan ada bug — kode yang
+  diuji mungkin bukan `main`.
+
 ## Alur kerja
 
 1. Audit dulu, usul kemudian, ubah terakhir. Jangan refactor yang tidak diminta.
