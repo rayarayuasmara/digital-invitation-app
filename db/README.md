@@ -36,6 +36,8 @@ Jalankan **berurutan**. Jangan melompat.
 | 16 | `2026-11-10-p9-dynamic-sessions.sql` | Sesi acara dinamis 1–3 (`event_sessions`) — **diterapkan 2026-11-10** |
 | 17 | `2026-11-10-p10-access-hardening.sql` | Batasi direct write, cegah eskalasi role/paket, validasi RSVP/ucapan di DB — **diterapkan 2026-11-10** (versi `20261110053237`) |
 | 18 | `2026-11-10-p11-event-profile-wizard.sql` | RPC aman untuk menyimpan profil undangan dan sesi secara atomik — **diterapkan 2026-11-10** (versi `20261110080803`) |
+| 19 | `2026-11-23-p12-event-couple-details.sql` | Kolom nama lengkap, panggilan, dan orang tua kedua mempelai; `create_event` menerima `p_couple` — **diterapkan 2026-11-23** (migration `event_couple_details`) |
+| 20 | `2026-11-23-p13-event-slug-check.sql` | RPC `check_event_slug_available(p_slug)` untuk status ketersediaan alamat tautan saat onboarding; hanya mengembalikan boolean — **diterapkan 2026-11-23** (migration `event_slug_check`) |
 
 ### Prasyarat tiap tahap
 

@@ -163,7 +163,17 @@ export function DashboardPage() {
   }
 
   if (!data.event) {
-    return <EventOnboarding onExit={signOut} onLoadEvent={loadFirstEvent} />
+    return (
+      <>
+        <EventOnboarding account={{ name: data.client.name, onOpen: () => setAccountOpen(true) }} onLoadEvent={loadFirstEvent} />
+        <AccountSheet open={accountOpen} data={data} notify={notify} onClose={() => setAccountOpen(false)} />
+        {notice && (
+          <div className="toast-layer">
+            <Toast key={notice.id} title={notice.text} open onOpenChange={open => { if (!open) setNotice(null) }} duration={2600} />
+          </div>
+        )}
+      </>
+    )
   }
 
   return (

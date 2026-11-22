@@ -1,7 +1,19 @@
 import { supabase } from './supabase'
 
+export type CoupleDetails = {
+  groomName: string
+  groomNickname: string
+  groomFather: string
+  groomMother: string
+  brideName: string
+  brideNickname: string
+  brideFather: string
+  brideMother: string
+}
+
 export type FirstEventInput = {
   coupleName: string
+  couple: CoupleDetails
   title: string
   slug: string
   date: string
@@ -22,7 +34,14 @@ export function suggestEventSlug(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
+export async function checkEventSlug(slug: string) {
+  const { data, error } = await supabase.rpc('check_event_slug_available', { p_slug: slug })
+  if (error || data?.success !== true || typeof data?.available !== 'boolean') throw new Error('slug-check-failed')
+  return data.available as boolean
+}
+
 export async function createFirstEvent(input: FirstEventInput) {
+  const { couple } = input
   const { data, error } = await supabase.rpc('create_event', {
     p_title: input.title.trim(),
     p_event_date: input.date,
@@ -30,6 +49,16 @@ export async function createFirstEvent(input: FirstEventInput) {
     p_couple_name: input.coupleName.trim(),
     p_slug: input.slug,
     p_sessions: input.sessions.map(({ name, time }) => ({ name: name.trim(), time_text: time ? `${time.replace(':', '.')} WIB` : null })),
+    p_couple: {
+      groom_name: couple.groomName.trim(),
+      groom_nickname: couple.groomNickname.trim(),
+      groom_father: couple.groomFather.trim(),
+      groom_mother: couple.groomMother.trim(),
+      bride_name: couple.brideName.trim(),
+      bride_nickname: couple.brideNickname.trim(),
+      bride_father: couple.brideFather.trim(),
+      bride_mother: couple.brideMother.trim(),
+    },
   })
 
   if (!error && data?.success === true) return
