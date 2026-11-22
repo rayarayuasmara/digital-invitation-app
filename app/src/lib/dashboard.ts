@@ -57,3 +57,10 @@ export async function fetchDashboard(): Promise<DashboardData> {
   if (!data || data.success !== true) throw new Error('Gagal memuat data dashboard.')
   return data as DashboardData
 }
+
+export async function deleteEvent(eventId: string) {
+  const { data, error } = await supabase.rpc('delete_event', { p_event_id: eventId })
+  if (error || data?.success !== true) {
+    throw new Error(typeof data?.message === 'string' ? data.message : 'Acara belum bisa dihapus. Coba lagi.')
+  }
+}

@@ -38,6 +38,7 @@ Jalankan **berurutan**. Jangan melompat.
 | 18 | `2026-11-10-p11-event-profile-wizard.sql` | RPC aman untuk menyimpan profil undangan dan sesi secara atomik — **diterapkan 2026-11-10** (versi `20261110080803`) |
 | 19 | `2026-11-23-p12-event-couple-details.sql` | Kolom nama lengkap, panggilan, dan orang tua kedua mempelai; `create_event` menerima `p_couple` — **diterapkan 2026-11-23** (migration `event_couple_details`) |
 | 20 | `2026-11-23-p13-event-slug-check.sql` | RPC `check_event_slug_available(p_slug)` untuk status ketersediaan alamat tautan saat onboarding; hanya mengembalikan boolean — **diterapkan 2026-11-23** (migration `event_slug_check`) |
+| 21 | `2026-11-23-p14-delete-event.sql` | RPC `delete_event(p_event_id)` untuk tombol "Hapus acara" di bottom sheet akun; memeriksa `auth.uid()` dan mengandalkan cascade `event_sessions`/`guests`/`wishes`, sedangkan `orders` menjadi `event_id = null` — **diterapkan 2026-11-23** (migration `delete_event`) |
 
 ### Prasyarat tiap tahap
 
