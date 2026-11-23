@@ -260,7 +260,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
         <OnboardingWelcome onStart={() => goTo(0)} account={account} />
       ) : (
         <div className={styles.wizard}>
-          <header ref={chromeRef} className={styles.chrome}>
+          <header ref={chromeRef} className={styles.chrome} data-step={step}>
             <span className="progressive-blur" aria-hidden="true" />
             <div className={styles.top}>
               <Button
@@ -318,8 +318,6 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                           onChange={event => setGroomNickname(event.target.value)}
                         />
                       </label>
-                    </div>
-                    <div className={styles.groupedTable}>
                       <label className={styles.groupedRow}>
                         <span className={styles.groupedLabel}>Ayah</span>
                         <input
@@ -374,8 +372,6 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                           onChange={event => setBrideNickname(event.target.value)}
                         />
                       </label>
-                    </div>
-                    <div className={styles.groupedTable}>
                       <label className={styles.groupedRow}>
                         <span className={styles.groupedLabel}>Ayah</span>
                         <input

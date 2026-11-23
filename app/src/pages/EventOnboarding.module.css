@@ -1,5 +1,5 @@
 .page {
-  --onboarding-width: 480px;
+  --onboarding-width: 390px;
   --page-pad: var(--space-4);
   --keyboard-inset: 0px;
   display: flex;
@@ -22,26 +22,29 @@
   flex-direction: column;
 }
 
-.page.introPage,
-.page.formPage { --onboarding-width: 390px; max-width: var(--onboarding-width); }
-
-.page.introPage { --page-pad: 0px; }
-.page.formPage { --page-pad: var(--space-5); }
-
-.intro {
-  gap: var(--space-8);
+.page.introPage {
+  --page-pad: 0px;
+  max-width: 520px;
 }
 
-.covers { margin-top: clamp(var(--space-10), 7svh, 76px); }
+.page.formPage {
+  --page-pad: var(--space-5);
+  max-width: var(--onboarding-width);
+}
+
+.intro { gap: var(--space-8); }
 
 .welcomeHeader {
   position: sticky;
   top: 0;
   z-index: 15;
   display: flex;
+  width: 100%;
+  max-width: var(--onboarding-width);
+  align-self: center;
   justify-content: flex-end;
   margin: calc(-1 * (env(safe-area-inset-top, 0px) + var(--space-4))) 0 0;
-  padding: calc(env(safe-area-inset-top, 0px) + var(--space-4)) var(--space-5) var(--space-2);
+  padding: calc(env(safe-area-inset-top, 0px) + var(--space-4)) var(--size-spacing-sp-40) var(--space-2);
 }
 
 .welcomeAvatar {
@@ -67,7 +70,7 @@
 
 .welcomeAvatar:active { transform: scale(0.94); }
 
-.covers { min-width: 0; margin-top: calc(-1 * var(--space-2)); }
+.covers { min-width: 0; margin-top: var(--space-6); }
 
 .covers > :focus-visible {
   outline: 2px solid var(--accent);
@@ -84,8 +87,12 @@
 
 .welcome {
   display: grid;
+  width: 100%;
+  max-width: var(--onboarding-width);
+  align-self: center;
   justify-items: center;
-  margin-inline: var(--space-5);
+  margin-top: var(--space-8);
+  padding-inline: var(--space-5);
   text-align: center;
 }
 
@@ -101,7 +108,7 @@
   position: relative;
   width: 255.057px;
   height: 43.109px;
-  margin: var(--space-2) 0 var(--space-5);
+  margin: var(--space-2) 0 0;
 }
 
 /* The Figma wordmark is exported as nine vectors. Their original sizes and
@@ -139,10 +146,16 @@
   background: linear-gradient(to bottom, transparent, var(--bg-page) var(--space-4));
 }
 
-.intro > .footer { padding-top: var(--space-6); }
+.intro > .footer {
+  width: 100%;
+  max-width: var(--onboarding-width);
+  align-self: center;
+  padding: var(--space-6) var(--space-5) calc(var(--safe-bottom) + var(--space-6));
+}
 
 .introCta { position: relative; width: 100%; }
 .introCta > .primary { min-height: var(--space-12); }
+.intro .introCta > .primary { min-height: var(--control-height-xl); }
 .introCta > img {
   position: absolute;
   inset-inline-end: var(--space-4);
@@ -186,6 +199,11 @@
 
 .formPage .chrome {
   padding-top: max(env(safe-area-inset-top, 0px) + var(--space-1), min(58px, 6.88svh));
+}
+
+.formPage:not([data-compact]) .chrome[data-step='0'] {
+  padding-top: calc(env(safe-area-inset-top, 0px) + var(--space-5));
+  padding-bottom: calc(var(--space-3) + var(--scale-28));
 }
 
 .top {

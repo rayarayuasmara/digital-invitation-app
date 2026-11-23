@@ -31,7 +31,7 @@ export function OnboardingWelcome({ onStart, account }: Props) {
           aria-label="Contoh tampilan undangan"
           labels={{ roleDescription: 'karusel' }}
           className="touch-pan-y"
-          itemSize={226.087}
+          itemSize={179.4}
           itemWidthRatio={.46}
           itemAspectRatio={226.087 / 409.275}
           itemSpacing={16}
