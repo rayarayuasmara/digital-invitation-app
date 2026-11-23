@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { BadgeCheck, ChartPie, CircleArrowRight, ExternalLink, MailQuestion, Printer, Smartphone, Tag, UsersRound } from 'lucide-react'
-import { Avatar } from '@/components/arc/avatar/avatar'
+import { BadgeCheck, ChartPie, CircleArrowRight, ExternalLink, MailQuestion, Tag, UsersRound } from 'lucide-react'
+import { InvitationAvatar } from '@/components/InvitationAvatar'
+import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
 import { Badge } from '@/components/arc/badge/badge'
 import { Button } from '@/components/arc/button/button'
 import type { BadgeTone } from '@/components/arc/badge/badge'
@@ -20,7 +21,7 @@ import { DigitSwap } from '@/components/motion/digit-swap'
 import { PageHeader } from '@/components/PageHeader'
 import type { DashboardData } from '@/lib/dashboard'
 import { timeAgo } from '@/lib/notifications'
-import type { GuestStatus } from '@/pages/GuestsPanel'
+import { matches, statusLabels, type GuestStatus } from '@/pages/guests/guest-helpers'
 
 type Props = {
   data: DashboardData
@@ -53,7 +54,7 @@ function RsvpComposition({ hadir, absen, pending }: { hadir: number; absen: numb
   const segments = [
     { id: 'hadir', name: 'Hadir', value: hadir, color: 'var(--rsvp-hadir)' },
     { id: 'tidak', name: 'Absen', value: absen, color: 'var(--rsvp-tidak)' },
-    { id: 'pending', name: 'Pending', value: pending, color: 'var(--rsvp-pending)' },
+    { id: 'pending', name: 'Belum RSVP', value: pending, color: 'var(--rsvp-pending)' },
   ]
 
   // Tapping anywhere outside the legend clears the pinned segment.
@@ -115,6 +116,26 @@ type HistoryItem = {
   invitation_type: 'digital' | 'cetak'
 }
 
+function HistoryList({ items }: { items: HistoryItem[] }) {
+  return (
+    <ol className="home-history-list">
+      {items.map(item => (
+        <li key={item.id} className="home-history-row">
+          <InvitationAvatar name={item.name} invitationType={item.invitation_type} />
+          <div className="home-history-copy">
+            <p className="home-history-name">{item.name}</p>
+            <div className="home-history-meta">
+              <Badge size="sm" pill tone={historyTone[item.kind]}>{historyLabel[item.kind]}</Badge>
+              <Badge size="sm" pill>{item.pax} pax</Badge>
+            </div>
+          </div>
+          <time className="home-history-time" dateTime={item.at}>{timeAgo(item.at)}</time>
+        </li>
+      ))}
+    </ol>
+  )
+}
+
 export function HomePage({ data, notify, onOpenGuests, onOpenAccount, onAddFirstGuest }: Props) {
   const { event, stats, guests, categories } = data
   const total = stats.total_guests
@@ -165,13 +186,18 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount, onAddFirst
     window.open(previewUrl, '_blank', 'noopener,noreferrer')
   }
 
-  const coupleName = event?.couple_name?.trim() || event?.title || 'Acara'
+  const fullNames = (event?.couple_name ?? '').split('&')
+  const nicknames = [event?.groom_nickname, event?.bride_nickname]
+    .map((nickname, index) => nickname?.trim() || fullNames[index]?.trim().split(/\s+/)[0])
+    .filter(Boolean)
+  const coupleName = nicknames.join(' & ') || event?.title || 'Acara'
   const sessionText = (event?.sessions ?? [])
     .filter(s => s.time_text)
     .map(s => `${s.name} ${(s.time_text ?? '').replace(/\s*WIB\b/gi, '')}`)
     .join(' · ')
   const tierLabel = (stats.tier || 'trial').replace(/^\w/, letter => letter.toUpperCase())
-  const belumRsvp = guests.filter(g => !g.rsvp_status || g.rsvp_status === 'pending').length
+  const waitingForRsvp = guests.filter(guest => matches(guest, 'pending')).length
+  const hasRsvpStats = [stats.hadir, stats.absen, stats.pending, stats.hadir_pax, waitingForRsvp].some(value => value > 0)
   const quotaFree = Math.max(0, stats.max_quota - total)
   const publishedAt = event?.published_at
 
@@ -243,7 +269,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount, onAddFirst
         )}
 
         {/* RSVP split and the invitation quota at a glance. */}
-        <div className="home-stats">
+        <div className={hasRsvpStats ? 'home-stats' : undefined} hidden={!hasRsvpStats}>
           <Card variant="default" padding="md" className="home-total" aria-labelledby="rsvp-title">
             <div className="home-tile-head">
               <h3 id="rsvp-title">Status RSVP</h3>
@@ -274,16 +300,16 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount, onAddFirst
               padding="md"
               className="home-rsvp-empty"
               onClick={() => onOpenGuests('pending')}
-              ariaLabel="Lihat undangan yang belum RSVP"
+              ariaLabel="Lihat undangan yang menunggu RSVP"
             >
               <div className="home-invites-head">
                 <div className="home-tile-head">
-                  <h3>Pending</h3>
+                  <h3>{statusLabels.pending}</h3>
                   <MailQuestion size={20} strokeWidth={1.75} aria-hidden />
                 </div>
                 <div className="home-invites-body">
                   <div className="home-invites-number">
-                    <DigitSwap value={belumRsvp} className="home-invites-total" />
+                    <DigitSwap value={waitingForRsvp} className="home-invites-total" />
                   </div>
                   <p className="home-invites-caption">Undangan</p>
                 </div>
@@ -329,41 +355,28 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount, onAddFirst
         {/* Latest RSVP replies and check-ins. */}
         <Card variant="default" padding="md" className="home-history" aria-labelledby="history-title">
           <div className="home-card-head">
-            <h3 id="history-title">Histori RSVP</h3>
-            <button type="button" className="home-link home-history-more" onClick={() => onOpenGuests('semua')}>
-              Lihat semua
-              <CircleArrowRight size={16} strokeWidth={1.9} aria-hidden />
-            </button>
+            <h3 id="history-title">Histori tamu</h3>
+            {history.length > historyFeed.length && (
+              <BottomSheet
+                trigger={
+                  <button type="button" className="home-link home-history-more">
+                    Lihat semua
+                    <CircleArrowRight size={16} strokeWidth={1.9} aria-hidden />
+                  </button>
+                }
+                title="Histori tamu"
+                description="Aktivitas RSVP dan check-in"
+                closeLabel="Tutup histori tamu"
+                detents={[0.9]}
+              >
+                <HistoryList items={history} />
+              </BottomSheet>
+            )}
           </div>
           {historyFeed.length === 0 ? (
             <p className="home-history-empty">Belum ada tamu yang RSVP atau check-in.</p>
           ) : (
-            <ol className="home-history-list">
-              {historyFeed.map(item => (
-                <li key={item.id} className="home-history-row">
-                  <span className={`home-history-avatar${item.invitation_type === 'cetak' ? ' is-print' : ''}`}>
-                    <Avatar name={item.name} size="lg" />
-                    <span
-                      className="guest-avatar-badge"
-                      role="img"
-                      aria-label={item.invitation_type === 'cetak' ? 'Undangan cetak' : 'Undangan digital'}
-                    >
-                      {item.invitation_type === 'cetak'
-                        ? <Printer size={10} aria-hidden />
-                        : <Smartphone size={10} aria-hidden />}
-                    </span>
-                  </span>
-                  <div className="home-history-copy">
-                    <p className="home-history-name">{item.name}</p>
-                    <div className="home-history-meta">
-                      <Badge size="sm" pill tone={historyTone[item.kind]}>{historyLabel[item.kind]}</Badge>
-                      <Badge size="sm" pill>{item.pax} pax</Badge>
-                    </div>
-                  </div>
-                  <time className="home-history-time" dateTime={item.at}>{timeAgo(item.at)}</time>
-                </li>
-              ))}
-            </ol>
+            <HistoryList items={historyFeed} />
           )}
         </Card>
 

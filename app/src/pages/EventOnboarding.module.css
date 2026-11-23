@@ -1,16 +1,11 @@
 .page {
   --onboarding-width: 390px;
   --page-pad: var(--space-4);
-  --keyboard-inset: 0px;
   display: flex;
   min-height: 100svh;
   flex-direction: column;
   padding: calc(var(--space-4) + env(safe-area-inset-top, 0px)) var(--page-pad)
     calc(var(--safe-bottom) + var(--space-3));
-}
-
-.page[data-compact] .chrome {
-  padding-top: max(env(safe-area-inset-top, 0px) + var(--space-1), var(--space-2));
 }
 
 .intro,
@@ -37,7 +32,8 @@
 .welcomeHeader {
   position: sticky;
   top: 0;
-  z-index: 15;
+  z-index: 25;
+  isolation: isolate;
   display: flex;
   width: 100%;
   max-width: var(--onboarding-width);
@@ -113,20 +109,22 @@
 
 /* The Figma wordmark is exported as nine vectors. Their original sizes and
    positions make a single lockup; decorative fragments have no accessible name. */
-.wordmark > img { position: absolute; display: block; }
-.wordmark > img:nth-of-type(1) { left: 0; top: 0; }
-.wordmark > img:nth-of-type(2) { left: 21.97%; top: 9.21%; }
-.wordmark > img:nth-of-type(3) { left: 31.04%; top: 24.97%; }
-.wordmark > img:nth-of-type(4) { left: 41.25%; top: 26.11%; }
-.wordmark > img:nth-of-type(5) { left: 49.82%; top: 24.97%; }
-.wordmark > img:nth-of-type(6) { left: 63.4%; top: 9.26%; }
-.wordmark > img:nth-of-type(7) { left: 72.47%; top: 25.03%; }
-.wordmark > img:nth-of-type(8) { left: 82.68%; top: 26.17%; }
-.wordmark > img:nth-of-type(9) { left: 91.58%; top: 26.15%; }
-
-:global([data-theme='dark']) .wordmark > img {
-  filter: brightness(2.6) saturate(0.9);
+.wordmark > span {
+  position: absolute;
+  display: block;
+  background: var(--brand);
+  mask-size: 100% 100%;
 }
+.wordmark > span > img { display: block; visibility: hidden; }
+.wordmark > span:nth-of-type(2) { left: 0; top: 0; }
+.wordmark > span:nth-of-type(3) { left: 21.97%; top: 9.21%; }
+.wordmark > span:nth-of-type(4) { left: 31.04%; top: 24.97%; }
+.wordmark > span:nth-of-type(5) { left: 41.25%; top: 26.11%; }
+.wordmark > span:nth-of-type(6) { left: 49.82%; top: 24.97%; }
+.wordmark > span:nth-of-type(7) { left: 63.4%; top: 9.26%; }
+.wordmark > span:nth-of-type(8) { left: 72.47%; top: 25.03%; }
+.wordmark > span:nth-of-type(9) { left: 82.68%; top: 26.17%; }
+.wordmark > span:nth-of-type(10) { left: 91.58%; top: 26.15%; }
 
 .welcomeCopy {
   margin: 0;
@@ -138,13 +136,52 @@
 /* The action stays in flow and pins itself to the bottom edge while the step scrolls. */
 .footer {
   position: sticky;
-  bottom: var(--keyboard-inset);
+  bottom: 0;
   z-index: 16;
   margin-top: auto;
   margin-inline: calc(-1 * var(--page-pad));
   padding: var(--space-4) var(--page-pad) calc(var(--safe-bottom) + var(--space-3));
   background: linear-gradient(to bottom, transparent, var(--bg-page) var(--space-4));
 }
+
+.page[data-compact] .footer { position: static; }
+
+@media (pointer: coarse) {
+  .form:has(input:focus) .footer { position: static; }
+}
+
+.form input { scroll-margin-block: var(--space-24); }
+
+.validationBanner {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in oklab, var(--danger) 24%, transparent);
+  border-radius: var(--radius-control);
+  background: color-mix(in oklab, var(--danger) 10%, var(--surface));
+  color: var(--red-ink);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  scroll-margin-block: var(--space-24);
+}
+
+.mapsField {
+  position: relative;
+  min-width: 0;
+  flex: 1;
+}
+
+.mapsField > input { width: 100%; }
+.mapsField[data-added]:not(:focus-within) > input { color: transparent; }
+.mapsStatus {
+  position: absolute;
+  inset-inline-end: 0;
+  top: 50%;
+  translate: 0 -50%;
+  color: var(--green-ink);
+  font-size: var(--text-sm);
+  pointer-events: none;
+}
+.mapsField:focus-within .mapsStatus { display: none; }
 
 .intro > .footer {
   width: 100%;
@@ -192,13 +229,10 @@
 .chrome {
   position: sticky;
   top: 0;
-  z-index: 15;
-  margin: calc(-1 * (env(safe-area-inset-top, 0px) + var(--space-4))) calc(-1 * var(--page-pad)) var(--space-5);
-  padding: calc(env(safe-area-inset-top, 0px) + var(--space-4)) var(--page-pad) var(--space-3);
-}
-
-.formPage .chrome {
-  padding-top: max(env(safe-area-inset-top, 0px) + var(--space-1), min(58px, 6.88svh));
+  z-index: 25;
+  isolation: isolate;
+  margin: calc(-1 * (env(safe-area-inset-top, 0px) + var(--space-4))) calc(-1 * var(--page-pad)) 0;
+  padding: max(env(safe-area-inset-top, 0px) + var(--space-2), clamp(var(--space-4), 5svh, var(--space-12))) var(--page-pad) var(--space-2);
 }
 
 .formPage:not([data-compact]) .chrome[data-step='0'] {
@@ -236,15 +270,12 @@
 .formPage .heading {
   justify-items: center;
   gap: var(--space-3);
-  padding: var(--space-6) var(--space-4) var(--space-2);
+  padding: var(--space-4) var(--space-4) var(--space-2);
   text-align: center;
 }
 
 .formPage .heading h1 { max-width: 14ch; font-size: var(--text-4xl); line-height: 1.15; }
 .formPage .heading p { max-width: 34ch; color: var(--text-secondary); font-size: var(--text-base); line-height: var(--leading-body); }
-.page[data-compact] .heading { padding-block: var(--space-2); }
-.page[data-compact] .heading h1 { max-width: none; font-size: var(--text-xl); }
-.page[data-compact] .heading p { display: none; }
 
 .body { display: grid; min-width: 0; gap: var(--space-3); }
 .body[data-step='1'],
@@ -261,6 +292,7 @@
 .coupleFields { gap: var(--space-6); }
 
 .sections { gap: var(--space-6); }
+.section { align-content: start; }
 
 .personSection {
   display: grid;
@@ -284,9 +316,7 @@
 
 /* iOS-style grouped rows: label on the left, value on the right, whole row focusable. */
 .groupedTable {
-  overflow: hidden;
-  border-radius: var(--radius-panel);
-  background: var(--surface);
+  composes: ios-group-body from global;
 }
 
 .groupedRow {
@@ -336,7 +366,7 @@
   background: var(--surface-muted);
 }
 
-.slugRow { gap: var(--space-1); cursor: text; }
+.slugRow { gap: 0; cursor: text; }
 .slugPrefix { flex: none; color: var(--text-secondary); font-size: var(--text-base); }
 .slugRow .groupedInput { text-align: start; }
 
@@ -354,11 +384,24 @@
 .linkHint[data-status='taken'] { color: var(--red-ink); }
 
 /* Sessions: name on the left, a time chip and the delete action on the right. */
-.sessionRow { cursor: default; }
+.sessionList.sessionList {
+  --swipe-content-min-height: var(--control-height-xl);
+  --swipe-content-padding-block: 0;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius-control) + 4px);
+}
+
+.sessionRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sessionRow input { user-select: text; -webkit-user-select: text; }
 
 .sessionName {
   min-width: 0;
-  min-height: 52px;
+  min-height: var(--control-height-xl);
   flex: 1;
   padding: 0;
   border: 0;
@@ -369,8 +412,8 @@
 }
 
 .timeChip {
-  width: 92px;
-  min-height: var(--space-8);
+  width: clamp(90px, 25vw, 112px);
+  min-height: var(--control-height-sm);
   padding: 0 var(--space-2);
   border: 0;
   border-radius: var(--radius-pill);
@@ -380,53 +423,15 @@
   font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
   text-align: center;
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-.timeChip::-webkit-calendar-picker-indicator {
-  display: none;
 }
 
 .timeChip::-webkit-datetime-edit { text-align: center; }
 .timeChip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.deleteSession {
-  display: grid;
-  width: var(--space-7, 28px);
-  height: var(--space-7, 28px);
-  flex: none;
-  place-items: center;
-  padding: 0;
-  border: 0;
+.addSession.addSession {
   border-radius: var(--radius-pill);
-  background: color-mix(in oklab, var(--danger) 14%, transparent);
-  color: var(--danger);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.addSession {
-  display: flex;
-  min-height: var(--space-12);
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  padding-inline: var(--space-4);
-  border: 0;
-  border-radius: var(--radius-panel);
-  background: var(--surface);
   color: var(--accent);
-  font: inherit;
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
 }
-
-.mapRow { cursor: default; }
-.mapAction { margin-inline-start: auto; color: var(--accent); font-size: var(--text-base); text-decoration: none; }
-.mapMuted { margin-inline-start: auto; color: var(--text-muted); font-size: var(--text-base); }
 
 .fields,
 .sessions {
@@ -456,37 +461,12 @@
 .date p { margin: 0; color: var(--text-secondary); font-size: var(--text-sm); }
 .dateCard {
   display: grid;
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.5fr) minmax(0, .9fr);
   min-width: 0;
   overflow: hidden;
   border-radius: var(--radius-panel);
   background: var(--surface);
 }
-.dateRow + .dateRow { border-top: 1px solid var(--border); }
-.dateRow {
-  display: grid;
-  gap: var(--space-2);
-  padding: var(--space-3) 0 var(--space-3);
-}
-.dateRowLabel {
-  padding-inline: var(--space-4);
-  color: var(--text-secondary);
-  font-size: var(--text-body-sm);
-  text-align: start;
-}
-.dateItem {
-  display: grid;
-  width: 100%;
-  height: 100%;
-  place-items: center;
-  border-radius: var(--radius-pill);
-  background: var(--surface-muted);
-  color: var(--foreground);
-  font-size: var(--text-base);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  user-select: none;
-}
-
 .sessions {
   margin: 0;
   padding: 0;
@@ -501,8 +481,7 @@
 .remove { width: var(--space-12); padding: 0; }
 
 /* iOS-style list rows: tappable, label left, value right, hairline separator inset from the left. */
-.listRow,
-.planRow {
+.listRow {
   position: relative;
   display: flex;
   width: 100%;
@@ -519,14 +498,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.listRow:disabled,
-.planRow:disabled { cursor: default; }
+.listRow:disabled { cursor: default; }
 
-.listRow:active,
-.planRow:not(:disabled):active { background: var(--surface-muted); }
+.listRow:active { background: var(--surface-muted); }
 
-.listRow + .listRow::before,
-.planRow + .planRow::before {
+.listRow + .listRow::before {
   position: absolute;
   top: 0;
   right: 0;
@@ -547,18 +523,41 @@
 }
 .listChevron { flex: none; color: var(--text-muted); }
 
-.planText { display: grid; min-width: 0; flex: 1; gap: 2px; }
-.planDetail { color: var(--text-secondary); font-size: var(--text-sm); }
-.planRow:disabled .listLabel,
-.planRow:disabled .planDetail { color: var(--text-muted); }
-.planSoon {
-  margin-inline-start: auto;
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--surface-muted);
-  color: var(--text-secondary);
-  font-size: var(--text-xs, 12px);
-  white-space: nowrap;
+.planGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
 }
-.planCheck { flex: none; margin-inline-start: auto; color: var(--accent); }
-.planRow[aria-checked='true'] .planText .listLabel { color: var(--accent); }
+
+.paidPlan,
+.freePlan {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+}
+
+.paidPlan {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.paidPlan small { color: var(--text-secondary); }
+.planPrice { margin-top: var(--space-3); color: var(--brand-ink); font-weight: var(--weight-semibold); }
+.freePlan {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  border-color: var(--accent);
+}
+
+.freePlan > span:last-child {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--brand-ink);
+  font-size: var(--text-sm);
+}

@@ -5,14 +5,19 @@ export type GuestStatus = 'semua' | 'hadir' | 'tidak_hadir' | 'pending' | 'belum
 export type Status = GuestStatus
 export type SortKey = 'nama' | 'dibuat' | 'diubah'
 
-export const statusTabs: { value: Status; label: string }[] = [
-  { value: 'semua', label: 'Semua' },
-  { value: 'hadir', label: 'Hadir' },
-  { value: 'tidak_hadir', label: 'Absen' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'belum_terkirim', label: 'Unsent' },
-  { value: 'check_in', label: 'Check-in' },
-]
+export const statusLabels: Record<GuestStatus, string> = {
+  semua: 'Semua',
+  hadir: 'Hadir',
+  tidak_hadir: 'Absen',
+  pending: 'Menunggu',
+  belum_terkirim: 'Unsent',
+  check_in: 'Check-in',
+}
+
+export const statusTabs = (Object.keys(statusLabels) as GuestStatus[]).map(value => ({
+  value,
+  label: statusLabels[value],
+}))
 
 export const typeOptions = [
   { value: 'digital', label: 'Digital' },
@@ -37,9 +42,9 @@ export function matches(g: Guest, f: Status) {
 }
 
 export function statusOf(g: Guest): { text: string; tone: BadgeTone } {
-  if (g.is_checked_in) return { text: 'Check-in', tone: 'info' }
-  if (g.rsvp_status === 'hadir') return { text: 'Hadir', tone: 'success' }
-  if (g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen') return { text: 'Absen', tone: 'danger' }
-  if (!g.is_sent) return { text: 'Unsent', tone: 'neutral' }
-  return { text: 'Pending', tone: 'warning' }
+  if (g.is_checked_in) return { text: statusLabels.check_in, tone: 'info' }
+  if (g.rsvp_status === 'hadir') return { text: statusLabels.hadir, tone: 'success' }
+  if (g.rsvp_status === 'tidak_hadir' || g.rsvp_status === 'absen') return { text: statusLabels.tidak_hadir, tone: 'danger' }
+  if (!g.is_sent) return { text: statusLabels.belum_terkirim, tone: 'neutral' }
+  return { text: statusLabels.pending, tone: 'warning' }
 }

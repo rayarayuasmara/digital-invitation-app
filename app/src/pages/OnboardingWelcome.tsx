@@ -50,7 +50,11 @@ export function OnboardingWelcome({ onStart, account }: Props) {
         <p className={styles.greeting}>Selamat datang di</p>
         <h1 className={styles.wordmark}>
           <span className="sr-only">Raya Rayu</span>
-          {wordmark.map(file => <img key={file} src={`${asset}${file}`} alt="" />)}
+          {wordmark.map(file => (
+            <span key={file} aria-hidden style={{ maskImage: `url(${asset}${file})` }}>
+              <img src={`${asset}${file}`} alt="" />
+            </span>
+          ))}
         </h1>
         <p className={styles.welcomeCopy}>Buat undangan pernikahan digital yang indah dalam hitungan menit. Tamu bisa menerima undangan dengan mudah, dan pengiriman dengan WhatsApp.</p>
       </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import type { DashboardData } from '@/lib/dashboard'
+import { publishEvent, type DashboardData } from '@/lib/dashboard'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/arc/dialog/dialog'
 import { DEFAULT_TEMPLATE, TEMPLATE_VARIABLES, categoriesOf, saveTemplates } from '@/lib/whatsapp'
 import type { Templates } from '@/lib/whatsapp'
 import { Button } from '@/components/arc/button/button'
@@ -24,7 +25,26 @@ export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount
   const categories = categoriesOf(data)
   const [templates, setTemplates] = useState<Templates>(() => ({ ...(event.wa_templates ?? {}) }))
   const [saving, setSaving] = useState(false)
+  const [publishOpen, setPublishOpen] = useState(false)
+  const [publishing, setPublishing] = useState(false)
+  const [published, setPublished] = useState(false)
   const [open, setOpen] = useState<string | null>(null)
+
+  const publish = async () => {
+    if (publishing) return
+    setPublishing(true)
+    try {
+      await publishEvent(event.id)
+      setPublished(true)
+      setPublishOpen(false)
+      notify('Undangan berhasil diterbitkan.')
+      await onChanged()
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'Undangan belum bisa diterbitkan.')
+    } finally {
+      setPublishing(false)
+    }
+  }
 
   const save = async () => {
     setSaving(true)
@@ -58,6 +78,23 @@ export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount
           ))}
         </div>
       </Card>
+
+      <h2 className="section-title">Publikasi</h2>
+      {event.published_at || published ? (
+        <p className="page-sub">Undangan sudah terbit.</p>
+      ) : (
+        <Dialog open={publishOpen} onOpenChange={next => { if (!publishing) setPublishOpen(next) }}>
+          <DialogTrigger asChild>
+            <Button type="button" variant="accent" size="xl" fullWidth>Terbitkan undangan</Button>
+          </DialogTrigger>
+          <DialogContent title="Terbitkan undangan?" description="Tamu dapat membuka tautan undangan setelah diterbitkan. Masa aktif paket dimulai saat undangan terbit.">
+            <div className="dialog-actions">
+              <Button type="button" variant="accent" size="xl" fullWidth loading={publishing} onClick={publish}>Terbitkan</Button>
+              <Button type="button" variant="accentOutline" size="xl" fullWidth disabled={publishing} onClick={() => setPublishOpen(false)}>Batal</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <h2 className="section-title">Bagikan</h2>
       <Button type="button" variant="accent" size="xl" fullWidth onClick={onShare}>Salin tautan pratinjau</Button>

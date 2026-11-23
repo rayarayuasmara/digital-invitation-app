@@ -1,9 +1,9 @@
 import { Fragment, useEffect, useRef } from 'react'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
-import type { BadgeTone } from '@/components/arc/badge/badge'
 import type { Guest } from '@/lib/guests'
 import type { Wish } from '@/lib/wishes'
+import { statusOf } from '@/pages/guests/guest-helpers'
 
 type Props = {
   /** Oldest first. */
@@ -26,15 +26,6 @@ function dayLabel(iso: string) {
 
 const clock = (iso: string) =>
   new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' })
-
-function statusOf(guest: Guest | undefined): { text: string; tone: BadgeTone } | null {
-  if (!guest) return null
-  if (guest.is_checked_in) return { text: 'Check-in', tone: 'info' }
-  if (guest.rsvp_status === 'hadir') return { text: 'Hadir', tone: 'success' }
-  if (guest.rsvp_status === 'tidak_hadir' || guest.rsvp_status === 'absen') return { text: 'Absen', tone: 'danger' }
-  if (!guest.is_sent) return { text: 'Unsent', tone: 'neutral' }
-  return { text: 'Pending', tone: 'warning' }
-}
 
 /** Read-only transcript of guest wishes, styled like a chat thread. */
 export function WishThread({ wishes, guests, hostName, seenAt }: Props) {
@@ -63,7 +54,7 @@ export function WishThread({ wishes, guests, hostName, seenAt }: Props) {
           const previous = wishes[i - 1]
           const next = wishes[i + 1]
           const guest = (w.guest_id ? byId.get(w.guest_id) : undefined) ?? byName.get((w.guest_name ?? '').trim().toLowerCase())
-          const status = statusOf(guest)
+          const status = guest ? statusOf(guest) : null
           const isNew = new Date(w.created_at).getTime() > seen
           const newDay = !previous || dayKey(previous.created_at) !== dayKey(w.created_at)
           const sameAuthor = !!previous && !newDay && (previous.guest_id ?? previous.guest_name) === (w.guest_id ?? w.guest_name)

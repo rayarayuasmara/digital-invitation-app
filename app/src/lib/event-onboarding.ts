@@ -18,6 +18,7 @@ export type FirstEventInput = {
   slug: string
   date: string
   location: string
+  mapsUrl: string
   sessions: { name: string; time: string }[]
 }
 
@@ -34,6 +35,26 @@ export function suggestEventSlug(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
+export function normalizeMapsUrl(value: string) {
+  const candidate = value.match(/https:\/\/[^\s<>]+/i)?.[0] ?? value.trim()
+  if (!candidate) return ''
+  const url = /^https:\/\//i.test(candidate) ? candidate : `https://${candidate}`
+  try {
+    const parsed = new URL(url)
+    if (parsed.username || parsed.password || parsed.port) return ''
+    const host = parsed.hostname
+    const path = parsed.pathname
+    if (host === 'maps.app.goo.gl' && path.length > 1) return parsed.href
+    if (host === 'share.google' && path.length > 1) return parsed.href
+    if (host === 'goo.gl' && path.startsWith('/maps/')) return parsed.href
+    if (host === 'maps.google.com' || host === 'maps.google.co.id') return parsed.href
+    if (/^(www\.)?google\.(com|co\.id)$/.test(host) && /^\/maps(?:\/|$)/.test(path)) return parsed.href
+  } catch {
+    return ''
+  }
+  return ''
+}
+
 export async function checkEventSlug(slug: string) {
   const { data, error } = await supabase.rpc('check_event_slug_available', { p_slug: slug })
   if (error || data?.success !== true || typeof data?.available !== 'boolean') throw new Error('slug-check-failed')
@@ -42,7 +63,9 @@ export async function checkEventSlug(slug: string) {
 
 export async function createFirstEvent(input: FirstEventInput) {
   const { couple } = input
-  const { data, error } = await supabase.rpc('create_event', {
+  const mapsUrl = normalizeMapsUrl(input.mapsUrl)
+  const { data, error } = await supabase.rpc(mapsUrl ? 'create_event_with_map' : 'create_event', {
+    ...(mapsUrl ? { p_maps_url: mapsUrl } : {}),
     p_title: input.title.trim(),
     p_event_date: input.date,
     p_location: input.location.trim(),
@@ -64,6 +87,8 @@ export async function createFirstEvent(input: FirstEventInput) {
   if (!error && data?.success === true) return
 
   const serverMessage = typeof data?.message === 'string' ? data.message : ''
+  if (error?.code === 'PGRST202' && mapsUrl) throw new CreateEventError('Penyimpanan tautan Google Maps belum tersedia.')
+  if (/Google Maps/i.test(serverMessage)) throw new CreateEventError(serverMessage)
   if (/slug|alamat tautan/i.test(serverMessage) || (error?.code === '23505' && /slug/i.test(error.message))) {
     throw new CreateEventError('Alamat tautan tidak tersedia. Coba alamat lain.', 'slug')
   }

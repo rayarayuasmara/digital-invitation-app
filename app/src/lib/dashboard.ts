@@ -34,6 +34,8 @@ export type DashboardEvent = {
   title: string
   sessions: { id: string; name: string; time_text?: string }[] | null
   couple_name: string | null
+  groom_nickname?: string | null
+  bride_nickname?: string | null
   location: string | null
   event_date: string | null
   scanner_code: string | null
@@ -63,4 +65,12 @@ export async function deleteEvent(eventId: string) {
   if (error || data?.success !== true) {
     throw new Error(typeof data?.message === 'string' ? data.message : 'Acara belum bisa dihapus. Coba lagi.')
   }
+}
+
+export async function publishEvent(eventId: string): Promise<string> {
+  const { data, error } = await supabase.rpc('publish_event', { p_event_id: eventId })
+  if (error || data?.success !== true || typeof data.published_at !== 'string') {
+    throw new Error(typeof data?.message === 'string' ? data.message : 'Undangan belum bisa diterbitkan. Coba lagi.')
+  }
+  return data.published_at
 }

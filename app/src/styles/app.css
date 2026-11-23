@@ -558,15 +558,6 @@ body[data-scroll-locked] .app-top-fade {
 
 /* Settings-style grouped rows: one white inset card per group, hairline separators. */
 /* Theme picker inside a settings group: a full-width segmented control. */
-.theme-tabs {
-  display: flex;
-  width: 100%;
-}
-
-.theme-tabs > button {
-  flex: 1;
-}
-
 .kv span:first-child {
   color: var(--sub);
 }
@@ -585,6 +576,18 @@ body[data-scroll-locked] .app-top-fade {
   border-radius: var(--radius-pill);
   background: var(--soft);
   color: var(--accent);
+}
+
+.scanner-manual-filters {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.scanner-token-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--space-2);
 }
 
 .scanner-screen {
@@ -1568,23 +1571,6 @@ body[data-scroll-locked] .app-top-fade {
 
 .home-history-row:first-child::before {
   display: none;
-}
-
-.home-history-avatar {
-  position: relative;
-  flex: 0 0 auto;
-}
-
-.home-history-avatar > span:first-child {
-  border: 0;
-  background: color-mix(in oklab, var(--accent) 12%, var(--surface));
-  color: var(--accent-strong);
-  font-weight: 600;
-}
-
-.home-history-avatar.is-print .guest-avatar-badge {
-  background: var(--warning-solid);
-  color: var(--on-solid);
 }
 
 /* The link keeps its compact visual; the tap area grows to 44px without moving the title. */
@@ -2649,73 +2635,41 @@ body[data-scroll-locked] .app-top-fade {
   font-size: var(--text-sm);
 }
 
-.invitation-type-choice {
-  min-width: 0;
-  margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-panel);
-  background: var(--surface);
-}
-
-.invitation-type-choice > legend {
-  padding-inline: var(--space-1);
-  color: var(--text-secondary);
-}
-
 .invitation-type-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
+  gap: var(--space-2);
 }
 
 .invitation-type-option {
-  display: grid;
-  justify-items: center;
-  gap: var(--space-2);
-  color: var(--foreground);
-  font-size: var(--text-sm);
   cursor: pointer;
 }
 
 .invitation-type-preview {
   display: grid;
-  width: 100%;
-  max-width: 112px;
-  min-height: var(--space-16);
-  place-items: center;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: var(--control-height-lg);
+  gap: var(--space-2);
+  padding-inline: var(--space-3);
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
   background: var(--surface-muted);
   color: var(--text-secondary);
+  font-size: var(--text-sm);
 }
 
 .invitation-type-check {
-  display: grid;
-  width: var(--space-5);
-  height: var(--space-5);
-  place-items: center;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill);
-  color: var(--accent-foreground);
-}
-
-.invitation-type-check > svg {
   visibility: hidden;
 }
 
-.invitation-type-option > input:checked ~ .invitation-type-preview {
+.invitation-type-option > input:checked + .invitation-type-preview {
   border-color: var(--accent);
   background: var(--accent-subtle);
   color: var(--brand-ink);
 }
 
-.invitation-type-option > input:checked ~ .invitation-type-check {
-  border-color: var(--accent);
-  background: var(--accent);
-}
-
-.invitation-type-option > input:checked ~ .invitation-type-check > svg {
+.invitation-type-option > input:checked + .invitation-type-preview .invitation-type-check {
   visibility: visible;
 }
 
@@ -2791,9 +2745,9 @@ body[data-scroll-locked] .app-top-fade {
   justify-content: flex-end;
   min-height: 48px;
   gap: var(--space-2);
-  padding: 0;
+  padding-inline: var(--space-2);
   border: 0;
-  background: transparent;
+  --select-trigger-background: transparent;
   color: var(--text-secondary);
   font-size: var(--text-sm);
   text-align: right;
@@ -3269,6 +3223,9 @@ body[data-scroll-locked] .app-top-fade {
 
 /* Empty state */
 .guests-empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
   padding: var(--space-6) var(--space-4);
   text-align: center;
   color: var(--text-muted);
@@ -3327,27 +3284,16 @@ body[data-scroll-locked] .app-top-fade {
   flex: 0 0 auto;
 }
 
-.guest-card-action {
-  display: grid;
-  width: 32px;
-  height: 32px;
-  place-items: center;
+.guest-card-actions .guest-card-action {
+  flex: none;
+  width: var(--control-height-md);
+  min-height: var(--control-height-md);
   padding: 0;
-  border: 1px solid var(--line);
   border-radius: var(--radius-pill);
-  background: var(--surface);
-  color: var(--text-secondary);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
-}
-
-.guest-card-action:active {
-  background: var(--surface-muted);
 }
 
 /* Once the invitation is sent the WhatsApp button stays filled, so the state reads at a glance. */
-.guest-card-action.is-wa[data-sent] {
+.guest-card-actions .guest-card-action[data-sent] {
   border-color: color-mix(in oklab, var(--accent) 32%, transparent);
   background: color-mix(in oklab, var(--accent) 12%, var(--surface));
   color: var(--accent-strong);
@@ -3685,9 +3631,20 @@ body[data-scroll-locked] .app-top-fade {
   flex-direction: column;
   align-items: center;
   margin-top: var(--space-1);
+  text-align: center;
+}
+
+.account-tier {
+  margin-top: var(--space-3);
+}
+
+.account-profile {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .account-avatar {
+  flex: none;
   box-shadow:
     0 0 0 1px var(--line),
     0 0 0 5px color-mix(in srgb, var(--accent) 10%, transparent);
@@ -3700,27 +3657,12 @@ body[data-scroll-locked] .app-top-fade {
   font-size: var(--text-2xl);
   font-weight: var(--weight-bold);
   letter-spacing: var(--tracking-display);
-  text-align: center;
 }
 
 .account-email {
   margin: 2px 0 0;
   color: var(--sub);
   font-size: var(--text-sm);
-}
-
-.account-tier {
-  display: inline-flex;
-  height: 24px;
-  align-items: center;
-  gap: 4px;
-  margin-top: var(--space-3);
-  padding: 0 10px;
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--accent);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
 }
 
 .account-section {
@@ -3775,12 +3717,6 @@ body[data-scroll-locked] .app-top-fade {
 .account-row-value {
   color: var(--sub);
   font-variant-numeric: tabular-nums;
-}
-
-.account-row-note {
-  color: var(--text-muted);
-  font-size: var(--text-sm);
-  white-space: nowrap;
 }
 
 .account-row-action {
@@ -3857,14 +3793,6 @@ body[data-scroll-locked] .app-top-fade {
 .account-row-danger .account-row-icon {
   background: color-mix(in srgb, var(--red-ink) 14%, transparent);
   color: var(--red-ink);
-}
-
-.account-group-signout {
-  margin-top: var(--space-6);
-}
-
-.account-group-theme {
-  padding: var(--space-2);
 }
 
 /* Ucapan page: day-grouped feed of guest wishes. */

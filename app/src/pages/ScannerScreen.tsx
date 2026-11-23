@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
-import { CheckCircle2, LogOut, RefreshCw, ScanLine, Search, SwitchCamera, Ticket, UserCheck, UserRound, XCircle } from 'lucide-react'
+import { CheckCircle2, LogOut, RefreshCw, ScanLine, Search, SwitchCamera, UserCheck, UserRound, XCircle } from 'lucide-react'
+import { Badge } from '@/components/arc/badge/badge'
+import { ChipGroup } from '@/components/arc/chip-group/chip-group'
+import { Input } from '@/components/arc/input/input'
+import { SearchField } from '@/components/arc/search-field/search-field'
 import { Button } from '@/components/arc/button/button'
 import { Gauge } from '@/components/arc/gauge/gauge'
 import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
@@ -11,7 +15,11 @@ const READER_ID = 'scanner-reader'
 const scanConfig = { fps: 10, qrbox: { width: 220, height: 220 } }
 
 type Mode = 'scan' | 'manual'
-type Filter = 'semua' | 'belum' | 'sudah'
+const checkInFilters = [
+  { value: 'semua', label: 'Semua' },
+  { value: 'belum', label: 'Belum masuk' },
+  { value: 'sudah', label: 'Sudah masuk' },
+]
 type HistoryItem = { id: number; ok: boolean; dup: boolean; name: string; pax: number | null; time: string }
 type SheetState =
   | { kind: 'result'; ok: boolean; dup: boolean; title: string; subtitle: string; guest: ScanGuest | null; source: 'scan' | 'manual' }
@@ -53,7 +61,7 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
   const [guests, setGuests] = useState<ScanGuest[]>([])
   const [loadError, setLoadError] = useState('')
   const [query, setQuery] = useState('')
-  const [filter, setFilter] = useState<Filter>('semua')
+  const [filter, setFilter] = useState('semua')
   const [sheet, setSheet] = useState<SheetState | null>(null)
   const [history, setHistory] = useState<HistoryItem[]>([])
   const [camHint, setCamHint] = useState('Arahkan kamera ke QR Code tiket tamu')
@@ -278,14 +286,15 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
 
         {mode === 'manual' && (
           <section style={{ marginTop: 12 }}>
-            <label className="search">
-              <Search size={18} aria-hidden color="var(--sub)" />
-              <input type="search" placeholder="Ketik nama tamu" aria-label="Cari nama tamu" value={query} onChange={e => setQuery(e.target.value)} />
-            </label>
-            <div className="chips" role="group" aria-label="Filter tamu">
-              {([['semua', 'Semua'], ['belum', 'Belum masuk'], ['sudah', 'Sudah masuk']] as const).map(([v, l]) => (
-                <button key={v} type="button" className="chip" aria-pressed={filter === v} onClick={() => setFilter(v)}>{l}</button>
-              ))}
+            <div className="scanner-manual-filters">
+              <SearchField label="Cari nama tamu" placeholder="Cari nama tamu…" value={query} onValueChange={setQuery} />
+              <ChipGroup
+                label="Filter tamu"
+                options={checkInFilters}
+                value={[filter]}
+                multiple={false}
+                onValueChange={([next]) => { if (next) setFilter(next) }}
+              />
             </div>
             {loadError && <p role="alert" className="empty" style={{ color: 'var(--red-ink)' }}>{loadError}</p>}
             {!loadError && visible.length === 0 && <p className="empty">Tamu tidak ditemukan.</p>}
@@ -297,29 +306,26 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
                       <p className="name">{g.group_name}</p>
                       <p className="meta">{g.category || 'Umum'} · {paxOf(g)} orang</p>
                     </div>
-                    <span className={`badge ${g.is_checked_in ? 'badge-ok' : ''}`}>{g.is_checked_in ? 'Checked' : 'Ready'}</span>
+                    <Badge size="sm" pill tone={g.is_checked_in ? 'success' : 'neutral'}>
+                      {g.is_checked_in ? 'Sudah masuk' : 'Belum masuk'}
+                    </Badge>
                   </button>
                 </li>
               ))}
             </ul>
             <div className="card" style={{ marginTop: 12 }}>
-              <p className="stat-label" style={{ marginBottom: 8 }}>Atau masukkan kode token tiket</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 8 }}>
-                <label className="search" style={{ margin: 0 }}>
-                  <Ticket size={18} aria-hidden color="var(--sub)" />
-                  <input
-                    type="text"
-                    placeholder="Contoh: 115b0522"
-                    autoComplete="off"
-                    autoCapitalize="none"
-                    spellCheck={false}
-                    value={tokenInput}
-                    onChange={e => setTokenInput(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') submitToken() }}
-                  />
-                </label>
-                <Button type="button" variant="accent" size="md" style={{ minWidth: 96 }} onClick={submitToken}>Proses</Button>
-              </div>
+              <form className="scanner-token-form" onSubmit={event => { event.preventDefault(); submitToken() }}>
+                <Input
+                  label="Kode token tiket"
+                  placeholder="Contoh: 115b0522"
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  value={tokenInput}
+                  onChange={e => setTokenInput(e.target.value)}
+                />
+                <Button type="submit" variant="accent" size="md">Proses</Button>
+              </form>
             </div>
           </section>
         )}

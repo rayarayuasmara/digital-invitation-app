@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
-import { CylinderCarousel } from '@/components/motion/cylinder-carousel'
+import { WheelPicker } from '@/components/motion/wheel-picker'
 import styles from './EventOnboarding.module.css'
 
 const months = [
@@ -29,15 +29,8 @@ export function EventDateWheel({ value, onChange, startYear }: {
   const days = useMemo(() => Array.from({ length: maxDay }, (_, index) => String(index + 1)), [maxDay])
   const years = useMemo(() => Array.from({ length: 31 }, (_, index) => startYear - 10 + index), [startYear])
 
-  const rowProps = {
-    variant: 'convex' as const,
-    visibleItems: 3,
-    minScale: 0.7,
-    itemSize: 96,
-    itemAspectRatio: 2.2,
-    height: 64,
-    arc: 0,
-  }
+  const monthOptions = useMemo(() => months.map((label, index) => ({ label, value: String(index + 1) })), [])
+  const yearOptions = useMemo(() => years.map(String), [years])
 
   const setPart = useCallback((part: 0 | 1 | 2, next: number) => {
     onChange(current => {
@@ -50,40 +43,9 @@ export function EventDateWheel({ value, onChange, startYear }: {
 
   return (
     <div data-beui className={styles.dateCard} role="group" aria-label="Tanggal acara">
-      <div className={styles.dateRow}>
-        <span className={styles.dateRowLabel} aria-hidden="true">Hari</span>
-        <CylinderCarousel
-          key={`${year}-${month}`}
-          {...rowProps}
-          aria-label="Hari"
-          defaultIndex={day - 1}
-          onIndexChange={index => setPart(2, index + 1)}
-        >
-          {days.map(label => <span key={label} className={styles.dateItem}>{label}</span>)}
-        </CylinderCarousel>
-      </div>
-      <div className={styles.dateRow}>
-        <span className={styles.dateRowLabel} aria-hidden="true">Bulan</span>
-        <CylinderCarousel
-          {...rowProps}
-          aria-label="Bulan"
-          defaultIndex={month - 1}
-          onIndexChange={index => setPart(1, index + 1)}
-        >
-          {months.map(label => <span key={label} className={styles.dateItem}>{label}</span>)}
-        </CylinderCarousel>
-      </div>
-      <div className={styles.dateRow}>
-        <span className={styles.dateRowLabel} aria-hidden="true">Tahun</span>
-        <CylinderCarousel
-          {...rowProps}
-          aria-label="Tahun"
-          defaultIndex={years.indexOf(year)}
-          onIndexChange={index => setPart(0, years[index])}
-        >
-          {years.map(label => <span key={label} className={styles.dateItem}>{label}</span>)}
-        </CylinderCarousel>
-      </div>
+      <WheelPicker aria-label="Hari" options={days} value={String(day)} onValueChange={next => setPart(2, Number(next))} />
+      <WheelPicker aria-label="Bulan" options={monthOptions} value={String(month)} onValueChange={next => setPart(1, Number(next))} />
+      <WheelPicker aria-label="Tahun" options={yearOptions} value={String(year)} onValueChange={next => setPart(0, Number(next))} />
     </div>
   )
 }

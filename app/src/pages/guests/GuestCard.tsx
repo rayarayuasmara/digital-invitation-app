@@ -1,4 +1,6 @@
-import { Check, Link2, MessageCircle, Printer, Smartphone } from 'lucide-react'
+import { Check, Link2, MessageCircle } from 'lucide-react'
+import { InvitationAvatar } from '@/components/InvitationAvatar'
+import { Button } from '@/components/arc/button/button'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { Badge } from '@/components/arc/badge/badge'
 import type { Guest } from '@/lib/guests'
@@ -41,18 +43,7 @@ export function GuestCard({ guest, variant = 'grid', onClick, onCopyLink, onSend
         className="guest-card-main"
         onClick={onClick}
       >
-        <div className={`guest-avatar ${guest.invitation_type === 'cetak' ? 'is-print' : 'is-digital'}`}>
-          <Avatar name={guest.group_name} size="lg" />
-          <span
-            className="guest-avatar-badge"
-            role="img"
-            aria-label={guest.invitation_type === 'cetak' ? 'Undangan cetak' : 'Undangan digital'}
-          >
-            {guest.invitation_type === 'cetak'
-              ? <Printer size={10} aria-hidden />
-              : <Smartphone size={10} aria-hidden />}
-          </span>
-        </div>
+        <InvitationAvatar name={guest.group_name} invitationType={guest.invitation_type === 'cetak' ? 'cetak' : 'digital'} />
         <div className="guest-card-content">
           <p className="guest-card-name">{guest.group_name}</p>
           <div className="guest-card-badges">
@@ -65,19 +56,23 @@ export function GuestCard({ guest, variant = 'grid', onClick, onCopyLink, onSend
       {(onCopyLink || onSendWhatsApp) && (
         <div className="guest-card-actions">
           {onCopyLink && (
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
               className="guest-card-action"
               aria-label={`Salin tautan undangan ${guest.group_name}`}
               onClick={onCopyLink}
             >
               <Link2 size={16} strokeWidth={1.9} aria-hidden />
-            </button>
+            </Button>
           )}
           {onSendWhatsApp && (
-            <button
+            <Button
               type="button"
-              className="guest-card-action is-wa"
+              variant="secondary"
+              size="sm"
+              className="guest-card-action"
               data-sent={guest.is_sent || undefined}
               aria-pressed={guest.is_sent}
               aria-label={guest.is_sent
@@ -88,7 +83,7 @@ export function GuestCard({ guest, variant = 'grid', onClick, onCopyLink, onSend
               {guest.is_sent
                 ? <Check size={16} strokeWidth={2.2} aria-hidden />
                 : <MessageCircle size={16} strokeWidth={1.9} aria-hidden />}
-            </button>
+            </Button>
           )}
         </div>
       )}

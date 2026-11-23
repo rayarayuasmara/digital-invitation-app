@@ -15,6 +15,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
+    #maps-btn[hidden] { display: none; }
     :root {
       --tan: #BD9F7F;
       --paper: #EAEAEA;
@@ -468,7 +469,7 @@
         <p id="cd-note" class="where" hidden style="font-family:var(--serif);font-size:30px;line-height:1.1"></p>
 
         <div class="when-actions rv">
-          <a id="maps-btn" class="btn" href="#" target="_blank" rel="noopener">Buka di Google Maps
+          <a id="maps-btn" class="btn" href="#" hidden target="_blank" rel="noopener">Buka di Google Maps
             <svg class="arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12L12 4M5 4h7v7"/></svg></a>
           <button id="cal-btn" class="btn ghost" type="button">Simpan ke Kalender</button>
         </div>
@@ -768,7 +769,12 @@ async function fetchGuest() {
     const rpc = IS_PREVIEW ? 'get_event_preview' : 'get_invitation_details';
     const { data, error } = await sb.rpc(rpc, { p_token: token });
     const row = Array.isArray(data) ? data[0] : data;
-    if (!error && row) return row;
+    if (!error && row) {
+      try {
+        const { data: mapsUrl } = await sb.rpc('get_event_maps_url', { p_token: token, p_preview: IS_PREVIEW });
+        return { ...row, maps_url: mapsUrl };
+      } catch { return row; }
+    }
   } catch (e) { /* dibiarkan; tampilkan pesan tidak ditemukan */ }
   return null;
 }
@@ -880,7 +886,11 @@ function renderInvitation(g) {
     $('cal-btn').hidden = true;
   }
   $('event-location').textContent = g.event_location || '';
-  $('maps-btn').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(g.event_location || '')}`;
+  const mapsUrl = typeof g.maps_url === 'string' ? g.maps_url
+    : g.event_location ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(g.event_location)}` : '';
+  const mapsButton = $('maps-btn');
+  mapsButton.hidden = !mapsUrl.startsWith('https://');
+  if (!mapsButton.hidden) mapsButton.href = mapsUrl;
 
   // RSVP: identitas
   $('rsvp-guest-name').textContent = g.group_name || 'Tamu Undangan';

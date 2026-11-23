@@ -225,7 +225,25 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
       {/* Guest grid or list */}
       {visible.length === 0 && (
         <div className="guests-empty">
-          <p>Tidak ada tamu yang sesuai dengan filter.</p>
+          {guests.length === 0 ? (
+            <>
+              <p>Belum ada tamu.</p>
+              <Button type="button" variant="accent" size="sm" onClick={() => setSheet({ mode: 'new' })}>
+                Tambah tamu pertama
+              </Button>
+            </>
+          ) : (
+            <>
+              <p>Tidak ada tamu yang cocok dengan pencarian atau filter.</p>
+              <Button type="button" variant="secondary" size="sm" onClick={() => {
+                setQuery('')
+                setStatus('semua')
+                resetFilters()
+              }}>
+                Hapus pencarian dan filter
+              </Button>
+            </>
+          )}
         </div>
       )}
 

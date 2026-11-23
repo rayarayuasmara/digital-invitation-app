@@ -8,7 +8,7 @@ import { Switch } from '@/components/arc/switch/switch'
 import SegmentedControl from '@/components/arc/segmented-control/segmented-control'
 import { AdaptiveStepper, AdaptiveStepperDecrement, AdaptiveStepperIncrement, AdaptiveStepperValue } from '@/components/motion/adaptive-stepper'
 import type { Guest, GuestForm } from '@/lib/guests'
-import { emptyForm } from './guest-helpers'
+import { emptyForm, statusLabels } from './guest-helpers'
 
 /** The three RSVP states a client can set by hand; `pending` clears the RSVP row. */
 export type RsvpChoice = 'hadir' | 'tidak_hadir' | 'pending'
@@ -28,10 +28,10 @@ export type BodyProps = {
 }
 
 const statusChoices: { value: StatusChoice; label: string }[] = [
-  { value: 'belum_terkirim', label: 'Unsent' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'hadir', label: 'Hadir' },
-  { value: 'tidak_hadir', label: 'Absen' },
+  { value: 'belum_terkirim', label: statusLabels.belum_terkirim },
+  { value: 'pending', label: statusLabels.pending },
+  { value: 'hadir', label: statusLabels.hadir },
+  { value: 'tidak_hadir', label: statusLabels.tidak_hadir },
 ]
 
 const invitationTypes = [
@@ -91,7 +91,7 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
       return
     }
     setSent(true)
-    // "Pending" means the invitation arrived but has not been answered yet.
+    // Menunggu RSVP keeps the sent flag and clears the RSVP response.
     setRsvp(next === 'pending' ? 'pending' : next)
     // Only "Hadir" can sit next to a check-in; the other states have not arrived.
     if (next !== 'hadir') setCheckedIn(false)
@@ -157,6 +157,11 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
           <div className="ios-row">
             <Select label="Kategori" value={form.category} onValueChange={v => set('category', v)} options={categories.map(c => ({ value: c, label: c }))} />
           </div>
+          {sessions.length > 0 && (
+            <div className="ios-row">
+              <Select label="Sesi" value={form.session} onValueChange={v => set('session', v)} options={sessions.map(s => ({ value: s, label: s }))} />
+            </div>
+          )}
           <div className="ios-row ios-row-stepper">
             <span className="ios-row-label" id={`${fieldId}-pax`}>Jumlah orang</span>
             <div data-beui className="ios-stepper-scale">
@@ -176,48 +181,45 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
         </div>
       </section>
 
-      <fieldset className="invitation-type-choice">
-        <legend className="ios-row-label">Jenis undangan</legend>
-        <div className="invitation-type-options">
-          {invitationTypes.map(({ value, label, Icon }) => (
-            <label key={value} className="invitation-type-option">
-              <input
-                className="sr-only"
-                type="radio"
-                name={`${fieldId}-invitation-type`}
-                value={value}
-                checked={form.invitationType === value}
-                onChange={() => set('invitationType', value)}
-              />
-              <span className="invitation-type-preview" aria-hidden="true">
-                <Icon size={28} />
-              </span>
-              <span>{label}</span>
-              <span className="invitation-type-check" aria-hidden="true"><Check size={12} strokeWidth={3} /></span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      {sessions.length > 0 && (
-        <section className="ios-group" aria-label="Sesi undangan">
-          <div className="ios-group-body">
-            <div className="ios-row">
-              <Select label="Sesi" value={form.session} onValueChange={v => set('session', v)} options={sessions.map(s => ({ value: s, label: s }))} />
-            </div>
+      <section className="ios-group">
+        <div className="ios-group-body">
+          <div className="ios-row ios-row-stack">
+            <span className="ios-row-label" aria-hidden="true">Jenis undangan</span>
+            <fieldset className="ios-segment-field">
+              <legend className="sr-only">Jenis undangan</legend>
+              <div className="invitation-type-options">
+                {invitationTypes.map(({ value, label, Icon }) => (
+                  <label key={value} className="invitation-type-option">
+                    <input
+                      className="sr-only"
+                      type="radio"
+                      name={`${fieldId}-invitation-type`}
+                      value={value}
+                      checked={form.invitationType === value}
+                      onChange={() => set('invitationType', value)}
+                    />
+                    <span className="invitation-type-preview">
+                      <Icon size={18} aria-hidden />
+                      <span>{label}</span>
+                      <Check className="invitation-type-check" size={15} strokeWidth={2.5} aria-hidden />
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {guest && (
-        <section className="ios-group" aria-label="Status tamu">
+        <section className="ios-group" aria-label="Status undangan">
           <div className="ios-group-body">
             <div className="ios-row ios-row-stack">
-              <span className="ios-row-label" id={`${fieldId}-status`}>Status RSVP</span>
+              <span className="ios-row-label" id={`${fieldId}-status`}>Status undangan</span>
               <div className="w-full">
                 <fieldset disabled={isPrint} className="ios-segment-field">
                   <SegmentedControl
-                    label="Status RSVP"
+                    label="Status undangan"
                     fullWidth
                     value={status}
                     onValueChange={v => pickStatus(v as StatusChoice)}
@@ -235,6 +237,16 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
                 onCheckedChange={changeSent}
               />
             </div>
+          </div>
+          {isPrint && (
+            <p className="ios-group-note">Undangan cetak otomatis tercatat terkirim dan hadir.</p>
+          )}
+        </section>
+      )}
+
+      {guest && (
+        <section className="ios-group" aria-label="Kehadiran tamu">
+          <div className="ios-group-body">
             <div className="ios-row">
               <span className="ios-row-label" id={`${fieldId}-checkin`}>Sudah check-in</span>
               <Switch
@@ -244,9 +256,6 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
               />
             </div>
           </div>
-          {isPrint && (
-            <p className="ios-group-note">Undangan cetak otomatis tercatat terkirim dan hadir.</p>
-          )}
         </section>
       )}
 

@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { ChevronLeft, ChevronRight, Check, MapPin, Plus, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Check, Plus, Trash2 } from 'lucide-react'
+import { SwipeActions, SwipeActionsRow } from '@/components/arc/swipe-actions/swipe-actions'
 import { Button } from '@/components/arc/button/button'
 import { useCollapseProgress } from '@/lib/hooks/use-collapse-progress'
-import { CreateEventError, checkEventSlug, createFirstEvent, suggestEventSlug } from '@/lib/event-onboarding'
+import { CreateEventError, checkEventSlug, createFirstEvent, suggestEventSlug, normalizeMapsUrl } from '@/lib/event-onboarding'
 import { EventDateWheel, todayInJakarta } from './EventDateWheel'
 import { OnboardingWelcome } from './OnboardingWelcome'
 import styles from './EventOnboarding.module.css'
@@ -13,21 +14,18 @@ const SLUG_MIN = 5
 
 const steps = [
   { title: 'Siapa kedua mempelai?', copy: 'Nama lengkap akan tampil di undangan. Nama panggilan dipakai di bagian sapaan.' },
-  { title: 'Judul & alamat tautan', copy: 'Tamu akan membuka undangan lewat alamat ini. Pilih yang mudah diingat.' },
+  { title: 'Pilih alamat tautan', copy: 'Tamu akan membuka undangan lewat alamat ini. Pilih yang mudah diingat.' },
   { title: 'Kapan acara berlangsung?', copy: 'Tanggal ini akan tampil di undangan.' },
   { title: 'Atur sesi dan lokasi acara', copy: 'Tambahkan satu atau lebih sesi, misalnya akad dan resepsi.' },
-  { title: 'Pilih paket', copy: 'Mulai dengan paket Gratis. Paket berbayar akan segera tersedia.' },
+  { title: 'Pilih paket', copy: 'Mulai dengan Free. Kamu bisa upgrade saat paket berbayar tersedia.' },
 ] as const
 
-type Plan = { id: string; name: string; detail: string; price: string; available: boolean }
-const plans: Plan[] = [
-  { id: 'gratis', name: 'Gratis', detail: '30 tamu · ada watermark', price: 'Rp0', available: true },
-  { id: 'silver', name: 'Silver', detail: '300 tamu · tanpa watermark', price: 'Rp99.000', available: false },
-  { id: 'gold', name: 'Gold', detail: '1.000 tamu · ekspor PDF', price: 'Rp199.000', available: false },
-  { id: 'diamond', name: 'Diamond', detail: '3.000 tamu · domain sendiri', price: 'Rp349.000', available: false },
-]
+const paidPlans = [
+  { name: 'Pro', price: 'Rp670.000' },
+  { name: 'Max', price: 'Rp988.000' },
+] as const
 
-const firstWord = (name: string) => name.trim().split(/\s+/)[0] ?? ''
+const firstWord = (name: string) => (name.trim().split(/\s+/)[0] ?? '').slice(0, 30)
 
 const slugStatusText: Record<Exclude<SlugStatus, 'idle'>, string> = {
   checking: 'Memeriksa ketersediaan…',
@@ -55,10 +53,10 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
   const [step, setStep] = useState<Step>(-1)
   const [firstName, setFirstName] = useState('')
   const [secondName, setSecondName] = useState('')
-  const [groomNickname, setGroomNickname] = useState('')
+  const [groomNicknameEdit, setGroomNickname] = useState<string | null>(null)
   const [groomFather, setGroomFather] = useState('')
   const [groomMother, setGroomMother] = useState('')
-  const [brideNickname, setBrideNickname] = useState('')
+  const [brideNicknameEdit, setBrideNickname] = useState<string | null>(null)
   const [brideFather, setBrideFather] = useState('')
   const [brideMother, setBrideMother] = useState('')
   const [title, setTitle] = useState<string | null>(null)
@@ -67,9 +65,9 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
   const [date, setDate] = useState(today)
   const [venue, setVenue] = useState('')
   const [city, setCity] = useState('')
+  const [mapsUrl, setMapsUrl] = useState('')
   const [sessions, setSessions] = useState<Session[]>([
     { id: 0, name: 'Akad', time: '' },
-    { id: 1, name: 'Resepsi', time: '' },
   ])
   const [error, setError] = useState('')
   const [slugError, setSlugError] = useState('')
@@ -77,28 +75,29 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
   const [busy, setBusy] = useState(false)
   const [saved, setSaved] = useState(false)
   const [returnToReview, setReturnToReview] = useState(false)
-  const nextSessionId = useRef(2)
+  const nextSessionId = useRef(1)
   const busyRef = useRef(false)
   const checkBeforeRetry = useRef(false)
   const stepHeading = useRef<HTMLHeadingElement>(null)
   const pageRef = useRef<HTMLElement>(null)
   const chromeRef = useRef<HTMLElement>(null)
-  useCollapseProgress(chromeRef)
+  const errorRef = useRef<HTMLParagraphElement>(null)
+  const normalizedMapsUrl = normalizeMapsUrl(mapsUrl)
+  useCollapseProgress(chromeRef, 44, step >= 0)
 
+  const groomNickname = groomNicknameEdit ?? firstWord(firstName)
+  const brideNickname = brideNicknameEdit ?? firstWord(secondName)
   const coupleName = [firstName.trim(), secondName.trim()].filter(Boolean).join(' & ')
   const coupleLabel = [groomNickname.trim() || firstWord(firstName), brideNickname.trim() || firstWord(secondName)].filter(Boolean).join(' & ')
   const titleValue = title ?? (coupleLabel ? `Pernikahan ${coupleLabel}` : '')
   const slugValue = slug ?? suggestEventSlug(coupleLabel)
   const normalizedSlug = suggestEventSlug(slugValue)
   const location = [venue.trim(), city.trim()].filter(Boolean).join(', ')
-  const mapsUrl = venue.trim()
-    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
-    : ''
   const sessionSummary = sessions
     .map(session => `${session.name.trim()}${session.time ? ` ${session.time.replace(':', '.')}` : ''}`)
     .join(' · ')
   const summaryRows: { label: string; value: string; step: Step }[] = [
-    { label: 'Mempelai', value: firstName.trim() && secondName.trim() ? coupleName : 'Belum lengkap', step: 0 },
+    { label: 'Mempelai', value: firstName.trim() && secondName.trim() ? coupleLabel : 'Belum lengkap', step: 0 },
     { label: 'Judul', value: titleValue.trim() || '-', step: 1 },
     { label: 'Alamat', value: `${LINK_PREFIX}${normalizedSlug}`, step: 1 },
     { label: 'Tanggal', value: formatDate(date), step: 2 },
@@ -112,12 +111,16 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
   }, [step])
 
   useEffect(() => {
+    if (!error) return
+    errorRef.current?.scrollIntoView({ block: 'nearest' })
+  }, [error])
+
+  useEffect(() => {
     const viewport = window.visualViewport
     const page = pageRef.current
     if (!viewport || !page) return
     const update = () => {
-      const inset = viewport.scale === 1 ? Math.max(0, document.documentElement.clientHeight - viewport.height - viewport.offsetTop) : 0
-      page.style.setProperty('--keyboard-inset', `${inset}px`)
+      const inset = viewport.scale === 1 ? Math.max(0, document.documentElement.clientHeight - viewport.height) : 0
       page.toggleAttribute('data-compact', inset > 100)
     }
     update()
@@ -185,6 +188,8 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
     }
     if (step === 3) {
       if (!venue.trim()) return setError('Isi nama venue acara.')
+      if (mapsUrl.trim() && !normalizedMapsUrl) return setError('Masukkan tautan Google Maps yang valid.')
+      if (sessions.length === 0) return setError('Tambahkan minimal satu sesi acara.')
       const names = sessions.map(session => session.name.trim().toLowerCase())
       if (names.some(name => !name)) return setError('Isi nama setiap sesi.')
       if (new Set(names).size !== names.length) return setError('Gunakan nama yang berbeda untuk setiap sesi.')
@@ -223,6 +228,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
           slug: normalizedSlug,
           date,
           location,
+          mapsUrl,
           sessions,
         })
         eventSaved = true
@@ -278,17 +284,17 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                 <ChevronLeft size={20} aria-hidden="true" />
               </Button>
               <progress className={styles.progress} value={step + 1} max={steps.length} aria-label="Progres pembuatan acara" />
-              {step <= 3 && !returnToReview && (
-                <Button type="button" variant="secondary" size="md" className={styles.skip} onClick={() => goTo((step + 1) as Step)}>
+              {!returnToReview && (step === 2 || step === 4) && (
+                <Button type="button" variant="secondary" size="md" className={styles.skip} disabled={step === 4} onClick={() => goTo((step + 1) as Step)}>
                   Lewati
                 </Button>
               )}
             </div>
-            {step <= 3 && heading}
           </header>
-          <form className={styles.form} onSubmit={submit} aria-busy={busy}>
-            {step > 3 && heading}
+          <form className={styles.form} onSubmit={submit} aria-busy={busy} noValidate>
+            {heading}
             <div className={styles.body} data-step={step}>
+              {error && <p ref={errorRef} className={styles.validationBanner} role="alert">{error}</p>}
               {step === 0 && (
                 <div className={styles.coupleFields}>
                   <section className={styles.personSection}>
@@ -419,7 +425,6 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                       </label>
                     </div>
                   </section>
-
                   <section className={styles.section}>
                     <p className={styles.sectionLabel}>Alamat tautan</p>
                     <div className={styles.groupedTable}>
@@ -461,48 +466,54 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                 <div className={styles.sections}>
                   <section className={styles.section}>
                     <p className={styles.sectionLabel}>Waktu acara</p>
-                    <div className={styles.groupedTable}>
+                    <SwipeActions label="Sesi acara" className={styles.sessionList}>
                       {sessions.map((session, index) => (
-                        <div key={session.id} className={`${styles.groupedRow} ${styles.sessionRow}`}>
-                          <input
-                            className={styles.sessionName}
-                            aria-label={`Nama sesi ${index + 1}`}
-                            placeholder="Nama sesi"
-                            maxLength={40}
-                            value={session.name}
-                            onChange={event => updateSession(session.id, 'name', event.target.value)}
-                          />
-                          <input
-                            className={styles.timeChip}
-                            type="time"
-                            aria-label={`Jam sesi ${index + 1}`}
-                            value={session.time}
-                            onChange={event => updateSession(session.id, 'time', event.target.value)}
-                          />
-                          {sessions.length > 1 && (
-                            <button
-                              type="button"
-                              className={styles.deleteSession}
-                              aria-label={`Hapus sesi ${index + 1}`}
-                              onClick={() => setSessions(current => current.filter(item => item.id !== session.id))}
-                            >
-                              <Trash2 size={18} aria-hidden="true" />
-                            </button>
-                          )}
-                        </div>
+                        <SwipeActionsRow
+                          key={session.id}
+                          label={session.name || `Sesi ${index + 1}`}
+                          fullSwipe={false}
+                          showMenu={false}
+                          trailing={[{
+                            label: 'Hapus',
+                            icon: <Trash2 size={18} aria-hidden />,
+                            tone: 'danger',
+                            onSelect: () => setSessions(current => current.filter(item => item.id !== session.id)),
+                          }]}
+                        >
+                          <div className={styles.sessionRow}>
+                            <input
+                              className={styles.sessionName}
+                              aria-label={`Nama sesi ${index + 1}`}
+                              placeholder="Nama sesi"
+                              maxLength={40}
+                              value={session.name}
+                              onChange={event => updateSession(session.id, 'name', event.target.value)}
+                            />
+                            <input
+                              className={styles.timeChip}
+                              type="time"
+                              aria-label={`Jam sesi ${index + 1}`}
+                              value={session.time}
+                              onChange={event => updateSession(session.id, 'time', event.target.value)}
+                            />
+                          </div>
+                        </SwipeActionsRow>
                       ))}
-                    </div>
+                    </SwipeActions>
                     {sessions.length < 3 && (
-                      <button
+                      <Button
                         type="button"
+                        variant="secondary"
+                        size="md"
                         className={styles.addSession}
+                        fullWidth
                         onClick={() => {
                           const id = nextSessionId.current++
                           setSessions(current => [...current, { id, name: '', time: '' }])
                         }}
                       >
                         <Plus size={16} aria-hidden="true" /> Tambah sesi
-                      </button>
+                      </Button>
                     )}
                   </section>
 
@@ -531,14 +542,24 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                           onChange={event => setCity(event.target.value)}
                         />
                       </label>
-                      <div className={`${styles.groupedRow} ${styles.mapRow}`}>
-                        <span className={styles.groupedLabel}>Link google map</span>
-                        {mapsUrl
-                          ? <a className={styles.mapAction} href={mapsUrl} target="_blank" rel="noreferrer">Buka peta</a>
-                          : <span className={styles.mapMuted}>Terisi otomatis</span>}
-                      </div>
+                      <label className={styles.groupedRow}>
+                        <span className={styles.groupedLabel}>Google Maps</span>
+                        <span className={styles.mapsField} data-added={Boolean(normalizedMapsUrl) || undefined}>
+                          <input
+                            className={styles.groupedInput}
+                            type="url"
+                            inputMode="url"
+                            autoCapitalize="none"
+                            spellCheck={false}
+                            placeholder="Tempel tautan"
+                            value={mapsUrl}
+                            onBlur={() => setMapsUrl(normalizedMapsUrl || mapsUrl.trim())}
+                            onChange={event => setMapsUrl(event.target.value)}
+                          />
+                          {normalizedMapsUrl && <span className={styles.mapsStatus} aria-hidden="true">Added</span>}
+                        </span>
+                      </label>
                     </div>
-                    <p className={styles.linkHint}><MapPin size={14} aria-hidden="true" /> Peta dibuat dari venue dan kota. Tidak perlu diisi.</p>
                   </section>
                 </div>
               )}
@@ -546,7 +567,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
               {step === 4 && (
                 <div className={styles.sections}>
                   <section className={styles.section}>
-                    <p className={styles.sectionLabel}>Ringkasan</p>
+                    <p className={styles.sectionLabel}>Ringkasan acara</p>
                     <div className={styles.groupedTable}>
                       {summaryRows.map(row => (
                         <button
@@ -564,39 +585,29 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                     </div>
                   </section>
 
-                  <section className={styles.section}>
-                    <p className={styles.sectionLabel}>Paket</p>
-                    <div className={styles.groupedTable} role="radiogroup" aria-label="Pilih paket">
-                      {plans.map(plan => (
-                        <button
-                          key={plan.id}
-                          type="button"
-                          role="radio"
-                          aria-checked={plan.id === 'gratis'}
-                          disabled={!plan.available}
-                          className={styles.planRow}
-                        >
-                          <span className={styles.planText}>
-                            <span className={styles.listLabel}>{plan.name}</span>
-                            <span className={styles.planDetail}>{plan.detail}</span>
-                          </span>
-                          {plan.available
-                            ? <span className={styles.listValue}>{plan.price}</span>
-                            : <span className={styles.planSoon}>Segera hadir</span>}
-                          {plan.available && <Check size={18} aria-hidden="true" className={styles.planCheck} />}
-                        </button>
+                  <section className={styles.section} aria-label="Paket undangan">
+                    <div className={styles.planGrid}>
+                      {paidPlans.map(plan => (
+                        <div key={plan.name} className={styles.paidPlan}>
+                          <strong>{plan.name}</strong>
+                          <span className={styles.planPrice}>{plan.price}</span>
+                          <small>Segera hadir</small>
+                        </div>
                       ))}
                     </div>
-                    <p className={styles.hint}>Membuat acara tidak langsung menerbitkan undangan.</p>
+                    <div className={styles.freePlan}>
+                      <span><strong>Free</strong> · 30 tamu</span>
+                      <span><Check size={16} aria-hidden /> Dipilih</span>
+                    </div>
+                    <p className={styles.hint}>Undangan disimpan sebagai draf.</p>
                   </section>
                 </div>
               )}
             </div>
 
-            {error && <p className={styles.error} role="alert">{error}</p>}
             <div className={styles.footer}>
               <div className={styles.introCta}>
-                <Button type="submit" variant="accent" size="xl" className={styles.primary} loading={busy} formNoValidate={step === 4} fullWidth>
+                <Button type="submit" variant="accent" size="xl" className={styles.primary} loading={busy} fullWidth>
                   {busy ? (saved ? 'Memuat Beranda…' : 'Membuat acara…') : saved ? 'Muat ulang Beranda' : step === 4 ? 'Buat acara' : step === 3 ? 'Lanjut pilih paket' : 'Berikutnya'}
                 </Button>
                 {!busy && step < 4 && <img src="/onboarding/couple/arrow-right.svg" alt="" />}

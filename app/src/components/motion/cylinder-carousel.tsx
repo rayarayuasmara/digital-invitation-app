@@ -330,7 +330,9 @@ export function CylinderCarousel({
   );
 
   const drag = useRef({
+    pointerId: -1,
     startX: 0,
+    startY: 0,
     startScroll: 0,
     lastX: 0,
     lastT: 0,
@@ -340,13 +342,12 @@ export function CylinderCarousel({
 
   const onPointerDown = useCallback(
     (e: ReactPointerEvent) => {
-      e.preventDefault();
-      stopGlide();
-      draggingRef.current = true;
-      capturePointer(e.currentTarget, e.pointerId);
+      if (!e.isPrimary || e.button !== 0) return;
       const now = performance.now();
       drag.current = {
+        pointerId: e.pointerId,
         startX: e.clientX,
+        startY: e.clientY,
         startScroll: scroll.get(),
         lastX: e.clientX,
         lastT: now,
@@ -354,31 +355,46 @@ export function CylinderCarousel({
         prevT: now,
       };
     },
-    [scroll, stopGlide],
+    [scroll],
   );
 
   const onPointerMove = useCallback(
     (e: ReactPointerEvent) => {
-      if (!draggingRef.current) return;
       const d = drag.current;
+      if (d.pointerId !== e.pointerId) return;
+      if (!draggingRef.current) {
+        const dx = Math.abs(e.clientX - d.startX);
+        const dy = Math.abs(e.clientY - d.startY);
+        if (Math.max(dx, dy) < 8) return;
+        if (dy >= dx) {
+          d.pointerId = -1;
+          return;
+        }
+        stopGlide();
+        d.startScroll = scroll.get();
+        draggingRef.current = true;
+        capturePointer(e.currentTarget, e.pointerId);
+      }
       scroll.set(d.startScroll - ((e.clientX - d.startX) * dragSpeed) / gap);
       d.prevX = d.lastX;
       d.prevT = d.lastT;
       d.lastX = e.clientX;
       d.lastT = performance.now();
     },
-    [scroll, gap, dragSpeed],
+    [scroll, gap, dragSpeed, stopGlide],
   );
 
   const onPointerUp = useCallback(
     (e: ReactPointerEvent) => {
+      if (drag.current.pointerId !== e.pointerId) return;
+      drag.current.pointerId = -1;
       if (!draggingRef.current) return;
       draggingRef.current = false;
       releasePointer(e.currentTarget, e.pointerId);
       const d = drag.current;
       const dt = d.lastT - d.prevT;
       const vpx = dt > 0 ? (d.lastX - d.prevX) / dt : 0; // px per ms
-      settle((-vpx * dragSpeed * 1000) / gap); // items per second
+      settle(e.type === "pointercancel" ? 0 : (-vpx * dragSpeed * 1000) / gap); // items per second
     },
     [settle, gap, dragSpeed],
   );
@@ -463,7 +479,7 @@ export function CylinderCarousel({
         }}
         className={cn(
           // clip-path, not overflow: it also clips the GPU-composited balls
-          "relative w-full touch-none outline-none [clip-path:inset(0)]",
+          "relative w-full touch-pan-y outline-none [clip-path:inset(0)]",
           // The stage drives the roll from the press itself, so iOS must not
           // claim the same touch for its callout or a slide drag.
           TOUCH_GESTURE_CLASS,

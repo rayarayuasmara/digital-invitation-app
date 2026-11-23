@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ChevronRight, LogOut, Mail, ShieldCheck, Sparkles, Trash2, Users } from 'lucide-react'
+import { ChevronRight, LogOut, Mail, Sparkles, Trash2, Users } from 'lucide-react'
+import { Badge } from '@/components/arc/badge/badge'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
 import { Button } from '@/components/arc/button/button'
 import { Dialog, DialogContent } from '@/components/arc/dialog/dialog'
-import { Tabs, TabsList, TabsTrigger } from '@/components/arc/tabs/tabs'
+import SegmentedControl from '@/components/arc/segmented-control/segmented-control'
 import { useAuth } from '@/lib/auth'
 import { deleteEvent } from '@/lib/dashboard'
 import type { DashboardData } from '@/lib/dashboard'
@@ -83,85 +84,80 @@ export function AccountSheet({ open, data, notify, onClose, onEventDeleted }: Pr
 
   return (
     <>
-      <BottomSheet open={open} onOpenChange={next => { if (!next) onClose() }} title="Akun" detents={[.92]}>
+      <BottomSheet open={open} onOpenChange={next => { if (!next) onClose() }} title="Akun" detents={[.92]} closeLabel="Tutup akun">
         <div className="account-sheet">
           <div className="account-identity">
             <Avatar name={initialsName(client.name)} size="xl" className="account-avatar" />
-            <h2 className="account-name">{client.name}</h2>
-            <p className="account-email">{client.email}</p>
-            <span className="account-tier">
-              {isPro && <Sparkles size={12} strokeWidth={2.4} aria-hidden />}
+            <div className="account-profile">
+              <h2 className="account-name">{client.name}</h2>
+              <p className="account-email">{client.email}</p>
+            </div>
+            <Badge className="account-tier" size="sm" pill tone={isPro ? 'info' : 'neutral'} icon={isPro ? <Sparkles size={12} aria-hidden /> : undefined}>
               Paket {tierLabel}
-            </span>
+            </Badge>
           </div>
 
-          <p className="account-section">Akun</p>
-          <div className="account-group">
-            <div className="account-row account-row-quota">
-              <span className="account-row-icon" aria-hidden><Users size={16} strokeWidth={2} /></span>
-              <span className="account-row-main">
-                <span className="account-row-line">
-                  <span className="account-row-label">Kuota tamu</span>
-                  <span className="account-row-value">{used.toLocaleString('id-ID')} / {quota.toLocaleString('id-ID')}</span>
+          <section aria-labelledby="account-package-title">
+            <h3 className="account-section" id="account-package-title">Pemakaian</h3>
+            <div className="account-group">
+              <div className="account-row account-row-quota">
+                <span className="account-row-icon" aria-hidden><Users size={16} strokeWidth={2} /></span>
+                <span className="account-row-main">
+                  <span className="account-row-line">
+                    <span className="account-row-label">Kuota tamu</span>
+                    <span className="account-row-value">{used.toLocaleString('id-ID')} / {quota.toLocaleString('id-ID')}</span>
+                  </span>
+                  <span
+                    className="account-meter"
+                    role="progressbar"
+                    aria-label="Kuota tamu terpakai"
+                    aria-valuemin={0}
+                    aria-valuemax={quota}
+                    aria-valuenow={used}
+                  >
+                    <span className="account-meter-fill" style={{ width: `${Math.max(percent, used > 0 ? 3 : 0)}%` }} />
+                  </span>
                 </span>
-                <span
-                  className="account-meter"
-                  role="progressbar"
-                  aria-label="Kuota tamu terpakai"
-                  aria-valuemin={0}
-                  aria-valuemax={quota}
-                  aria-valuenow={used}
-                >
-                  <span className="account-meter-fill" style={{ width: `${Math.max(percent, used > 0 ? 3 : 0)}%` }} />
-                </span>
-              </span>
+              </div>
             </div>
+          </section>
 
-            <button type="button" className="account-row account-row-action" onClick={sendReset} disabled={sending}>
-              <span className="account-row-icon" aria-hidden><Mail size={16} strokeWidth={2} /></span>
-              <span className="account-row-label">Ubah password</span>
-              {sending && <span className="account-row-note">Mengirim…</span>}
-              <ChevronRight size={18} strokeWidth={2} className="account-chevron" aria-hidden />
-            </button>
-          </div>
+          <section aria-labelledby="account-theme-title">
+            <h3 className="account-section" id="account-theme-title">Tampilan</h3>
+            <SegmentedControl label="Tema tampilan" options={themeOptions} value={theme} onValueChange={chooseTheme} fullWidth />
+          </section>
 
-          <p className="account-section">Tampilan</p>
-          <div className="account-group account-group-theme">
-            <Tabs value={theme} onValueChange={chooseTheme}>
-              <TabsList className="theme-tabs" aria-label="Tema tampilan">
-                {themeOptions.map(option => (
-                  <TabsTrigger key={option.value} value={option.value}>{option.label}</TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-          </div>
-
-          <p className="account-section">Data</p>
-          <div className="account-group">
-            <div className="account-row">
-              <span className="account-row-icon" aria-hidden><ShieldCheck size={16} strokeWidth={2} /></span>
-              <span className="account-row-label">Data tamu tersimpan aman</span>
-              <span className="account-row-note">Terenkripsi</span>
-            </div>
-            {event && (
-              <button
-                type="button"
-                className="account-row account-row-action account-row-danger"
-                onClick={() => setConfirmDelete(true)}
-              >
-                <span className="account-row-icon" aria-hidden><Trash2 size={16} strokeWidth={2} /></span>
-                <span className="account-row-label">Hapus acara</span>
+          <section aria-labelledby="account-security-title">
+            <h3 className="account-section" id="account-security-title">Keamanan</h3>
+            <div className="account-group">
+              <button type="button" className="account-row account-row-action" onClick={sendReset} disabled={sending}>
+                <span className="account-row-icon" aria-hidden><Mail size={16} strokeWidth={2} /></span>
+                <span className="account-row-label">{sending ? 'Mengirim tautan…' : 'Kirim tautan ubah kata sandi'}</span>
                 <ChevronRight size={18} strokeWidth={2} className="account-chevron" aria-hidden />
               </button>
-            )}
-          </div>
+              <button type="button" className="account-row account-row-action" onClick={() => signOut()}>
+                <span className="account-row-icon" aria-hidden><LogOut size={16} strokeWidth={2} /></span>
+                <span className="account-row-label">Keluar dari akun</span>
+              </button>
+            </div>
+          </section>
 
-          <div className="account-group account-group-signout">
-            <button type="button" className="account-row account-row-danger" onClick={() => signOut()}>
-              <span className="account-row-icon" aria-hidden><LogOut size={16} strokeWidth={2} /></span>
-              <span className="account-row-label">Keluar</span>
-            </button>
-          </div>
+          {event && (
+            <section aria-labelledby="account-event-title">
+              <h3 className="account-section" id="account-event-title">Kelola acara</h3>
+              <div className="account-group">
+                <button
+                  type="button"
+                  className="account-row account-row-action account-row-danger"
+                  onClick={() => setConfirmDelete(true)}
+                >
+                  <span className="account-row-icon" aria-hidden><Trash2 size={16} strokeWidth={2} /></span>
+                  <span className="account-row-label">Hapus acara</span>
+                  <ChevronRight size={18} strokeWidth={2} className="account-chevron" aria-hidden />
+                </button>
+              </div>
+            </section>
+          )}
         </div>
       </BottomSheet>
 
