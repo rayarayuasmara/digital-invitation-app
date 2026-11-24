@@ -348,7 +348,7 @@ export function UsageMeter({ label, segments, limit, unit = "", decimals = 1, fr
       </div>
       <motion.span className={styles.limit} style={{ x: limitX, opacity: markerOpacity }} aria-hidden="true" />
     </div>
-    <div ref={legend} className={styles.legend} role="group" aria-label={`${label} by category`} onKeyDown={onLegendKey}>
+    <div ref={legend} className={styles.legend} role="group" aria-label={label} onKeyDown={onLegendKey}>
       {items.map((item, index) => {
         const warning = item.id === "free" && status === "over";
         return <button key={item.id} type="button" className={styles.item} data-highlight={active ? active === item.id ? "on" : "off" : undefined} aria-pressed={pinned === item.id} tabIndex={index === roving ? 0 : -1}

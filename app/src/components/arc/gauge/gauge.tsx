@@ -91,7 +91,7 @@ export function Gauge({ value, min = 0, max = 100, label, detail, tone = "accent
     return () => observer.disconnect();
   }, [digitsWidth, reduceMotion]);
 
-  return <figure ref={ref} className={[styles.figure, styles[activeTone]].join(" ")} aria-label={`${label}: ${value} of ${safeMax}${band ? `, ${band.label}` : ""}`}>
+  return <figure ref={ref} className={[styles.figure, styles[activeTone]].join(" ")} aria-label={`${label}: ${detail ?? `${displayValue}%`}${band ? `, ${band.label}` : ""}`}>
     <div className={styles.visual} role="meter" aria-label={label} aria-valuemin={min} aria-valuemax={safeMax} aria-valuenow={Math.min(safeMax, Math.max(min, value))} aria-valuetext={`${displayValue}%${band ? `, ${band.label}` : ""}`}>
       <svg viewBox="0 0 100 90" aria-hidden="true" focusable="false"><path className={styles.track} d={track} /><motion.path className={styles.arc} d={path} style={{ opacity: arcOpacity }} /></svg>
       <div className={styles.readout} aria-hidden="true">

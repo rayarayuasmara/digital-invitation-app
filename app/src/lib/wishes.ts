@@ -14,25 +14,30 @@ export type WishSummary = {
   unread: number
 }
 
+export async function fetchWishesPage(eventId: string, limit: number, offset = 0) {
+  const { data, error } = await supabase
+    .from('wishes')
+    .select('id, guest_id, guest_name, message, created_at')
+    .eq('event_id', eventId)
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
+    .range(offset, offset + limit - 1)
+  if (error) throw new Error(error.message)
+  return (data ?? []) as Wish[]
+}
+
 export async function fetchWishes(eventId: string, seenAt: string | null, limit = 3): Promise<WishSummary> {
   const base = () => supabase.from('wishes').select('id', { count: 'exact', head: true }).eq('event_id', eventId)
 
   const [list, total, unseen] = await Promise.all([
-    supabase
-      .from('wishes')
-      .select('id, guest_id, guest_name, message, created_at')
-      .eq('event_id', eventId)
-      .order('created_at', { ascending: false })
-      .range(0, limit - 1),
+    fetchWishesPage(eventId, limit),
     base(),
     seenAt ? base().gt('created_at', seenAt) : Promise.resolve(null),
   ])
 
-  if (list.error) throw new Error(list.error.message)
-
-  const totalCount = total.count ?? list.data.length
+  const totalCount = total.count ?? list.length
   const unread = seenAt ? (unseen?.count ?? 0) : totalCount
-  return { wishes: (list.data ?? []) as Wish[], total: totalCount, unread }
+  return { wishes: list, total: totalCount, unread }
 }
 
 export async function markWishesSeen(eventId: string) {

@@ -27,6 +27,7 @@ export interface BottomSheetProps {
   initialDetent?: number;
   onDetentChange?: (index: number) => void;
   closeLabel?: string;
+  onCloseAutoFocus?: (event: Event) => void;
   className?: string;
   children: ReactNode;
 }
@@ -80,7 +81,7 @@ export function BottomSheet({ trigger, open: openProp, defaultOpen = false, onOp
   </DialogPrimitive.Root>;
 }
 
-function Sheet({ title, description, detents = [.45, .92], initialDetent = 0, onDetentChange, closeLabel = "Close", className, children, onDismiss }: Omit<BottomSheetProps, "trigger" | "open" | "defaultOpen" | "onOpenChange"> & { onDismiss: () => void }) {
+function Sheet({ title, description, detents = [.45, .92], initialDetent = 0, onDetentChange, closeLabel = "Close", onCloseAutoFocus, className, children, onDismiss }: Omit<BottomSheetProps, "trigger" | "open" | "defaultOpen" | "onOpenChange"> & { onDismiss: () => void }) {
   const [isPresent, safeToRemove] = usePresence();
   const reduced = useReducedMotion() ?? false;
   const detentKey = detents.join(",");
@@ -357,6 +358,7 @@ function Sheet({ title, description, detents = [.45, .92], initialDetent = 0, on
       forceMount
       {...(description ? {} : { "aria-describedby": undefined })}
       onOpenAutoFocus={event => { event.preventDefault(); sheetRef.current?.focus({ preventScroll: true }); }}
+      onCloseAutoFocus={onCloseAutoFocus}
       // Radix waits for the click before treating a press as outside. A press on the trigger while the sheet leaves reopens it first, so that press must not close it again.
       onPointerDownOutside={event => { const { present, at } = presenceChange.current; if (!present || event.detail.originalEvent.timeStamp < at) event.preventDefault(); }}
     >

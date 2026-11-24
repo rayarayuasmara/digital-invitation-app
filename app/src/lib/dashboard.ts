@@ -53,6 +53,14 @@ export type DashboardData = {
   guests: Guest[]
 }
 
+export type EventDetailsUpdate = {
+  title: string
+  date: string
+  location: string
+  mapsUrl: string | null
+  sessions: { id?: string; name: string; time_text: string | null }[]
+}
+
 export async function fetchDashboard(): Promise<DashboardData> {
   const { data, error } = await supabase.rpc('get_client_dashboard_data', {})
   if (error) throw new Error(error.message)
@@ -73,4 +81,25 @@ export async function publishEvent(eventId: string): Promise<string> {
     throw new Error(typeof data?.message === 'string' ? data.message : 'Undangan belum bisa diterbitkan. Coba lagi.')
   }
   return data.published_at
+}
+
+export async function fetchEventMapsUrl(eventId: string) {
+  const { data, error } = await supabase.from('events').select('maps_url').eq('id', eventId).single()
+  if (error) throw new Error('Tautan Google Maps belum bisa dimuat.')
+  return (data?.maps_url ?? null) as string | null
+}
+
+export async function saveEventDetails(eventId: string, details: EventDetailsUpdate) {
+  const { data, error } = await supabase.rpc('save_event_details', {
+    p_event_id: eventId,
+    p_title: details.title,
+    p_date: details.date,
+    p_location: details.location,
+    p_maps_url: details.mapsUrl,
+    p_sessions: details.sessions,
+  })
+  if (error?.code === 'PGRST202') throw new Error('Penyuntingan acara belum tersedia. Hubungi dukungan.')
+  if (error || data?.success !== true) {
+    throw new Error(typeof data?.message === 'string' ? data.message : 'Detail acara belum bisa disimpan. Coba lagi.')
+  }
 }

@@ -9,7 +9,7 @@ export const statusLabels: Record<GuestStatus, string> = {
   semua: 'Semua',
   hadir: 'Hadir',
   tidak_hadir: 'Absen',
-  pending: 'Menunggu',
+  pending: 'Pending',
   belum_terkirim: 'Unsent',
   check_in: 'Check-in',
 }
@@ -27,7 +27,7 @@ export const typeOptions = [
 export const sortFields: { value: SortKey; label: string; asc: string; desc: string }[] = [
   { value: 'nama', label: 'Nama', asc: 'A–Z', desc: 'Z–A' },
   { value: 'dibuat', label: 'Ditambahkan', asc: 'Terlama dulu', desc: 'Terbaru dulu' },
-  { value: 'diubah', label: 'Update', asc: 'Terlama dulu', desc: 'Terbaru dulu' },
+  { value: 'diubah', label: 'Terakhir diubah', asc: 'Terlama dulu', desc: 'Terbaru dulu' },
 ]
 
 export const emptyForm: GuestForm = { name: '', category: 'Umum', maxPax: 1, phone: '', invitationType: 'digital', session: '' }

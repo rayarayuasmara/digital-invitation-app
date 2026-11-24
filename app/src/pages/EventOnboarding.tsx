@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { ChevronLeft, ChevronRight, Check, Plus, Trash2 } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight, Check, Plus, Trash2 } from 'lucide-react'
 import { SwipeActions, SwipeActionsRow } from '@/components/arc/swipe-actions/swipe-actions'
 import { Button } from '@/components/arc/button/button'
+import { Badge } from '@/components/arc/badge/badge'
+import { Card } from '@/components/arc/card'
+import { Input, type InputProps } from '@/components/arc/input/input'
 import { useCollapseProgress } from '@/lib/hooks/use-collapse-progress'
 import { CreateEventError, checkEventSlug, createFirstEvent, suggestEventSlug, normalizeMapsUrl } from '@/lib/event-onboarding'
 import { EventDateWheel, todayInJakarta } from './EventDateWheel'
@@ -11,11 +14,12 @@ import styles from './EventOnboarding.module.css'
 
 const LINK_PREFIX = 'rayarayu.id/'
 const SLUG_MIN = 5
+const SLUG_MAX = 40
 
 const steps = [
   { title: 'Siapa kedua mempelai?', copy: 'Nama lengkap akan tampil di undangan. Nama panggilan dipakai di bagian sapaan.' },
   { title: 'Pilih alamat tautan', copy: 'Tamu akan membuka undangan lewat alamat ini. Pilih yang mudah diingat.' },
-  { title: 'Kapan acara berlangsung?', copy: 'Tanggal ini akan tampil di undangan.' },
+  { title: 'Kapan acara berlangsung?', copy: 'Pilih tanggal acara. Tanggal hari ini dipilih sebagai awal.' },
   { title: 'Atur sesi dan lokasi acara', copy: 'Tambahkan satu atau lebih sesi, misalnya akad dan resepsi.' },
   { title: 'Pilih paket', copy: 'Mulai dengan Free. Kamu bisa upgrade saat paket berbayar tersedia.' },
 ] as const
@@ -26,6 +30,7 @@ const paidPlans = [
 ] as const
 
 const firstWord = (name: string) => (name.trim().split(/\s+/)[0] ?? '').slice(0, 30)
+const normalizeSlug = (value: string) => suggestEventSlug(value).slice(0, SLUG_MAX).replace(/-+$/, '')
 
 const slugStatusText: Record<Exclude<SlugStatus, 'idle'>, string> = {
   checking: 'Memeriksa ketersediaan…',
@@ -42,6 +47,12 @@ type Props = {
   account: { name: string; onOpen: () => void }
   /** Load the existing event if present; throw if the outcome could not be checked. */
   onLoadEvent: () => Promise<boolean>
+}
+
+function GroupedField({ fieldClassName, labelClassName, ...props }: InputProps) {
+  return <Input {...props} className={styles.groupedInput}
+    fieldClassName={[styles.groupedRow, fieldClassName].filter(Boolean).join(' ')}
+    labelClassName={[styles.groupedLabel, labelClassName].filter(Boolean).join(' ')} />
 }
 
 const formatDate = (date: string) => new Intl.DateTimeFormat('id-ID', {
@@ -71,7 +82,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
   ])
   const [error, setError] = useState('')
   const [slugError, setSlugError] = useState('')
-  const [slugStatus, setSlugStatus] = useState<SlugStatus>('idle')
+  const [slugCheck, setSlugCheck] = useState<{ value: string; status: 'available' | 'taken' | 'unknown' } | null>(null)
   const [busy, setBusy] = useState(false)
   const [saved, setSaved] = useState(false)
   const [returnToReview, setReturnToReview] = useState(false)
@@ -90,8 +101,10 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
   const coupleName = [firstName.trim(), secondName.trim()].filter(Boolean).join(' & ')
   const coupleLabel = [groomNickname.trim() || firstWord(firstName), brideNickname.trim() || firstWord(secondName)].filter(Boolean).join(' & ')
   const titleValue = title ?? (coupleLabel ? `Pernikahan ${coupleLabel}` : '')
-  const slugValue = slug ?? suggestEventSlug(coupleLabel)
-  const normalizedSlug = suggestEventSlug(slugValue)
+  const slugValue = slug ?? normalizeSlug(coupleLabel)
+  const normalizedSlug = normalizeSlug(slugValue)
+  const slugStatus: SlugStatus = normalizedSlug.length < SLUG_MIN ? 'idle'
+    : slugCheck?.value === normalizedSlug ? slugCheck.status : 'checking'
   const location = [venue.trim(), city.trim()].filter(Boolean).join(', ')
   const sessionSummary = sessions
     .map(session => `${session.name.trim()}${session.time ? ` ${session.time.replace(':', '.')}` : ''}`)
@@ -102,6 +115,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
     { label: 'Alamat', value: `${LINK_PREFIX}${normalizedSlug}`, step: 1 },
     { label: 'Tanggal', value: formatDate(date), step: 2 },
     { label: 'Lokasi', value: location || '-', step: 3 },
+    ...(normalizedMapsUrl ? [{ label: 'Google Maps', value: 'Tautan ditambahkan', step: 3 as const }] : []),
     { label: 'Sesi', value: sessionSummary || '-', step: 3 },
   ]
 
@@ -133,16 +147,12 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
   }, [])
 
   useEffect(() => {
-    if (step !== 1 || normalizedSlug.length < SLUG_MIN) {
-      setSlugStatus('idle')
-      return
-    }
+    if (step !== 1 || normalizedSlug.length < SLUG_MIN) return
     let active = true
-    setSlugStatus('checking')
     const timer = window.setTimeout(() => {
       checkEventSlug(normalizedSlug)
-        .then(available => { if (active) setSlugStatus(available ? 'available' : 'taken') })
-        .catch(() => { if (active) setSlugStatus('unknown') })
+        .then(available => { if (active) setSlugCheck({ value: normalizedSlug, status: available ? 'available' : 'taken' }) })
+        .catch(() => { if (active) setSlugCheck({ value: normalizedSlug, status: 'unknown' }) })
     }, 400)
     return () => {
       active = false
@@ -175,9 +185,13 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
     }
     if (step === 1) {
       if (!titleValue.trim()) return setError('Isi judul acara.')
-      if (normalizedSlug.length < SLUG_MIN) return setSlugError(`Alamat tautan minimal ${SLUG_MIN} karakter.`)
-      if (slugStatus === 'taken') return setSlugError('Alamat tautan sudah dipakai. Coba yang lain.')
-      if (slugStatus === 'checking') return setSlugError('Tunggu, alamat tautan sedang diperiksa.')
+      const rejectSlug = (message: string) => {
+        setSlugError(message)
+        event.currentTarget.querySelector<HTMLInputElement>('[name="alamat-tautan"]')?.focus()
+      }
+      if (normalizedSlug.length < SLUG_MIN) return rejectSlug(`Alamat tautan minimal ${SLUG_MIN} karakter.`)
+      if (slugStatus === 'taken') return rejectSlug('Alamat tautan sudah dipakai. Coba yang lain.')
+      if (slugStatus === 'checking') return
       setSlugError('')
       advance(2)
       return
@@ -187,7 +201,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
       return
     }
     if (step === 3) {
-      if (!venue.trim()) return setError('Isi nama venue acara.')
+      if (!venue.trim()) return setError('Isi nama tempat acara.')
       if (mapsUrl.trim() && !normalizedMapsUrl) return setError('Masukkan tautan Google Maps yang valid.')
       if (sessions.length === 0) return setError('Tambahkan minimal satu sesi acara.')
       const names = sessions.map(session => session.name.trim().toLowerCase())
@@ -240,6 +254,8 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
         setError('Acara sudah dibuat, tetapi Beranda belum bisa dimuat. Coba muat ulang.')
       } else if (cause instanceof CreateEventError && cause.field === 'slug') {
         checkBeforeRetry.current = false
+        setReturnToReview(true)
+        setSlugCheck({ value: normalizedSlug, status: 'taken' })
         goTo(1)
         setSlugError(cause.message)
       } else {
@@ -267,7 +283,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
       ) : (
         <div className={styles.wizard}>
           <header ref={chromeRef} className={styles.chrome} data-step={step}>
-            <span className="progressive-blur" aria-hidden="true" />
+            <span className="progressive-blur page-head-glass" aria-hidden="true" />
             <div className={styles.top}>
               <Button
                 type="button"
@@ -284,11 +300,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                 <ChevronLeft size={20} aria-hidden="true" />
               </Button>
               <progress className={styles.progress} value={step + 1} max={steps.length} aria-label="Progres pembuatan acara" />
-              {!returnToReview && (step === 2 || step === 4) && (
-                <Button type="button" variant="secondary" size="md" className={styles.skip} disabled={step === 4} onClick={() => goTo((step + 1) as Step)}>
-                  Lewati
-                </Button>
-              )}
+              <Badge size="sm" pill className={styles.stepCount} aria-hidden="true">{step + 1} / {steps.length}</Badge>
             </div>
           </header>
           <form className={styles.form} onSubmit={submit} aria-busy={busy} noValidate>
@@ -300,108 +312,28 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                   <section className={styles.personSection}>
                     <p className={styles.sectionLabel}>Nama mempelai pria</p>
                     <div className={styles.groupedTable}>
-                      <label className={styles.groupedRow}>
-                        <span className={styles.groupedLabel}>Lengkap</span>
-                        <input
-                          className={styles.groupedInput}
-                          aria-label="Nama lengkap mempelai pria"
-                          placeholder="Nama lengkap"
-                          autoComplete="off"
-                          maxLength={60}
-                          value={firstName}
-                          onChange={event => setFirstName(event.target.value)}
-                        />
-                      </label>
-                      <label className={styles.groupedRow}>
-                        <span className={styles.groupedLabel}>Panggilan</span>
-                        <input
-                          className={styles.groupedInput}
-                          aria-label="Nama panggilan mempelai pria"
-                          placeholder="Nama panggilan"
-                          autoComplete="off"
-                          maxLength={30}
-                          value={groomNickname}
-                          onChange={event => setGroomNickname(event.target.value)}
-                        />
-                      </label>
-                      <label className={styles.groupedRow}>
-                        <span className={styles.groupedLabel}>Ayah</span>
-                        <input
-                          className={styles.groupedInput}
-                          aria-label="Nama ayah mempelai pria"
-                          placeholder="Nama ayah"
-                          autoComplete="off"
-                          maxLength={60}
-                          value={groomFather}
-                          onChange={event => setGroomFather(event.target.value)}
-                        />
-                      </label>
-                      <label className={styles.groupedRow}>
-                        <span className={styles.groupedLabel}>Ibu</span>
-                        <input
-                          className={styles.groupedInput}
-                          aria-label="Nama ibu mempelai pria"
-                          placeholder="Nama ibu"
-                          autoComplete="off"
-                          maxLength={60}
-                          value={groomMother}
-                          onChange={event => setGroomMother(event.target.value)}
-                        />
-                      </label>
+                      <GroupedField label="Lengkap" name="nama-pria" aria-label="Nama lengkap mempelai pria" placeholder="Nama lengkap…" autoComplete="off"
+                        required maxLength={60} value={firstName} onChange={e => setFirstName(e.target.value)} />
+                      <GroupedField label="Panggilan" name="panggilan-pria" aria-label="Nama panggilan mempelai pria" placeholder="Otomatis" autoComplete="off"
+                        maxLength={30} value={groomNickname} onChange={e => setGroomNickname(e.target.value)} />
+                      <GroupedField label="Ayah" name="ayah-pria" aria-label="Nama ayah mempelai pria" placeholder="Opsional" autoComplete="off"
+                        maxLength={60} value={groomFather} onChange={e => setGroomFather(e.target.value)} />
+                      <GroupedField label="Ibu" name="ibu-pria" aria-label="Nama ibu mempelai pria" placeholder="Opsional" autoComplete="off"
+                        maxLength={60} value={groomMother} onChange={e => setGroomMother(e.target.value)} />
                     </div>
                   </section>
 
                   <section className={styles.personSection}>
                     <p className={styles.sectionLabel}>Nama mempelai wanita</p>
                     <div className={styles.groupedTable}>
-                      <label className={styles.groupedRow}>
-                        <span className={styles.groupedLabel}>Lengkap</span>
-                        <input
-                          className={styles.groupedInput}
-                          aria-label="Nama lengkap mempelai wanita"
-                          placeholder="Nama lengkap"
-                          autoComplete="off"
-                          maxLength={60}
-                          value={secondName}
-                          onChange={event => setSecondName(event.target.value)}
-                        />
-                      </label>
-                      <label className={styles.groupedRow}>
-                        <span className={styles.groupedLabel}>Panggilan</span>
-                        <input
-                          className={styles.groupedInput}
-                          aria-label="Nama panggilan mempelai wanita"
-                          placeholder="Nama panggilan"
-                          autoComplete="off"
-                          maxLength={30}
-                          value={brideNickname}
-                          onChange={event => setBrideNickname(event.target.value)}
-                        />
-                      </label>
-                      <label className={styles.groupedRow}>
-                        <span className={styles.groupedLabel}>Ayah</span>
-                        <input
-                          className={styles.groupedInput}
-                          aria-label="Nama ayah mempelai wanita"
-                          placeholder="Nama ayah"
-                          autoComplete="off"
-                          maxLength={60}
-                          value={brideFather}
-                          onChange={event => setBrideFather(event.target.value)}
-                        />
-                      </label>
-                      <label className={styles.groupedRow}>
-                        <span className={styles.groupedLabel}>Ibu</span>
-                        <input
-                          className={styles.groupedInput}
-                          aria-label="Nama ibu mempelai wanita"
-                          placeholder="Nama ibu"
-                          autoComplete="off"
-                          maxLength={60}
-                          value={brideMother}
-                          onChange={event => setBrideMother(event.target.value)}
-                        />
-                      </label>
+                      <GroupedField label="Lengkap" name="nama-wanita" aria-label="Nama lengkap mempelai wanita" placeholder="Nama lengkap…" autoComplete="off"
+                        required maxLength={60} value={secondName} onChange={e => setSecondName(e.target.value)} />
+                      <GroupedField label="Panggilan" name="panggilan-wanita" aria-label="Nama panggilan mempelai wanita" placeholder="Otomatis" autoComplete="off"
+                        maxLength={30} value={brideNickname} onChange={e => setBrideNickname(e.target.value)} />
+                      <GroupedField label="Ayah" name="ayah-wanita" aria-label="Nama ayah mempelai wanita" placeholder="Opsional" autoComplete="off"
+                        maxLength={60} value={brideFather} onChange={e => setBrideFather(e.target.value)} />
+                      <GroupedField label="Ibu" name="ibu-wanita" aria-label="Nama ibu mempelai wanita" placeholder="Opsional" autoComplete="off"
+                        maxLength={60} value={brideMother} onChange={e => setBrideMother(e.target.value)} />
                     </div>
                   </section>
                 </div>
@@ -412,41 +344,27 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                   <section className={styles.section}>
                     <p className={styles.sectionLabel}>Judul acara</p>
                     <div className={styles.groupedTable}>
-                      <label className={styles.groupedRow}>
-                        <span className={styles.groupedLabel}>Judul</span>
-                        <input
-                          className={styles.groupedInput}
-                          aria-label="Judul acara"
-                          placeholder="Judul undangan"
-                          maxLength={80}
-                          value={titleValue}
-                          onChange={event => setTitle(event.target.value)}
-                        />
-                      </label>
+                      <GroupedField label="Judul" name="judul-acara" aria-label="Judul acara" placeholder="Judul undangan…" required
+                        maxLength={80} value={titleValue} onChange={e => setTitle(e.target.value)} />
                     </div>
                   </section>
                   <section className={styles.section}>
                     <p className={styles.sectionLabel}>Alamat tautan</p>
                     <div className={styles.groupedTable}>
-                      <label className={`${styles.groupedRow} ${styles.slugRow}`}>
-                        <span className={styles.slugPrefix} aria-hidden="true">{LINK_PREFIX}</span>
-                        <input
-                          className={styles.groupedInput}
-                          aria-label="Alamat tautan undangan"
-                          value={slugValue}
-                          autoCapitalize="none"
-                          autoCorrect="off"
-                          spellCheck={false}
-                          onChange={event => { setSlug(event.target.value); setSlugError('') }}
-                          onBlur={() => { if (slug !== null) setSlug(normalizedSlug) }}
-                        />
-                      </label>
+                      <GroupedField label={LINK_PREFIX} name="alamat-tautan" aria-label="Alamat tautan undangan"
+                        fieldClassName={styles.slugRow} labelClassName={styles.slugPrefix} aria-describedby="onboarding-slug-hint"
+                        aria-invalid={Boolean(slugError) || slugStatus === 'taken'} required value={slugValue}
+                        autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false}
+                        onChange={e => { setSlug(e.target.value); setSlugError('') }}
+                        onBlur={() => {
+                          if (slug !== null || slugValue !== normalizedSlug) setSlug(normalizedSlug)
+                        }} />
                     </div>
-                    {slugError ? <p className={styles.error} role="alert">{slugError}</p>
+                    {slugError ? <p id="onboarding-slug-hint" className={styles.error} role="alert">{slugError}</p>
                       : normalizedSlug.length < SLUG_MIN || slugStatus === 'idle'
-                        ? <p className={styles.linkHint}>Gunakan huruf kecil, angka, dan tanda hubung (-). Minimal {SLUG_MIN} karakter.</p>
+                        ? <p id="onboarding-slug-hint" className={styles.linkHint}>Gunakan huruf kecil, angka, dan tanda hubung (-). {SLUG_MIN}–{SLUG_MAX} karakter.</p>
                         : (
-                          <p className={styles.linkHint} data-status={slugStatus} role="status" aria-live="polite">
+                          <p id="onboarding-slug-hint" className={styles.linkHint} data-status={slugStatus} role="status">
                             {slugStatus === 'available' && <Check size={14} aria-hidden="true" />}
                             {slugStatusText[slugStatus]}
                           </p>
@@ -472,27 +390,33 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                           key={session.id}
                           label={session.name || `Sesi ${index + 1}`}
                           fullSwipe={false}
-                          showMenu={false}
-                          trailing={[{
+                          menuLabel={`Tindakan sesi ${index + 1}`}
+                          trailing={sessions.length > 1 ? [{
                             label: 'Hapus',
                             icon: <Trash2 size={18} aria-hidden />,
                             tone: 'danger',
                             onSelect: () => setSessions(current => current.filter(item => item.id !== session.id)),
-                          }]}
+                          }] : []}
                         >
                           <div className={styles.sessionRow}>
-                            <input
+                            <Input
                               className={styles.sessionName}
-                              aria-label={`Nama sesi ${index + 1}`}
-                              placeholder="Nama sesi"
+                              fieldClassName={styles.sessionNameField}
+                              labelClassName="sr-only"
+                              label={`Nama sesi ${index + 1}`}
+                              name={`sesi-${session.id}`}
+                              placeholder="Nama sesi…"
+                              required
                               maxLength={40}
                               value={session.name}
                               onChange={event => updateSession(session.id, 'name', event.target.value)}
                             />
-                            <input
+                            <Input
                               className={styles.timeChip}
                               type="time"
-                              aria-label={`Jam sesi ${index + 1}`}
+                              labelClassName="sr-only"
+                              label={`Jam sesi ${index + 1}`}
+                              name={`jam-${session.id}`}
                               value={session.time}
                               onChange={event => updateSession(session.id, 'time', event.target.value)}
                             />
@@ -520,46 +444,19 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                   <section className={styles.section}>
                     <p className={styles.sectionLabel}>Lokasi acara</p>
                     <div className={styles.groupedTable}>
-                      <label className={styles.groupedRow}>
-                        <span className={styles.groupedLabel}>Venue</span>
-                        <input
-                          className={styles.groupedInput}
-                          aria-label="Nama venue"
-                          placeholder="Gedung atau tempat"
-                          maxLength={80}
-                          value={venue}
-                          onChange={event => setVenue(event.target.value)}
-                        />
-                      </label>
-                      <label className={styles.groupedRow}>
-                        <span className={styles.groupedLabel}>Kota</span>
-                        <input
-                          className={styles.groupedInput}
-                          aria-label="Kota acara"
-                          placeholder="Kota"
-                          maxLength={60}
-                          value={city}
-                          onChange={event => setCity(event.target.value)}
-                        />
-                      </label>
-                      <label className={styles.groupedRow}>
-                        <span className={styles.groupedLabel}>Google Maps</span>
-                        <span className={styles.mapsField} data-added={Boolean(normalizedMapsUrl) || undefined}>
-                          <input
-                            className={styles.groupedInput}
-                            type="url"
-                            inputMode="url"
-                            autoCapitalize="none"
-                            spellCheck={false}
-                            placeholder="Tempel tautan"
-                            value={mapsUrl}
-                            onBlur={() => setMapsUrl(normalizedMapsUrl || mapsUrl.trim())}
-                            onChange={event => setMapsUrl(event.target.value)}
-                          />
-                          {normalizedMapsUrl && <span className={styles.mapsStatus} aria-hidden="true">Added</span>}
-                        </span>
-                      </label>
+                      <GroupedField label="Tempat" name="nama-tempat" aria-label="Nama tempat acara" placeholder="Gedung atau tempat…" required
+                        maxLength={80} value={venue} onChange={e => setVenue(e.target.value)} />
+                      <GroupedField label="Kota" name="kota" aria-label="Kota acara" placeholder="Opsional"
+                        maxLength={60} value={city} onChange={e => setCity(e.target.value)} />
+                      <GroupedField label="Google Maps" name="google-maps" type="url" inputMode="url"
+                        autoComplete="off" autoCapitalize="none" spellCheck={false} placeholder="Opsional"
+                        value={mapsUrl} maxLength={2048}
+                        onBlur={() => setMapsUrl(normalizedMapsUrl || mapsUrl.trim())}
+                        onChange={e => setMapsUrl(e.target.value)} />
                     </div>
+                    {normalizedMapsUrl && <p className={styles.linkHint} data-status="available" role="status">
+                      <Check size={14} aria-hidden="true" /> Tautan Google Maps ditambahkan
+                    </p>}
                   </section>
                 </div>
               )}
@@ -574,7 +471,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                           key={row.label}
                           type="button"
                           className={styles.listRow}
-                          disabled={busy}
+                          disabled={busy || saved}
                           onClick={() => { setReturnToReview(true); goTo(row.step) }}
                         >
                           <span className={styles.listLabel}>{row.label}</span>
@@ -586,18 +483,22 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                   </section>
 
                   <section className={styles.section} aria-label="Paket undangan">
+                    <Card variant="outlined" padding="sm" className={styles.freePlan}>
+                      <div className={styles.freePlanContent}>
+                        <span><strong>Free</strong> · 30 undangan</span>
+                        <Badge size="sm" tone="success" pill icon={<Check size={13} aria-hidden="true" />}>Dipilih</Badge>
+                      </div>
+                    </Card>
                     <div className={styles.planGrid}>
                       {paidPlans.map(plan => (
-                        <div key={plan.name} className={styles.paidPlan}>
-                          <strong>{plan.name}</strong>
-                          <span className={styles.planPrice}>{plan.price}</span>
-                          <small>Segera hadir</small>
-                        </div>
+                        <Card key={plan.name} variant="outlined" padding="sm">
+                          <div className={styles.paidPlanContent}>
+                            <strong>{plan.name}</strong>
+                            <span className={styles.planPrice}>{plan.price}</span>
+                            <Badge size="sm" pill>Segera hadir</Badge>
+                          </div>
+                        </Card>
                       ))}
-                    </div>
-                    <div className={styles.freePlan}>
-                      <span><strong>Free</strong> · 30 tamu</span>
-                      <span><Check size={16} aria-hidden /> Dipilih</span>
                     </div>
                     <p className={styles.hint}>Undangan disimpan sebagai draf.</p>
                   </section>
@@ -608,9 +509,9 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
             <div className={styles.footer}>
               <div className={styles.introCta}>
                 <Button type="submit" variant="accent" size="xl" className={styles.primary} loading={busy} fullWidth>
-                  {busy ? (saved ? 'Memuat Beranda…' : 'Membuat acara…') : saved ? 'Muat ulang Beranda' : step === 4 ? 'Buat acara' : step === 3 ? 'Lanjut pilih paket' : 'Berikutnya'}
+                  {busy ? (saved ? 'Memuat Beranda…' : 'Membuat acara…') : saved ? 'Muat ulang Beranda' : step === 4 ? 'Buat acara' : returnToReview ? 'Ke ringkasan' : step === 3 ? 'Lanjut pilih paket' : 'Berikutnya'}
+                  {!busy && step < 4 && <ArrowRight size={17} aria-hidden="true" />}
                 </Button>
-                {!busy && step < 4 && <img src="/onboarding/couple/arrow-right.svg" alt="" />}
               </div>
             </div>
           </form>

@@ -37,6 +37,7 @@ export interface SwipeActionsRowProps {
   fullSwipe?: boolean;
   /** Shows the More actions button and menu. Turn it off when the row already carries visible buttons for the same actions. */
   showMenu?: boolean;
+  menuLabel?: string;
   children: ReactNode;
   className?: string;
 }
@@ -89,7 +90,7 @@ function velocityOf(samples: [number, number][]) {
   return elapsed > 0 ? (last[1] - first[1]) / elapsed : 0;
 }
 
-export function SwipeActionsRow({ label, leading = [], trailing = [], fullSwipe = true, showMenu = true, children, className }: SwipeActionsRowProps) {
+export function SwipeActionsRow({ label, leading = [], trailing = [], fullSwipe = true, showMenu = true, menuLabel, children, className }: SwipeActionsRowProps) {
   const { openId, setOpenId, rows } = useContext(GroupContext);
   const id = useId();
   const reduced = useReducedMotion() ?? false;
@@ -300,7 +301,7 @@ export function SwipeActionsRow({ label, leading = [], trailing = [], fullSwipe 
       <div className={styles.body}>{children}</div>
       {showMenu && menuItems.length > 0 && <Menu.Root open={menuOpen} onOpenChange={setMenuOpen}>
         {/* Opens on click rather than on press, so a swipe that starts on the button still moves the row. */}
-        <Menu.Trigger className={styles.more} data-swipe-more="" aria-label={`More actions for ${label}`} onPointerDown={event => event.preventDefault()} onClick={event => { if (event.detail > 0) setMenuOpen(open => !open); }}>
+        <Menu.Trigger className={styles.more} data-swipe-more="" aria-label={menuLabel ?? `More actions for ${label}`} onPointerDown={event => event.preventDefault()} onClick={event => { if (event.detail > 0) setMenuOpen(open => !open); }}>
           <MoreHorizontal size={18} strokeWidth={1.75} aria-hidden="true" />
         </Menu.Trigger>
         <Menu.Portal>

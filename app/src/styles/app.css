@@ -32,11 +32,19 @@ body {
 }
 
 .app {
+  --app-gutter: var(--space-4);
   min-height: 100dvh;
   max-width: 480px;
   margin: 0 auto;
-  padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(120px + var(--safe-bottom));
+  padding: calc(env(safe-area-inset-top, 0px) + 16px) var(--app-gutter) calc(120px + var(--safe-bottom));
   position: relative;
+}
+
+@media (min-width: 768px) {
+  .app.app--guests {
+    --app-gutter: var(--space-6);
+    max-width: 896px;
+  }
 }
 
 /* Tab header. --p (0 at the top, 1 after 44px of scroll) is set by useCollapseProgress.
@@ -46,22 +54,19 @@ body {
   top: 0;
   z-index: 25;
   height: var(--page-bar-h);
-  margin: calc(-1 * (env(safe-area-inset-top, 0px) + var(--space-4))) calc(-1 * var(--space-4)) var(--space-4);
-  padding: 0 var(--space-4);
+  margin: calc(-1 * (env(safe-area-inset-top, 0px) + var(--space-4))) calc(-1 * var(--app-gutter, var(--space-4))) var(--space-4);
+  padding-inline: var(--app-gutter, var(--space-4));
 }
 
 /* Same geometry as the sticky header, so every tab puts the title, avatar and subtitle in the same place. */
 .page-head.is-static {
   position: relative;
-  height: var(--page-bar-h);
-  margin: calc(-1 * (env(safe-area-inset-top, 0px) + var(--space-4))) calc(-1 * var(--space-4)) var(--space-4);
-  padding: 0 var(--space-4);
 }
 
 .page-head .page-title {
   position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + 18px + 4.5px * var(--p, 0));
-  left: calc(var(--space-4) + (50% - var(--space-4)) * var(--p, 0));
+  left: calc(var(--app-gutter, var(--space-4)) + (50% - var(--app-gutter, var(--space-4))) * var(--p, 0));
   translate: calc(-50% * var(--p, 0)) 0;
   font-size: calc(var(--text-page-title) - 1.0625rem * var(--p, 0));
   font-weight: var(--weight-bold);
@@ -77,10 +82,9 @@ body {
   margin: 0;
 }
 
-/* Progressive blur, shared by the tab header and the sticky guest toolbar.
-   The blur radius and tint follow --p, so nothing shows at rest and the glass fades in with scroll.
-   Several eased mask stops keep the falloff smooth instead of a visible band. */
+/* Shared glass: the gradient fades out vertically; scroll can also intensify it. */
 .progressive-blur {
+  --_blur: var(--blur-progress, var(--p, 0));
   position: absolute;
   inset: 0 0 calc(-1 * var(--blur-fade, 48px)) 0;
   z-index: -1;
@@ -95,8 +99,8 @@ body {
 }
 
 .progressive-blur::before {
-  -webkit-backdrop-filter: blur(calc(20px * var(--p, 0))) saturate(160%);
-  backdrop-filter: blur(calc(20px * var(--p, 0))) saturate(160%);
+  -webkit-backdrop-filter: blur(calc(20px * var(--_blur))) saturate(160%);
+  backdrop-filter: blur(calc(20px * var(--_blur))) saturate(160%);
   -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 30%, rgb(0 0 0 / 0.82) 45%, rgb(0 0 0 / 0.45) 65%, rgb(0 0 0 / 0.14) 84%, transparent 100%);
   mask-image: linear-gradient(to bottom, #000 0%, #000 30%, rgb(0 0 0 / 0.82) 45%, rgb(0 0 0 / 0.45) 65%, rgb(0 0 0 / 0.14) 84%, transparent 100%);
 }
@@ -104,9 +108,9 @@ body {
 .progressive-blur::after {
   background: linear-gradient(
     to bottom,
-    color-mix(in oklab, var(--bg-page) calc(90% * var(--p, 0)), transparent) 0%,
-    color-mix(in oklab, var(--bg-page) calc(70% * var(--p, 0)), transparent) 40%,
-    color-mix(in oklab, var(--bg-page) calc(30% * var(--p, 0)), transparent) 72%,
+    color-mix(in oklab, var(--bg-page) calc(90% * var(--_blur)), transparent) 0%,
+    color-mix(in oklab, var(--bg-page) calc(70% * var(--_blur)), transparent) 40%,
+    color-mix(in oklab, var(--bg-page) calc(30% * var(--_blur)), transparent) 72%,
     transparent 100%
   );
 }
@@ -121,15 +125,13 @@ body {
   }
 }
 
-/* The header's glass sits behind it at the root, so it reads as coming from
-   behind the bar instead of being painted inside it. */
-.app-top-fade {
-  position: fixed;
-  inset: 0 auto auto 50%;
-  width: min(100%, 480px);
-  height: calc(var(--page-bar-h) + var(--blur-fade, 48px));
-  translate: -50% 0;
-  z-index: 18;
+/* Size the glass from the header, including the wider Tamu layout. */
+.page-head-glass {
+  --blur-progress: calc(.24 + .76 * var(--p, 0));
+}
+
+.page-head.is-static .page-head-glass {
+  --blur-fade: var(--space-4);
 }
 
 .page-title {
@@ -147,7 +149,7 @@ body {
 .page-head-avatar {
   position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + 8px);
-  right: var(--space-4);
+  right: var(--app-gutter, var(--space-4));
   display: grid;
   width: 44px;
   height: 44px;
@@ -712,6 +714,15 @@ body[data-scroll-locked] .app-top-fade {
   gap: var(--space-3);
 }
 
+.scanner-mode {
+  margin-top: var(--space-3);
+}
+
+.scanner-guest-details {
+  width: 100%;
+  text-align: left;
+}
+
 .hero {
   display: grid;
   gap: var(--space-3);
@@ -926,37 +937,6 @@ body[data-scroll-locked] .app-top-fade {
   overflow-wrap: break-word;
 }
 
-.home-tier {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-pill);
-  background: var(--green-bg);
-  color: var(--green-ink);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-  line-height: 1;
-}
-
-.home-tier-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  box-shadow: 0 0 0 3px color-mix(in oklab, currentColor 22%, transparent);
-}
-
-.home-tier.is-draft {
-  background: var(--surface-muted);
-  color: var(--sub);
-}
-
-.home-tier.is-draft .home-tier-dot {
-  box-shadow: none;
-}
-
 /* Event details open into an Arc ExpandableCard under the names. */
 .home-event-info {
   margin-top: var(--space-4);
@@ -1039,36 +1019,72 @@ body[data-scroll-locked] .app-top-fade {
   text-align: right;
 }
 
-.home-event-actions {
+.invitation-preview-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.home-hero-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  align-items: stretch;
   gap: var(--space-2);
   margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
 }
 
-.home-event-actions > button {
-  flex: 1;
-}
-
-.home-event-preview {
+.home-hero-preview {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  min-height: var(--control-height-sm);
-  padding: 0 var(--space-3);
-  border: 0;
+  min-height: var(--control-height-md);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  background: var(--accent);
-  color: var(--accent-foreground);
-  font: inherit;
+  background: var(--surface);
+  color: var(--ink);
   font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  cursor: pointer;
+  font-weight: var(--weight-medium);
+  text-align: center;
+  text-decoration: none;
 }
 
-.home-event-preview:active {
-  opacity: 0.9;
+.home-hero-preview:hover {
+  background: var(--surface-muted);
+  border-color: var(--accent);
+}
+
+.home-hero-preview svg {
+  flex: none;
+  color: var(--accent-strong);
+}
+
+.dashboard-inline-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-md);
+  padding-inline: var(--space-1);
+  border-radius: var(--radius-control);
+  color: var(--accent-strong);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.dashboard-inline-link:hover {
+  color: var(--ink);
+}
+
+.dashboard-inline-link:focus-visible,
+.home-hero-preview:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .home-hero-countdown {
@@ -1473,24 +1489,6 @@ body[data-scroll-locked] .app-top-fade {
   line-height: var(--number-md-line);
   letter-spacing: var(--number-md-tracking);
   font-variant-numeric: tabular-nums;
-}
-
-.home-quota-upgrade {
-  width: 100%;
-  height: var(--control-height-sm);
-  margin-top: var(--space-3);
-  border: 0;
-  border-radius: var(--radius-control);
-  background: var(--accent);
-  color: var(--accent-foreground);
-  font: inherit;
-  font-size: var(--text-base);
-  font-weight: var(--weight-semibold);
-  cursor: pointer;
-}
-
-.home-quota-upgrade:active {
-  opacity: 0.9;
 }
 
 /* One outline for every Beranda card, matching the Tamu / Belum RSVP tiles. */
@@ -3103,8 +3101,8 @@ body[data-scroll-locked] .app-top-fade {
   position: sticky;
   top: 0;
   z-index: 20;
-  margin: 0 calc(var(--space-4) * -1);
-  padding: calc(env(safe-area-inset-top, 0px) + var(--space-2)) var(--space-4) var(--space-2);
+  margin: 0 calc(var(--app-gutter, var(--space-4)) * -1);
+  padding: calc(env(safe-area-inset-top, 0px) + var(--space-2)) var(--app-gutter, var(--space-4)) var(--space-2);
 }
 
 /* While the filter menu is open the toolbar sits above the scrim, so its button stays bright. */
@@ -3114,6 +3112,26 @@ body[data-scroll-locked] .app-top-fade {
 
 .guests-sticky .list-controls {
   margin-top: var(--space-2);
+}
+
+@media (min-width: 768px) {
+  .guests-sticky {
+    display: grid;
+    grid-template-columns: minmax(12rem, 1fr) minmax(0, 2fr);
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .guests-sticky .guests-status-controls {
+    margin: 0;
+    min-width: 0;
+    justify-content: flex-end;
+  }
+
+  .guests-status-controls > .status-tabs {
+    flex: 0 1 auto;
+    max-width: 100%;
+  }
 }
 
 .search {
@@ -4018,10 +4036,108 @@ body[data-scroll-locked] .app-top-fade {
 }
 
 .wishes-more {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
   margin: 0;
   color: var(--text-muted);
   font-size: var(--text-xs);
   text-align: center;
+}
+
+.wishes-more p {
+  margin: 0;
+}
+
+.invitation-detail,
+.invitation-template-editor,
+.invitation-template-actions,
+.event-details-form,
+.event-details-sessions,
+.event-details-session {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.invitation-detail h2 {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.invitation-detail :is(dl, dd, p) {
+  margin: 0;
+}
+
+.invitation-detail .kv {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr);
+  align-items: start;
+  overflow-wrap: anywhere;
+}
+
+.invitation-detail .kv dd {
+  color: var(--sub);
+}
+
+.invitation-detail button,
+.event-details-session button,
+.event-details-sessions > button {
+  justify-self: start;
+}
+
+.invitation-variables,
+.invitation-template-editor {
+  margin-bottom: var(--space-3);
+}
+
+.invitation-template-editor textarea {
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--bg-app);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-base);
+  resize: vertical;
+}
+
+.invitation-template-editor textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.invitation-template-actions {
+  margin-top: var(--space-4);
+  justify-items: center;
+}
+
+.event-details-sessions {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  margin: 0;
+  padding: var(--space-3);
+}
+
+.event-details-sessions legend {
+  padding-inline: var(--space-2);
+  font-weight: var(--weight-semibold);
+}
+
+.event-details-session + .event-details-session {
+  border-top: 1px solid var(--line);
+  padding-top: var(--space-3);
+}
+
+.event-details-maps-note {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
 .sr-only {

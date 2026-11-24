@@ -66,7 +66,7 @@ export function ScannerRoute() {
     return (
       <ScannerScreen
         code={code}
-        eventTitle={title || 'Mode operator door'}
+        eventTitle={title || 'Mode petugas penerima tamu'}
         onExit={() => {
           localStorage.removeItem(STORAGE_KEY)
           setCode('')

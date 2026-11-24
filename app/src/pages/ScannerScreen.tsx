@@ -6,8 +6,10 @@ import { ChipGroup } from '@/components/arc/chip-group/chip-group'
 import { Input } from '@/components/arc/input/input'
 import { SearchField } from '@/components/arc/search-field/search-field'
 import { Button } from '@/components/arc/button/button'
+import { Card } from '@/components/arc/card'
 import { Gauge } from '@/components/arc/gauge/gauge'
 import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/motion/tabs'
 import { checkIn, listScanGuests, tokenFromScan } from '@/lib/scanner'
 import type { CheckInResult, ScanGuest } from '@/lib/scanner'
 
@@ -242,36 +244,35 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
       <div className="app">
         <header className="scanner-top">
           <div>
-            <p className="scanner-kicker"><span className="live" aria-hidden />Mode operator door</p>
-            <h1 className="page-title" style={{ margin: '4px 0 0' }}>Scanner</h1>
+            <p className="scanner-kicker"><span className="live" aria-hidden />Mode petugas penerima tamu</p>
+            <h1 className="page-title" style={{ margin: '4px 0 0' }}>Pemindai tamu</h1>
             <p className="page-sub" style={{ margin: '2px 0 0' }}>{eventTitle}</p>
           </div>
           <div className="scanner-actions">
-            <button type="button" className="icon-btn" onClick={refresh} aria-label="Muat ulang data"><RefreshCw size={16} aria-hidden /></button>
-            <button type="button" className="icon-btn" onClick={onExit} aria-label="Keluar dari scanner"><LogOut size={16} aria-hidden /></button>
+            <Button type="button" variant="secondary" size="sm" onClick={refresh} aria-label="Muat ulang data"><RefreshCw size={16} aria-hidden /></Button>
+            <Button type="button" variant="secondary" size="sm" onClick={onExit} aria-label="Keluar dari pemindai"><LogOut size={16} aria-hidden /></Button>
           </div>
         </header>
 
-        <div className="segmented" role="tablist" aria-label="Mode scanner">
-          <button type="button" role="tab" aria-selected={mode === 'scan'} onClick={() => setMode('scan')}>
-            <ScanLine size={16} aria-hidden /> Scan QR
-          </button>
-          <button type="button" role="tab" aria-selected={mode === 'manual'} onClick={() => setMode('manual')}>
-            <Search size={16} aria-hidden /> Cari manual
-          </button>
-        </div>
+        <Tabs value={mode} onValueChange={value => setMode(value === 'manual' ? 'manual' : 'scan')} variant="segment"
+          labels={{ scrollLeft: 'Gulir pilihan ke kiri', scrollRight: 'Gulir pilihan ke kanan' }}>
+          <TabsList aria-label="Mode pemindai">
+            <TabsTrigger value="scan" icon={<ScanLine size={16} aria-hidden />}>Pindai QR</TabsTrigger>
+            <TabsTrigger value="manual" icon={<Search size={16} aria-hidden />}>Cari manual</TabsTrigger>
+          </TabsList>
 
-        {mode === 'scan' && (
-          <section className="card" style={{ padding: 14, marginTop: 12 }}>
+          <TabsContent value="scan" className="scanner-mode">
+          <Card padding="md">
             <div className="cam">
               <div id={READER_ID} />
               <div className="cam-frame" aria-hidden />
             </div>
             <div className="cam-bar">
               <p>{camHint}</p>
-              <button
+              <Button
                 type="button"
-                className="icon-btn"
+                variant="secondary"
+                size="sm"
                 aria-label="Ganti kamera"
                 onClick={() => {
                   const next = facing === 'environment' ? 'user' : 'environment'
@@ -279,13 +280,12 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
                 }}
               >
                 <SwitchCamera size={16} aria-hidden />
-              </button>
+              </Button>
             </div>
-          </section>
-        )}
+          </Card>
+          </TabsContent>
 
-        {mode === 'manual' && (
-          <section style={{ marginTop: 12 }}>
+          <TabsContent value="manual" className="scanner-mode">
             <div className="scanner-manual-filters">
               <SearchField label="Cari nama tamu" placeholder="Cari nama tamu…" value={query} onValueChange={setQuery} />
               <ChipGroup
@@ -313,7 +313,7 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
                 </li>
               ))}
             </ul>
-            <div className="card" style={{ marginTop: 12 }}>
+            <Card padding="md" className="scanner-mode">
               <form className="scanner-token-form" onSubmit={event => { event.preventDefault(); submitToken() }}>
                 <Input
                   label="Kode token tiket"
@@ -326,11 +326,12 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
                 />
                 <Button type="submit" variant="accent" size="md">Proses</Button>
               </form>
-            </div>
-          </section>
-        )}
+            </Card>
+          </TabsContent>
+        </Tabs>
 
-        <section className="card scanner-stats" style={{ marginTop: 12 }}>
+        <Card padding="md" className="scanner-mode">
+          <div className="scanner-stats">
           <Gauge
             label="Check-in"
             value={stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0}
@@ -338,7 +339,7 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
           />
           <dl className="split" style={{ alignContent: 'center' }}>
             <div>
-              <dt>Belum masuk</dt>
+              <dt>Grup belum masuk</dt>
               <dd>{stats.wait}</dd>
             </div>
             <div>
@@ -346,10 +347,11 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
               <dd>{stats.pax}</dd>
             </div>
           </dl>
-        </section>
+          </div>
+        </Card>
 
-        <h2 className="section-title">Riwayat scan · {history.length}</h2>
-        {history.length === 0 && <p className="empty" style={{ padding: 16 }}>Belum ada scan di sesi ini.</p>}
+        <h2 className="section-title">Riwayat pemindaian · {history.length}</h2>
+        {history.length === 0 && <p className="empty" style={{ padding: 16 }}>Belum ada pemindaian di sesi ini.</p>}
         <ul className="list">
           {history.map(h => (
             <li key={h.id} className="list-row" style={{ cursor: 'default' }}>
@@ -357,13 +359,13 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
                 <p className="name">{h.name}</p>
                 <p className="meta">{h.pax ? `${h.pax} orang · ` : ''}{h.time}</p>
               </div>
-              <span className={`badge ${h.ok ? 'badge-ok' : h.dup ? '' : 'badge-bad'}`}>{h.ok ? 'Berhasil' : h.dup ? 'Duplikat' : 'Gagal'}</span>
+              <Badge size="sm" pill tone={h.ok ? 'success' : h.dup ? 'neutral' : 'danger'}>{h.ok ? 'Berhasil' : h.dup ? 'Duplikat' : 'Gagal'}</Badge>
             </li>
           ))}
         </ul>
       </div>
 
-      <BottomSheet open={sheet !== null} onOpenChange={next => { if (!next) closeSheet() }} title={sheetTitle} detents={[.6]}>
+      <BottomSheet open={sheet !== null} onOpenChange={next => { if (!next) closeSheet() }} title={sheetTitle} closeLabel="Tutup detail pemindaian" detents={[.6]}>
         {sheet?.kind === 'result' && (
           <div className="sheet-body" style={{ justifyItems: 'center', textAlign: 'center' }}>
             {sheet.ok ? <CheckCircle2 size={56} color="var(--green-ink)" aria-hidden /> : sheet.dup ? <UserCheck size={56} color="var(--accent)" aria-hidden /> : <XCircle size={56} color="var(--red-ink)" aria-hidden />}
@@ -409,11 +411,11 @@ export function ScannerScreen({ code, eventTitle, onExit }: Props) {
 
 function GuestDetail({ guest }: { guest: ScanGuest }) {
   return (
-    <div className="card" style={{ width: '100%', textAlign: 'left' }}>
+    <Card padding="md" className="scanner-guest-details">
       <div className="kv"><span>Nama</span><span>{guest.group_name}</span></div>
       <div className="kv"><span>Kategori</span><span>{guest.category || 'Umum'}</span></div>
       <div className="kv"><span>Jumlah</span><span>{paxOf(guest)} orang</span></div>
       <div className="kv" style={{ alignItems: 'center' }}><span>Status</span><span><UserRound size={14} aria-hidden /> {guest.is_checked_in ? 'Sudah masuk' : 'Belum masuk'}</span></div>
-    </div>
+    </Card>
   )
 }

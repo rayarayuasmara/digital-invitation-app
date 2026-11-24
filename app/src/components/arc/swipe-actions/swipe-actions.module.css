@@ -15,7 +15,7 @@
 .more { display: grid; width: 32px; height: 32px; flex: none; place-items: center; border: 0; border-radius: calc(var(--radius-control) - 6px); background: transparent; color: var(--text-muted); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard); }
 /* The button anchors a menu, so a press answers with colour, never scale. */
 .more:active, .more[data-state="open"] { background: var(--surface-muted); color: var(--foreground); }
-.more:focus-visible { outline: none; }
+.more:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 @media (hover: hover) and (pointer: fine) {
   .content { cursor: grab; }
   .more:hover { background: var(--surface-muted); color: var(--foreground); }

@@ -21,7 +21,7 @@ const shortcutOffsets = [
 type Props = {
   value: Tab
   onChange: (tab: Tab) => void
-  onScanner: () => void
+  onScanner: () => boolean
   onAddGuest: () => void
   /** Notifications for the speed-dial's bell; the panel is the beUI notification center. */
   notifications: NotificationItem[]
@@ -81,13 +81,13 @@ export function TabBar({ value, onChange, onScanner, onAddGuest, notifications, 
   }, [open])
 
   const shortcuts = [
-    { label: 'Scanner', icon: <ScanLine size={20} strokeWidth={2.5} aria-hidden />, run: onScanner },
-    { label: 'Tambah tamu', icon: <NavigationGlyph name="addPerson" size={20} />, run: onAddGuest },
+    { label: 'Pemindai tamu', icon: <ScanLine size={20} strokeWidth={2.5} aria-hidden />, run: onScanner },
+    { label: 'Tambah tamu', icon: <NavigationGlyph name="addPerson" size={20} />, run: () => { onAddGuest(); return true } },
   ]
 
-  const pick = (run: () => void) => {
-    closeMenu()
-    run()
+  const pick = (run: () => boolean) => {
+    if (run()) setOpen(false)
+    else closeMenu()
   }
 
   const changeTab = (tab: Tab) => {

@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { Tabs, TabsList, TabsTrigger } from '@/components/motion/tabs'
 import type { DashboardData } from '@/lib/dashboard'
 import { initialsName } from '@/lib/text'
-import { fetchWishes, markWishesSeen } from '@/lib/wishes'
+import { fetchWishes, fetchWishesPage, markWishesSeen } from '@/lib/wishes'
 import type { Wish } from '@/lib/wishes'
 
 const WISH_LIMIT = 100
@@ -30,6 +30,8 @@ type Props = {
   onChanged: () => Promise<void>
   /** Called after the host marks everything read, so the tab badge clears. */
   onSeen: () => void
+  filter: Filter
+  onFilterChange: (filter: Filter) => void
 }
 
 type Filter = 'semua' | 'baru'
@@ -52,15 +54,18 @@ function dayLabel(iso: string) {
   })
 }
 
-export function WishesPage({ data, notify, onOpenAccount, onChanged, onSeen }: Props) {
+export function WishesPage({ data, notify, onOpenAccount, onChanged, onSeen, filter, onFilterChange }: Props) {
   const event = data.event!
   const [wishes, setWishes] = useState<Wish[] | null>(null)
   const [total, setTotal] = useState(0)
   const [unread, setUnread] = useState(0)
   const [seenAt, setSeenAt] = useState<string | null>(event.wishes_seen_at ?? null)
-  const [filter, setFilter] = useState<Filter>('semua')
   const [error, setError] = useState('')
   const [marking, setMarking] = useState(false)
+  const [offset, setOffset] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [moreError, setMoreError] = useState('')
 
   const load = useCallback(async () => {
     setError('')
@@ -69,10 +74,32 @@ export function WishesPage({ data, notify, onOpenAccount, onChanged, onSeen }: P
       setWishes(summary.wishes)
       setTotal(summary.total)
       setUnread(summary.unread)
+      setOffset(summary.wishes.length)
+      setHasMore(summary.wishes.length < summary.total)
+      setMoreError('')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Ucapan belum bisa dimuat.')
     }
   }, [event.id, seenAt])
+
+  const loadMore = async () => {
+    if (loadingMore || !hasMore || marking) return
+    setLoadingMore(true)
+    setMoreError('')
+    try {
+      const next = await fetchWishesPage(event.id, WISH_LIMIT, offset)
+      setOffset(offset + next.length)
+      setHasMore(next.length === WISH_LIMIT && offset + next.length < total)
+      setWishes(current => {
+        const seen = new Set(current?.map(wish => wish.id))
+        return [...(current ?? []), ...next.filter(wish => !seen.has(wish.id))]
+      })
+    } catch {
+      setMoreError('Ucapan sebelumnya belum bisa dimuat. Coba lagi.')
+    } finally {
+      setLoadingMore(false)
+    }
+  }
 
   useEffect(() => {
     load()
@@ -106,7 +133,7 @@ export function WishesPage({ data, notify, onOpenAccount, onChanged, onSeen }: P
       await markWishesSeen(event.id)
       setSeenAt(now)
       setUnread(0)
-      setFilter('semua')
+      onFilterChange('semua')
       onSeen()
       await onChanged()
       notify('Semua ucapan ditandai sudah dibaca')
@@ -135,7 +162,8 @@ export function WishesPage({ data, notify, onOpenAccount, onChanged, onSeen }: P
 
       <div className="wishes-toolbar">
         <div className="status-tabs wishes-filter" data-beui>
-          <Tabs value={filter} onValueChange={value => setFilter(value === 'baru' ? 'baru' : 'semua')} variant="segment">
+          <Tabs value={filter} onValueChange={value => onFilterChange(value === 'baru' ? 'baru' : 'semua')} variant="segment"
+            labels={{ scrollLeft: 'Gulir filter ke kiri', scrollRight: 'Gulir filter ke kanan' }}>
             <TabsList aria-label="Saring ucapan" className="rounded-full" wrapperClassName="rounded-full">
               <TabsTrigger value="semua" className="min-h-10 rounded-full text-interface-label" indicatorClassName="rounded-full">
                 Semua <Badge size="sm" pill>{total}</Badge>
@@ -148,7 +176,7 @@ export function WishesPage({ data, notify, onOpenAccount, onChanged, onSeen }: P
         </div>
 
         {unread > 0 && (
-          <Button variant="accentOutline" size="sm" onClick={markSeen} disabled={marking}>
+          <Button variant="accentOutline" size="sm" onClick={markSeen} disabled={loadingMore} loading={marking}>
             <CheckCheck size={16} strokeWidth={2.2} aria-hidden />
             {marking ? 'Menandai…' : 'Tandai dibaca'}
           </Button>
@@ -226,8 +254,14 @@ export function WishesPage({ data, notify, onOpenAccount, onChanged, onSeen }: P
         </section>
       ))}
 
-      {wishes !== null && total > wishes.length && (
-        <p className="wishes-more">Menampilkan {wishes.length} ucapan terbaru dari {total}.</p>
+      {!error && wishes !== null && hasMore && (filter === 'semua' || visible.length < unread) && (
+        <div className="wishes-more">
+          <p role="status">Menampilkan {visible.length} dari {filter === 'baru' ? unread : total} ucapan{filter === 'baru' ? ' belum dibaca' : ''}.</p>
+          {moreError && <p role="alert">{moreError}</p>}
+          <Button type="button" variant="secondary" size="md" loading={loadingMore} disabled={marking} onClick={loadMore}>
+            Muat ucapan sebelumnya
+          </Button>
+        </div>
       )}
     </div>
   )

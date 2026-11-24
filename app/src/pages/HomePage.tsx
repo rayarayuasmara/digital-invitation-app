@@ -6,7 +6,6 @@ import { Badge } from '@/components/arc/badge/badge'
 import { Button } from '@/components/arc/button/button'
 import type { BadgeTone } from '@/components/arc/badge/badge'
 import { Card } from '@/components/arc/card'
-import { CopyButton } from '@/components/arc/copy-button/copy-button'
 import { Gauge } from '@/components/arc/gauge/gauge'
 import { Countdown } from '@/components/arc/countdown/countdown'
 import { ExpandableCard } from '@/components/arc/expandable-card/expandable-card'
@@ -25,9 +24,9 @@ import { matches, statusLabels, type GuestStatus } from '@/pages/guests/guest-he
 
 type Props = {
   data: DashboardData
-  notify: (message: string) => void
   /** Jump to the Tamu tab with a status filter already applied. */
   onOpenGuests: (status: GuestStatus) => void
+  onOpenInvitation: () => void
   onOpenAccount: () => void
   onAddFirstGuest?: () => void
 }
@@ -54,7 +53,7 @@ function RsvpComposition({ hadir, absen, pending }: { hadir: number; absen: numb
   const segments = [
     { id: 'hadir', name: 'Hadir', value: hadir, color: 'var(--rsvp-hadir)' },
     { id: 'tidak', name: 'Absen', value: absen, color: 'var(--rsvp-tidak)' },
-    { id: 'pending', name: 'Belum RSVP', value: pending, color: 'var(--rsvp-pending)' },
+    { id: 'pending', name: statusLabels.pending, value: pending, color: 'var(--rsvp-pending)' },
   ]
 
   // Tapping anywhere outside the legend clears the pinned segment.
@@ -86,7 +85,7 @@ function RsvpComposition({ hadir, absen, pending }: { hadir: number; absen: numb
             {(segment, total) => (
               <>
                 <span className="home-total-value">{(segment?.value ?? total).toLocaleString('id-ID')}</span>
-                <span className="home-total-caption">{segment ? segment.name : 'RSVP'}</span>
+                <span className="home-total-caption">{segment ? segment.name : 'Undangan'}</span>
               </>
             )}
           </DonutChartCenter>
@@ -126,7 +125,7 @@ function HistoryList({ items }: { items: HistoryItem[] }) {
             <p className="home-history-name">{item.name}</p>
             <div className="home-history-meta">
               <Badge size="sm" pill tone={historyTone[item.kind]}>{historyLabel[item.kind]}</Badge>
-              <Badge size="sm" pill>{item.pax} pax</Badge>
+              <Badge size="sm" pill>Kapasitas {item.pax} orang</Badge>
             </div>
           </div>
           <time className="home-history-time" dateTime={item.at}>{timeAgo(item.at)}</time>
@@ -136,7 +135,7 @@ function HistoryList({ items }: { items: HistoryItem[] }) {
   )
 }
 
-export function HomePage({ data, notify, onOpenGuests, onOpenAccount, onAddFirstGuest }: Props) {
+export function HomePage({ data, onOpenGuests, onOpenInvitation, onOpenAccount, onAddFirstGuest }: Props) {
   const { event, stats, guests, categories } = data
   const total = stats.total_guests
 
@@ -178,13 +177,8 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount, onAddFirst
   )
 
   const previewUrl = event?.preview_token
-    ? `${window.location.origin}/pratinjau/${event.slug}/${event.preview_token}`
+    ? `/pratinjau/${event.slug}/${event.preview_token}`
     : ''
-
-  const openPreview = () => {
-    if (!previewUrl) return notify('Tautan pratinjau belum tersedia.')
-    window.open(previewUrl, '_blank', 'noopener,noreferrer')
-  }
 
   const fullNames = (event?.couple_name ?? '').split('&')
   const nicknames = [event?.groom_nickname, event?.bride_nickname]
@@ -193,13 +187,14 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount, onAddFirst
   const coupleName = nicknames.join(' & ') || event?.title || 'Acara'
   const sessionText = (event?.sessions ?? [])
     .filter(s => s.time_text)
-    .map(s => `${s.name} ${(s.time_text ?? '').replace(/\s*WIB\b/gi, '')}`)
+    .map(s => `${s.name} ${s.time_text}`)
     .join(' · ')
   const tierLabel = (stats.tier || 'trial').replace(/^\w/, letter => letter.toUpperCase())
   const waitingForRsvp = guests.filter(guest => matches(guest, 'pending')).length
-  const hasRsvpStats = [stats.hadir, stats.absen, stats.pending, stats.hadir_pax, waitingForRsvp].some(value => value > 0)
+  const hasRsvpStats = [stats.hadir, stats.absen, stats.hadir_pax, waitingForRsvp].some(value => value > 0)
   const quotaFree = Math.max(0, stats.max_quota - total)
   const publishedAt = event?.published_at
+  const eventDate = event?.event_date && Number.isFinite(Date.parse(event.event_date)) ? event.event_date : null
 
   return (
     <div className="home-page">
@@ -213,18 +208,13 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount, onAddFirst
               <p className="home-hero-halo">Hari Berbahagia</p>
               <h2 className="home-hero-title">{coupleName}</h2>
             </div>
-            {publishedAt !== undefined && (
-              <span className={`home-tier ${publishedAt ? 'is-live' : 'is-draft'}`}>
-                <span className="home-tier-dot" aria-hidden />
-                {publishedAt ? 'Terbit' : 'Draf'}
-              </span>
-            )}
+            <Badge size="md" pill tone={publishedAt ? 'success' : 'neutral'}>{publishedAt ? 'Terbit' : 'Draf'}</Badge>
           </div>
           <div className="home-event-info">
             <ExpandableCard
               className="home-event-card"
               title="Tanggal"
-              description={formatDate(event?.event_date ?? null)}
+              description={eventDate ? formatDate(eventDate) : 'Belum diatur'}
             >
               <dl className="home-event-details">
                 {sessionText && (
@@ -238,30 +228,30 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount, onAddFirst
                   <dd>{event?.location || '-'}</dd>
                 </div>
               </dl>
-              <div className="home-event-actions">
-                <CopyButton
-                  value={previewUrl}
-                  label="Salin tautan"
-                  onCopied={() => notify('Tautan pratinjau disalin')}
-                />
-                <button type="button" className="home-event-preview" onClick={openPreview}>
-                  <ExternalLink size={14} strokeWidth={2} aria-hidden />
-                  Preview
-                </button>
-              </div>
             </ExpandableCard>
           </div>
 
-          <div className="home-hero-countdown">
+          {eventDate && <div className="home-hero-countdown">
             <Countdown
-              target={event?.event_date ?? new Date().toISOString()}
+              target={eventDate}
               timeZone="Asia/Jakarta"
               variant="large"
               label="Menuju hari H"
-              completeLabel="Acara sudah berlangsung"
+              completeLabel="Hari acara telah tiba"
               units={['days', 'hours', 'minutes', 'seconds']}
             />
-          </div>
+          </div>}
+          {(!publishedAt || previewUrl) && (
+            <div className="home-hero-actions">
+              {!publishedAt && <Button type="button" variant="accent" size="md" fullWidth onClick={onOpenInvitation}>Siapkan publikasi</Button>}
+              {previewUrl && (
+                <a className="home-hero-preview" href={previewUrl} target="_blank" rel="noopener noreferrer">
+                  <span>Pratinjau undangan<span className="sr-only"> (tab baru)</span></span>
+                  <ExternalLink size={15} aria-hidden />
+                </a>
+              )}
+            </div>
+          )}
         </Card>
 
         {onAddFirstGuest && (
@@ -275,22 +265,22 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount, onAddFirst
               <h3 id="rsvp-title">Status RSVP</h3>
               <ChartPie size={18} strokeWidth={1.75} aria-hidden />
             </div>
-            <RsvpComposition hadir={stats.hadir} absen={stats.absen} pending={stats.pending} />
+            <RsvpComposition hadir={stats.hadir} absen={stats.absen} pending={waitingForRsvp} />
           </Card>
 
           <div className="home-stats-side">
             <Card variant="default" padding="md" className="home-invites" aria-labelledby="invites-title">
               <div className="home-invites-head">
                 <div className="home-tile-head">
-                  <h3 id="invites-title">Tamu</h3>
+                  <h3 id="invites-title">Konfirmasi hadir</h3>
                   <UsersRound size={20} strokeWidth={1.75} aria-hidden />
                 </div>
                 <div className="home-invites-body">
                   <div className="home-invites-number">
                     <DigitSwap value={stats.hadir_pax} className="home-invites-total" />
-                    <span className="home-invites-chip">Pax</span>
+                    <span className="home-invites-chip">orang</span>
                   </div>
-                  <p className="home-invites-caption">dari RSVP Hadir</p>
+                  <p className="home-invites-caption">dari RSVP</p>
                 </div>
               </div>
             </Card>
@@ -329,9 +319,7 @@ export function HomePage({ data, notify, onOpenGuests, onOpenAccount, onAddFirst
               <p className="home-quota-card-note">
                 {total.toLocaleString('id-ID')} dari {stats.max_quota.toLocaleString('id-ID')} terpakai
               </p>
-              <button type="button" className="home-quota-upgrade" onClick={() => notify('Hubungi admin untuk upgrade paket.')}>
-                Upgrade paket
-              </button>
+              <p className="home-quota-card-note">Hubungi admin untuk menambah kuota.</p>
             </div>
             <div className="home-quota-card-side">
               <Gauge

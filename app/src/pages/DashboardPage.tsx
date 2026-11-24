@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import type { KeyboardEvent } from 'react'
 import { useAuth } from '@/lib/auth'
 import { Button } from '@/components/arc/button/button'
 import { fetchDashboard } from '@/lib/dashboard'
@@ -19,16 +20,25 @@ import { HomePage } from '@/pages/HomePage'
 import { InvitationPage } from '@/pages/InvitationPage'
 import { WishesPage } from '@/pages/WishesPage'
 import { EventOnboarding } from '@/pages/EventOnboarding'
+import type { Templates } from '@/lib/whatsapp'
 
 const NOTIF_SEEN_KEY = 'rr_notif_seen'
 const WISH_LIMIT = 50
+const tabParams = ['status', 'cari', 'kategori', 'jenis', 'sesi', 'urut', 'arah', 'bacaan']
+const readSearch = () => new URLSearchParams(window.location.search)
+
+function tabOf(search: URLSearchParams): Tab {
+  const tab = search.get('tab')
+  return tab === 'tamu' || tab === 'ucapan' || tab === 'undangan' ? tab : 'beranda'
+}
 
 export function DashboardPage() {
   const { signOut } = useAuth()
   const [data, setData] = useState<DashboardData | null>(null)
   const [error, setError] = useState('')
-  const [tab, setTab] = useState<Tab>('beranda')
-  const [guestView, setGuestView] = useState<GuestStatus>('semua')
+  const [search, setSearch] = useState(readSearch)
+  const tab = tabOf(search)
+  const [templateDraft, setTemplateDraft] = useState<{ eventId: string; templates: Templates } | null>(null)
   const [createRequest, setCreateRequest] = useState(0)
   const [notice, setNotice] = useState<{ id: number; text: string } | null>(null)
   const [scannerOpen, setScannerOpen] = useState(false)
@@ -39,6 +49,52 @@ export function DashboardPage() {
 
   // Mirrors `data` for the load callback, which is stable and must not depend on it.
   const hasDataRef = useRef(false)
+  const mainRef = useRef<HTMLElement>(null)
+  const scannerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const sync = () => setSearch(readSearch())
+    window.addEventListener('popstate', sync)
+    return () => window.removeEventListener('popstate', sync)
+  }, [])
+
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [tab])
+
+  useEffect(() => {
+    if (scannerOpen) scannerRef.current?.focus()
+  }, [scannerOpen])
+
+  useEffect(() => {
+    if (templateDraft?.eventId !== data?.event?.id || !templateDraft) return
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+      event.returnValue = true
+    }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [templateDraft, data?.event?.id])
+
+  const updateSearch = (patch: Record<string, string | string[] | null>, replace = false) => {
+    const url = new URL(window.location.href)
+    for (const [key, value] of Object.entries(patch)) {
+      url.searchParams.delete(key)
+      for (const entry of Array.isArray(value) ? value : value ? [value] : []) url.searchParams.append(key, entry)
+    }
+    if (url.href === window.location.href) return
+    window.history[replace ? 'replaceState' : 'pushState'](null, '', url)
+    setSearch(url.searchParams)
+  }
+
+  const openTab = (next: Tab, status: GuestStatus = 'semua') => {
+    if (next === tab && status === 'semua') return
+    updateSearch({
+      ...Object.fromEntries(tabParams.map(key => [key, null])),
+      tab: next === 'beranda' ? null : next,
+      status: next === 'tamu' && status !== 'semua' ? status : null,
+    })
+  }
 
   const notify = useCallback((message: string) => setNotice({ id: Date.now(), text: message }), [])
 
@@ -83,6 +139,7 @@ export function DashboardPage() {
     const next = await fetchDashboard()
     if (!next.event) return false
     applyDashboard(next)
+    updateSearch({ ...Object.fromEntries(tabParams.map(key => [key, null])), tab: null }, true)
     notify('Acara siap. Mulai dengan menambah tamu pertama.')
     requestAnimationFrame(() => {
       window.scrollTo({ top: 0, behavior: 'instant' })
@@ -110,14 +167,46 @@ export function DashboardPage() {
   const handleCreateRequest = useCallback(() => setCreateRequest(0), [])
 
   const openScanner = () => {
-    if (data?.event?.scanner_code) setScannerOpen(true)
-    else notify('Kode scanner belum tersedia.')
+    if (data?.event?.scanner_code) {
+      setScannerOpen(true)
+      return true
+    }
+    notify('Kode pemindai belum tersedia.')
+    return false
+  }
+
+  const closeScanner = () => {
+    setScannerOpen(false)
+    requestAnimationFrame(() => mainRef.current?.querySelector<HTMLButtonElement>('button.fab')?.focus({ preventScroll: true }))
+  }
+
+  const onScannerKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const dialog = event.currentTarget
+    // Radix manages the keyboard while a portaled scanner sheet is open.
+    if (event.defaultPrevented || !dialog.contains(event.target as Node)) return
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      closeScanner()
+    } else if (event.key === 'Tab') {
+      const stops = Array.from(dialog.querySelectorAll<HTMLElement>('button, input, a[href], [tabindex]'))
+        .filter(node => node.tabIndex >= 0 && !node.matches(':disabled') && node.getClientRects().length > 0)
+      const index = stops.indexOf(document.activeElement as HTMLElement)
+      if (stops.length && (index < 0 || (event.shiftKey ? index === 0 : index === stops.length - 1))) {
+        event.preventDefault()
+        stops[event.shiftKey ? stops.length - 1 : 0].focus()
+      }
+    }
   }
 
   const addGuest = () => {
-    setGuestView('semua')
-    setTab('tamu')
+    openTab('tamu')
     setCreateRequest(n => n + 1)
+  }
+
+  const openInvitation = () => {
+    setAccountOpen(false)
+    openTab('undangan')
+    requestAnimationFrame(() => mainRef.current?.focus({ preventScroll: true }))
   }
 
   if (error) {
@@ -177,12 +266,16 @@ export function DashboardPage() {
   }
 
   return (
-    <main id="main-content" className="app" tabIndex={-1}>
+    <>
+    <main ref={mainRef} id="main-content" className={`app${tab === 'tamu' ? ' app--guests' : ''}`} tabIndex={-1} inert={scannerOpen}>
       {tab === 'beranda' && (
         <HomePage
           data={data}
-          notify={notify}
-          onOpenGuests={status => { setGuestView(status); setTab('tamu') }}
+          onOpenGuests={status => {
+            openTab('tamu', status)
+            requestAnimationFrame(() => mainRef.current?.focus({ preventScroll: true }))
+          }}
+          onOpenInvitation={openInvitation}
           onOpenAccount={() => setAccountOpen(true)}
           onAddFirstGuest={data.stats.total_guests === 0 ? addGuest : undefined}
         />
@@ -194,7 +287,8 @@ export function DashboardPage() {
           notify={notify}
           createRequest={createRequest}
           onCreateHandled={handleCreateRequest}
-          initialStatus={guestView}
+          search={search}
+          onFilterChange={patch => updateSearch(patch, true)}
           onOpenAccount={() => setAccountOpen(true)}
         />
       )}
@@ -205,6 +299,8 @@ export function DashboardPage() {
           onOpenAccount={() => setAccountOpen(true)}
           onChanged={load}
           onSeen={() => setUnreadWishes(0)}
+          filter={search.get('bacaan') === 'baru' ? 'baru' : 'semua'}
+          onFilterChange={filter => updateSearch({ bacaan: filter === 'baru' ? filter : null }, true)}
         />
       )}
       {tab === 'undangan' && (
@@ -214,17 +310,21 @@ export function DashboardPage() {
           onChanged={load}
           notify={notify}
           onOpenAccount={() => setAccountOpen(true)}
+          draft={templateDraft?.eventId === data.event.id ? templateDraft.templates : null}
+          onDraftChange={templates => setTemplateDraft(templates ? { eventId: data.event!.id, templates } : null)}
+          onTemplatesSaved={templates => {
+            const eventId = data.event!.id
+            setData(current => current?.event?.id === eventId
+              ? { ...current, event: { ...current.event, wa_templates: templates } }
+              : current)
+            setTemplateDraft(current => current?.eventId === eventId && current.templates === templates ? null : current)
+          }}
         />
       )}
 
       <TabBar
         value={tab}
-        onChange={next => {
-          // A tab-bar visit starts from the full list; only Beranda deep-links
-          // into a filtered guest view.
-          if (next === 'tamu') setGuestView('semua')
-          setTab(next)
-        }}
+        onChange={openTab}
         onScanner={openScanner}
         onAddGuest={addGuest}
         notifications={notifications}
@@ -234,7 +334,7 @@ export function DashboardPage() {
         unreadWishes={unreadWishes}
       />
 
-      <AccountSheet open={accountOpen} data={data} notify={notify} onClose={() => setAccountOpen(false)} onEventDeleted={load} />
+      <AccountSheet open={accountOpen} data={data} notify={notify} onClose={() => setAccountOpen(false)} onEventDeleted={load} onOpenInvitation={openInvitation} />
 
       {notice && (
         <div className="toast-layer">
@@ -248,13 +348,12 @@ export function DashboardPage() {
         </div>
       )}
 
-      {scannerOpen && data.event?.scanner_code && (
-        <ScannerScreen
-          code={data.event.scanner_code}
-          eventTitle={data.event.title}
-          onExit={() => setScannerOpen(false)}
-        />
-      )}
     </main>
+      {scannerOpen && data.event?.scanner_code && (
+        <div ref={scannerRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Pemindai tamu" onKeyDown={onScannerKeyDown}>
+          <ScannerScreen code={data.event.scanner_code} eventTitle={data.event.title} onExit={closeScanner} />
+        </div>
+      )}
+    </>
   )
 }

@@ -16,7 +16,7 @@ import { GuestFilterMenu } from './guests/GuestFilterMenu'
 import { GuestGrid } from './guests/GuestGrid'
 import { GuestSheetBody } from './guests/GuestSheetBody'
 import { matches, statusTabs } from './guests/guest-helpers'
-import type { GuestStatus, SortKey, Status } from './guests/guest-helpers'
+import type { SortKey } from './guests/guest-helpers'
 
 export type { GuestStatus } from './guests/guest-helpers'
 
@@ -27,32 +27,42 @@ type Props = {
   /** Non-zero asks for the new-guest sheet. The panel calls onCreateHandled to reset it. */
   createRequest: number
   onCreateHandled: () => void
-  /** Status tab to start on, for example after tapping a metric on Beranda. */
-  initialStatus?: GuestStatus
+  search: URLSearchParams
+  onFilterChange: (patch: Record<string, string | string[] | null>) => void
   onOpenAccount: () => void
 }
 
-export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHandled, initialStatus = 'semua', onOpenAccount }: Props) {
+export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHandled, search, onFilterChange, onOpenAccount }: Props) {
   const event = data.event!
   const guests = data.guests as Guest[]
-  const [query, setQuery] = useState('')
-  const [status, setStatus] = useState<Status>(initialStatus)
-  const [categories, setCategories] = useState<string[]>([])
-  const [types, setTypes] = useState<string[]>([])
-  const [sessions, setSessions] = useState<string[]>([])
-  const [sort, setSort] = useState<SortKey>('nama')
-  const [asc, setAsc] = useState(true)
+  const query = search.get('cari') ?? ''
+  const status = statusTabs.find(item => item.value === search.get('status'))?.value ?? 'semua'
+  const categories = useMemo(() => search.getAll('kategori'), [search])
+  const types = useMemo(() => search.getAll('jenis'), [search])
+  const sessions = useMemo(() => search.getAll('sesi'), [search])
+  const order = search.get('urut')
+  const sort: SortKey = order === 'dibuat' || order === 'diubah' ? order : 'nama'
+  const asc = search.get('arah') !== 'turun'
   const [sheet, setSheet] = useState<{ mode: 'new' } | { mode: 'edit'; guest: Guest } | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Guest | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
   const stickyRef = useRef<HTMLDivElement>(null)
+  const sheetTrigger = useRef<HTMLElement | null>(null)
   const [filterOpen, setFilterOpen] = useState(false)
   useCollapseProgress(stickyRef)
 
   useEffect(() => {
     if (createRequest === 0) return
+    sheetTrigger.current = document.querySelector<HTMLButtonElement>('button.fab')
     setSheet({ mode: 'new' })
     onCreateHandled()
   }, [createRequest, onCreateHandled])
+
+  const openSheet = (next: NonNullable<typeof sheet>) => {
+    sheetTrigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    setSheet(next)
+  }
 
   const categoryOptions = useMemo(() => {
     const set = new Set(['Keluarga', 'Teman', 'Umum', 'VIP', 'Artis', 'Tetangga', ...guests.map(g => g.category)])
@@ -70,21 +80,16 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
    */
   const pickSort = (next: SortKey) => {
     if (sort === next) {
-      setAsc(!asc)
+      onFilterChange({ arah: asc ? 'turun' : null })
       return
     }
-    setSort(next)
-    setAsc(next === 'nama')
+    onFilterChange({ urut: next === 'nama' ? null : next, arah: next === 'nama' ? null : 'turun' })
   }
 
   const activeFilters = categories.length + types.length + sessions.length
 
 
-  const resetFilters = () => {
-    setCategories([])
-    setTypes([])
-    setSessions([])
-  }
+  const resetFilters = () => onFilterChange({ kategori: null, jenis: null, sesi: null })
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -102,13 +107,25 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
     return list
   }, [guests, query, status, categories, types, sessions, sort, asc])
 
-  const run = async (fn: () => Promise<void>, ok: string) => {
+  const requestDelete = (guest: Guest) => {
+    setDeleteError('')
+    setDeleteTarget(guest)
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteTarget || deleting) return
+    setDeleting(true)
+    setDeleteError('')
     try {
-      await fn()
-      notify(ok)
+      await deleteGuest(deleteTarget.id)
+      setDeleteTarget(null)
+      setSheet(null)
+      notify('Tamu dihapus')
       await onChanged()
     } catch (e) {
-      notify(e instanceof Error ? e.message : 'Terjadi kesalahan.')
+      setDeleteError(e instanceof Error ? e.message : 'Gagal menghapus tamu. Coba lagi.')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -167,7 +184,7 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
               className="guests-search"
               placeholder="Cari nama tamu…"
               value={query}
-              onValueChange={setQuery}
+              onValueChange={value => onFilterChange({ cari: value })}
             />
           </div>
           <GuestFilterMenu
@@ -178,23 +195,24 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
             onPickSort={pickSort}
             categoryOptions={categoryOptions}
             categories={categories}
-            onCategories={setCategories}
+            onCategories={value => onFilterChange({ kategori: value })}
             types={types}
-            onTypes={setTypes}
+            onTypes={value => onFilterChange({ jenis: value })}
             sessionOptions={sessionOptions}
             sessions={sessions}
-            onSessions={setSessions}
+            onSessions={value => onFilterChange({ sesi: value })}
             activeFilters={activeFilters}
             onReset={resetFilters}
           />
         </div>
 
-        {/* Status tabs scroll sideways; the sort control stays pinned at the right edge */}
-        <div className="list-controls">
+        {/* Keep the status filters scrollable on smaller screens. */}
+        <div className="list-controls guests-status-controls">
           <div className="status-tabs" data-beui>
             <Tabs
               value={status}
-              onValueChange={v => setStatus(v as Status)}
+              onValueChange={(value: string) => onFilterChange({ status: value === 'semua' ? null : value })}
+              labels={{ scrollLeft: 'Gulir filter ke kiri', scrollRight: 'Gulir filter ke kanan' }}
               variant="segment"
             >
               <TabsList
@@ -228,18 +246,16 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
           {guests.length === 0 ? (
             <>
               <p>Belum ada tamu.</p>
-              <Button type="button" variant="accent" size="sm" onClick={() => setSheet({ mode: 'new' })}>
+              <Button type="button" variant="accent" size="sm" onClick={() => openSheet({ mode: 'new' })}>
                 Tambah tamu pertama
               </Button>
             </>
           ) : (
             <>
               <p>Tidak ada tamu yang cocok dengan pencarian atau filter.</p>
-              <Button type="button" variant="secondary" size="sm" onClick={() => {
-                setQuery('')
-                setStatus('semua')
-                resetFilters()
-              }}>
+              <Button type="button" variant="secondary" size="sm" onClick={() =>
+                onFilterChange({ cari: null, status: null, kategori: null, jenis: null, sesi: null })
+              }>
                 Hapus pencarian dan filter
               </Button>
             </>
@@ -250,10 +266,10 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
       {visible.length > 0 && (
         <GuestGrid
           guests={visible}
-          onOpen={guest => setSheet({ mode: 'edit', guest })}
+          onOpen={guest => openSheet({ mode: 'edit', guest })}
           onCopyLink={copyLink}
           onSendWhatsApp={sendWhatsApp}
-          onDelete={setDeleteTarget}
+          onDelete={requestDelete}
         />
       )}
 
@@ -262,6 +278,14 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
         open={sheet !== null}
         onOpenChange={open => { if (!open) close() }}
         title={sheet?.mode === 'edit' ? 'Ubah tamu' : 'Tamu baru'}
+        closeLabel="Tutup formulir tamu"
+        onCloseAutoFocus={event => {
+          event.preventDefault()
+          const trigger = sheetTrigger.current
+          const fallback = document.querySelector<HTMLButtonElement>('button.fab')
+          const target = trigger?.isConnected && trigger !== document.body ? trigger : fallback
+          target?.focus({ preventScroll: true })
+        }}
         description={sheet?.mode === 'edit' ? sheet.guest.group_name : undefined}
         detents={[0.94]}
         initialDetent={0}
@@ -273,38 +297,35 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
             categories={categoryOptions.map(c => c.value)}
             sessions={sessionOptions.map(s => s.value)}
             onSave={async (form, flags) => {
-              await run(async () => {
-                if (sheet.mode === 'edit') await updateGuest(sheet.guest, event.id, form, flags)
-                else await addGuest(event.id, form)
-              }, sheet.mode === 'edit' ? 'Tamu diperbarui' : 'Tamu ditambahkan')
+              if (sheet.mode === 'edit') await updateGuest(sheet.guest, event.id, form, flags)
+              else await addGuest(event.id, form)
               close()
+              notify(sheet.mode === 'edit' ? 'Tamu diperbarui' : 'Tamu ditambahkan')
+              await onChanged()
             }}
             onCopyLink={sheet.mode === 'edit' ? () => copyLink(sheet.guest) : undefined}
-            onDelete={sheet.mode === 'edit' ? () => setDeleteTarget(sheet.guest) : undefined}
+            onDelete={sheet.mode === 'edit' ? () => requestDelete(sheet.guest) : undefined}
           />
         )}
       </BottomSheet>
 
       {/* Delete confirmation dialog */}
-      <Dialog open={deleteTarget !== null} onOpenChange={open => { if (!open) setDeleteTarget(null) }}>
+      <Dialog open={deleteTarget !== null} onOpenChange={open => { if (!open && !deleting) setDeleteTarget(null) }}>
         {deleteTarget && (
           <DialogContent title={`Hapus ${deleteTarget.group_name}?`} description="Data tamu ini akan dihapus dan tidak bisa dikembalikan.">
             <div className="dialog-actions">
+              {deleteError && <p className="form-error" role="alert">{deleteError}</p>}
               <Button
                 type="button"
                 variant="dangerSoft"
                 size="xl"
                 fullWidth
-                onClick={() => {
-                  const target = deleteTarget
-                  setDeleteTarget(null)
-                  setSheet(null)
-                  run(() => deleteGuest(target.id), 'Tamu dihapus')
-                }}
+                loading={deleting}
+                onClick={confirmDelete}
               >
                 Ya, hapus
               </Button>
-              <Button type="button" variant="accentOutline" size="xl" fullWidth onClick={() => setDeleteTarget(null)}>Batal</Button>
+              <Button type="button" variant="accentOutline" size="xl" fullWidth disabled={deleting} onClick={() => setDeleteTarget(null)}>Batal</Button>
             </div>
           </DialogContent>
         )}

@@ -91,7 +91,7 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
       return
     }
     setSent(true)
-    // Menunggu RSVP keeps the sent flag and clears the RSVP response.
+    // Pending keeps the sent flag and clears the RSVP response.
     setRsvp(next === 'pending' ? 'pending' : next)
     // Only "Hadir" can sit next to a check-in; the other states have not arrived.
     if (next !== 'hadir') setCheckedIn(false)
@@ -115,6 +115,7 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if (busy) return
     setError('')
     if (!form.name.trim()) return setError('Nama tamu wajib diisi.')
     if (form.maxPax < 1) return setError('Jumlah orang minimal 1.')
@@ -138,7 +139,7 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
   }
 
   return (
-    <form className="ios-form" onSubmit={submit}>
+    <form className="ios-form" onSubmit={submit} aria-busy={busy}>
       <section className="ios-group" aria-label="Data tamu">
         <div className="ios-group-body">
           <div className="ios-row">
@@ -163,14 +164,14 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
             </div>
           )}
           <div className="ios-row ios-row-stepper">
-            <span className="ios-row-label" id={`${fieldId}-pax`}>Jumlah orang</span>
+            <span className="ios-row-label" id={`${fieldId}-pax`}>Kapasitas undangan</span>
             <div data-beui className="ios-stepper-scale">
               <AdaptiveStepper
                 value={form.maxPax}
                 min={1}
                 max={50}
                 onValueChange={v => set('maxPax', v)}
-                aria-label="Jumlah orang"
+                aria-labelledby={`${fieldId}-pax`}
               >
                 <AdaptiveStepperDecrement />
                 <AdaptiveStepperValue />
@@ -259,8 +260,6 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
         </section>
       )}
 
-      {error && <p role="alert" className="form-error">{error}</p>}
-
       {guest && onCopyLink && (
         <section className="ios-group" aria-label="Tautan undangan">
           <div className="ios-group-body">
@@ -284,8 +283,9 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
       )}
 
       <div className="ios-form-save">
-        <Button type="submit" variant="accent" size="xl" fullWidth disabled={busy}>
-          {busy ? 'Menyimpan…' : guest ? 'Simpan perubahan' : 'Tambah tamu'}
+        {error && <p role="alert" className="form-error">{error}</p>}
+        <Button type="submit" variant="accent" size="xl" fullWidth loading={busy}>
+          {guest ? 'Simpan perubahan' : 'Tambah tamu'}
         </Button>
       </div>
     </form>

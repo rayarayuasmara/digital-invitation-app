@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ChevronRight, LogOut, Mail, Sparkles, Trash2, Users } from 'lucide-react'
+import { ChevronRight, LogOut, Mail, Pencil, Sparkles, Trash2, Users } from 'lucide-react'
 import { Badge } from '@/components/arc/badge/badge'
 import { Avatar } from '@/components/arc/avatar/avatar'
 import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
@@ -19,6 +19,7 @@ type Props = {
   data: DashboardData
   notify: (message: string) => void
   onClose: () => void
+  onOpenInvitation?: () => void
   /** Reload the dashboard after the event is deleted, so onboarding can show again. */
   onEventDeleted?: () => void
 }
@@ -30,7 +31,7 @@ const themeOptions: { value: ThemeMode; label: string }[] = [
 ]
 
 /** Account details, opened from the avatar in any tab header. */
-export function AccountSheet({ open, data, notify, onClose, onEventDeleted }: Props) {
+export function AccountSheet({ open, data, notify, onClose, onEventDeleted, onOpenInvitation }: Props) {
   const { signOut } = useAuth()
   const { client, stats } = data
   const [sending, setSending] = useState(false)
@@ -144,8 +145,15 @@ export function AccountSheet({ open, data, notify, onClose, onEventDeleted }: Pr
 
           {event && (
             <section aria-labelledby="account-event-title">
-              <h3 className="account-section" id="account-event-title">Kelola acara</h3>
-              <div className="account-group">
+            <h3 className="account-section" id="account-event-title">Kelola acara</h3>
+            <div className="account-group">
+              {onOpenInvitation && (
+                <button type="button" className="account-row account-row-action" onClick={onOpenInvitation}>
+                  <span className="account-row-icon" aria-hidden><Pencil size={16} strokeWidth={2} /></span>
+                  <span className="account-row-label">Kelola detail undangan</span>
+                  <ChevronRight size={18} strokeWidth={2} className="account-chevron" aria-hidden />
+                </button>
+              )}
                 <button
                   type="button"
                   className="account-row account-row-action account-row-danger"

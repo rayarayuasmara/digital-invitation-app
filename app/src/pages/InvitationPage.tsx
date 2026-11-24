@@ -6,6 +6,9 @@ import type { Templates } from '@/lib/whatsapp'
 import { Button } from '@/components/arc/button/button'
 import { PageHeader } from '@/components/PageHeader'
 import { Card } from '@/components/arc/card'
+import { Badge } from '@/components/arc/badge/badge'
+import { ExpandableCard } from '@/components/arc/expandable-card/expandable-card'
+import { EventDetailsEditor } from '@/pages/EventDetailsEditor'
 
 type Props = {
   data: DashboardData
@@ -13,22 +16,26 @@ type Props = {
   onChanged: () => Promise<void>
   notify: (message: string) => void
   onOpenAccount: () => void
+  draft: Templates | null
+  onDraftChange: (templates: Templates | null) => void
+  onTemplatesSaved: (templates: Templates) => void
 }
 
 function formatDate(value: string | null) {
-  if (!value) return '-'
+  if (!value || !Number.isFinite(Date.parse(value))) return 'Belum diatur'
   return new Date(value).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })
 }
 
-export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount }: Props) {
+export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount, draft, onDraftChange, onTemplatesSaved }: Props) {
   const event = data.event!
   const categories = categoriesOf(data)
-  const [templates, setTemplates] = useState<Templates>(() => ({ ...(event.wa_templates ?? {}) }))
+  const templates = draft ?? event.wa_templates ?? {}
   const [saving, setSaving] = useState(false)
   const [publishOpen, setPublishOpen] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [published, setPublished] = useState(false)
-  const [open, setOpen] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState('')
+  const previewUrl = event.preview_token ? `/pratinjau/${event.slug}/${event.preview_token}` : null
 
   const publish = async () => {
     if (publishing) return
@@ -47,16 +54,29 @@ export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount
   }
 
   const save = async () => {
+    if (!draft || saving) return
     setSaving(true)
+    setSaveError('')
     try {
-      await saveTemplates(event.id, templates)
-      await onChanged()
+      await saveTemplates(event.id, draft)
+      onTemplatesSaved(draft)
       notify('Template WhatsApp disimpan')
     } catch (e) {
-      notify(e instanceof Error ? e.message : 'Gagal menyimpan template.')
+      setSaveError(e instanceof Error ? e.message : 'Template belum bisa disimpan. Coba lagi.')
     } finally {
       setSaving(false)
     }
+  }
+
+  const changeTemplate = (category: string, value: string) => {
+    setSaveError('')
+    const next = { ...templates }
+    if (value) next[category] = value
+    else delete next[category]
+    const saved = event.wa_templates ?? {}
+    const sameAsSaved = Object.keys(next).length === Object.keys(saved).length &&
+      Object.entries(next).every(([key, text]) => saved[key] === text)
+    onDraftChange(sameAsSaved ? null : next)
   }
 
   return (
@@ -68,14 +88,20 @@ export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount
       />
 
       <Card variant="default" padding="md">
-        <p className="name" style={{ margin: 0, fontSize: 'var(--text-xl)', fontWeight: 700 }}>{event.couple_name || event.title}</p>
-        <p style={{ margin: '4px 0 0', color: 'var(--sub)' }}>{event.title}</p>
-        <div style={{ marginTop: 12 }}>
-          <div className="kv"><span>Tanggal</span><span>{formatDate(event.event_date)}</span></div>
-          <div className="kv"><span>Lokasi</span><span style={{ textAlign: 'right' }}>{event.location || '-'}</span></div>
+        <div className="invitation-detail">
+          <h2>{event.title}</h2>
+          {event.couple_name && event.couple_name !== event.title && <p className="page-sub">{event.couple_name}</p>}
+          <dl>
+          <div className="kv"><dt>Tanggal</dt><dd>{formatDate(event.event_date)}</dd></div>
+          <div className="kv"><dt>Lokasi</dt><dd>{event.location || 'Belum diatur'}</dd></div>
           {(event.sessions ?? []).map(s => (
-            <div key={s.id} className="kv"><span>{s.name}</span><span>{s.time_text || '-'}</span></div>
+            <div key={s.id} className="kv"><dt>{s.name}</dt><dd>{s.time_text || 'Belum diatur'}</dd></div>
           ))}
+          </dl>
+          <EventDetailsEditor event={event} onSaved={async () => {
+            notify('Detail acara disimpan.')
+            await onChanged()
+          }} />
         </div>
       </Card>
 
@@ -96,54 +122,55 @@ export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount
         </Dialog>
       )}
 
-      <h2 className="section-title">Bagikan</h2>
-      <Button type="button" variant="accent" size="xl" fullWidth onClick={onShare}>Salin tautan pratinjau</Button>
+      <h2 className="section-title">Pratinjau</h2>
+      {previewUrl ? (
+        <div className="invitation-preview-actions">
+          <a className="dashboard-inline-link" href={previewUrl} target="_blank" rel="noopener noreferrer">Buka pratinjau undangan</a>
+          <Button type="button" variant="secondary" size="md" onClick={onShare}>Salin tautan pratinjau</Button>
+        </div>
+      ) : <p className="page-sub">Tautan pratinjau belum tersedia.</p>}
 
       <h2 className="section-title">Template WhatsApp</h2>
       <p className="page-sub" style={{ margin: '0 4px 12px' }}>
         Dipakai saat mengirim undangan. Kategori yang belum punya template memakai template Umum.
       </p>
-      <div className="chips" style={{ marginBottom: 12 }} aria-label="Variabel template">
-        {TEMPLATE_VARIABLES.map(v => <span key={v} className="badge">{v}</span>)}
+      <div className="chips invitation-variables" role="group" aria-label="Variabel template">
+        {TEMPLATE_VARIABLES.map(v => <Badge key={v} size="sm" pill><code translate="no">{v}</code></Badge>)}
       </div>
 
       <ul className="list">
-        {categories.map(c => {
-          const expanded = open === c
-          return (
+        {categories.map(c => (
             <li key={c}>
-              <Card variant="default" padding="none" className="overflow-hidden">
-                <button type="button" className="list-row" style={{ border: 0, borderRadius: 0 }} onClick={() => setOpen(expanded ? null : c)} aria-expanded={expanded}>
-                  <div style={{ flex: 1 }}>
-                    <p className="name">{c}</p>
-                    <p className="meta">{(templates[c] || '').trim() ? 'Template kustom' : 'Memakai template Umum'}</p>
-                  </div>
-                  <span className="badge">{expanded ? 'Tutup' : 'Ubah'}</span>
-                </button>
-                {expanded && (
-                  <div style={{ padding: '0 16px 16px', display: 'grid', gap: 8 }}>
+              <ExpandableCard title={c} description={(templates[c] || '').trim() ? 'Template khusus' : c === 'Umum' ? 'Template bawaan' : 'Memakai template Umum'}>
+                  <div className="invitation-template-editor">
                     <textarea
                       aria-label={`Template untuk ${c}`}
+                      name={`template-${c}`}
+                      autoComplete="off"
                       rows={9}
                       value={templates[c] ?? ''}
-                      placeholder={DEFAULT_TEMPLATE}
-                      onChange={e => setTemplates(t => ({ ...t, [c]: e.target.value }))}
-                      style={{ width: '100%', font: 'inherit', fontSize: 'var(--text-base)', lineHeight: 1.45, padding: 'var(--space-3)', borderRadius: 'var(--radius-control)', border: '1px solid var(--line)', background: 'var(--bg-app)', color: 'var(--ink)', resize: 'vertical' }}
+                      placeholder={(c !== 'Umum' && templates.Umum?.trim()) || DEFAULT_TEMPLATE}
+                      disabled={saving}
+                      onChange={e => changeTemplate(c, e.target.value)}
                     />
-                    <Button type="button" variant="accentOutline" size="md" fullWidth onClick={() => setTemplates(t => { const n = { ...t }; delete n[c]; return n })}>
-                      Pakai template Umum
+                    <Button type="button" variant="accentOutline" size="md" fullWidth disabled={saving || !templates[c]} onClick={() => changeTemplate(c, '')}>
+                      {c === 'Umum' ? 'Pakai template bawaan' : 'Pakai template Umum'}
                     </Button>
                   </div>
-                )}
-              </Card>
+              </ExpandableCard>
             </li>
-          )
-        })}
+        ))}
       </ul>
 
-      <Button type="button" variant="accent" size="xl" fullWidth style={{ marginTop: 16 }} onClick={save} disabled={saving}>
-        {saving ? 'Menyimpan…' : 'Simpan template'}
-      </Button>
+      <div className="invitation-template-actions">
+        {saveError && <p className="form-error" role="alert">{saveError}</p>}
+        {draft && <p className="page-sub" role="status">Ada perubahan template yang belum disimpan.</p>}
+        <Button type="button" variant="accent" size="xl" fullWidth onClick={save} disabled={!draft} loading={saving}>Simpan template</Button>
+        {draft && <Button type="button" variant="ghost" size="md" disabled={saving} onClick={() => {
+          setSaveError('')
+          onDraftChange(null)
+        }}>Buang perubahan</Button>}
+      </div>
     </>
   )
 }
