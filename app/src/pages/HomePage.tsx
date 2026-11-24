@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { BadgeCheck, ChartPie, CircleArrowRight, ExternalLink, MailQuestion, Tag, UsersRound } from 'lucide-react'
+import { BadgeCheck, ChartPie, CircleArrowRight, MailQuestion, Tag, UsersRound } from 'lucide-react'
 import { InvitationAvatar } from '@/components/InvitationAvatar'
 import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
 import { Badge } from '@/components/arc/badge/badge'
@@ -125,7 +125,7 @@ function HistoryList({ items }: { items: HistoryItem[] }) {
             <p className="home-history-name">{item.name}</p>
             <div className="home-history-meta">
               <Badge size="sm" pill tone={historyTone[item.kind]}>{historyLabel[item.kind]}</Badge>
-              <Badge size="sm" pill>Kapasitas {item.pax} orang</Badge>
+              <Badge size="sm" pill>{item.pax} pax</Badge>
             </div>
           </div>
           <time className="home-history-time" dateTime={item.at}>{timeAgo(item.at)}</time>
@@ -247,7 +247,6 @@ export function HomePage({ data, onOpenGuests, onOpenInvitation, onOpenAccount, 
               {previewUrl && (
                 <a className="home-hero-preview" href={previewUrl} target="_blank" rel="noopener noreferrer">
                   <span>Pratinjau undangan<span className="sr-only"> (tab baru)</span></span>
-                  <ExternalLink size={15} aria-hidden />
                 </a>
               )}
             </div>
@@ -322,7 +321,7 @@ export function HomePage({ data, onOpenGuests, onOpenInvitation, onOpenAccount, 
               <a className="home-quota-upgrade dashboard-inline-link"
                 href="https://wa.me/6281234567890?text=Halo%20RayaRayu%2C%20saya%20ingin%20upgrade%20paket%20undangan."
                 target="_blank" rel="noopener noreferrer">
-                Upgrade paket <ExternalLink size={14} aria-hidden />
+                Upgrade paket
               </a>
             </div>
             <div className="home-quota-card-side">
