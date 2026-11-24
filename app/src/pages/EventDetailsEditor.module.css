@@ -1,0 +1,36 @@
+/* The editor reuses the onboarding wizard layout, so it takes over the screen
+   the same way a full-page route does. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--bg-page);
+  -webkit-overflow-scrolling: touch;
+}
+
+.readonlyValue {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+/* A summary row that cannot be edited (the invitation address). */
+.staticRow {
+  cursor: default;
+}
+
+.staticRow:active {
+  background: transparent;
+}
+
+.mapsNote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
