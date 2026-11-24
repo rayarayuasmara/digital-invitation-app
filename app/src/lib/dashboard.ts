@@ -85,7 +85,7 @@ export async function publishEvent(eventId: string): Promise<string> {
 
 export async function fetchEventMapsUrl(eventId: string) {
   const { data, error } = await supabase.from('events').select('maps_url').eq('id', eventId).single()
-  if (error) throw new Error('Tautan Google Maps belum bisa dimuat.')
+  if (error) throw new Error('Tautan lokasi belum bisa dimuat.')
   return (data?.maps_url ?? null) as string | null
 }
 

@@ -43,9 +43,9 @@ export function EventDateWheel({ value, onChange, startYear }: {
 
   return (
     <div data-beui className={styles.dateCard} role="group" aria-label="Tanggal acara">
-      <WheelPicker aria-label="Hari" options={days} value={String(day)} onValueChange={next => setPart(2, Number(next))} />
-      <WheelPicker aria-label="Bulan" options={monthOptions} value={String(month)} onValueChange={next => setPart(1, Number(next))} />
-      <WheelPicker aria-label="Tahun" options={yearOptions} value={String(year)} onValueChange={next => setPart(0, Number(next))} />
+      <WheelPicker className="min-w-0 border-0 bg-transparent" visibleCount={7} itemHeight={42} aria-label="Hari" options={days} value={String(day)} onValueChange={next => setPart(2, Number(next))} />
+      <WheelPicker className="min-w-0 border-0 bg-transparent" visibleCount={7} itemHeight={42} aria-label="Bulan" options={monthOptions} value={String(month)} onValueChange={next => setPart(1, Number(next))} />
+      <WheelPicker className="min-w-0 border-0 bg-transparent" visibleCount={7} itemHeight={42} aria-label="Tahun" options={yearOptions} value={String(year)} onValueChange={next => setPart(0, Number(next))} />
     </div>
   )
 }

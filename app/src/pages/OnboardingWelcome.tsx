@@ -59,12 +59,12 @@ export function OnboardingWelcome({ onStart, account }: Props) {
           </h1>
           <p className={styles.welcomeCopy}>Buat undangan pernikahan digital, lalu bagikan ke tamu lewat WhatsApp.</p>
         </div>
-        <div className={styles.footer}>
-          <div className={styles.introCta}>
-            <Button type="button" variant="accent" size="xl" fullWidth className={styles.primary} onClick={onStart}>
-              Buat acara <ArrowRight size={18} aria-hidden="true" />
-            </Button>
-          </div>
+      </div>
+      <div className={`${styles.footer} ${styles.welcomeFooter}`}>
+        <div className={styles.introCta}>
+          <Button type="button" variant="accent" size="xl" fullWidth className={styles.primary} onClick={onStart}>
+            Buat acara <ArrowRight size={18} aria-hidden="true" />
+          </Button>
         </div>
       </div>
     </div>

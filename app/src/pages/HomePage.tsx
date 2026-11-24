@@ -319,7 +319,11 @@ export function HomePage({ data, onOpenGuests, onOpenInvitation, onOpenAccount, 
               <p className="home-quota-card-note">
                 {total.toLocaleString('id-ID')} dari {stats.max_quota.toLocaleString('id-ID')} terpakai
               </p>
-              <p className="home-quota-card-note">Hubungi admin untuk menambah kuota.</p>
+              <a className="home-quota-upgrade dashboard-inline-link"
+                href="https://wa.me/6281234567890?text=Halo%20RayaRayu%2C%20saya%20ingin%20upgrade%20paket%20undangan."
+                target="_blank" rel="noopener noreferrer">
+                Upgrade paket <ExternalLink size={14} aria-hidden />
+              </a>
             </div>
             <div className="home-quota-card-side">
               <Gauge

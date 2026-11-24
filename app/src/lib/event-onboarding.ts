@@ -35,20 +35,14 @@ export function suggestEventSlug(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
-export function normalizeMapsUrl(value: string) {
-  const candidate = value.match(/https:\/\/[^\s<>]+/i)?.[0] ?? value.trim()
+export function normalizeLocationUrl(value: string) {
+  const candidate = value.trim()
   if (!candidate) return ''
-  const url = /^https:\/\//i.test(candidate) ? candidate : `https://${candidate}`
+  if (/[\s\\]/u.test(candidate)) return ''
   try {
-    const parsed = new URL(url)
-    if (parsed.username || parsed.password || parsed.port) return ''
-    const host = parsed.hostname
-    const path = parsed.pathname
-    if (host === 'maps.app.goo.gl' && path.length > 1) return parsed.href
-    if (host === 'share.google' && path.length > 1) return parsed.href
-    if (host === 'goo.gl' && path.startsWith('/maps/')) return parsed.href
-    if (host === 'maps.google.com' || host === 'maps.google.co.id') return parsed.href
-    if (/^(www\.)?google\.(com|co\.id)$/.test(host) && /^\/maps(?:\/|$)/.test(path)) return parsed.href
+    const parsed = new URL(candidate)
+    if (!/^https?:\/\//i.test(candidate) || parsed.username || parsed.password || parsed.href.length > 2048) return ''
+    return parsed.href
   } catch {
     return ''
   }
@@ -63,7 +57,7 @@ export async function checkEventSlug(slug: string) {
 
 export async function createFirstEvent(input: FirstEventInput) {
   const { couple } = input
-  const mapsUrl = normalizeMapsUrl(input.mapsUrl)
+  const mapsUrl = normalizeLocationUrl(input.mapsUrl)
   const { data, error } = await supabase.rpc(mapsUrl ? 'create_event_with_map' : 'create_event', {
     ...(mapsUrl ? { p_maps_url: mapsUrl } : {}),
     p_title: input.title.trim(),
@@ -87,8 +81,8 @@ export async function createFirstEvent(input: FirstEventInput) {
   if (!error && data?.success === true) return
 
   const serverMessage = typeof data?.message === 'string' ? data.message : ''
-  if (error?.code === 'PGRST202' && mapsUrl) throw new CreateEventError('Penyimpanan tautan Google Maps belum tersedia.')
-  if (/Google Maps/i.test(serverMessage)) throw new CreateEventError(serverMessage)
+  if (error?.code === 'PGRST202' && mapsUrl) throw new CreateEventError('Penyimpanan tautan lokasi belum tersedia.')
+  if (/Google Maps|tautan lokasi/i.test(serverMessage)) throw new CreateEventError(serverMessage)
   if (/slug|alamat tautan/i.test(serverMessage) || (error?.code === '23505' && /slug/i.test(error.message))) {
     throw new CreateEventError('Alamat tautan tidak tersedia. Coba alamat lain.', 'slug')
   }

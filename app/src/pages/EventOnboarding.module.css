@@ -86,8 +86,8 @@
 .greeting {
   margin: 0;
   color: var(--text-secondary);
-  font-size: var(--text-base);
-  font-weight: var(--weight-semibold);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
   line-height: var(--leading-h6);
 }
 
@@ -103,9 +103,10 @@
 .wordmark > span {
   position: absolute;
   display: block;
-  background: var(--brand);
+  background: var(--foreground);
   mask-size: 100% 100%;
 }
+:global([data-theme='dark']) .wordmark > span { background: var(--on-solid); }
 .wordmark > span > img { display: block; visibility: hidden; }
 .wordmark > span:nth-of-type(2) { left: 0; top: 0; }
 .wordmark > span:nth-of-type(3) { left: 21.97%; top: 9.21%; }
@@ -118,10 +119,12 @@
 .wordmark > span:nth-of-type(10) { left: 91.58%; top: 26.15%; }
 
 .welcomeCopy {
-  margin: 0;
-  color: var(--foreground);
+  max-width: 30ch;
+  margin: var(--space-3) 0 0;
+  color: var(--text-secondary);
   font-size: var(--text-base);
   line-height: var(--leading-body);
+  text-wrap: pretty;
 }
 
 /* The action stays in flow and pins itself to the bottom edge while the step scrolls. */
@@ -155,19 +158,16 @@
   scroll-margin-block: var(--space-24);
 }
 
-.welcomeStage > .footer {
-  position: static;
-  margin-top: 0;
+.intro .welcomeFooter {
+  --page-pad: var(--space-5);
   width: 100%;
   max-width: var(--onboarding-width);
   align-self: center;
-  padding: var(--space-2) var(--space-5) calc(var(--safe-bottom) + var(--space-4));
-  background: none;
+  margin-inline: 0;
 }
 
 .introCta { width: 100%; }
 .introCta > .primary { min-height: var(--space-12); }
-.intro .introCta > .primary { min-height: var(--control-height-xl); }
 .heading {
   display: grid;
   justify-items: center;
@@ -323,10 +323,9 @@
 
 .groupedRow:has(.groupedInput:focus-visible) {
   background: var(--surface-muted);
-  box-shadow: inset 0 0 0 1px var(--accent);
 }
 
-.groupedTable .slugRow { gap: var(--space-1); }
+.groupedTable .slugRow { gap: 0; }
 .groupedRow .slugPrefix { color: var(--text-secondary); font-size: var(--text-base); }
 .slugRow .groupedInput { text-align: start; }
 
@@ -346,7 +345,9 @@
 /* Sessions: name on the left, a time chip and the delete action on the right. */
 .sessionList.sessionList {
   --swipe-content-min-height: var(--control-height-xl);
-  --swipe-content-padding-block: 0;
+  --swipe-content-padding-block: var(--space-2);
+  --swipe-content-padding-bottom: var(--space-2);
+  --swipe-content-end: var(--space-3);
   border: 1px solid var(--line);
   border-radius: calc(var(--radius-control) + 4px);
 }
@@ -368,7 +369,7 @@
 
 .sessionRow .sessionName {
   min-width: 0;
-  min-height: var(--control-height-xl);
+  min-height: var(--control-height-md);
   padding: 0;
   border: 0;
   background: transparent;
@@ -429,7 +430,9 @@
   display: grid;
   grid-template-columns: minmax(0, .8fr) minmax(0, 1.5fr) minmax(0, .9fr);
   min-width: 0;
-  overflow: hidden;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border: 1px solid var(--line);
   border-radius: var(--radius-panel);
   background: var(--surface);
 }
@@ -503,6 +506,7 @@
 }
 
 .planPrice { margin-bottom: var(--space-1); color: var(--text-secondary); font-size: var(--text-sm); }
+.planCard { border: 1px solid var(--line); box-shadow: none; }
 .section .freePlan { border-color: var(--accent); }
 
 .freePlanContent {

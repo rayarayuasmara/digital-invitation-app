@@ -7,7 +7,7 @@ import { Badge } from '@/components/arc/badge/badge'
 import { Card } from '@/components/arc/card'
 import { Input, type InputProps } from '@/components/arc/input/input'
 import { useCollapseProgress } from '@/lib/hooks/use-collapse-progress'
-import { CreateEventError, checkEventSlug, createFirstEvent, suggestEventSlug, normalizeMapsUrl } from '@/lib/event-onboarding'
+import { CreateEventError, checkEventSlug, createFirstEvent, suggestEventSlug, normalizeLocationUrl } from '@/lib/event-onboarding'
 import { EventDateWheel, todayInJakarta } from './EventDateWheel'
 import { OnboardingWelcome } from './OnboardingWelcome'
 import styles from './EventOnboarding.module.css'
@@ -42,6 +42,7 @@ const slugStatusText: Record<Exclude<SlugStatus, 'idle'>, string> = {
 type Step = -1 | 0 | 1 | 2 | 3 | 4
 type SlugStatus = 'idle' | 'checking' | 'available' | 'taken' | 'unknown'
 type Session = { id: number; name: string; time: string }
+const DEFAULT_SESSION_TIME = '10:00'
 type Props = {
   /** The signed-in account, shown in the header and its bottom sheet. */
   account: { name: string; onOpen: () => void }
@@ -78,7 +79,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
   const [city, setCity] = useState('')
   const [mapsUrl, setMapsUrl] = useState('')
   const [sessions, setSessions] = useState<Session[]>([
-    { id: 0, name: 'Akad', time: '' },
+    { id: 0, name: 'Akad', time: DEFAULT_SESSION_TIME },
   ])
   const [error, setError] = useState('')
   const [slugError, setSlugError] = useState('')
@@ -93,7 +94,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
   const pageRef = useRef<HTMLElement>(null)
   const chromeRef = useRef<HTMLElement>(null)
   const errorRef = useRef<HTMLParagraphElement>(null)
-  const normalizedMapsUrl = normalizeMapsUrl(mapsUrl)
+  const normalizedMapsUrl = normalizeLocationUrl(mapsUrl)
   useCollapseProgress(chromeRef, 44, step >= 0)
 
   const groomNickname = groomNicknameEdit ?? firstWord(firstName)
@@ -115,7 +116,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
     { label: 'Alamat', value: `${LINK_PREFIX}${normalizedSlug}`, step: 1 },
     { label: 'Tanggal', value: formatDate(date), step: 2 },
     { label: 'Lokasi', value: location || '-', step: 3 },
-    ...(normalizedMapsUrl ? [{ label: 'Google Maps', value: 'Tautan ditambahkan', step: 3 as const }] : []),
+    ...(normalizedMapsUrl ? [{ label: 'Tautan lokasi', value: 'Ditambahkan', step: 3 as const }] : []),
     { label: 'Sesi', value: sessionSummary || '-', step: 3 },
   ]
 
@@ -202,7 +203,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
     }
     if (step === 3) {
       if (!venue.trim()) return setError('Isi nama tempat acara.')
-      if (mapsUrl.trim() && !normalizedMapsUrl) return setError('Masukkan tautan Google Maps yang valid.')
+      if (mapsUrl.trim() && !normalizedMapsUrl) return setError('Masukkan tautan lokasi yang dimulai dengan https:// atau http://.')
       if (sessions.length === 0) return setError('Tambahkan minimal satu sesi acara.')
       const names = sessions.map(session => session.name.trim().toLowerCase())
       if (names.some(name => !name)) return setError('Isi nama setiap sesi.')
@@ -314,11 +315,11 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                     <div className={styles.groupedTable}>
                       <GroupedField label="Lengkap" name="nama-pria" aria-label="Nama lengkap mempelai pria" placeholder="Nama lengkap…" autoComplete="off"
                         required maxLength={60} value={firstName} onChange={e => setFirstName(e.target.value)} />
-                      <GroupedField label="Panggilan" name="panggilan-pria" aria-label="Nama panggilan mempelai pria" placeholder="Otomatis" autoComplete="off"
+                      <GroupedField label="Panggilan" name="panggilan-pria" aria-label="Nama panggilan mempelai pria" placeholder="Nama panggilan" autoComplete="off"
                         maxLength={30} value={groomNickname} onChange={e => setGroomNickname(e.target.value)} />
-                      <GroupedField label="Ayah" name="ayah-pria" aria-label="Nama ayah mempelai pria" placeholder="Opsional" autoComplete="off"
+                      <GroupedField label="Ayah" name="ayah-pria" aria-label="Nama ayah mempelai pria" placeholder="Nama ayah" autoComplete="off"
                         maxLength={60} value={groomFather} onChange={e => setGroomFather(e.target.value)} />
-                      <GroupedField label="Ibu" name="ibu-pria" aria-label="Nama ibu mempelai pria" placeholder="Opsional" autoComplete="off"
+                      <GroupedField label="Ibu" name="ibu-pria" aria-label="Nama ibu mempelai pria" placeholder="Nama ibu" autoComplete="off"
                         maxLength={60} value={groomMother} onChange={e => setGroomMother(e.target.value)} />
                     </div>
                   </section>
@@ -328,11 +329,11 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                     <div className={styles.groupedTable}>
                       <GroupedField label="Lengkap" name="nama-wanita" aria-label="Nama lengkap mempelai wanita" placeholder="Nama lengkap…" autoComplete="off"
                         required maxLength={60} value={secondName} onChange={e => setSecondName(e.target.value)} />
-                      <GroupedField label="Panggilan" name="panggilan-wanita" aria-label="Nama panggilan mempelai wanita" placeholder="Otomatis" autoComplete="off"
+                      <GroupedField label="Panggilan" name="panggilan-wanita" aria-label="Nama panggilan mempelai wanita" placeholder="Nama panggilan" autoComplete="off"
                         maxLength={30} value={brideNickname} onChange={e => setBrideNickname(e.target.value)} />
-                      <GroupedField label="Ayah" name="ayah-wanita" aria-label="Nama ayah mempelai wanita" placeholder="Opsional" autoComplete="off"
+                      <GroupedField label="Ayah" name="ayah-wanita" aria-label="Nama ayah mempelai wanita" placeholder="Nama ayah" autoComplete="off"
                         maxLength={60} value={brideFather} onChange={e => setBrideFather(e.target.value)} />
-                      <GroupedField label="Ibu" name="ibu-wanita" aria-label="Nama ibu mempelai wanita" placeholder="Opsional" autoComplete="off"
+                      <GroupedField label="Ibu" name="ibu-wanita" aria-label="Nama ibu mempelai wanita" placeholder="Nama ibu" autoComplete="off"
                         maxLength={60} value={brideMother} onChange={e => setBrideMother(e.target.value)} />
                     </div>
                   </section>
@@ -433,7 +434,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                         fullWidth
                         onClick={() => {
                           const id = nextSessionId.current++
-                          setSessions(current => [...current, { id, name: '', time: '' }])
+                          setSessions(current => [...current, { id, name: '', time: DEFAULT_SESSION_TIME }])
                         }}
                       >
                         <Plus size={16} aria-hidden="true" /> Tambah sesi
@@ -444,18 +445,18 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                   <section className={styles.section}>
                     <p className={styles.sectionLabel}>Lokasi acara</p>
                     <div className={styles.groupedTable}>
-                      <GroupedField label="Tempat" name="nama-tempat" aria-label="Nama tempat acara" placeholder="Gedung atau tempat…" required
+                      <GroupedField label="Tempat" name="nama-tempat" aria-label="Nama tempat acara" placeholder="Nama gedung atau tempat" required
                         maxLength={80} value={venue} onChange={e => setVenue(e.target.value)} />
-                      <GroupedField label="Kota" name="kota" aria-label="Kota acara" placeholder="Opsional"
+                      <GroupedField label="Kota" name="kota" aria-label="Kota acara" placeholder="Contoh: Bandung"
                         maxLength={60} value={city} onChange={e => setCity(e.target.value)} />
-                      <GroupedField label="Google Maps" name="google-maps" type="url" inputMode="url"
-                        autoComplete="off" autoCapitalize="none" spellCheck={false} placeholder="Opsional"
+                      <GroupedField label="Tautan lokasi" name="google-maps" type="url" inputMode="url"
+                        autoComplete="off" autoCapitalize="none" spellCheck={false} placeholder="https://contoh.id/lokasi"
                         value={mapsUrl} maxLength={2048}
                         onBlur={() => setMapsUrl(normalizedMapsUrl || mapsUrl.trim())}
                         onChange={e => setMapsUrl(e.target.value)} />
                     </div>
                     {normalizedMapsUrl && <p className={styles.linkHint} data-status="available" role="status">
-                      <Check size={14} aria-hidden="true" /> Tautan Google Maps ditambahkan
+                      <Check size={14} aria-hidden="true" /> Tautan lokasi ditambahkan
                     </p>}
                   </section>
                 </div>
@@ -483,7 +484,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                   </section>
 
                   <section className={styles.section} aria-label="Paket undangan">
-                    <Card variant="outlined" padding="sm" className={styles.freePlan}>
+                    <Card variant="default" padding="md" className={`${styles.planCard} ${styles.freePlan}`}>
                       <div className={styles.freePlanContent}>
                         <span><strong>Free</strong> · 30 undangan</span>
                         <Badge size="sm" tone="success" pill icon={<Check size={13} aria-hidden="true" />}>Dipilih</Badge>
@@ -491,7 +492,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                     </Card>
                     <div className={styles.planGrid}>
                       {paidPlans.map(plan => (
-                        <Card key={plan.name} variant="outlined" padding="sm">
+                        <Card key={plan.name} variant="default" padding="md" className={styles.planCard}>
                           <div className={styles.paidPlanContent}>
                             <strong>{plan.name}</strong>
                             <span className={styles.planPrice}>{plan.price}</span>

@@ -469,7 +469,7 @@
         <p id="cd-note" class="where" hidden style="font-family:var(--serif);font-size:30px;line-height:1.1"></p>
 
         <div class="when-actions rv">
-          <a id="maps-btn" class="btn" href="#" hidden target="_blank" rel="noopener">Buka di Google Maps
+          <a id="maps-btn" class="btn" href="#" hidden target="_blank" rel="noopener noreferrer">Buka lokasi
             <svg class="arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12L12 4M5 4h7v7"/></svg></a>
           <button id="cal-btn" class="btn ghost" type="button">Simpan ke Kalender</button>
         </div>
@@ -889,8 +889,14 @@ function renderInvitation(g) {
   const mapsUrl = typeof g.maps_url === 'string' ? g.maps_url
     : g.event_location ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(g.event_location)}` : '';
   const mapsButton = $('maps-btn');
-  mapsButton.hidden = !mapsUrl.startsWith('https://');
-  if (!mapsButton.hidden) mapsButton.href = mapsUrl;
+  mapsButton.hidden = true;
+  try {
+    const link = new URL(mapsUrl);
+    if (['http:', 'https:'].includes(link.protocol) && !link.username && !link.password) {
+      mapsButton.href = link.href;
+      mapsButton.hidden = false;
+    }
+  } catch { /* Tidak ada tautan lokasi yang dapat dibuka. */ }
 
   // RSVP: identitas
   $('rsvp-guest-name').textContent = g.group_name || 'Tamu Undangan';

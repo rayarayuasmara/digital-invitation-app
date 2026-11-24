@@ -41,6 +41,7 @@ Jalankan **berurutan**. Jangan melompat.
 | 21 | `2026-11-23-p14-delete-event.sql` | RPC `delete_event(p_event_id)` untuk tombol "Hapus acara" di bottom sheet akun; memeriksa `auth.uid()` dan mengandalkan cascade `event_sessions`/`guests`/`wishes`, sedangkan `orders` menjadi `event_id = null` — **diterapkan 2026-11-23** (migration `delete_event`) |
 | 22 | `2026-11-23-p15-event-maps-url.sql` | Menyimpan tautan Google Maps dari onboarding melalui `create_event_with_map`; undangan dan pratinjau membacanya lewat `get_event_maps_url` dengan token yang sama. Terapkan sebelum menguji pembuatan acara dengan tautan Maps. |
 | 23 | `2026-11-24-p16-edit-event-details.sql` | RPC `save_event_details` untuk mengubah judul, tanggal, lokasi, Maps, dan sesi. Terapkan setelah p15, sebelum deploy editor di tab Undangan. Slug dan publikasi tidak berubah; tamu dari sesi yang dihapus dipindahkan ke sesi pertama. |
+| 24 | `2026-11-24-p17-general-location-links.sql` | Terapkan setelah p16 dan sebelum deploy UI tautan lokasi. Onboarding dan editor menerima tautan HTTP(S) dari domain selain Google Maps; kontrak RPC dan kolom lama tetap sama. |
 
 ### Prasyarat tiap tahap
 

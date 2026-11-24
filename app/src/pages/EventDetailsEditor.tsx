@@ -4,7 +4,7 @@ import { Button } from '@/components/arc/button/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/arc/dialog/dialog'
 import { Input } from '@/components/arc/input/input'
 import { fetchEventMapsUrl, saveEventDetails, type DashboardEvent } from '@/lib/dashboard'
-import { normalizeMapsUrl } from '@/lib/event-onboarding'
+import { normalizeLocationUrl } from '@/lib/event-onboarding'
 
 type Props = {
   event: DashboardEvent
@@ -74,10 +74,10 @@ function EventDetailsForm({ event, onSaved, onCancel, busy, setBusy }: Props & {
     e.preventDefault()
     if (busy) return
     setError('')
-    const normalizedMaps = normalizeMapsUrl(maps)
+    const normalizedMaps = normalizeLocationUrl(maps)
     const mapsChanged = mapsStatus === 'ready' && maps.trim() !== (initialMaps ?? '').trim()
     if (mapsChanged && maps.trim() && !normalizedMaps) {
-      setMapsError('Masukkan tautan Google Maps yang valid.')
+      setMapsError('Masukkan tautan yang dimulai dengan https:// atau http://.')
       e.currentTarget.querySelector<HTMLInputElement>('input[name="maps"]')?.focus()
       return
     }
@@ -114,12 +114,12 @@ function EventDetailsForm({ event, onSaved, onCancel, busy, setBusy }: Props & {
       <Input name="judul" label="Judul acara" value={title} onChange={e => setTitle(e.target.value)} required maxLength={160} />
       <Input name="tanggal" type="date" label="Tanggal acara" value={date} onChange={e => setDate(e.target.value)} required />
       <Input name="lokasi" label="Nama atau alamat lokasi" value={location} onChange={e => setLocation(e.target.value)} required maxLength={300} />
-      <Input name="maps" label="Tautan Google Maps (opsional)" type="text" inputMode="url" autoComplete="off" value={maps}
+      <Input name="maps" label="Tautan lokasi (opsional)" type="url" inputMode="url" autoComplete="off" value={maps}
         onChange={e => { setMaps(e.target.value); setMapsError('') }} disabled={mapsStatus !== 'ready'} error={mapsError} />
-      {mapsStatus === 'loading' && <p className="page-sub" role="status">Memuat tautan Maps…</p>}
+      {mapsStatus === 'loading' && <p className="page-sub" role="status">Memuat tautan lokasi…</p>}
       {mapsStatus === 'failed' && (
         <div className="event-details-maps-note">
-          <p className="page-sub" role="status">Tautan Maps belum bisa dimuat dan tidak akan diubah.</p>
+          <p className="page-sub" role="status">Tautan lokasi belum bisa dimuat dan tidak akan diubah.</p>
           <Button type="button" size="sm" variant="secondary" onClick={() => { setMapsStatus('loading'); setRetry(value => value + 1) }}>Coba lagi</Button>
         </div>
       )}
