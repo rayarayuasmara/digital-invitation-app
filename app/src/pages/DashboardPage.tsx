@@ -310,6 +310,7 @@ export function DashboardPage() {
           onChanged={load}
           notify={notify}
           onOpenAccount={() => setAccountOpen(true)}
+          onOpenGuests={() => openTab('tamu')}
           draft={templateDraft?.eventId === data.event.id ? templateDraft.templates : null}
           onDraftChange={templates => setTemplateDraft(templates ? { eventId: data.event!.id, templates } : null)}
           onTemplatesSaved={templates => {

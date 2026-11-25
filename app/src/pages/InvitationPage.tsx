@@ -17,12 +17,13 @@ type Props = {
   onChanged: () => Promise<void>
   notify: (message: string) => void
   onOpenAccount: () => void
+  onOpenGuests?: () => void
   draft: Templates | null
   onDraftChange: (templates: Templates | null) => void
   onTemplatesSaved: (templates: Templates) => void
 }
 
-export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount, draft, onDraftChange, onTemplatesSaved }: Props) {
+export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount, onOpenGuests, draft, onDraftChange, onTemplatesSaved }: Props) {
   const event = data.event!
   const [segment, setSegment] = useState('ringkasan')
   const [editing, setEditing] = useState(false)
@@ -130,6 +131,7 @@ export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount
             {event.preview_token && <div className="ios-group-body">
               <a className="ios-action" href={`/pratinjau/${event.slug}/${event.preview_token}`} target="_blank" rel="noopener noreferrer">Buka pratinjau <ExternalLink size={15} aria-hidden /></a>
               <button type="button" className="ios-action" onClick={onShare}>Salin tautan pratinjau</button>
+              {live && onOpenGuests && <button type="button" className="ios-action" onClick={onOpenGuests}>Bagikan ke tamu</button>}
             </div>}
             <p className="ios-group-note">{live ? 'Bagikan tautan pribadi setiap tamu dari tab Tamu.' : 'Periksa pratinjau sebelum membuka akses untuk tamu.'}</p>
           </section>
