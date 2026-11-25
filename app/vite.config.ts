@@ -6,6 +6,9 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  server: {
+    allowedHosts: ['sb-7krqnjlm8lmm.vercel.run'],
+  },
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
