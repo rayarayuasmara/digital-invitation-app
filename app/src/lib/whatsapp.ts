@@ -8,18 +8,20 @@ export const TEMPLATE_VARIABLES = ['{nama}', '{acara}', '{tanggal}', '{waktu}', 
 
 export type Templates = Record<string, string>
 
-export function guestLink(event: DashboardEvent, guest: Guest) {
+type MessageRecipient = Pick<Guest, 'group_name' | 'session' | 'invitation_token'>
+
+export function guestLink(event: DashboardEvent, guest: Pick<MessageRecipient, 'invitation_token'>) {
   return `${window.location.origin}/${event.slug}/${guest.invitation_token}`
 }
 
-function sessionOf(event: DashboardEvent, guest: Guest) {
+function sessionOf(event: DashboardEvent, guest: MessageRecipient) {
   const sessions = event.sessions ?? []
   const name = guest.session || sessions[0]?.name || 'Sesi 1'
   const match = sessions.find(s => s.name === name) ?? sessions[0]
   return { name, time: match?.time_text ?? '' }
 }
 
-export function fillTemplate(template: string, event: DashboardEvent, guest: Guest) {
+export function fillTemplate(template: string, event: DashboardEvent, guest: MessageRecipient) {
   const date = event.event_date
     ? new Date(event.event_date).toLocaleDateString('id-ID', {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta',

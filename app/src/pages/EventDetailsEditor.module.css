@@ -1,31 +1,112 @@
-/* The editor reuses the onboarding wizard layout, so it takes over the screen
-   the same way a full-page route does. */
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 70;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  background: var(--bg-page);
-  -webkit-overflow-scrolling: touch;
-}
+/* The event editor borrows the guest form's grouped rows; these are the few
+   pieces that form has no equivalent for. */
 
 .readonlyValue {
-  flex: 1;
   min-width: 0;
+  flex: 1;
   color: var(--text-secondary);
-  font-size: var(--text-base);
-  text-align: start;
+  font-size: var(--text-sm);
+  text-align: end;
   overflow-wrap: anywhere;
 }
 
-/* A summary row that cannot be edited (the invitation address). */
-.staticRow {
-  cursor: default;
+.sessionRow {
+  position: relative;
+  display: flex;
+  min-height: 50px;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-4);
 }
 
-.staticRow:active {
+.sessionRow + .sessionRow::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: var(--space-4);
+  height: 1px;
+  background: var(--line);
+  content: '';
+}
+
+.sessionName {
+  min-width: 0;
+  flex: 1;
+  height: 2.5rem;
+  padding: 0;
+  border: 0;
   background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-size: var(--text-base);
+}
+
+.sessionName::placeholder {
+  color: var(--text-muted);
+}
+
+.timeChipWrap {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+}
+
+.timeChip {
+  width: clamp(90px, 25vw, 112px);
+  min-height: calc(var(--control-height-sm) + 4px);
+  padding: 0 1.375rem 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--surface-muted);
+  color: var(--foreground);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* The browser's clock becomes a pair of chevrons: a hint that the chip opens a picker. */
+.timeChip::-webkit-calendar-picker-indicator {
+  opacity: 0;
+}
+
+.timeChip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.timeChipIcon {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  color: var(--text-secondary);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.removeSession {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--red-ink);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.removeSession:active {
+  background: var(--surface-muted);
+}
+
+.removeSession:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .mapsNote {
@@ -33,4 +114,20 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
+  margin-inline: var(--space-3);
+}
+
+.mapsNote :global(.ios-group-note) {
+  margin-inline: 0;
+}
+
+.mapsAvailable {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--green-ink);
+}
+
+.slugTaken {
+  color: var(--danger);
 }

@@ -59,6 +59,8 @@ export type EventDetailsUpdate = {
   location: string
   mapsUrl: string | null
   sessions: { id?: string; name: string; time_text: string | null }[]
+  /** Only sent when the host changed the address; the RPC keeps the old one otherwise. */
+  slug?: string
 }
 
 export async function fetchDashboard(): Promise<DashboardData> {
@@ -97,6 +99,7 @@ export async function saveEventDetails(eventId: string, details: EventDetailsUpd
     p_location: details.location,
     p_maps_url: details.mapsUrl,
     p_sessions: details.sessions,
+    ...(details.slug ? { p_slug: details.slug } : {}),
   })
   if (error?.code === 'PGRST202') throw new Error('Penyuntingan acara belum tersedia. Hubungi dukungan.')
   if (error || data?.success !== true) {

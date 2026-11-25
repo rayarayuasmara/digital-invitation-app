@@ -208,7 +208,7 @@ export function HomePage({ data, onOpenGuests, onOpenInvitation, onOpenAccount, 
               <p className="home-hero-halo">Hari Berbahagia</p>
               <h2 className="home-hero-title">{coupleName}</h2>
             </div>
-            <Badge size="md" pill tone={publishedAt ? 'success' : 'neutral'}>{publishedAt ? 'Terbit' : 'Draf'}</Badge>
+            <Badge size="md" pill tone={publishedAt ? 'success' : 'neutral'}>{publishedAt ? 'Live' : 'Draf'}</Badge>
           </div>
           <div className="home-event-info">
             <ExpandableCard

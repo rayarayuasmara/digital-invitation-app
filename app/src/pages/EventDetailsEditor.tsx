@@ -1,29 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
-import type { FormEvent, KeyboardEvent } from 'react'
-import { createPortal } from 'react-dom'
-import { ArrowRight, Check, ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react'
-import { Badge } from '@/components/arc/badge/badge'
+import type { FormEvent } from 'react'
+import { Check, ChevronsUpDown, Plus, Trash2 } from 'lucide-react'
+import { BottomSheet } from '@/components/arc/bottom-sheet/bottom-sheet'
 import { Button } from '@/components/arc/button/button'
-import { Input, type InputProps } from '@/components/arc/input/input'
-import { SwipeActions, SwipeActionsRow } from '@/components/arc/swipe-actions/swipe-actions'
+import { Input } from '@/components/arc/input/input'
 import { fetchEventMapsUrl, saveEventDetails, type DashboardEvent } from '@/lib/dashboard'
-import { normalizeLocationUrl } from '@/lib/event-onboarding'
-import { EventDateWheel, todayInJakarta } from './EventDateWheel'
-import onboarding from './EventOnboarding.module.css'
+import { checkEventSlug, normalizeLocationUrl, suggestEventSlug } from '@/lib/event-onboarding'
 import styles from './EventDetailsEditor.module.css'
 
 const LINK_PREFIX = 'rayarayu.id/'
 const DEFAULT_TIME = '10:00'
 const jakartaDate = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Jakarta' })
 
-const steps = [
-  { title: 'Judul acara', copy: 'Nama acara yang tampil di undangan tamu.' },
-  { title: 'Kapan acara berlangsung?', copy: 'Tanggal ini dipakai di undangan dan hitung mundur.' },
-  { title: 'Atur sesi dan lokasi acara', copy: 'Lengkapi waktu, sesi, dan lokasi acara.' },
-  { title: 'Periksa perubahan', copy: 'Pastikan detail acara sudah benar sebelum disimpan.' },
-] as const
-
-type Step = 0 | 1 | 2 | 3
 type Session = { key: string; id?: string; name: string; time: string }
 
 type Props = {
@@ -31,17 +19,6 @@ type Props = {
   onClose: () => void
   onSaved: () => Promise<void>
 }
-
-function GroupedField({ fieldClassName, labelClassName, ...props }: InputProps) {
-  return <Input {...props} className={onboarding.groupedInput}
-    fieldClassName={[onboarding.groupedRow, fieldClassName].filter(Boolean).join(' ')}
-    labelClassName={[onboarding.groupedLabel, labelClassName].filter(Boolean).join(' ')} />
-}
-
-const formatDate = (date: string) => new Intl.DateTimeFormat('id-ID', {
-  dateStyle: 'long',
-  timeZone: 'UTC',
-}).format(new Date(`${date}T00:00:00Z`))
 
 const splitLocation = (value: string | null) => {
   const text = (value ?? '').trim()
@@ -58,14 +35,20 @@ const toTimeValue = (text?: string) => {
 }
 
 const timeText = (time: string) => time ? `${time.replace(':', '.')} WIB` : null
+const normalizeSlug = (value: string) => suggestEventSlug(value).slice(0, 40)
 
+/**
+ * Edits the event in the same sheet and grouped rows as the guest form: one
+ * scrollable column, a sticky save button, and no step-by-step wizard.
+ */
 export function EventDetailsEditor({ event, onClose, onSaved }: Props) {
-  const [step, setStep] = useState<Step>(0)
   const [title, setTitle] = useState(event.title)
+  const [slug, setSlug] = useState(event.slug)
+  const slugEditable = !event.published_at
   const [date, setDate] = useState(() => {
     if (/^\d{4}-\d{2}-\d{2}$/.test(event.event_date ?? '')) return event.event_date!
     const value = Date.parse(event.event_date ?? '')
-    return Number.isFinite(value) ? jakartaDate.format(value) : todayInJakarta()
+    return Number.isFinite(value) ? jakartaDate.format(value) : jakartaDate.format(Date.now())
   })
   const [initialLocation] = useState(() => splitLocation(event.location))
   const [venue, setVenue] = useState(initialLocation.venue)
@@ -80,48 +63,29 @@ export function EventDetailsEditor({ event, onClose, onSaved }: Props) {
     : [{ key: 'baru-0', name: '', time: DEFAULT_TIME }])
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
-  const [today] = useState(todayInJakarta)
+  const [checkedSlug, setCheckedSlug] = useState<{ slug: string; available: boolean } | null>(null)
   const nextSession = useRef(1)
-  const overlayRef = useRef<HTMLDivElement>(null)
-  const headingRef = useRef<HTMLHeadingElement>(null)
-  const errorRef = useRef<HTMLParagraphElement>(null)
-  const restoreFocus = useRef<HTMLElement | null>(null)
 
   const normalizedMaps = normalizeLocationUrl(maps)
   const location = [venue.trim(), city.trim()].filter(Boolean).join(', ')
-  const sessionSummary = sessions
-    .map(session => `${session.name.trim()}${session.time ? ` ${session.time.replace(':', '.')} WIB` : ''}`)
-    .join(' · ')
-  const summaryRows: { label: string; value: string; step: Step | null }[] = [
-    { label: 'Judul', value: title.trim() || '-', step: 0 },
-    { label: 'Alamat', value: `${LINK_PREFIX}${event.slug}`, step: null },
-    { label: 'Tanggal', value: formatDate(date), step: 1 },
-    { label: 'Lokasi', value: location || '-', step: 2 },
-    { label: 'Sesi', value: sessionSummary || '-', step: 2 },
-  ]
+  const nextSlug = normalizeSlug(slug)
+  const slugChanged = slugEditable && nextSlug !== event.slug
+  const slugStatus = !slugChanged || nextSlug.length < 5
+    ? 'idle' as const
+    : checkedSlug?.slug === nextSlug
+      ? (checkedSlug.available ? 'available' as const : 'taken' as const)
+      : 'checking' as const
 
   useEffect(() => {
-    restoreFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    const main = document.getElementById('main-content')
-    main?.setAttribute('inert', '')
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      main?.removeAttribute('inert')
-      document.body.style.overflow = previousOverflow
-      restoreFocus.current?.focus({ preventScroll: true })
-    }
-  }, [])
-
-  useEffect(() => {
-    overlayRef.current?.scrollTo({ top: 0, behavior: 'instant' })
-    headingRef.current?.focus({ preventScroll: true })
-  }, [step])
-
-  useEffect(() => {
-    if (!error) return
-    errorRef.current?.scrollIntoView({ block: 'nearest' })
-  }, [error])
+    if (!slugChanged || nextSlug.length < 5) return
+    let active = true
+    const timer = setTimeout(() => {
+      checkEventSlug(nextSlug)
+        .then(available => { if (active) setCheckedSlug({ slug: nextSlug, available }) })
+        .catch(() => { if (active) setCheckedSlug(null) })
+    }, 400)
+    return () => { active = false; clearTimeout(timer) }
+  }, [nextSlug, slugChanged])
 
   useEffect(() => {
     let active = true
@@ -138,47 +102,33 @@ export function EventDetailsEditor({ event, onClose, onSaved }: Props) {
     setSessions(current => current.map(session => session.key === key ? { ...session, ...patch } : session))
   }
 
-  const goTo = (next: Step) => {
-    setError('')
-    setStep(next)
+  const addSession = () => {
+    const id = nextSession.current++
+    setSessions(current => [...current, { key: `baru-${id}`, name: '', time: DEFAULT_TIME }])
   }
 
   const submit = async (formEvent: FormEvent<HTMLFormElement>) => {
     formEvent.preventDefault()
     if (busy) return
     setError('')
+    setMapsError('')
 
-    if (step === 0) {
-      if (!title.trim()) return setError('Isi judul acara.')
-      goTo(1)
-      return
-    }
-    if (step === 1) {
-      goTo(2)
-      return
-    }
-    if (step === 2) {
-      if (!venue.trim()) return setError('Isi nama tempat acara.')
-      if (maps.trim() && !normalizedMaps) {
-        setMapsError('Masukkan tautan yang dimulai dengan https:// atau http://.')
-        formEvent.currentTarget.querySelector<HTMLInputElement>('input[name="google-maps"]')?.focus()
-        return
-      }
-      if (sessions.length === 0) return setError('Tambahkan minimal satu sesi acara.')
-      const names = sessions.map(session => session.name.trim().toLowerCase())
-      if (names.some(name => !name)) return setError('Isi nama setiap sesi.')
-      if (new Set(names).size !== names.length) return setError('Gunakan nama yang berbeda untuk setiap sesi.')
-      setMapsError('')
-      goTo(3)
-      return
-    }
-
-    const mapsChanged = mapsStatus === 'ready' && maps.trim() !== (initialMaps ?? '').trim()
-    if (mapsChanged && maps.trim() && !normalizedMaps) {
+    if (!title.trim()) return setError('Isi judul acara.')
+    if (slugEditable && nextSlug.length < 5) return setError('Alamat tautan minimal 5 karakter.')
+    if (slugStatus === 'taken') return setError('Alamat tautan sudah dipakai acara lain.')
+    if (!date) return setError('Pilih tanggal acara.')
+    if (!venue.trim()) return setError('Isi nama tempat acara.')
+    if (maps.trim() && !normalizedMaps) {
       setMapsError('Masukkan tautan yang dimulai dengan https:// atau http://.')
-      goTo(2)
       return
     }
+    if (sessions.length === 0) return setError('Tambahkan minimal satu sesi acara.')
+    const names = sessions.map(session => session.name.trim().toLowerCase())
+    if (names.some(name => !name)) return setError('Isi nama setiap sesi.')
+    if (new Set(names).size !== names.length) return setError('Gunakan nama yang berbeda untuk setiap sesi.')
+
+    // Only send the link when it changed, so a failed fetch never clears the saved one.
+    const mapsChanged = mapsStatus === 'ready' && maps.trim() !== (initialMaps ?? '').trim()
 
     setBusy(true)
     try {
@@ -192,6 +142,7 @@ export function EventDetailsEditor({ event, onClose, onSaved }: Props) {
           name: name.trim(),
           time_text: timeText(time),
         })),
+        ...(slugChanged ? { slug: nextSlug } : {}),
       })
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Detail acara belum bisa disimpan.')
@@ -202,276 +153,201 @@ export function EventDetailsEditor({ event, onClose, onSaved }: Props) {
     await onSaved()
   }
 
-  const trapFocus = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'Escape') {
-      if (busy) return
-      event.preventDefault()
-      onClose()
-      return
-    }
-    if (event.key !== 'Tab' || !overlayRef.current) return
-    const stops = Array.from(overlayRef.current.querySelectorAll<HTMLElement>('button, input, a[href], textarea, [tabindex]:not([tabindex="-1"])'))
-      .filter(node => !node.hasAttribute('disabled') && !node.closest('[inert]') && node.getClientRects().length > 0)
-    if (!stops.length) return
-    const first = stops[0]
-    const last = stops[stops.length - 1]
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault()
-      last.focus()
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault()
-      first.focus()
-    }
-  }
-
-  return createPortal(
-    <div
-      ref={overlayRef}
-      className={styles.overlay}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Ubah detail acara"
-      onKeyDown={trapFocus}
+  return (
+    <BottomSheet
+      open
+      onOpenChange={next => { if (!next && !busy) onClose() }}
+      title="Ubah detail acara"
+      description={event.title}
+      closeLabel="Tutup ubah detail acara"
+      detents={[0.94]}
+      initialDetent={0}
     >
-      <div className={`app ${onboarding.page} ${onboarding.formPage}`}>
-        <div className={onboarding.wizard}>
-          <header className={onboarding.chrome} data-step={step}>
-            <span className="progressive-blur page-head-glass" aria-hidden="true" />
-            <div className={onboarding.top}>
+      <form className="ios-form" onSubmit={submit} aria-busy={busy} noValidate>
+        <section className="ios-group" aria-label="Judul acara">
+          <div className="ios-group-body">
+            <div className="ios-row">
+              <Input
+                label="Judul acara"
+                name="judul-acara"
+                placeholder="Judul undangan"
+                autoComplete="off"
+                required
+                maxLength={160}
+                value={title}
+                onChange={event => setTitle(event.target.value)}
+              />
+            </div>
+            <div className="ios-row">
+              {slugEditable ? (
+                <Input
+                  label="Alamat tautan"
+                  description={`${LINK_PREFIX}${nextSlug || '…'}`}
+                  aria-invalid={slugStatus === 'taken' ? true : undefined}
+                  aria-label="Alamat tautan undangan"
+                  name="alamat-tautan"
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  maxLength={40}
+                  value={slug}
+                  onChange={event => setSlug(event.target.value)}
+                  onBlur={() => setSlug(normalizeSlug(slug))}
+                />
+              ) : (
+                <>
+                  <span className="ios-row-label">Alamat tautan</span>
+                  <span className={styles.readonlyValue}>{LINK_PREFIX}{event.slug}</span>
+                </>
+              )}
+            </div>
+          </div>
+          <p
+            className={`ios-group-note${slugStatus === 'taken' ? ` ${styles.slugTaken}` : ''}`}
+            role={slugStatus === 'taken' ? 'alert' : undefined}
+          >
+            {!slugEditable
+              ? 'Alamat tautan tidak bisa diubah karena undangan sudah terbit.'
+              : slugStatus === 'checking'
+                ? 'Memeriksa ketersediaan alamat…'
+                : slugStatus === 'available'
+                  ? 'Alamat ini tersedia.'
+                  : slugStatus === 'taken'
+                    ? 'Alamat ini sudah dipakai acara lain. Coba yang lain.'
+                    : 'Alamat tautan bisa diubah sampai undangan diterbitkan.'}
+          </p>
+        </section>
+
+        <section className="ios-group" aria-label="Waktu dan lokasi acara">
+          <div className="ios-group-body">
+            <div className="ios-row">
+              <Input
+                label="Tanggal"
+                name="tanggal-acara"
+                type="date"
+                required
+                value={date}
+                onChange={event => setDate(event.target.value)}
+              />
+            </div>
+            <div className="ios-row">
+              <Input
+                label="Tempat"
+                name="nama-tempat"
+                placeholder="Nama gedung atau tempat"
+                required
+                maxLength={80}
+                value={venue}
+                onChange={event => setVenue(event.target.value)}
+              />
+            </div>
+            <div className="ios-row">
+              <Input
+                label="Kota"
+                name="kota"
+                placeholder="Opsional"
+                maxLength={60}
+                value={city}
+                onChange={event => setCity(event.target.value)}
+              />
+            </div>
+            <div className="ios-row">
+              <Input
+                label="Tautan lokasi"
+                name="google-maps"
+                type="url"
+                inputMode="url"
+                autoComplete="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                placeholder="https://contoh.id/lokasi"
+                value={maps}
+                maxLength={2048}
+                disabled={mapsStatus !== 'ready'}
+                onBlur={() => setMaps(normalizedMaps || maps.trim())}
+                onChange={event => { setMaps(event.target.value); setMapsError('') }}
+              />
+            </div>
+          </div>
+          {mapsError && <p className="form-error" role="alert">{mapsError}</p>}
+          {mapsStatus === 'loading' && <p className="ios-group-note" role="status">Memuat tautan lokasi…</p>}
+          {mapsStatus === 'failed' && (
+            <div className={styles.mapsNote}>
+              <p className="ios-group-note" role="status">Tautan lokasi belum bisa dimuat dan tidak akan diubah.</p>
               <Button
                 type="button"
                 variant="secondary"
-                size="md"
-                className={onboarding.back}
-                aria-label={step === 0 ? 'Tutup ubah detail acara' : 'Kembali'}
-                disabled={busy}
-                onClick={() => step === 0 ? onClose() : goTo((step - 1) as Step)}
+                size="sm"
+                onClick={() => { setMapsStatus('loading'); setRetry(value => value + 1) }}
               >
-                <ChevronLeft size={20} aria-hidden="true" />
+                Coba lagi
               </Button>
-              <progress className={onboarding.progress} value={step + 1} max={steps.length} aria-label="Progres ubah detail acara" />
-              <Badge size="sm" pill className={onboarding.stepCount} aria-hidden="true">{step + 1} / {steps.length}</Badge>
             </div>
-          </header>
+          )}
+          {mapsStatus === 'ready' && !mapsError && normalizedMaps && (
+            <p className={`ios-group-note ${styles.mapsAvailable}`} role="status">
+              <Check size={14} aria-hidden="true" /> Tautan lokasi ditambahkan
+            </p>
+          )}
+        </section>
 
-          <form className={onboarding.form} onSubmit={submit} aria-busy={busy} noValidate>
-            <div className={onboarding.heading}>
-              <h1 ref={headingRef} tabIndex={-1}>
-                <span className="sr-only">Langkah {step + 1} dari {steps.length}: </span>{steps[step].title}
-              </h1>
-              <p>{steps[step].copy}</p>
-            </div>
-
-            <div className={onboarding.body}>
-              {error && <p ref={errorRef} className={onboarding.validationBanner} role="alert">{error}</p>}
-
-              {step === 0 && (
-                <div className={onboarding.sections}>
-                  <section className={onboarding.section}>
-                    <p className={onboarding.sectionLabel}>Judul acara</p>
-                    <div className={onboarding.groupedTable}>
-                      <GroupedField
-                        label="Judul"
-                        name="judul-acara"
-                        aria-label="Judul acara"
-                        placeholder="Judul undangan…"
-                        required
-                        maxLength={160}
-                        value={title}
-                        onChange={e => setTitle(e.target.value)}
-                      />
-                    </div>
-                  </section>
-
-                  <section className={onboarding.section}>
-                    <p className={onboarding.sectionLabel}>Alamat tautan</p>
-                    <div className={onboarding.groupedTable}>
-                      <div className={`${onboarding.groupedRow} ${onboarding.slugRow}`}>
-                        <span className={onboarding.groupedLabel}>{LINK_PREFIX}</span>
-                        <span className={styles.readonlyValue}>{event.slug}</span>
-                      </div>
-                    </div>
-                    <p className={onboarding.linkHint}>Alamat tautan tidak bisa diubah setelah acara dibuat.</p>
-                  </section>
-                </div>
-              )}
-
-              {step === 1 && (
-                <div className={onboarding.date}>
-                  <EventDateWheel value={date} onChange={setDate} startYear={Number(today.slice(0, 4))} />
-                  <p>{formatDate(date)}</p>
-                </div>
-              )}
-
-              {step === 2 && (
-                <div className={onboarding.sections}>
-                  <section className={onboarding.section}>
-                    <p className={onboarding.sectionLabel}>Waktu acara</p>
-                    <SwipeActions label="Sesi acara" className={onboarding.sessionList}>
-                      {sessions.map((session, index) => (
-                        <SwipeActionsRow
-                          key={session.key}
-                          label={session.name || `Sesi ${index + 1}`}
-                          fullSwipe={false}
-                          menuLabel={`Tindakan sesi ${index + 1}`}
-                          trailing={sessions.length > 1 ? [{
-                            label: 'Hapus',
-                            icon: <Trash2 size={18} aria-hidden />,
-                            tone: 'danger',
-                            onSelect: () => setSessions(current => current.filter(item => item.key !== session.key)),
-                          }] : []}
-                        >
-                          <div className={onboarding.sessionRow}>
-                            <Input
-                              className={onboarding.sessionName}
-                              fieldClassName={onboarding.sessionNameField}
-                              labelClassName="sr-only"
-                              label={`Nama sesi ${index + 1}`}
-                              name={`sesi-${session.key}`}
-                              placeholder="Nama sesi…"
-                              required
-                              maxLength={40}
-                              value={session.name}
-                              onChange={event => updateSession(session.key, { name: event.target.value })}
-                            />
-                            <Input
-                              className={onboarding.timeChip}
-                              type="time"
-                              labelClassName="sr-only"
-                              label={`Jam sesi ${index + 1}`}
-                              name={`jam-${session.key}`}
-                              value={session.time}
-                              onChange={event => updateSession(session.key, { time: event.target.value })}
-                            />
-                          </div>
-                        </SwipeActionsRow>
-                      ))}
-                    </SwipeActions>
-                    {sessions.length < 3 && (
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="md"
-                        className={onboarding.addSession}
-                        fullWidth
-                        onClick={() => {
-                          const id = nextSession.current++
-                          setSessions(current => [...current, { key: `baru-${id}`, name: '', time: DEFAULT_TIME }])
-                        }}
-                      >
-                        <Plus size={16} aria-hidden="true" /> Tambah sesi
-                      </Button>
-                    )}
-                  </section>
-
-                  <section className={onboarding.section}>
-                    <p className={onboarding.sectionLabel}>Lokasi acara</p>
-                    <div className={onboarding.groupedTable}>
-                      <GroupedField
-                        label="Tempat"
-                        name="nama-tempat"
-                        aria-label="Nama tempat acara"
-                        placeholder="Nama gedung atau tempat"
-                        required
-                        maxLength={80}
-                        value={venue}
-                        onChange={e => setVenue(e.target.value)}
-                      />
-                      <GroupedField
-                        label="Kota"
-                        name="kota"
-                        aria-label="Kota acara"
-                        placeholder="Contoh: Bandung"
-                        maxLength={60}
-                        value={city}
-                        onChange={e => setCity(e.target.value)}
-                      />
-                      <GroupedField
-                        label="Tautan lokasi"
-                        name="google-maps"
-                        type="url"
-                        inputMode="url"
-                        autoComplete="off"
-                        autoCapitalize="none"
-                        spellCheck={false}
-                        placeholder="https://contoh.id/lokasi"
-                        value={maps}
-                        maxLength={2048}
-                        disabled={mapsStatus !== 'ready'}
-                        error={mapsError}
-                        onBlur={() => setMaps(normalizedMaps || maps.trim())}
-                        onChange={e => { setMaps(e.target.value); setMapsError('') }}
-                      />
-                    </div>
-                    {mapsStatus === 'loading' && <p className={onboarding.linkHint} role="status">Memuat tautan lokasi…</p>}
-                    {mapsStatus === 'failed' && (
-                      <div className={styles.mapsNote}>
-                        <p className={onboarding.linkHint} role="status">Tautan lokasi belum bisa dimuat dan tidak akan diubah.</p>
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => { setMapsStatus('loading'); setRetry(value => value + 1) }}
-                        >
-                          Coba lagi
-                        </Button>
-                      </div>
-                    )}
-                    {mapsStatus === 'ready' && !mapsError && normalizedMaps && (
-                      <p className={onboarding.linkHint} data-status="available" role="status">
-                        <Check size={14} aria-hidden="true" /> Tautan lokasi ditambahkan
-                      </p>
-                    )}
-                  </section>
-                </div>
-              )}
-
-              {step === 3 && (
-                <div className={onboarding.sections}>
-                  <section className={onboarding.section}>
-                    <p className={onboarding.sectionLabel}>Ringkasan acara</p>
-                    <div className={onboarding.groupedTable}>
-                      {summaryRows.map(row => row.step === null ? (
-                        <div key={row.label} className={`${onboarding.listRow} ${styles.staticRow}`}>
-                          <span className={onboarding.listLabel}>{row.label}</span>
-                          <span className={onboarding.listValue}>{row.value}</span>
-                        </div>
-                      ) : (
-                        <button
-                          key={row.label}
-                          type="button"
-                          className={onboarding.listRow}
-                          disabled={busy}
-                          onClick={() => goTo(row.step!)}
-                        >
-                          <span className={onboarding.listLabel}>{row.label}</span>
-                          <span className={onboarding.listValue}>{row.value}</span>
-                          <ChevronRight size={16} aria-hidden="true" className={onboarding.listChevron} />
-                        </button>
-                      ))}
-                    </div>
-                  </section>
-
-                  <p className={onboarding.hint}>Perubahan langsung terlihat di pratinjau dan undangan yang sudah terbit.</p>
-                </div>
-              )}
-            </div>
-
-            <div className={onboarding.footer}>
-              <div className={onboarding.introCta}>
-                <Button type="submit" variant="accent" size="xl" className={onboarding.primary} loading={busy} fullWidth>
-                  {busy ? 'Menyimpan…' : step === 3 ? 'Simpan perubahan' : 'Berikutnya'}
-                  {!busy && step < 3 && <ArrowRight size={17} aria-hidden="true" />}
-                </Button>
-                {step === 0 && (
-                  <Button type="button" variant="ghost" size="md" fullWidth disabled={busy} onClick={onClose}>Batal</Button>
+        <section className="ios-group" aria-label="Sesi acara">
+          <div className="ios-group-body">
+            {sessions.map((session, index) => (
+              <div key={session.key} className={styles.sessionRow}>
+                <label className="sr-only" htmlFor={`sesi-${session.key}`}>Nama sesi {index + 1}</label>
+                <input
+                  id={`sesi-${session.key}`}
+                  className={styles.sessionName}
+                  name={`sesi-${session.key}`}
+                  placeholder="Nama sesi"
+                  autoComplete="off"
+                  required
+                  maxLength={40}
+                  value={session.name}
+                  onChange={event => updateSession(session.key, { name: event.target.value })}
+                />
+                <span className={styles.timeChipWrap}>
+                  <label className="sr-only" htmlFor={`jam-${session.key}`}>Jam sesi {index + 1}</label>
+                  <input
+                    id={`jam-${session.key}`}
+                    className={styles.timeChip}
+                    type="time"
+                    name={`jam-${session.key}`}
+                    value={session.time}
+                    onChange={event => updateSession(session.key, { time: event.target.value })}
+                  />
+                  <ChevronsUpDown size={14} aria-hidden="true" className={styles.timeChipIcon} />
+                </span>
+                {sessions.length > 1 && (
+                  <button
+                    type="button"
+                    className={styles.removeSession}
+                    aria-label={`Hapus sesi ${session.name.trim() || index + 1}`}
+                    onClick={() => setSessions(current => current.filter(item => item.key !== session.key))}
+                  >
+                    <Trash2 size={16} aria-hidden="true" />
+                  </button>
                 )}
               </div>
-            </div>
-          </form>
+            ))}
+          </div>
+          {sessions.length < 3 && (
+            <Button type="button" variant="secondary" size="md" fullWidth onClick={addSession}>
+              <Plus size={16} aria-hidden="true" /> Tambah sesi
+            </Button>
+          )}
+          <p className="ios-group-note">Setiap sesi tampil dengan waktunya sendiri di undangan.</p>
+        </section>
+
+        <div className="ios-form-save">
+          {error && <p role="alert" className="form-error">{error}</p>}
+          <Button type="submit" variant="accent" size="xl" fullWidth loading={busy}>
+            Simpan perubahan
+          </Button>
         </div>
-      </div>
-    </div>,
-    document.body,
+      </form>
+    </BottomSheet>
   )
 }

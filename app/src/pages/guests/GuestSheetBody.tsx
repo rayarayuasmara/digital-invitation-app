@@ -185,7 +185,6 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
       <section className="ios-group">
         <div className="ios-group-body">
           <div className="ios-row ios-row-stack">
-            <span className="ios-row-label" aria-hidden="true">Jenis undangan</span>
             <fieldset className="ios-segment-field">
               <legend className="sr-only">Jenis undangan</legend>
               <div className="invitation-type-options">
@@ -216,7 +215,6 @@ export function GuestSheetBody({ guest, categories, sessions, onSave, onCopyLink
         <section className="ios-group" aria-label="Status undangan">
           <div className="ios-group-body">
             <div className="ios-row ios-row-stack">
-              <span className="ios-row-label" id={`${fieldId}-status`}>Status undangan</span>
               <div className="w-full">
                 <fieldset disabled={isPrint} className="ios-segment-field">
                   <SegmentedControl

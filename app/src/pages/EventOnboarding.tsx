@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { ArrowRight, ChevronLeft, ChevronRight, Check, Plus, Trash2 } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight, Check, ChevronsUpDown, Plus, Trash2 } from 'lucide-react'
 import { SwipeActions, SwipeActionsRow } from '@/components/arc/swipe-actions/swipe-actions'
 import { Button } from '@/components/arc/button/button'
 import { Badge } from '@/components/arc/badge/badge'
@@ -391,7 +391,7 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                           key={session.id}
                           label={session.name || `Sesi ${index + 1}`}
                           fullSwipe={false}
-                          menuLabel={`Tindakan sesi ${index + 1}`}
+                          showMenu={false}
                           trailing={sessions.length > 1 ? [{
                             label: 'Hapus',
                             icon: <Trash2 size={18} aria-hidden />,
@@ -412,15 +412,23 @@ export function EventOnboarding({ account, onLoadEvent }: Props) {
                               value={session.name}
                               onChange={event => updateSession(session.id, 'name', event.target.value)}
                             />
-                            <Input
-                              className={styles.timeChip}
-                              type="time"
-                              labelClassName="sr-only"
-                              label={`Jam sesi ${index + 1}`}
-                              name={`jam-${session.id}`}
-                              value={session.time}
-                              onChange={event => updateSession(session.id, 'time', event.target.value)}
-                            />
+                            <span className={styles.timeChipWrap}>
+                              <input
+                                className={styles.timeChip}
+                                type="time"
+                                aria-label={`Jam sesi ${index + 1}`}
+                                name={`jam-${session.id}`}
+                                value={session.time}
+                                onChange={event => updateSession(session.id, 'time', event.target.value)}
+                              />
+                              <ChevronsUpDown size={14} aria-hidden="true" className={styles.timeChipIcon} />
+                            </span>
+                            {sessions.length > 1 && (
+                              <button type="button" className={styles.keyboardRemove}
+                                onClick={() => setSessions(current => current.filter(item => item.id !== session.id))}>
+                                Hapus sesi {index + 1}
+                              </button>
+                            )}
                           </div>
                         </SwipeActionsRow>
                       ))}
