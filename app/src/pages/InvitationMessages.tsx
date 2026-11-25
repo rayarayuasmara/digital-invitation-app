@@ -66,8 +66,12 @@ export function InvitationMessages({ data, templates, dirty, busy, error, change
       <div className={styles.tokens}>{TEMPLATE_VARIABLES.map(v => <Button key={v} type="button" variant="secondary" size="sm" disabled={busy} onClick={() => insert(v)}>{v}</Button>)}</div>
     </details>
     {error && <p className="form-error" role="alert">{error}</p>}
-    {dirty && <div className={styles.panel}><span role="status">Perubahan pesan belum disimpan.</span>
-      <Button variant="accent" size="lg" fullWidth loading={busy} onClick={save}>Simpan pesan</Button>
-      <Button variant="ghost" size="sm" disabled={busy} onClick={discard}>Buang perubahan</Button></div>}
+    {dirty && <div className={styles.saveBar}>
+      <p className={styles.saveStatus} role="status">Perubahan pesan belum disimpan.</p>
+      <div className={styles.saveActions}>
+        <Button variant="accent" size="lg" fullWidth loading={busy} onClick={save}>Simpan pesan</Button>
+        <Button variant="ghost" size="sm" disabled={busy} aria-label="Buang perubahan" onClick={discard}>Buang</Button>
+      </div>
+    </div>}
   </section>
 }

@@ -24,3 +24,26 @@
 .custom textarea { width: 100%; padding: var(--space-3); resize: vertical; font: inherit; color: var(--foreground); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); }
 .tokens { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-2); }
 .workspace .form-error { color: var(--red-ink); }
+
+/* Keeps the save action in view once the draft changes: the panel can be taller
+   than the phone viewport, so the bar pins itself just above the tab bar. */
+.saveBar {
+  position: sticky;
+  bottom: calc(68px + var(--space-2) + var(--safe-bottom) + var(--space-3));
+  z-index: 20;
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius-control) + 4px);
+  background: color-mix(in oklab, var(--surface-raised) 94%, transparent);
+  box-shadow: var(--shadow-raised);
+  backdrop-filter: blur(16px);
+}
+.saveStatus {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+}
+.saveActions { display: flex; align-items: center; gap: var(--space-2); }
+.saveActions > :first-child { flex: 1; }
