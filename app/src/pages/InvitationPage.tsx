@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
-import { ChevronRight, ExternalLink } from 'lucide-react'
+import { ChevronRight, Copy, ExternalLink } from 'lucide-react'
 import { publishEvent, type DashboardData } from '@/lib/dashboard'
-import { saveTemplates, type Templates } from '@/lib/whatsapp'
+import { appBaseUrl, saveTemplates, type Templates } from '@/lib/whatsapp'
 import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/arc/button/button'
 import { Badge } from '@/components/arc/badge/badge'
@@ -40,6 +40,14 @@ export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount
       ? new Date(event.event_date).toLocaleDateString('id-ID', { dateStyle: 'full', timeZone: 'Asia/Jakarta' }) : null],
     ['Tempat', event.location], ...(event.sessions?.length ? event.sessions.map(s => [s.name, s.time_text]) : [['Sesi', null]]),
   ]
+  const copyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(`${appBaseUrl()}/${event.slug}`)
+      notify('Alamat tautan disalin.')
+    } catch {
+      notify('Gagal menyalin alamat tautan.')
+    }
+  }
   const close = () => {
     setEditing(false)
     requestAnimationFrame(() => editTrigger.current?.focus({ preventScroll: true }))
@@ -84,13 +92,29 @@ export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount
         <div className={styles.panel}>
           <section className="ios-group" aria-label="Detail acara">
             <div className="ios-group-body">
-              <dl className={styles.rows}>{rows.map(([label,value],i) => <div className="ios-row" key={i}>
-                <dt>{label}</dt><dd>{value || 'Belum diatur'}</dd></div>)}</dl>
+              <dl className={styles.rows}>{rows.map(([label,value],i) => label === 'Alamat tautan' ? (
+                <div className="ios-row" key={i}>
+                  <dt>{label}</dt>
+                  <dd className={styles.addressValue}>
+                    <span>{value}</span>
+                    <button type="button" className={styles.copyButton} onClick={copyAddress} aria-label="Salin alamat tautan">
+                      <Copy size={14} aria-hidden />
+                    </button>
+                  </dd>
+                </div>
+              ) : (
+                <div className="ios-row" key={i}><dt>{label}</dt><dd>{value || 'Belum diatur'}</dd></div>
+              ))}</dl>
               <button ref={editTrigger} type="button" className={styles.editRow} onClick={() => setEditing(true)}>
                 <span>Ubah detail acara</span>
                 <ChevronRight size={16} aria-hidden />
               </button>
             </div>
+            <p className="ios-group-note">
+              {live
+                ? 'Tautan pribadi per tamu dibuat di tab Tamu.'
+                : 'Alamat tautan aktif setelah undangan diterbitkan. Tautan pribadi per tamu dibuat di tab Tamu.'}
+            </p>
           </section>
           <section className="ios-group">
             <div className={styles.heading}><h2>Publikasi</h2><Badge pill dot tone={live ? 'success' : 'warning'}>{live ? 'Live' : 'Draf'}</Badge></div>

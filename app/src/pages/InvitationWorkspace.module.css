@@ -77,5 +77,33 @@
 }
 .editRow:active { background: var(--surface-muted); }
 
+.addressValue {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.addressValue > span {
+  overflow-wrap: anywhere;
+  text-align: end;
+}
+.copyButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.copyButton:active { color: var(--brand-ink); }
+
 .publishCta { display: grid; gap: var(--space-2); padding: 0 var(--space-4); }
 .workspace .publishHint { color: var(--text-muted); }
