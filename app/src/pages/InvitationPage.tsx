@@ -37,7 +37,7 @@ export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount
   const rows = [
     ['Judul', event.title], ['Alamat tautan', `rayarayu.id/${event.slug}`],
     ['Tanggal', event.event_date && Number.isFinite(Date.parse(event.event_date))
-      ? new Date(event.event_date).toLocaleDateString('id-ID', { dateStyle: 'full', timeZone: 'Asia/Jakarta' }) : null],
+      ? new Date(event.event_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' }) : null],
     ['Tempat', event.location], ...(event.sessions?.length ? event.sessions.map(s => [s.name, s.time_text]) : [['Sesi', null]]),
   ]
   const copyAddress = async () => {
