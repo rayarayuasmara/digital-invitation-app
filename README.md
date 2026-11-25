@@ -1,58 +1,39 @@
-# digital-invitation-app
+# RayaRayu
 
-Undangan pernikahan digital RayaRayu. Repo ini punya dua lapis:
+Platform undangan pernikahan digital. Semua halaman memakai **Next.js App Router**, TypeScript, dan Tailwind CSS v4 dalam satu proyek di root repo.
 
-| Lapis | Lokasi | Status |
+| Halaman | URL | Lokasi |
 |---|---|---|
-| **React (aktif)** | `app/` | Migrasi yang dilanjutkan. Vite + React + Arc UI |
-| HTML vanila | root: `index.html`, `invitation.html` | Halaman publik yang tetap vanila; disalin ke output oleh `app/scripts/copy-static.mjs` |
+| Landing page | `/` | `app/(marketing)/` |
+| Dashboard klien | `/dashboard`, `/login`, `/register`, `/reset-password` | `app/(dashboard)/`, `src/screens/` |
+| Pemindai petugas | `/scanner` | `app/(dashboard)/scanner/` |
+| Undangan tamu | `/{slug}/{token}`, `/pratinjau/{slug}/{token}` | `app/(invitation)/`, `src/features/invitation/` |
 
-Arsip HTML lama (`index.html.legacy`, `dashboard.html.legacy`) disimpan
-lokal dan tidak masuk git. Versi dashboard dan scanner yang berada di root
-sudah dihapus; sumber kebenarannya sekarang `app/src/`.
+Tautan lama `/invitation.html?token=…` masih didukung sebagai route Next.js, bukan file HTML. Markup undangan sudah berupa komponen React; interaksi template lama masih berada di `src/features/invitation/mount-invitation.js`.
 
-## Menjalankan app React
+## Jalankan secara lokal
+
+Gunakan Node.js 22 atau lebih baru. Jalankan perintah dari root repo:
 
 ```bash
-cd app
-npm install
-cp .env.example .env   # lalu isi dua nilai Supabase
-npm run dev     # http://localhost:5173
-npm run build   # cek tipe + build produksi
+npm ci
+cp .env.example .env.local
+# Isi NEXT_PUBLIC_SUPABASE_URL dan NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+npm run dev                  # http://localhost:3000
+npm run typecheck
+npm run lint
+npm run build
+npm start                   # jalankan hasil build
 ```
 
-Konfigurasi Supabase dibaca dari dua variabel: `VITE_SUPABASE_URL` dan
-`VITE_SUPABASE_PUBLISHABLE_KEY`. Nilai untuk deploy diset di Vercel
-(Production, Preview, Development) — mengubahnya di sana butuh redeploy.
-Untuk lokal, salin `app/.env.example` menjadi `app/.env` lalu isi nilainya
-dari dashboard Supabase. `app/.env` tidak dilacak git.
+Jika berpindah dari Vite, salin **nilai** `VITE_SUPABASE_URL` dan `VITE_SUPABASE_PUBLISHABLE_KEY` dari `app/.env` lama ke nama `NEXT_PUBLIC_*` yang baru. Jika menggunakan `VITE_PUBLIC_APP_URL`, padanannya adalah `NEXT_PUBLIC_APP_URL` (opsional). Jangan commit `.env.local` atau memakai service-role key. Tanpa konfigurasi, landing page tetap bisa dibuka; halaman yang memerlukan Supabase menampilkan pesan konfigurasi.
 
-## Halaman HTML vanila
+Untuk tes di HP pada Wi-Fi yang sama, isi `NEXT_DEV_ALLOWED_ORIGINS` di `.env.local` dengan IP LAN Mac saja (`ipconfig getifaddr en0`, tanpa `http://` atau port). Jalankan ulang `npm run dev -- --hostname 0.0.0.0`, lalu buka `http://<IP-LAN-Mac>:3000`. Kamera pemindai perlu HTTPS di HP.
 
-| File | URL | Isi |
-|---|---|---|
-| `index.html` | `/` | Landing page |
-| `invitation.html` | `/{slug}/{token}` | Undangan tamu |
-| `invitation.html` | `/pratinjau/{slug}/{token}` | Pratinjau undangan |
+## v0 dan Vercel
 
-Dashboard (`/dashboard`, `/login`, `/register`, `/reset-password`) dan
-check-in petugas (`/scanner`) sekarang dilayani React dari `app/`.
+1. Setelah branch tersedia di GitHub, hubungkan repo ke v0 dan pilih branch migrasi. Gunakan root repo (`.`), bukan `app/`, sebagai direktori proyek.
+2. Untuk UI dashboard dari v0, letakkan komponen bersama di `src/components/ui/` dan impor lewat `@/components/ui/…`. Route baru dibuat di `app/`. Konfigurasi shadcn ada di `components.json`; token Tailwind dashboard di `src/styles/tailwind.css`. Pakai `'use client'` hanya untuk bagian yang perlu state, event handler, atau API browser.
+3. Di Vercel, pilih **Next.js**, gunakan root repo (`.`), dan kosongkan override install, build, serta output Vite lama. Isi `NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` untuk environment yang dipakai, lalu redeploy. Pastikan URL preview diizinkan di pengaturan redirect Supabase jika ingin menguji konfirmasi akun dan reset password.
 
-Deploy memakai build React dari `app/` (lihat `vercel.json`):
-`app/dist` menjadi output Vercel. React melayani `/dashboard`, `/login`,
-`/register`, `/reset-password`, dan `/scanner`; halaman marketing `/` serta
-undangan tamu `/:slug/:token` tetap vanila dan disalin ke output oleh
-`app/scripts/copy-static.mjs`. Push ke `main` → Vercel auto-deploy.
-
-Perubahan database (policy, RPC, index, token) dicatat di
-[`db/README.md`](db/README.md) — baca itu sebelum menyentuh Supabase.
-
-## Sebelum mengubah
-
-- Frontend memanggil Supabase langsung. Nama dan parameter RPC adalah kontrak
-  API; mengubahnya memutus halaman tanpa error build.
-- Jangan menambah policy `using (true)` untuk role `public` pada tabel mana pun.
-- `opencode.json` memuat token GitHub dan tidak masuk git.
-- Satu akun klien bisa punya lebih dari satu acara. Dashboard menyediakan
-  pemilih acara; lihat [`db/README.md`](db/README.md) bagian "Banyak acara per
-  klien".
+Tidak ada perubahan pada database. Nama dan parameter RPC adalah kontrak API; lihat [`db/README.md`](db/README.md) sebelum mengubahnya.

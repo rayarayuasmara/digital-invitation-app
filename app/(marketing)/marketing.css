@@ -1,0 +1,6 @@
+@import 'tailwindcss' source(none);
+@source './';
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans Variable', sans-serif;
+}

@@ -95,9 +95,9 @@ Tidak ada yang bisa membaca tabel langsung.
 | `send_wish(token, message)` | `invitation.html` | token undangan |
 | `get_event_wishes(token)` | `invitation.html` | token undangan |
 | `get_event_rsvp_summary(token)` | `invitation.html` | token undangan |
-| `scanner_event_info(kode)` | `app/src/lib/scanner.ts` | kode petugas acara |
-| `scanner_list_guests(kode)` | `app/src/lib/scanner.ts` | kode petugas acara |
-| `scanner_check_in(kode, input)` | `app/src/lib/scanner.ts` | kode petugas acara |
+| `scanner_event_info(kode)` | `src/lib/scanner.ts` | kode petugas acara |
+| `scanner_list_guests(kode)` | `src/lib/scanner.ts` | kode petugas acara |
+| `scanner_check_in(kode, input)` | `src/lib/scanner.ts` | kode petugas acara |
 
 ### RPC pemilik acara (wajib login)
 

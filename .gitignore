@@ -13,3 +13,9 @@ db/backup/
 dist/
 *.legacy
 *.tsbuildinfo
+.next/
+next-env.d.ts
+.vercel/
+.env
+.env.*
+!.env.example
