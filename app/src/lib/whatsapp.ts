@@ -10,8 +10,20 @@ export type Templates = Record<string, string>
 
 type MessageRecipient = Pick<Guest, 'group_name' | 'session' | 'invitation_token'>
 
+export function appBaseUrl() {
+  const configured = import.meta.env.VITE_PUBLIC_APP_URL
+  if (typeof configured === 'string' && configured.trim()) {
+    return configured.trim().replace(/\/+$/, '')
+  }
+  if (typeof window !== 'undefined'
+      && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    return 'https://rayarayu.id'
+  }
+  return typeof window !== 'undefined' ? window.location.origin : 'https://rayarayu.id'
+}
+
 export function guestLink(event: DashboardEvent, guest: Pick<MessageRecipient, 'invitation_token'>) {
-  return `${window.location.origin}/${event.slug}/${guest.invitation_token}`
+  return `${appBaseUrl()}/${event.slug}/${guest.invitation_token}`
 }
 
 function sessionOf(event: DashboardEvent, guest: MessageRecipient) {

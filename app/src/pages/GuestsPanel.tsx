@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/motion/tabs'
 import type { DashboardData } from '@/lib/dashboard'
 import { addGuest, deleteGuest, markSent, updateGuest } from '@/lib/guests'
 import type { Guest } from '@/lib/guests'
-import { messageFor, normalizePhone, openWhatsApp } from '@/lib/whatsapp'
+import { appBaseUrl, messageFor, normalizePhone, openWhatsApp } from '@/lib/whatsapp'
 import { useCollapseProgress } from '@/lib/hooks/use-collapse-progress'
 import { GuestFilterMenu } from './guests/GuestFilterMenu'
 import { GuestGrid } from './guests/GuestGrid'
@@ -130,7 +130,7 @@ export function GuestsPanel({ data, onChanged, notify, createRequest, onCreateHa
   }
 
   const copyLink = async (g: Guest) => {
-    const url = `${window.location.origin}/${event.slug}/${g.invitation_token}`
+    const url = `${appBaseUrl()}/${event.slug}/${g.invitation_token}`
     try {
       await navigator.clipboard.writeText(url)
       notify(`Tautan ${g.group_name} disalin`)
