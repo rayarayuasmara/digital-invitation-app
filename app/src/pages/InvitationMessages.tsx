@@ -7,10 +7,12 @@ import type { DashboardData } from '@/lib/dashboard'
 import styles from './InvitationWorkspace.module.css'
 
 const themes = [
-  { name: 'Formal', sample: 'Kami mengundang Anda…', text: DEFAULT_TEMPLATE },
-  { name: 'Hangat', sample: 'Hari bahagia kami terasa lebih lengkap…', text: 'Halo {nama},\n\nHari bahagia kami terasa lebih lengkap dengan kehadiranmu di {acara}.\n\nKita bertemu pada {tanggal}, pukul {waktu} di {lokasi}, ya.\n\nIni undangan untukmu:\n{link}' },
-  { name: 'Ringkas', sample: 'Simpan tanggalnya, ya!', text: 'Halo {nama}! Simpan tanggalnya, ya!\n\n{acara}\n{tanggal} · {waktu}\n{lokasi}\n\nDetail undangan: {link}' },
+  { name: 'Formal', text: DEFAULT_TEMPLATE },
+  { name: 'Hangat', text: 'Halo {nama},\n\nHari bahagia kami terasa lebih lengkap dengan kehadiranmu di {acara}.\n\nKita bertemu pada {tanggal}, pukul {waktu} di {lokasi}, ya.\n\nIni undangan untukmu:\n{link}' },
+  { name: 'Ringkas', text: 'Halo {nama}! Simpan tanggalnya, ya!\n\n{acara}\n{tanggal} · {waktu}\n{lokasi}\n\nDetail undangan: {link}' },
 ]
+
+const SAMPLE_GUEST = { group_name: 'Kak Rani', session: null, invitation_token: 'contoh' }
 
 type Props = {
   data: DashboardData
@@ -32,7 +34,17 @@ export function InvitationMessages({ data, templates, dirty, busy, error, change
   const text = templates[category] ?? (category === 'Umum' ? DEFAULT_TEMPLATE : general)
   const effective = text.trim() || general
   const selected = themes.find(t => t.text === effective)
-  const preview = fillTemplate(effective, event, { group_name: 'Kak Rani', session: null, invitation_token: 'contoh' })
+  const custom = !selected
+  const preview = fillTemplate(effective, event, SAMPLE_GUEST)
+  /** The card shows the message itself, minus the greeting every theme opens with. */
+  const sampleLine = (template: string) => {
+    const lines = fillTemplate(template, event, SAMPLE_GUEST)
+      .replaceAll('*', '')
+      .split('\n')
+      .map(line => line.trim().replace(/^halo\b[^\n]*?[,.!]\s*/i, ''))
+      .filter(Boolean)
+    return lines[0] ?? ''
+  }
   const insert = (token: string) => {
     const field = editor.current
     if (!field) return
@@ -46,13 +58,19 @@ export function InvitationMessages({ data, templates, dirty, busy, error, change
       options={categories.map(c => ({ value: c, label: c === 'Umum' ? 'Semua tamu (pesan umum)' : c }))} />}
     {category !== 'Umum' && <div><p>{templates[category]?.trim() ? 'Kategori ini memakai pesan khusus.' : 'Kategori ini mengikuti pesan umum.'}</p>
       {templates[category] != null && <Button variant="secondary" size="sm" disabled={busy} onClick={() => change(category, null)}>Kembali ke pesan umum</Button>}</div>}
-    <fieldset className={styles.themes} disabled={busy}>
-      <legend>Pilih gaya pesan</legend>
-      {themes.map(t => <label key={t.name} className={styles.theme}>
-        <input type="radio" name="gaya-pesan" checked={selected === t} onChange={() => change(category, t.text)} />
-        <span><strong>{t.name}</strong><small>{t.sample}</small></span>
-      </label>)}
-    </fieldset>
+    <div className={styles.themesBlock}>
+      <div className={styles.themesHead}>
+        <h3 id="gaya-pesan">Pilih gaya pesan</h3>
+        {custom && <Badge size="sm" pill>Kustom</Badge>}
+      </div>
+      <fieldset className={styles.themes} aria-labelledby="gaya-pesan" disabled={busy}>
+        {themes.map(t => <label key={t.name} className={styles.theme}>
+          <input type="radio" name="gaya-pesan" aria-label={t.name} checked={selected === t} onChange={() => change(category, t.text)} />
+          <span><strong>{t.name}</strong><small>{sampleLine(t.text)}</small></span>
+        </label>)}
+      </fieldset>
+      {custom && <p className={styles.customHint}>Pesan Anda sendiri. Pilih gaya di atas untuk memakai contohnya lagi.</p>}
+    </div>
     <div className={styles.preview}>
       <div className={styles.heading}><h3>Contoh untuk Kak Rani</h3><Badge size="sm" pill>Pratinjau</Badge></div>
       <div className={styles.bubble}>{preview.split(/(\*[^*\n]+\*)/g).map((s,i) => s.startsWith('*') && s.endsWith('*') ? <strong key={i}>{s.slice(1,-1)}</strong> : s)}</div>

@@ -1,7 +1,7 @@
 .workspace, .panel { display: grid; gap: var(--space-5); min-width: 0; }
 .workspace h2, .workspace h3, .workspace p, .rows, .rows dd { margin: 0; }
 .workspace h2 { font-size: var(--text-lg); }
-.workspace h3, .themes legend { font-size: var(--text-base); font-weight: var(--weight-semibold); }
+.workspace h3 { font-size: var(--text-base); font-weight: var(--weight-semibold); }
 .workspace p, .theme small { font-size: var(--text-sm); color: var(--text-secondary); }
 .panel header p { margin-top: var(--space-1); }
 .heading { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); }
@@ -11,11 +11,20 @@
 .workspace :global(.ios-action) { text-decoration: none; }
 .workspace :global(.ios-action + .ios-action) { border-top: 1px solid var(--line); }
 .themes { min-width: 0; margin: 0; padding: 0; border: 0; display: grid; gap: var(--space-2); }
-.themes legend { padding: 0; margin-bottom: var(--space-2); }
+.themesBlock { display: grid; gap: var(--space-2); }
+.themesHead { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
 .theme { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--surface); cursor: pointer; }
 .theme:has(:checked) { border-color: var(--accent); background: var(--accent-subtle); }
 .theme input { accent-color: var(--accent); }
 .theme span { display: grid; }
+.theme small {
+  display: -webkit-box;
+  min-height: 2lh;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.workspace .customHint { color: var(--text-muted); }
 .preview { display: grid; gap: var(--space-3); padding: var(--space-4); background: var(--surface-muted); border-radius: var(--radius-control); }
 .bubble { padding: var(--space-4); border-radius: 0 var(--radius-control) var(--radius-control); background: var(--surface); white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--text-sm); }
 .custom { padding: var(--space-3) var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-control); }
