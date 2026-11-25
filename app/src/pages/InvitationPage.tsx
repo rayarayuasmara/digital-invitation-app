@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { ExternalLink } from 'lucide-react'
+import { ChevronRight, ExternalLink } from 'lucide-react'
 import { publishEvent, type DashboardData } from '@/lib/dashboard'
 import { saveTemplates, type Templates } from '@/lib/whatsapp'
 import { PageHeader } from '@/components/PageHeader'
@@ -82,10 +82,15 @@ export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount
       {segment === 'pesan' ? <InvitationMessages data={data} templates={draft ?? saved} dirty={!!draft}
         busy={saving} error={error} change={change} save={save} discard={() => { setError(''); onDraftChange(null) }} /> :
         <div className={styles.panel}>
-          <section className="ios-group">
-            <div className={styles.heading}><h2>Detail acara</h2><Button ref={editTrigger} size="sm" variant="secondary" onClick={() => setEditing(true)}>Ubah detail</Button></div>
-            <dl className={`ios-group-body ${styles.rows}`}>{rows.map(([label,value],i) => <div className="ios-row" key={i}>
-              <dt>{label}</dt><dd>{value || 'Belum diatur'}</dd></div>)}</dl>
+          <section className="ios-group" aria-label="Detail acara">
+            <div className="ios-group-body">
+              <dl className={styles.rows}>{rows.map(([label,value],i) => <div className="ios-row" key={i}>
+                <dt>{label}</dt><dd>{value || 'Belum diatur'}</dd></div>)}</dl>
+              <button ref={editTrigger} type="button" className={styles.editRow} onClick={() => setEditing(true)}>
+                <span>Ubah detail acara</span>
+                <ChevronRight size={16} aria-hidden />
+              </button>
+            </div>
           </section>
           <section className="ios-group">
             <div className={styles.heading}><h2>Publikasi</h2><Badge pill dot tone={live ? 'success' : 'warning'}>{live ? 'Live' : 'Draf'}</Badge></div>
