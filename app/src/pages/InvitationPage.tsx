@@ -133,7 +133,7 @@ export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount
               <button type="button" className="ios-action" onClick={onShare}>Salin tautan pratinjau</button>
               {live && onOpenGuests && <button type="button" className="ios-action" onClick={onOpenGuests}>Bagikan ke tamu</button>}
             </div>}
-            <p className="ios-group-note">{live ? 'Bagikan tautan pribadi setiap tamu dari tab Tamu.' : 'Periksa pratinjau sebelum membuka akses untuk tamu.'}</p>
+            <p className="ios-group-note">{live ? 'Bagikan tautan pribadi setiap tamu dari tab Tamu.' : 'Periksa pratinjau. Setelah terbit, paket aktif dimulai dan alamat tautan terkunci.'}</p>
           </section>
         </div>}
     </div>
