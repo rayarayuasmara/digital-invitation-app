@@ -89,18 +89,19 @@ export function InvitationPage({ data, onShare, onChanged, notify, onOpenAccount
           </section>
           <section className="ios-group">
             <div className={styles.heading}><h2>Publikasi</h2><Badge pill dot tone={live ? 'success' : 'warning'}>{live ? 'Live' : 'Draf'}</Badge></div>
-            <div className="ios-group-body">
-              {event.preview_token && <>
-                <a className="ios-action" href={`/pratinjau/${event.slug}/${event.preview_token}`} target="_blank" rel="noopener noreferrer">Buka pratinjau <ExternalLink size={15} aria-hidden /></a>
-                <button type="button" className="ios-action" onClick={onShare}>Salin tautan pratinjau</button>
-              </>}
-              {!live && <Dialog open={publishOpen} onOpenChange={v => { if (!publishing) setPublishOpen(v) }}>
-                <DialogTrigger asChild><button className="ios-action" type="button">Terbitkan undangan</button></DialogTrigger>
-                <DialogContent title="Terbitkan undangan?" description="Tamu dapat membuka undangan setelah diterbitkan. Masa aktif paket dimulai saat undangan terbit.">
+            {!live && <div className={styles.publishCta}>
+              <Dialog open={publishOpen} onOpenChange={v => { if (!publishing) setPublishOpen(v) }}>
+                <DialogTrigger asChild><Button variant="accent" size="lg" fullWidth>Terbitkan undangan</Button></DialogTrigger>
+                <DialogContent title="Terbitkan undangan?" description="Tamu dapat membuka undangan setelah diterbitkan. Masa aktif paket dimulai saat undangan terbit, dan alamat tautan terkunci.">
                   <div className="dialog-actions"><Button variant="accent" size="xl" fullWidth loading={publishing} onClick={publish}>Terbitkan</Button>
                     <Button variant="secondary" size="xl" fullWidth disabled={publishing} onClick={() => setPublishOpen(false)}>Batal</Button></div>
-                </DialogContent></Dialog>}
-            </div>
+                </DialogContent></Dialog>
+              <p className={styles.publishHint}>Paket aktif dimulai saat terbit. Alamat tautan tidak bisa diubah setelahnya.</p>
+            </div>}
+            {event.preview_token && <div className="ios-group-body">
+              <a className="ios-action" href={`/pratinjau/${event.slug}/${event.preview_token}`} target="_blank" rel="noopener noreferrer">Buka pratinjau <ExternalLink size={15} aria-hidden /></a>
+              <button type="button" className="ios-action" onClick={onShare}>Salin tautan pratinjau</button>
+            </div>}
             <p className="ios-group-note">{live ? 'Bagikan tautan pribadi setiap tamu dari tab Tamu.' : 'Periksa pratinjau sebelum membuka akses untuk tamu.'}</p>
           </section>
         </div>}
